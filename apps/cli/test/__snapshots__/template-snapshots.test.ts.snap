@@ -855,8 +855,8 @@ export default app;
     "@tailwindcss/vite": "^4.2.1",
     "tw-animate-css": "^1.2.5",
     "@tanstack/react-router": "^1.167.4",
-    "react": "19.2.3",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-tanstack-router-minimal/env": "workspace:*",
@@ -1232,7 +1232,7 @@ export default defineConfig({
     {
       "content": 
 "import { initTRPC } from "@trpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
 
@@ -1249,7 +1249,7 @@ export const publicProcedure = t.procedure;
 "import {
   publicProcedure,
   router,
-} from "../index.js";
+} from "../index";
 
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => {
@@ -1525,7 +1525,7 @@ export default nextConfig;
     "tw-animate-css": "^1.3.4",
     "next": "catalog:",
     "react": "^19.2.3",
-    "react-dom": "^19.2.4",
+    "react-dom": "^19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "dotenv": "catalog:",
     "zod": "catalog:",
@@ -1841,7 +1841,7 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
     {
       "content": 
 "import { initTRPC, TRPCError } from "@trpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
 
@@ -1873,7 +1873,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 "import {
   protectedProcedure, publicProcedure,
   router,
-} from "../index.js";
+} from "../index";
 
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => {
@@ -2485,7 +2485,7 @@ export const client = createORPCClient<typeof appRouter>(link);
     {
       "content": 
 "import { os } from "@orpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const o = os.$context<Context>();
 
@@ -2497,7 +2497,7 @@ export const publicProcedure = o;
     },
     {
       "content": 
-"import { publicProcedure } from "../index.js";
+"import { publicProcedure } from "../index";
 import type { RouterClient } from "@orpc/server";
 
 export const appRouter = {
@@ -2995,7 +2995,7 @@ export default defineNuxtConfig({
     {
       "content": 
 "import { os } from "@orpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const o = os.$context<Context>();
 
@@ -3007,7 +3007,7 @@ export const publicProcedure = o;
     },
     {
       "content": 
-"import { publicProcedure } from "../index.js";
+"import { publicProcedure } from "../index";
 import type { RouterClient } from "@orpc/server";
 
 export const appRouter = {
@@ -3379,8 +3379,8 @@ app.listen(3000, () => {
     "@tailwindcss/vite": "^4.2.1",
     "tw-animate-css": "^1.2.5",
     "@tanstack/react-router": "^1.167.4",
-    "react": "19.2.3",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-express-node-trpc/env": "workspace:*",
@@ -3753,7 +3753,7 @@ export default defineConfig({
     {
       "content": 
 "import { initTRPC } from "@trpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
 
@@ -3770,7 +3770,7 @@ export const publicProcedure = t.procedure;
 "import {
   publicProcedure,
   router,
-} from "../index.js";
+} from "../index";
 
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => {
@@ -4160,8 +4160,8 @@ export default app;
     "@tailwindcss/vite": "^4.2.1",
     "tw-animate-css": "^1.2.5",
     "@tanstack/react-router": "^1.167.4",
-    "react": "19.2.3",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-hono-bun-orpc/env": "workspace:*",
@@ -4537,7 +4537,7 @@ export default defineConfig({
     {
       "content": 
 "import { os } from "@orpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const o = os.$context<Context>();
 
@@ -4549,7 +4549,7 @@ export const publicProcedure = o;
     },
     {
       "content": 
-"import { publicProcedure } from "../index.js";
+"import { publicProcedure } from "../index";
 import type { RouterClient } from "@orpc/server";
 
 export const appRouter = {
@@ -4925,8 +4925,8 @@ export default app;
     "@tailwindcss/vite": "^4.2.1",
     "tw-animate-css": "^1.2.5",
     "@tanstack/react-router": "^1.167.4",
-    "react": "19.2.3",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-better-auth-full/env": "workspace:*",
@@ -5332,7 +5332,7 @@ export default defineConfig({
     {
       "content": 
 "import { initTRPC, TRPCError } from "@trpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
 
@@ -5364,7 +5364,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 "import {
   protectedProcedure, publicProcedure,
   router,
-} from "../index.js";
+} from "../index";
 
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => {
@@ -5819,8 +5819,8 @@ exports[`Template Snapshots Key File Content Snapshots key files: convex-clerk 1
     "@tailwindcss/vite": "^4.2.1",
     "tw-animate-css": "^1.2.5",
     "@tanstack/react-router": "^1.167.4",
-    "react": "19.2.3",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-convex-clerk/env": "workspace:*",
@@ -6358,7 +6358,7 @@ export default nextConfig;
     "tw-animate-css": "^1.3.4",
     "next": "catalog:",
     "react": "^19.2.3",
-    "react-dom": "^19.2.4",
+    "react-dom": "^19.2.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "dotenv": "catalog:",
     "zod": "catalog:",
@@ -6649,7 +6649,7 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
     {
       "content": 
 "import { initTRPC } from "@trpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
 
@@ -6666,7 +6666,7 @@ export const publicProcedure = t.procedure;
 "import {
   publicProcedure,
   router,
-} from "../index.js";
+} from "../index";
 
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => {
@@ -6928,8 +6928,8 @@ exports[`Template Snapshots Key File Content Snapshots key files: self-tanstack-
     "@tanstack/react-router-with-query": "^1.130.17",
     "@tanstack/react-start": "^1.166.15",
     "@tanstack/router-plugin": "^1.166.13",
-    "react": "19.2.3",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "vite-tsconfig-paths": "^5.1.4",
     "dotenv": "catalog:",
     "zod": "catalog:",
@@ -7331,7 +7331,7 @@ export default defineConfig({
     {
       "content": 
 "import { os } from "@orpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const o = os.$context<Context>();
 
@@ -7343,7 +7343,7 @@ export const publicProcedure = o;
     },
     {
       "content": 
-"import { publicProcedure } from "../index.js";
+"import { publicProcedure } from "../index";
 import type { RouterClient } from "@orpc/server";
 
 export const appRouter = {
@@ -7713,8 +7713,8 @@ export default app;
     "@tailwindcss/vite": "^4.2.1",
     "tw-animate-css": "^1.2.5",
     "@tanstack/react-router": "^1.167.4",
-    "react": "19.2.3",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-mongodb-mongoose/env": "workspace:*",
@@ -8081,7 +8081,7 @@ export default defineConfig({
     {
       "content": 
 "import { initTRPC } from "@trpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
 
@@ -8098,7 +8098,7 @@ export const publicProcedure = t.procedure;
 "import {
   publicProcedure,
   router,
-} from "../index.js";
+} from "../index";
 
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => {
@@ -8431,8 +8431,8 @@ export default app;
     "@tailwindcss/vite": "^4.2.1",
     "tw-animate-css": "^1.2.5",
     "@tanstack/react-router": "^1.167.4",
-    "react": "19.2.3",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-postgres-prisma/env": "workspace:*",
@@ -8805,7 +8805,7 @@ export default defineConfig({
     {
       "content": 
 "import { initTRPC } from "@trpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
 
@@ -8822,7 +8822,7 @@ export const publicProcedure = t.procedure;
 "import {
   publicProcedure,
   router,
-} from "../index.js";
+} from "../index";
 
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => {
@@ -9067,8 +9067,8 @@ exports[`Template Snapshots Key File Content Snapshots key files: frontend-only-
     "@tailwindcss/vite": "^4.2.1",
     "tw-animate-css": "^1.2.5",
     "@tanstack/react-router": "^1.167.4",
-    "react": "19.2.3",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "dotenv": "catalog:",
     "zod": "catalog:",
     "@snapshot-frontend-only-no-backend/env": "workspace:*",
@@ -9963,7 +9963,7 @@ export default app;
     {
       "content": 
 "import { initTRPC } from "@trpc/server";
-import type { Context } from "./context.js";
+import type { Context } from "./context";
 
 export const t = initTRPC.context<Context>().create();
 
@@ -9980,7 +9980,7 @@ export const publicProcedure = t.procedure;
 "import {
   publicProcedure,
   router,
-} from "../index.js";
+} from "../index";
 
 export const appRouter = router({
   healthCheck: publicProcedure.query(() => {
