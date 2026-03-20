@@ -34,7 +34,7 @@ for (const stackKey of stackStateKeys) {
 
 export const stackSearchSchema = z.object({
   ...stackSearchShape,
-  view: z.enum(["command", "preview", "presets"]).catch("command"),
+  view: z.enum(["command", "preview", "presets", "saved"]).catch("command"),
   file: z.string().catch(""),
   preset: z.string().catch(""),
 });
@@ -46,7 +46,7 @@ type StackSearchParamShape = {
 };
 
 export type StackSearchParams = Partial<StackSearchParamShape> & {
-  view?: "command" | "preview" | "presets";
+  view?: "command" | "preview" | "presets" | "saved";
   file?: string;
   preset?: string;
 };

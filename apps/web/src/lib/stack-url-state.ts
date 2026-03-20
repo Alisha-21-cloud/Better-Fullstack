@@ -288,7 +288,9 @@ function searchToStack(search: StackSearchParams | undefined): StackState {
 
 export function useStackState() {
   const [stack, setStackState] = useState<StackState>(DEFAULT_STACK);
-  const [viewMode, setViewModeState] = useState<"command" | "preview" | "presets">("command");
+  const [viewMode, setViewModeState] = useState<"command" | "preview" | "presets" | "saved">(
+    "command",
+  );
   const [selectedFile, setSelectedFileState] = useState<string>("");
   const initialized = useRef(false);
 
@@ -332,7 +334,7 @@ export function useStackState() {
     [],
   );
 
-  const setViewMode = useCallback((mode: "command" | "preview" | "presets") => {
+  const setViewMode = useCallback((mode: "command" | "preview" | "presets" | "saved") => {
     setViewModeState(mode);
   }, []);
 

@@ -1,22 +1,26 @@
 
 import {
+  Bookmark,
   BookOpen,
   Check,
   ChevronDown,
   ClipboardCopy,
+  EllipsisVertical,
   Eye,
   Github,
   Hammer,
   InfoIcon,
+  Link,
   List,
   RefreshCw,
+  Save,
   Settings,
   Shuffle,
   Terminal,
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { isMultiSelectCategory, type OptionCategory } from "@better-fullstack/types";
 
@@ -25,8 +29,17 @@ import type { Ecosystem } from "@/lib/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -53,6 +66,7 @@ import { cn } from "@/lib/utils";
 
 import { PresetsPanel } from "./presets-panel";
 import { PreviewPanel } from "./preview-panel";
+import { SavedStacksPanel } from "./saved-stacks-panel";
 import { ShareButton } from "./share-button";
 import { TechIcon } from "./tech-icon";
 import {
@@ -64,6 +78,12 @@ import {
   validateProjectName,
 } from "./utils";
 import { YoloToggle } from "./yolo-toggle";
+import {
+  buildSavedStackEntry,
+  loadSavedStacks,
+  saveSavedStacks,
+  type SavedStackEntry,
+} from "@/lib/saved-stacks";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -340,8 +360,12 @@ const StackBuilder = () => {
 
   const [command, setCommand] = useState("");
   const [copied, setCopied] = useState(false);
+  const [savedStacks, setSavedStacks] = useState<SavedStackEntry[]>(() => loadSavedStacks());
   const [, setLastChanges] = useState<Array<{ category: string; message: string }>>([]);
   const [mobileTab, setMobileTab] = useState<MobileTab>("configure");
+  const [isSaveInputVisible, setIsSaveInputVisible] = useState(false);
+  const [savePresetName, setSavePresetName] = useState("");
+  const [pendingUpdateEntryId, setPendingUpdateEntryId] = useState<string | null>(null);
   const [openCategory, setOpenCategory] = useState<string | null>(null);
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(() => {
     const initial = new Set(INITIALLY_COLLAPSED_SET);
@@ -415,9 +439,17 @@ const StackBuilder = () => {
     return generateStackSharingUrl({ ...stackToUse, projectName: formattedProjectName });
   };
 
+  const getPersistableStack = (): StackState => {
+    const stackToUse = adjustedStack || stack;
+    const projectName = stackToUse.projectName || "my-app";
+
+    return {
+      ...stackToUse,
+      projectName: formatProjectName(projectName),
+    };
+  };
+
   // ─── Side effects ──────────────────────────────────────────────────────
-
-
 
   useEffect(() => {
     if (adjustedStack) {
@@ -597,7 +629,99 @@ const StackBuilder = () => {
     }
   };
 
-  const handleAccordionToggle = useCallback((category: string) => {
+  const persistSavedEntries = (entries: SavedStackEntry[]) => {
+    setSavedStacks(entries);
+    saveSavedStacks(entries);
+  };
+
+  const saveCurrentStack = (name: string) => {
+    const nextEntry = buildSavedStackEntry(name, getPersistableStack());
+    persistSavedEntries([nextEntry, ...savedStacks]);
+    setIsSaveInputVisible(false);
+    setSavePresetName("");
+    toast.success(`Saved preset: ${nextEntry.name}`);
+  };
+
+  const loadSavedStack = (entryId: string) => {
+    const entry = savedStacks.find((item) => item.id === entryId);
+    if (!entry) return;
+
+    startTransition(() => {
+      setStack(entry.stack);
+      setViewMode("command");
+    });
+    toast.success(`Loaded preset: ${entry.name}`);
+  };
+
+  const overwriteSavedStack = (entryId: string) => {
+    setPendingUpdateEntryId(entryId);
+  };
+
+  const confirmOverwriteSavedStack = () => {
+    const entryId = pendingUpdateEntryId;
+    if (!entryId) return;
+
+    const currentStack = getPersistableStack();
+    const nextEntries = savedStacks.map((entry) =>
+      entry.id === entryId
+        ? {
+            ...entry,
+            stack: currentStack,
+            updatedAt: new Date().toISOString(),
+          }
+        : entry,
+    );
+
+    persistSavedEntries(nextEntries);
+    setPendingUpdateEntryId(null);
+    const entryName = savedStacks.find((entry) => entry.id === entryId)?.name || "preset";
+    toast.success(`Updated preset: ${entryName}`);
+  };
+
+  const renameSavedStack = (entryId: string, name: string) => {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      toast.error("Preset name cannot be empty");
+      return;
+    }
+
+    const nextEntries = savedStacks.map((entry) =>
+      entry.id === entryId
+        ? {
+            ...entry,
+            name: trimmedName,
+            updatedAt: new Date().toISOString(),
+          }
+        : entry,
+    );
+
+    persistSavedEntries(nextEntries);
+    toast.success("Preset renamed");
+  };
+
+  const duplicateSavedStack = (entryId: string, name: string) => {
+    const sourceEntry = savedStacks.find((entry) => entry.id === entryId);
+    if (!sourceEntry) return;
+
+    const nextEntry = buildSavedStackEntry(name, sourceEntry.stack);
+    persistSavedEntries([nextEntry, ...savedStacks]);
+    toast.success(`Duplicated preset: ${sourceEntry.name}`);
+  };
+
+  const deleteSavedStack = (entryId: string) => {
+    const entry = savedStacks.find((item) => item.id === entryId);
+    if (!entry) return;
+
+    persistSavedEntries(savedStacks.filter((item) => item.id !== entryId));
+    toast.success(`Deleted preset: ${entry.name}`);
+  };
+
+  const pendingUpdateEntry =
+    pendingUpdateEntryId === null
+      ? null
+      : savedStacks.find((entry) => entry.id === pendingUpdateEntryId) || null;
+
+  const handleAccordionToggle = (category: string) => {
     setOpenCategory((prev) => (prev === category ? null : category));
     setCollapsedSections((prev) => {
       if (!prev.has(category)) return prev;
@@ -610,9 +734,9 @@ const StackBuilder = () => {
     if (sectionEl) {
       sectionEl.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, []);
+  };
 
-  const toggleSection = useCallback((categoryKey: string) => {
+  const toggleSection = (categoryKey: string) => {
     setCollapsedSections((prev) => {
       const next = new Set(prev);
       if (next.has(categoryKey)) {
@@ -622,7 +746,7 @@ const StackBuilder = () => {
       }
       return next;
     });
-  }, []);
+  };
 
   // ─── Build the categories to show in sidebar (with astro integration) ──
 
@@ -648,9 +772,36 @@ const StackBuilder = () => {
 
   return (
     <TooltipProvider>
+      <Dialog
+        open={pendingUpdateEntry !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingUpdateEntryId(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Saved Preset</DialogTitle>
+            <DialogDescription>
+              {pendingUpdateEntry
+                ? `Updating "${pendingUpdateEntry.name}" will override the saved preset with your current stack configuration.`
+                : "Updating this preset will override the saved preset with your current stack configuration."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-1">
+            <Button type="button" variant="outline" onClick={() => setPendingUpdateEntryId(null)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={confirmOverwriteSavedStack}>
+              Update Preset
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className="flex h-full w-full flex-col overflow-hidden border-border text-foreground">
         {/* Mobile tab navigation */}
-        <div className="flex border-b border-border bg-fd-background pl-2 sm:hidden">
+        <div className="flex border-b border-border bg-fd-background pl-2 lg:hidden">
           <button
             type="button"
             onClick={() => setMobileTab("summary")}
@@ -723,7 +874,7 @@ const StackBuilder = () => {
                   />
                   <span
                     className={cn(
-                      "relative font-mono text-[11px] uppercase tracking-wide transition-all sm:text-xs",
+                      "relative hidden font-mono text-[11px] uppercase tracking-wide transition-all min-[480px]:inline sm:text-xs",
                       isActive ? "font-bold" : "",
                     )}
                   >
@@ -739,8 +890,8 @@ const StackBuilder = () => {
           {/* ─── Left Sidebar ───────────────────────────────────────────────── */}
           <aside
             className={cn(
-              "flex h-full w-full shrink-0 flex-col overflow-hidden border-r border-border bg-background sm:w-[270px]",
-              mobileTab === "summary" ? "flex" : "hidden sm:flex",
+              "flex h-full w-full shrink-0 flex-col overflow-hidden border-r border-border bg-background lg:w-[270px]",
+              mobileTab === "summary" ? "flex" : "hidden lg:flex",
             )}
           >
             {/* Category Accordion */}
@@ -808,81 +959,219 @@ const StackBuilder = () => {
           <main
             className={cn(
               "flex min-w-0 flex-1 flex-col overflow-hidden",
-              mobileTab === "summary" ? "hidden sm:flex" : "flex",
+              mobileTab === "summary" ? "hidden lg:flex" : "flex",
             )}
           >
-            <div className="flex items-center gap-2 border-border border-b bg-fd-background px-3 py-2 sm:px-4">
+            <div className="flex items-center gap-1 border-border border-b bg-fd-background px-2 py-2 sm:gap-2 sm:px-4">
               <button
                 type="button"
                 onClick={() => setViewMode("command")}
                 className={cn(
-                  "flex items-center gap-1 rounded-md px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:text-[11px]",
+                  "flex items-center gap-1 rounded-md px-1.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:px-2.5 sm:text-[11px]",
                   viewMode === "command"
                     ? "bg-primary/15 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
                 <Hammer className="h-3 w-3" />
-                Builder
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode("preview")}
-                className={cn(
-                  "flex items-center gap-1 rounded-md px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:text-[11px]",
-                  viewMode === "preview"
-                    ? "bg-primary/15 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <Eye className="h-3 w-3" />
-                Preview
+                <span className="hidden min-[480px]:inline">Builder</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("presets")}
                 className={cn(
-                  "flex items-center gap-1 rounded-md px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:text-[11px]",
+                  "flex items-center gap-1 rounded-md px-1.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:px-2.5 sm:text-[11px]",
                   viewMode === "presets"
                     ? "bg-primary/15 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
                 <Zap className="h-3 w-3" />
-                Presets
+                <span className="hidden min-[480px]:inline">Presets</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("preview")}
+                className={cn(
+                  "flex items-center gap-1 rounded-md px-1.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:px-2.5 sm:text-[11px]",
+                  viewMode === "preview"
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <Eye className="h-3 w-3" />
+                <span className="hidden min-[480px]:inline">Preview</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("saved")}
+                className={cn(
+                  "flex items-center gap-1 rounded-md px-1.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:px-2.5 sm:text-[11px]",
+                  viewMode === "saved"
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <Bookmark className="h-3 w-3" />
+                <span className="hidden min-[480px]:inline">Saved</span>
               </button>
 
               <div className="ml-auto flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={resetStack}
-                  title="Reset to defaults"
-                  className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={getRandomStack}
-                  title="Generate a random stack"
-                  className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <Shuffle className="h-3.5 w-3.5" />
-                </button>
-                <ShareButton stackUrl={getStackUrl()} />
+                {/* Desktop action buttons */}
+                <AnimatePresence initial={false}>
+                  {isSaveInputVisible && (
+                    <motion.div
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 220, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="hidden overflow-hidden sm:block"
+                    >
+                      <div className="flex items-center gap-1 pr-1">
+                        <Input
+                          value={savePresetName}
+                          onChange={(e) => setSavePresetName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              saveCurrentStack(savePresetName || stack.projectName || "Untitled preset");
+                            }
+                            if (e.key === "Escape") {
+                              setIsSaveInputVisible(false);
+                              setSavePresetName("");
+                            }
+                          }}
+                          placeholder={stack.projectName || "My preset"}
+                          className="h-8 min-w-0"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            saveCurrentStack(savePresetName || stack.projectName || "Untitled preset")
+                          }
+                          className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                          title="Save preset"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div className="hidden items-center gap-1 sm:flex">
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextVisible = !isSaveInputVisible;
+                            setIsSaveInputVisible(nextVisible);
+                            setSavePresetName(nextVisible ? stack.projectName || "" : "");
+                          }}
+                          title="Save current preset"
+                          className={cn(
+                            "rounded-md p-1.5 transition-colors",
+                            isSaveInputVisible
+                              ? "bg-primary/15 text-primary"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          )}
+                        />
+                      }
+                    >
+                      <Save className="h-3.5 w-3.5" />
+                    </TooltipTrigger>
+                    <TooltipContent>Save the current stack as a named preset</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          onClick={resetStack}
+                          title="Reset to defaults"
+                          className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        />
+                      }
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    </TooltipTrigger>
+                    <TooltipContent>Reset all builder options to defaults</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          onClick={getRandomStack}
+                          title="Generate a random stack"
+                          className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        />
+                      }
+                    >
+                      <Shuffle className="h-3.5 w-3.5" />
+                    </TooltipTrigger>
+                    <TooltipContent>Generate a random stack configuration</TooltipContent>
+                  </Tooltip>
+                  <ShareButton stackUrl={getStackUrl()} />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <button
+                          type="button"
+                          className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        />
+                      }
+                    >
+                      <Settings className="h-3.5 w-3.5" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-64 bg-fd-background">
+                      <YoloToggle stack={stack} onToggle={(yolo) => setStack({ yolo })} />
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Mobile three-dot menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
                       <button
                         type="button"
-                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                        className="flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:hidden"
                       />
                     }
                   >
-                    <Settings className="h-3.5 w-3.5" />
+                    <EllipsisVertical className="h-4 w-4" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-64 bg-fd-background">
-                    <YoloToggle stack={stack} onToggle={(yolo) => setStack({ yolo })} />
+                  <DropdownMenuContent align="end" sideOffset={8} className="w-48 bg-fd-background">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        saveCurrentStack(stack.projectName || "Untitled preset");
+                      }}
+                    >
+                      <Save className="h-3.5 w-3.5" />
+                      Save Preset
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={resetStack}>
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Reset to Defaults
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={getRandomStack}>
+                      <Shuffle className="h-3.5 w-3.5" />
+                      Random Stack
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(getStackUrl());
+                          toast.success("Share link copied!");
+                        } catch {
+                          toast.error("Failed to copy link");
+                        }
+                      }}
+                    >
+                      <Link className="h-3.5 w-3.5" />
+                      Copy Share Link
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -1405,7 +1694,7 @@ const StackBuilder = () => {
                   onSelectFile={setSelectedFile}
                 />
               </div>
-            ) : (
+            ) : viewMode === "presets" ? (
               <div className="min-h-0 flex-1 overflow-hidden">
                 <PresetsPanel
                   stack={adjustedStack || stack}
@@ -1415,6 +1704,17 @@ const StackBuilder = () => {
                     applyPreset(presetId);
                     setViewMode("command");
                   }}
+                />
+              </div>
+            ) : (
+              <div className="min-h-0 flex-1 overflow-hidden">
+                <SavedStacksPanel
+                  entries={savedStacks}
+                  onLoadEntry={loadSavedStack}
+                  onOverwriteEntry={overwriteSavedStack}
+                  onDeleteEntry={deleteSavedStack}
+                  onRenameEntry={renameSavedStack}
+                  onDuplicateEntry={duplicateSavedStack}
                 />
               </div>
             )}

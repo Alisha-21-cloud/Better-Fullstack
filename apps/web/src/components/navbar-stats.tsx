@@ -101,25 +101,25 @@ export function NavbarStats() {
     return (
       <>
         <div className="hidden h-4 w-12 animate-pulse rounded bg-muted sm:block" />
-        <div className="hidden h-4 w-12 animate-pulse rounded bg-muted sm:block" />
+        <div className="hidden h-4 w-12 animate-pulse rounded bg-muted lg:block" />
       </>
     );
   }
 
   return (
     <>
-      <div className="hidden items-center gap-3 sm:flex">
-        <a
-          href={`https://github.com/${REPO}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-          title={`${stats.github.stars} stars`}
-        >
-          <Star className="h-3.5 w-3.5" />
-          <span>{formatCompact(stats.github.stars)}</span>
-        </a>
+      <a
+        href={`https://github.com/${REPO}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="hidden items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
+        title={`${stats.github.stars} stars`}
+      >
+        <Star className="h-3.5 w-3.5" />
+        <span>{formatCompact(stats.github.stars)}</span>
+      </a>
 
+      <div className="hidden items-center gap-3 lg:flex">
         <a
           href={`https://github.com/${REPO}/issues`}
           target="_blank"
@@ -151,7 +151,7 @@ export function NavbarStats() {
         href="https://www.npmjs.com/package/create-better-fullstack"
         target="_blank"
         rel="noopener noreferrer"
-        className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
+        className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
         title={`${stats.npm.downloads.toLocaleString()} downloads this week`}
       >
         <Download className="h-3.5 w-3.5" />

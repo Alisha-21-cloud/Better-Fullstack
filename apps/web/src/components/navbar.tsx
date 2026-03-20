@@ -33,10 +33,8 @@ export function Navbar() {
             to="/"
             className="flex items-center gap-2 font-mono text-base font-bold tracking-tight sm:text-lg"
           >
-            better<span className="text-muted-foreground">fullstack</span>
-            <span className="rounded border border-border px-1.5 py-0.5 text-[9px] font-semibold leading-none tracking-wide text-muted-foreground">
-              Alpha
-            </span>
+            <span className="sm:hidden">b<span className="text-muted-foreground">-f</span></span>
+            <span className="hidden sm:inline">better<span className="text-muted-foreground">fullstack</span></span>
           </Link>
           <Link
             to="/new"
@@ -61,7 +59,7 @@ export function Navbar() {
               fallback={
                 <>
                   <div className="hidden h-4 w-12 animate-pulse rounded bg-muted sm:block" />
-                  <div className="hidden h-4 w-12 animate-pulse rounded bg-muted sm:block" />
+                  <div className="hidden h-4 w-12 animate-pulse rounded bg-muted lg:block" />
                 </>
               }
             >
