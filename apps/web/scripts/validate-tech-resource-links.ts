@@ -17,6 +17,7 @@ const SHARED_DOCS_CATEGORIES = new Set([
   "shadcnBaseColor",
   "shadcnRadius",
   "shadcnStyle",
+  "versionChannel",
 ]);
 const LIVE_MODE = process.argv.includes("--live");
 
