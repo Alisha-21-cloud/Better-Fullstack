@@ -300,7 +300,8 @@ If Better Fullstack saves you time, consider supporting:
       <a href="https://github.com/Divith123">
         <img src="https://avatars.githubusercontent.com/u/106373840?v=4" width="80" style="border-radius:50%" alt="Divith123"/>
         <br /><sub><b>Divith S</b></sub>
-        <br /><sub>Version channels, builder parity (<a href="https://github.com/Marve10s/Better-Fullstack/pull/104">#104</a>)</sub>
+        <br /><sub>Version channels, builder parity</sub>
+        <br /><sub><a href="https://github.com/Marve10s/Better-Fullstack/pull/104">#104</a></sub>
         <br /><sub><code>+1,072</code> <code>−139</code></sub>
       </a>
     </td>
