@@ -12,6 +12,10 @@ describe("generateStackCommand", () => {
       versionChannel: "latest",
     });
 
+    expect(latestCommand).toContain("--version-channel latest");
+  });
+
+  it("omits version channel for non-TypeScript ecosystems", () => {
     const betaRustCommand = generateStackCommand({
       ...DEFAULT_STACK,
       ecosystem: "rust",
@@ -19,8 +23,7 @@ describe("generateStackCommand", () => {
       versionChannel: "beta",
     });
 
-    expect(latestCommand).toContain("--version-channel latest");
-    expect(betaRustCommand).toContain("--version-channel beta");
+    expect(betaRustCommand).not.toContain("--version-channel");
     expect(betaRustCommand).toContain("--ecosystem rust");
   });
 

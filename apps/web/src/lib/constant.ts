@@ -3005,7 +3005,6 @@ export const ECOSYSTEMS: {
 // Categories available for each ecosystem
 export const ECOSYSTEM_CATEGORIES: Record<Ecosystem, TechCategory[]> = {
   typescript: [
-    "versionChannel",
     "webFrontend",
     "nativeFrontend",
     "astroIntegration",
@@ -3034,13 +3033,13 @@ export const ECOSYSTEM_CATEGORIES: Record<Ecosystem, TechCategory[]> = {
     "documentation",
     "appPlatforms",
     "packageManager",
+    "versionChannel",
     "examples",
     "aiDocs",
     "git",
     "install",
   ],
   rust: [
-    "versionChannel",
     "rustWebFramework",
     "rustFrontend",
     "rustOrm",
@@ -3052,7 +3051,6 @@ export const ECOSYSTEM_CATEGORIES: Record<Ecosystem, TechCategory[]> = {
     "install",
   ],
   python: [
-    "versionChannel",
     "pythonWebFramework",
     "pythonOrm",
     "pythonValidation",
@@ -3063,7 +3061,7 @@ export const ECOSYSTEM_CATEGORIES: Record<Ecosystem, TechCategory[]> = {
     "git",
     "install",
   ],
-  go: ["versionChannel", "goWebFramework", "goOrm", "goApi", "goCli", "goLogging", "auth", "aiDocs", "git", "install"],
+  go: ["goWebFramework", "goOrm", "goApi", "goCli", "goLogging", "auth", "aiDocs", "git", "install"],
 };
 
 export const PRESET_CATEGORIES = [

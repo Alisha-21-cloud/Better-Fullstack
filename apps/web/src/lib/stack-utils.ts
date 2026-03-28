@@ -11,7 +11,6 @@ const PACKAGE_MANAGER_COMMANDS = {
 
 // TypeScript ecosystem category order
 const TYPESCRIPT_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
-  "versionChannel",
   "webFrontend",
   "nativeFrontend",
   "astroIntegration",
@@ -57,6 +56,7 @@ const TYPESCRIPT_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
   "documentation",
   "appPlatforms",
   "packageManager",
+  "versionChannel",
   "examples",
   "aiDocs",
   "git",
@@ -65,7 +65,6 @@ const TYPESCRIPT_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
 
 // Rust ecosystem category order
 const RUST_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
-  "versionChannel",
   "rustWebFramework",
   "rustFrontend",
   "rustOrm",
@@ -79,7 +78,6 @@ const RUST_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
 
 // Python ecosystem category order
 const PYTHON_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
-  "versionChannel",
   "pythonWebFramework",
   "pythonOrm",
   "pythonValidation",
@@ -93,7 +91,6 @@ const PYTHON_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
 
 // Go ecosystem category order
 const GO_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
-  "versionChannel",
   "goWebFramework",
   "goOrm",
   "goApi",
@@ -319,9 +316,6 @@ function generateRustCommand(stack: StackState, projectName: string) {
   if (stack.aiDocs.length > 0 && !stack.aiDocs.includes("none")) {
     flags.push(`--ai-docs ${stack.aiDocs.join(" ")}`);
   }
-  if (stack.versionChannel !== DEFAULT_STACK.versionChannel) {
-    flags.push(`--version-channel ${stack.versionChannel}`);
-  }
   if (stack.git === "false") {
     flags.push("--no-git");
   }
@@ -358,9 +352,6 @@ function generatePythonCommand(stack: StackState, projectName: string) {
   }
   if (stack.aiDocs.length > 0 && !stack.aiDocs.includes("none")) {
     flags.push(`--ai-docs ${stack.aiDocs.join(" ")}`);
-  }
-  if (stack.versionChannel !== DEFAULT_STACK.versionChannel) {
-    flags.push(`--version-channel ${stack.versionChannel}`);
   }
   if (stack.git === "false") {
     flags.push("--no-git");
@@ -399,9 +390,6 @@ function generateGoCommand(stack: StackState, projectName: string) {
   }
   if (stack.aiDocs.length > 0 && !stack.aiDocs.includes("none")) {
     flags.push(`--ai-docs ${stack.aiDocs.join(" ")}`);
-  }
-  if (stack.versionChannel !== DEFAULT_STACK.versionChannel) {
-    flags.push(`--version-channel ${stack.versionChannel}`);
   }
   if (stack.git === "false") {
     flags.push("--no-git");

@@ -33,7 +33,6 @@ import { cn } from "@/lib/utils";
 const RELEVANT_KEYS_BY_ECOSYSTEM: Record<string, readonly string[]> = {
   typescript: [
     "ecosystem", "projectName",
-    "versionChannel",
     "webFrontend", "nativeFrontend", "astroIntegration",
     "cssFramework", "uiLibrary",
     "shadcnBase", "shadcnStyle", "shadcnIconLibrary", "shadcnColorTheme", "shadcnBaseColor", "shadcnFont", "shadcnRadius",
@@ -45,24 +44,21 @@ const RELEVANT_KEYS_BY_ECOSYSTEM: Record<string, readonly string[]> = {
     "aiSdk", "stateManagement", "forms", "validation", "testing",
     "realtime", "jobQueue", "caching", "search", "fileStorage",
     "animation", "cms",
-    "codeQuality", "documentation", "appPlatforms", "packageManager", "examples",
+    "codeQuality", "documentation", "appPlatforms", "packageManager", "versionChannel", "examples",
     "aiDocs", "git", "install", "yolo",
   ],
   rust: [
     "ecosystem", "projectName",
-    "versionChannel",
     "rustWebFramework", "rustFrontend", "rustOrm", "rustApi", "rustCli", "rustLibraries",
     "aiDocs", "git", "install", "yolo",
   ],
   python: [
     "ecosystem", "projectName",
-    "versionChannel",
     "pythonWebFramework", "pythonOrm", "pythonValidation", "pythonAi", "pythonTaskQueue", "pythonQuality",
     "aiDocs", "git", "install", "yolo",
   ],
   go: [
     "ecosystem", "projectName",
-    "versionChannel",
     "goWebFramework", "goOrm", "goApi", "goCli", "goLogging",
     "auth", "aiDocs", "git", "install", "yolo",
   ],

@@ -43,7 +43,9 @@ type ParsedVersion = {
 
 export function parseVersion(value: string): ParsedVersion {
   const normalized = value.replace(/^[^\d]*/, "");
-  const [base, prerelease = ""] = normalized.split("-", 2);
+  const dashIdx = normalized.indexOf("-");
+  const base = dashIdx === -1 ? normalized : normalized.slice(0, dashIdx);
+  const prerelease = dashIdx === -1 ? "" : normalized.slice(dashIdx + 1);
   const [major = "0", minor = "0", patch = "0"] = base.split(".");
 
   return {
