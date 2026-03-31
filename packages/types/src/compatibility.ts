@@ -912,14 +912,6 @@ export const analyzeStackCompatibility = (
         message: "Payments set to 'None' (Polar requires Better Auth)",
       });
     }
-    if (nextStack.backend === "convex") {
-      nextStack.payments = "none";
-      changed = true;
-      changes.push({
-        category: "payments",
-        message: "Payments set to 'None' (Polar incompatible with Convex)",
-      });
-    }
     const hasWebFrontend = nextStack.webFrontend.some((f) => f !== "none");
     if (!hasWebFrontend) {
       nextStack.payments = "none";
@@ -1295,9 +1287,6 @@ export const getDisabledReason = (
         );
         return `Convex AI example only supports React-based frontends including React + Vite (not ${frontendName})`;
       }
-    }
-    if (category === "payments" && optionId === "polar") {
-      return "In Better-Fullstack, Polar is currently not available with the Convex backend";
     }
   }
 
