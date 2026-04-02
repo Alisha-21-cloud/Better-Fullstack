@@ -1,0 +1,8 @@
+import { createServerFn } from "@tanstack/react-start";
+
+export const getPayment = createServerFn({ method: "GET" }).handler(async () => {
+  // For Convex projects, payment data is fetched using Convex queries on the
+  // client side via useQuery(api.polar.getCurrentSubscription).
+  // See the dashboard component for an example.
+  return null;
+});

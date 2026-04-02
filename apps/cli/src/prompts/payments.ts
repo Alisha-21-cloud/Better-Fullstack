@@ -17,11 +17,8 @@ export async function getPaymentsChoice(
     return "none" as Payments;
   }
 
-  // Polar requires better-auth and non-convex backend
   const isPolarCompatible =
-    auth === "better-auth" &&
-    backend !== "convex" &&
-    (frontends?.length === 0 || splitFrontends(frontends).web.length > 0);
+    auth === "better-auth" && (frontends?.length === 0 || splitFrontends(frontends).web.length > 0);
 
   const options: Array<{ value: Payments; label: string; hint: string }> = [];
 

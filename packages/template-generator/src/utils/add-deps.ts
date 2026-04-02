@@ -228,6 +228,7 @@ export const dependencyVersionMap = {
   convex: "^1.34.1",
   "@convex-dev/react-query": "^0.1.0",
   "@convex-dev/agent": "^0.6.1",
+  "@convex-dev/polar": "^0.9.0",
   "convex-svelte": "^0.0.12",
   "convex-nuxt": "0.1.5",
   "convex-vue": "^0.1.5",
@@ -306,6 +307,7 @@ export const dependencyVersionMap = {
   srvx: "^0.11.13",
 
   "@polar-sh/better-auth": "^1.8.3",
+  "@polar-sh/checkout": "^0.2.0",
   "@polar-sh/sdk": "^0.46.7",
 
   // Email
