@@ -29,6 +29,12 @@ const contributors: Contributor[] = [
     role: "Elasticsearch search engine support",
     github: "https://github.com/Kavin-Bakyaraj",
   },
+  {
+    username: "Alisha-21-cloud",
+    name: "Alisha",
+    role: "Polar payments + Convex integration",
+    github: "https://github.com/Alisha-21-cloud",
+  },
 ];
 
 function ContributorCard({ contributor }: { contributor: Contributor }) {

@@ -50,6 +50,12 @@ export function Navbar() {
           >
             Presets
           </Link>
+          <Link
+            to="/mcp"
+            className="text-xs text-muted-foreground transition-colors hover:text-foreground sm:text-sm"
+          >
+            MCP
+          </Link>
         </div>
 
         {/* Navigation Links */}
