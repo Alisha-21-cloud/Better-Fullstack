@@ -314,6 +314,15 @@ If Better Fullstack saves you time, consider supporting:
         <br /><sub><code>+643</code> <code>−26</code></sub>
       </a>
     </td>
+    <td align="center">
+      <a href="https://github.com/Alisha-21-cloud">
+        <img src="https://avatars.githubusercontent.com/u/206520298?v=4" width="80" style="border-radius:50%" alt="Alisha-21-cloud"/>
+        <br /><sub><b>Syed Ahmad Alisha</b></sub>
+        <br /><sub>Polar payments for Convex + Better Auth</sub>
+        <br /><sub><a href="https://github.com/Marve10s/Better-Fullstack/pull/110">#110</a></sub>
+        <br /><sub><code>+483</code> <code>−46</code></sub>
+      </a>
+    </td>
   </tr>
 </table>
 
