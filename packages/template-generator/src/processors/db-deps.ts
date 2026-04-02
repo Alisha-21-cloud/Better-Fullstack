@@ -51,7 +51,7 @@ function processPrismaDeps(
   webPkgPath: string,
   webExists: boolean,
 ): void {
-  const { database, dbSetup } = config;
+  const { database, dbSetup, backend } = config;
 
   if (database === "mongodb") {
     addPackageDependency({
@@ -98,7 +98,13 @@ function processPrismaDeps(
   });
 
   if (webExists) {
-    addPackageDependency({ vfs, packagePath: webPkgPath, dependencies: ["@prisma/client"] });
+    const webDeps: AvailableDependencies[] = ["@prisma/client"];
+    // SvelteKit fullstack (backend=self) bundles server code into the web app.
+    // Native DB drivers must be resolvable from apps/web for the SSR build.
+    if (backend === "self" && database === "sqlite") {
+      webDeps.push("@libsql/client");
+    }
+    addPackageDependency({ vfs, packagePath: webPkgPath, dependencies: webDeps });
   }
 }
 
