@@ -6,6 +6,7 @@ import {
 } from "@garph/gqty/dist/utils";
 import {
   g,
+  buildSchema,
   queryType,
   mutationType,
 } from "@{{projectName}}/api/index";
@@ -21,9 +22,10 @@ export const queryClient = new QueryClient({
   },
 });
 
-// Generate schema and scalars for GQty client
-const generatedSchema = createGeneratedSchema(g as any);
-const scalarsEnumsHash = createScalarsEnumsHash(g as any);
+// Build a GraphQL schema from garph types for GQty client generation
+const schema = buildSchema({ g, resolvers: {} });
+const generatedSchema = createGeneratedSchema(schema);
+const scalarsEnumsHash = createScalarsEnumsHash(schema);
 
 // Create type-safe GraphQL client
 type Schema = InferClient<{ query: typeof queryType; mutation: typeof mutationType }>;
