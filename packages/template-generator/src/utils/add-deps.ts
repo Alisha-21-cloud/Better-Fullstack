@@ -675,7 +675,7 @@ export const dependencyVersionMap = {
   typesense: "^3.0.4",
 
   // Search - Elasticsearch
-  "@elastic/elasticsearch": "^9.1.0",
+  "@elastic/elasticsearch": "^9.3.4",
 
   // EdgeDB
   edgedb: "^2.0.1",
