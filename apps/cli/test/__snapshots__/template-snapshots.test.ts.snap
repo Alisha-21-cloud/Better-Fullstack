@@ -12609,7 +12609,6 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
   "cmd/server/main.go",
   "go.mod",
   "internal/database/database.go",
-  "internal/handlers/handlers.go",
   "internal/models/models.go",
 ]
 `;
@@ -12767,7 +12766,7 @@ LOG_LEVEL=debug
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: fiber-gorm-zap 1`] = `
 {
-  "fileCount": 9,
+  "fileCount": 8,
   "files": [
     {
       "content": 
@@ -12802,10 +12801,6 @@ LOG_LEVEL=debug
     {
       "content": "[exists]",
       "path": "internal/database/database.go",
-    },
-    {
-      "content": "[exists]",
-      "path": "internal/handlers/handlers.go",
     },
     {
       "content": "[exists]",
@@ -12925,6 +12920,21 @@ exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots f
   "src/app/main.py",
   "src/app/openai_client.py",
   "src/app/openai_schemas.py",
+  "src/app/schemas.py",
+  "src/app/settings.py",
+  "tests/__init__.py",
+  "tests/test_main.py",
+]
+`;
+
+exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots file structure: flask-pydantic-ruff 1`] = `
+[
+  ".env.example",
+  "CLAUDE.md",
+  "README.md",
+  "pyproject.toml",
+  "src/app/__init__.py",
+  "src/app/main.py",
   "src/app/schemas.py",
   "src/app/settings.py",
   "tests/__init__.py",
@@ -13209,6 +13219,76 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/0
     {
       "content": "[exists]",
       "path": "src/app/openai_schemas.py",
+    },
+    {
+      "content": "[exists]",
+      "path": "src/app/schemas.py",
+    },
+    {
+      "content": "[exists]",
+      "path": "src/app/settings.py",
+    },
+    {
+      "content": "[exists]",
+      "path": "tests/__init__.py",
+    },
+    {
+      "content": "[exists]",
+      "path": "tests/test_main.py",
+    },
+  ],
+}
+`;
+
+exports[`Template Snapshots - Python Ecosystem Python Key File Content Snapshots key files: flask-pydantic-ruff 1`] = `
+{
+  "fileCount": 11,
+  "files": [
+    {
+      "content": 
+"# Environment Configuration
+# Copy this file to .env and update the values
+
+# Application
+DEBUG=true
+HOST=0.0.0.0
+PORT=8000
+
+# Database (if using SQLAlchemy/SQLModel)
+DATABASE_URL=sqlite:///./app.db
+
+# OpenAI (if using AI frameworks)
+OPENAI_API_KEY=your-openai-api-key
+
+# Anthropic (if using Anthropic SDK)
+ANTHROPIC_API_KEY=your-anthropic-api-key
+
+# Celery (if using task queue)
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+"
+,
+      "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "CLAUDE.md",
+    },
+    {
+      "content": "[exists]",
+      "path": "pyproject.toml",
+    },
+    {
+      "content": "[exists]",
+      "path": "README.md",
+    },
+    {
+      "content": "[exists]",
+      "path": "src/app/__init__.py",
+    },
+    {
+      "content": "[exists]",
+      "path": "src/app/main.py",
     },
     {
       "content": "[exists]",
