@@ -48,7 +48,7 @@ export async function addDocuments<T extends Record<string, unknown>>(
     indexName,
     objects: documents,
   });
-  return { taskID: response[0].taskID };
+  return { taskID: response[0]!.taskID };
 }
 
 /**
@@ -63,7 +63,7 @@ export async function updateDocuments<T extends Record<string, unknown>>(
     objects: documents,
     createIfNotExists: true,
   });
-  return { taskID: response[0].taskID };
+  return { taskID: response[0]!.taskID };
 }
 
 /**
@@ -91,7 +91,7 @@ export async function deleteDocuments(
     indexName,
     objectIDs,
   });
-  return { taskID: response[0].taskID };
+  return { taskID: response[0]!.taskID };
 }
 
 /**
@@ -180,7 +180,7 @@ export async function multiSearch<T extends Record<string, unknown>>(
     filters?: string;
   }>
 ): Promise<{ results: SearchResponse<T>[] }> {
-  return searchClient.search<T>({
+  const response = await searchClient.search<T>({
     requests: queries.map((q) => ({
       indexName: q.indexName,
       query: q.query,
@@ -188,6 +188,7 @@ export async function multiSearch<T extends Record<string, unknown>>(
       filters: q.filters,
     })),
   });
+  return { results: response.results as SearchResponse<T>[] };
 }
 
 /**

@@ -46,6 +46,7 @@ import type {
   RustCli,
   RustFrontend,
   RustLibraries,
+  RustLogging,
   RustOrm,
   RustWebFramework,
   Runtime,
@@ -299,6 +300,10 @@ export function processFlags(options: CLIInput, projectName?: string) {
 
   if (options.rustLibraries !== undefined) {
     config.rustLibraries = processArrayOption(options.rustLibraries) as RustLibraries[];
+  }
+
+  if (options.rustLogging !== undefined) {
+    config.rustLogging = options.rustLogging as RustLogging;
   }
 
   // Python ecosystem options

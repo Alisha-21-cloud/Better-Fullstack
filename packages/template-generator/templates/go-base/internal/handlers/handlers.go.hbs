@@ -893,8 +893,8 @@ func HealthCheck(c echo.Context) error {
 {{/if}}
 {{#if (eq goWebFramework "fiber")}}
 import (
-	"net/http"
 {{#if (or (eq goOrm "gorm") (eq goOrm "sqlc"))}}
+	"net/http"
 	"strconv"
 {{/if}}
 
