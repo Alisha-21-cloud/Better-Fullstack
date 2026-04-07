@@ -25,3 +25,4 @@ Files:
   - `templates-and-handlers.md` - `processTemplatesFromPrefix()` reference, Handlebars helpers, conditional patterns, and ecosystem handler differences (Rust/Go/Python vs TypeScript)
   - `testing.md` - both test APIs (`runTRPCTest` vs `createVirtual`), utility functions, assertion patterns, and which tests auto-detect missing files
   - `routing-gotchas.md` - edge cases: Convex backend skips, self-backend routing, Redwood paths, frontend array detection, processor ordering, auth+payments interactions
+  - `compatibility-rules.md` - when/how to add disabled reasons, auto-adjustments, hard blocks, preflight warnings; backend/frontend matrices for deploy targets; research checklist
