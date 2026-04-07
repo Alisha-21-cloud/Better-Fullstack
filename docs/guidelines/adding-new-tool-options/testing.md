@@ -327,7 +327,7 @@ The minimum required fields for a TS snapshot config are: `frontend`, `backend`,
 
 After adding, update snapshots:
 ```bash
-bun test apps/cli/test/template-snapshots.test.ts --update
+bun test apps/cli/test/template-snapshots.test.ts -u
 ```
 
 ### D. Template validation test (SHOULD include in combos)
@@ -415,7 +415,7 @@ bun test apps/cli/test/search.test.ts
 bun test apps/cli/test/cli-builder-sync.test.ts
 
 # Update snapshots after structural changes
-bun test apps/cli/test/template-snapshots.test.ts --update
+bun test apps/cli/test/template-snapshots.test.ts -u
 
 # Full test suite
 bun test apps/cli/test/
