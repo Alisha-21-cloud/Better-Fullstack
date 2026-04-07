@@ -1209,6 +1209,7 @@ These are the most frequently missed files based on git history analysis and rea
 | **New cat:** missing `mcp.ts` updates (5 spots) | MCP server can't scaffold with new option | Manual MCP testing |
 | **New cat:** missing `constants.ts` default | Wrong default used when option not specified | Behavioral bug in non-interactive mode |
 | **New cat:** missing `command-handlers.ts` fallback | Type error on error path | `check-types` fails |
+| **New cat:** missing `generate-reproducible-command.test.ts` update | Reproducible command test has stale assertion (missing new flag) | `bun test apps/cli/test/generate-reproducible-command.test.ts` |
 | **Non-TS:** missing `readme-generator.ts` branch | Generated README references wrong framework | Manual inspection of generated project |
 | **Non-TS:** missing `ai-docs-generator.ts` branch | Generated CLAUDE.md has wrong dev command | Manual inspection of generated project |
 | **Go:** forgot to widen `.hbs` outer guards | New framework option generates empty handlers file | `createVirtual` test with content assertion |
