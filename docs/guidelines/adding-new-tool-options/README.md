@@ -72,6 +72,9 @@ For deeper dives, see the companion files:
 | 25 | `apps/web/src/lib/stack-url-keys.ts` | Short URL key (e.g., `rateLimiting: "rl"`) |
 | 26 | `apps/web/src/lib/stack-url-state.ts` | 3 spots: `loadStackParams()`, `serializeStackParams()`, `searchToStack()` |
 | 27 | `apps/web/src/lib/stack-utils.ts` | `TYPESCRIPT_CATEGORY_ORDER` + `generateStackCommand()` flags |
+| **Smoke test wiring** | | |
+| 28 | `testing/lib/generate-combos/options.ts` | Import `*_VALUES`, add `sampleScalar()` in `make*Draft()`, add default in base config |
+| 29 | `testing/lib/presets.ts` | Add field to `makeBaseConfig()` so existing presets don't break |
 
 See the [Worked Example](worked-example.md) for exact code at each spot.
 
@@ -1037,23 +1040,47 @@ test("algolia warns with no backend", () => {
 });
 ```
 
-### Smoke test presets (optional, for significant additions)
+### Random combo generator (REQUIRED for new categories)
+
+The smoke test randomly generates project combos by sampling from schema value arrays. **New options in existing categories are auto-discovered** (the generator imports `*_VALUES` from the schema). But **new categories** must be wired into the generator manually.
+
+**File:** `testing/lib/generate-combos/options.ts`
+
+For a new category (e.g., `rustLogging`):
+
+1. Import the values constant:
+```typescript
+import { RUST_LOGGING_VALUES } from "@better-fullstack/types";
+```
+
+2. Add sampling in the ecosystem's `make*Draft()` function:
+```typescript
+rustLogging: sampleScalar(RUST_LOGGING_VALUES, 0.15),
+```
+The second argument is the "none" probability (0.15 = 15% chance of "none").
+
+3. Add default in the base config (same file):
+```typescript
+rustLogging: "tracing",
+```
 
 **File:** `testing/lib/presets.ts`
 
-Add a preset if the option represents a major new combo:
-
+Add the field to `makeBaseConfig()` so existing presets don't break:
 ```typescript
-"search-algolia": {
-  ecosystem: "typescript",
-  overrides: {
-    search: "algolia",
-    frontend: ["tanstack-router"],
-    backend: "hono",
-    runtime: "bun",
-  },
-},
+rustLogging: "tracing",
 ```
+
+**Why this matters:** Without wiring into the combo generator, the new tool is never randomly tested. The schema value exists, the CLI accepts it, but no smoke test ever exercises it. Bugs in template conditionals go undetected until a user hits them.
+
+### How auto-discovery works for existing categories
+
+When you add a new option to an **existing** category (e.g., `"algolia"` to `SearchSchema`), the combo generator automatically picks it up because:
+- It imports `SEARCH_VALUES` from `@better-fullstack/types`
+- `SEARCH_VALUES` derives from the Zod enum
+- `sampleScalar(SEARCH_VALUES, 0.9)` randomly selects from all values including the new one
+
+No code changes needed in the generator for existing-category additions.
 
 ### CI validation
 
@@ -1214,6 +1241,7 @@ These are the most frequently missed files based on git history analysis and rea
 | **Non-TS:** missing `ai-docs-generator.ts` branch | Generated CLAUDE.md has wrong dev command | Manual inspection of generated project |
 | **Go:** forgot to widen `.hbs` outer guards | New framework option generates empty handlers file | `createVirtual` test with content assertion |
 | Editing handler when template conditionals suffice | Unnecessary code; may break empty-file-skip logic | Review handler before editing |
+| **New cat:** missing `generate-combos/options.ts` wiring | New category never randomly tested by smoke tests — bugs go undetected | Import `*_VALUES`, add `sampleScalar()` in `make*Draft()`, add default |
 | **#1 CI killer:** Snapshot file not committed | Added snapshot config in test but didn't run `-u` or didn't `git add` the `.snap` file — Release Guard fails | Run `bun test apps/cli/test/template-snapshots.test.ts -u` then `git add apps/cli/test/__snapshots__/` |
 | **Go/Rust:** Unbalanced `{{#if}}`/`{{/if}}` in large `.hbs` files | New framework block inserted inside another block's unclosed conditional — breaks ALL generation for that ecosystem | Count `{{#if` and `{{/if}}` in the file after editing; they must match. Search for the previous framework's closing `{{/if}}` before inserting. |
 

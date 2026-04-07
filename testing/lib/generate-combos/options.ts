@@ -46,6 +46,7 @@ import {
   RUST_CLI_VALUES,
   RUST_FRONTEND_VALUES,
   RUST_LIBRARIES_VALUES,
+  RUST_LOGGING_VALUES,
   RUST_ORM_VALUES,
   RUST_WEB_FRAMEWORK_VALUES,
   SEARCH_VALUES,
@@ -276,6 +277,7 @@ function makeRustDraft(args: GeneratorArgs): CandidateDraft {
       rustOrm: sampleScalar(RUST_ORM_VALUES, 0.15),
       rustApi: sampleScalar(RUST_API_VALUES, 0.25),
       rustCli: sampleScalar(RUST_CLI_VALUES, 0.3),
+      rustLogging: sampleScalar(RUST_LOGGING_VALUES, 0.15),
       rustLibraries: sampleArray(RUST_LIBRARIES_VALUES, 0.35, 2),
     },
   };
@@ -385,6 +387,7 @@ function createValidationBase(projectName: string, draft: CandidateDraft): Proje
     rustOrm: "none",
     rustApi: "none",
     rustCli: "none",
+    rustLogging: "tracing",
     rustLibraries: [],
     pythonWebFramework: "none",
     pythonOrm: "none",
