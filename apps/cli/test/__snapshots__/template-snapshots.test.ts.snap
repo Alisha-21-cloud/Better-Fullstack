@@ -12609,6 +12609,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
   "cmd/server/main.go",
   "go.mod",
   "internal/database/database.go",
+  "internal/handlers/handlers.go",
   "internal/models/models.go",
 ]
 `;
@@ -12766,7 +12767,7 @@ LOG_LEVEL=debug
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: fiber-gorm-zap 1`] = `
 {
-  "fileCount": 8,
+  "fileCount": 9,
   "files": [
     {
       "content": 
@@ -12801,6 +12802,10 @@ LOG_LEVEL=debug
     {
       "content": "[exists]",
       "path": "internal/database/database.go",
+    },
+    {
+      "content": "[exists]",
+      "path": "internal/handlers/handlers.go",
     },
     {
       "content": "[exists]",
