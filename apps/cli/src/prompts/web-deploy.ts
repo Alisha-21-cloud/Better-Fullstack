@@ -25,12 +25,6 @@ function getDeploymentDisplay(deployment: WebDeploy): {
       hint: "Deploy to Cloudflare Workers using Alchemy",
     };
   }
-  if (deployment === "vercel") {
-    return {
-      label: "Vercel",
-      hint: "Deploy to Vercel — zero-config for Next.js, supports all frameworks",
-    };
-  }
   return {
     label: deployment,
     hint: `Add ${deployment} deployment`,
@@ -48,7 +42,7 @@ export async function getDeploymentChoice(
     return "none";
   }
 
-  const availableDeployments = ["cloudflare", "vercel", "none"];
+  const availableDeployments = ["cloudflare", "none"];
 
   const options: DeploymentOption[] = availableDeployments.map((deploy) => {
     const { label, hint } = getDeploymentDisplay(deploy as WebDeploy);
@@ -81,15 +75,6 @@ export async function getDeploymentToAdd(frontend: Frontend[], existingDeploymen
     const { label, hint } = getDeploymentDisplay("cloudflare");
     options.push({
       value: "cloudflare",
-      label,
-      hint,
-    });
-  }
-
-  if (existingDeployment !== "vercel") {
-    const { label, hint } = getDeploymentDisplay("vercel");
-    options.push({
-      value: "vercel",
       label,
       hint,
     });
