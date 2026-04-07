@@ -67,7 +67,8 @@ For deeper dives, see the companion files:
 | **Compatibility** | | |
 | 23 | `packages/types/src/compatibility.ts` | Add field to `CompatibilityInput` type + `getCategoryDisplayName()` |
 | **Web builder** | | |
-| 24 | `apps/web/src/lib/stack-defaults.ts` | Add field to `StackState` type and `DEFAULT_STACK` |
+| 24 | `apps/web/src/lib/preview-config.ts` | Add field to `stackToConfig()` mapping (maps StackState → ProjectConfig for web preview) |
+| 25 | `apps/web/src/lib/stack-defaults.ts` | Add field to `StackState` type and `DEFAULT_STACK` |
 | 25 | `apps/web/src/lib/stack-url-keys.ts` | Short URL key (e.g., `rateLimiting: "rl"`) |
 | 26 | `apps/web/src/lib/stack-url-state.ts` | 3 spots: `loadStackParams()`, `serializeStackParams()`, `searchToStack()` |
 | 27 | `apps/web/src/lib/stack-utils.ts` | `TYPESCRIPT_CATEGORY_ORDER` + `generateStackCommand()` flags |
@@ -747,7 +748,8 @@ Use this when adding a language that doesn't exist yet (e.g., Java, Elixir, C#).
 | 20 | `apps/web/src/lib/constant.ts` | Add `"java"` to ecosystem options. Add all Java `TECH_OPTIONS` categories. Add `java: [...]` to `ECOSYSTEM_CATEGORIES`. Add label overrides. |
 | 21 | `apps/web/src/lib/tech-icons.ts` | Add icons for all Java tools |
 | 22 | `apps/web/src/lib/tech-resource-links.ts` | Add docs/GitHub URLs for all Java tools |
-| 23 | `apps/web/src/lib/stack-defaults.ts` | Add all `java*` fields to `StackState` type and `DEFAULT_STACK` with `"none"` defaults |
+| 23 | `apps/web/src/lib/preview-config.ts` | Add all `java*` fields to `stackToConfig()` mapping |
+| 24 | `apps/web/src/lib/stack-defaults.ts` | Add all `java*` fields to `StackState` type and `DEFAULT_STACK` with `"none"` defaults |
 | 24 | `apps/web/src/lib/stack-url-keys.ts` | Add short URL keys for all Java categories (`javaWebFramework: "jwf"`, etc.) |
 | 25 | `apps/web/src/lib/stack-url-state.ts` | Add all Java fields to `loadStackParams()`, `serializeStackParams()`, `searchToStack()` |
 | 26 | `apps/web/src/lib/stack-utils.ts` | Add `JAVA_CATEGORY_ORDER` array, add `generateJavaCommand()` function, register in ecosystem dispatch |
