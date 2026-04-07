@@ -8,7 +8,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  issues: write
   id-token: write
 
 concurrency:
@@ -16,65 +15,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  notify:
-    name: Awaiting Release Approval
-    if: startsWith(github.event.head_commit.message, 'chore(release):')
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - name: Extract version
-        id: version
-        run: |
-          FIRST_LINE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
-          VERSION=$(echo "$FIRST_LINE" | sed -E 's/^chore\(release\): ([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Post approval notice
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const version = '${{ steps.version.outputs.version }}';
-            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-
-            // Find existing open notice issues and close them
-            const existing = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'release-approval',
-              state: 'open',
-            });
-            for (const issue of existing.data) {
-              await github.rest.issues.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                state: 'closed',
-                state_reason: 'completed',
-              });
-            }
-
-            // Create new notice
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `🚀 Release v${version} awaiting approval`,
-              body: [
-                `## Release v${version} is ready to publish`,
-                '',
-                `**[👉 Review and approve deployment](${runUrl})**`,
-                '',
-                'Click the link above, then click **"Review deployments"** → select `npm-publish` → **Approve**.',
-                '',
-                `Commit: ${context.sha.substring(0, 8)}`,
-                '',
-                '_This issue will be closed automatically when a new release is triggered._',
-              ].join('\n'),
-              labels: ['release-approval'],
-            });
-
   release:
     name: Release to NPM
-    needs: notify
     if: startsWith(github.event.head_commit.message, 'chore(release):')
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -267,29 +209,3 @@ jobs:
           echo "### GitHub Release" >> $GITHUB_STEP_SUMMARY
           echo "[v$VERSION](https://github.com/${{ github.repository }}/releases/tag/v$VERSION)" >> $GITHUB_STEP_SUMMARY
 
-      - name: Close approval notice
-        if: steps.check-version.outputs.exists == 'false'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: 'release-approval',
-              state: 'open',
-            });
-            for (const issue of issues.data) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                body: `✅ Release v${{ steps.version.outputs.version }} published successfully to npm.`,
-              });
-              await github.rest.issues.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                state: 'closed',
-                state_reason: 'completed',
-              });
-            }
