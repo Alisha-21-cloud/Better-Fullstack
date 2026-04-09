@@ -1,10 +1,10 @@
-import { MeiliSearch, type SearchParams, type SearchResponse, type Index } from "meilisearch";
+import { Meilisearch, type SearchParams, type SearchResponse, type Index } from "meilisearch";
 
 /**
  * Meilisearch client for lightning-fast search
  * @see https://www.meilisearch.com/docs
  */
-export const searchClient = new MeiliSearch({
+export const searchClient = new Meilisearch({
   host: process.env.MEILISEARCH_HOST!,
   apiKey: process.env.MEILISEARCH_API_KEY,
 });
@@ -188,17 +188,17 @@ export async function updateSortableAttributes(
  * Wait for a task to complete
  */
 export async function waitForTask(taskUid: number): Promise<void> {
-  await searchClient.waitForTask(taskUid);
+  await searchClient.tasks.waitForTask(taskUid);
 }
 
 /**
  * Get the status of a task
  */
 export async function getTaskStatus(taskUid: number): Promise<{
-  status: "enqueued" | "processing" | "succeeded" | "failed" | "canceled";
+  status: string;
   error?: { message: string; code: string };
 }> {
-  const task = await searchClient.getTask(taskUid);
+  const task = await searchClient.tasks.getTask(taskUid);
   return {
     status: task.status,
     error: task.error ? { message: task.error.message, code: task.error.code } : undefined,
