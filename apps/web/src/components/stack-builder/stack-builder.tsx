@@ -20,7 +20,7 @@ import {
   Zap,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { startTransition, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { isMultiSelectCategory, type OptionCategory } from "@better-fullstack/types";
 
@@ -50,6 +50,7 @@ import {
   type StackState,
   TECH_OPTIONS,
 } from "@/lib/constant";
+import { usesVirtualNoneSelection } from "@/lib/stack-contract";
 import { useStackState } from "@/lib/stack-url-state";
 import {
   CATEGORY_ORDER,
@@ -65,7 +66,6 @@ import { getTechResourceLinks } from "@/lib/tech-resource-links";
 import { cn } from "@/lib/utils";
 
 import { PresetsPanel } from "./presets-panel";
-import { PreviewPanel } from "./preview-panel";
 import { SavedStacksPanel } from "./saved-stacks-panel";
 import { ShareButton } from "./share-button";
 import { TechIcon } from "./tech-icon";
@@ -94,6 +94,13 @@ function formatProjectName(name: string): string {
 }
 
 type TechOption = (typeof TECH_OPTIONS)[keyof typeof TECH_OPTIONS][number];
+type CompatibilityNotes = { notes: string[]; hasIssue: boolean };
+type RenderOptionGroup = {
+  key: string;
+  heading: string | null;
+  category: keyof typeof TECH_OPTIONS;
+  options: TechOption[];
+};
 
 const APP_PLATFORM_OPTION_GROUPS = [
   {
@@ -143,6 +150,52 @@ function getCategoryOptionGroups(
   }
 
   return groupedOptions;
+}
+
+function mergeCompatibilityNotes(
+  ...noteGroups: Array<CompatibilityNotes | undefined>
+): CompatibilityNotes | undefined {
+  const notes = [...new Set(noteGroups.flatMap((group) => group?.notes ?? []))];
+  const hasIssue = noteGroups.some((group) => group?.hasIssue);
+
+  if (!hasIssue && notes.length === 0) {
+    return undefined;
+  }
+
+  return { notes, hasIssue };
+}
+
+function getCategoryRenderGroups(
+  stack: StackState,
+  categoryKey: keyof typeof TECH_OPTIONS,
+): RenderOptionGroup[] {
+  const categoryOptions = getVisibleOptions(stack, categoryKey, TECH_OPTIONS[categoryKey] || []);
+
+  if (stack.ecosystem === "go" && categoryKey === "goAuth") {
+    const authOptions = getVisibleOptions(stack, "auth", TECH_OPTIONS.auth);
+
+    return [
+      {
+        key: "go-auth-libraries",
+        heading: "Libraries",
+        category: "goAuth" as const,
+        options: [...categoryOptions],
+      },
+      {
+        key: "go-auth-integrated",
+        heading: "Integrated Auth",
+        category: "auth" as const,
+        options: [...authOptions],
+      },
+    ].filter((group) => group.options.length > 0);
+  }
+
+  return getCategoryOptionGroups(categoryKey, categoryOptions).map((group, index) => ({
+    key: `${categoryKey}-${group.heading ?? index}`,
+    heading: group.heading,
+    category: categoryKey,
+    options: group.options,
+  }));
 }
 
 function TechResourceButtons({ category, techId }: { category: string; techId: string }) {
@@ -223,12 +276,12 @@ function CategoryHint({ categoryKey }: { categoryKey: string }) {
   );
 }
 
-function getSelectedCount(category: keyof typeof TECH_OPTIONS, stack: StackState): number {
-  const catKey = category as keyof StackState;
-  const value = stack[catKey];
-
+function getSelectionCountForValue(
+  category: keyof typeof TECH_OPTIONS,
+  value: StackState[keyof StackState],
+): number {
   if (Array.isArray(value)) {
-    return (value as string[]).filter((v) => v !== "none").length;
+    return value.filter((entry) => entry !== "none").length;
   }
 
   if (typeof value === "string" && value !== "none" && value !== "false") {
@@ -240,11 +293,29 @@ function getSelectedCount(category: keyof typeof TECH_OPTIONS, stack: StackState
   return 0;
 }
 
+function getSelectedCount(category: keyof typeof TECH_OPTIONS, stack: StackState): number {
+  if (stack.ecosystem === "go" && category === "goAuth") {
+    return (
+      getSelectionCountForValue("goAuth", stack.goAuth) +
+      getSelectionCountForValue("auth", stack.auth)
+    );
+  }
+
+  const catKey = category as keyof StackState;
+  return getSelectionCountForValue(category, stack[catKey]);
+}
+
 function isSelectedCheck(stack: StackState, categoryKey: string, techId: string): boolean {
   const category = categoryKey as keyof StackState;
   const currentValue = stack[category];
   if (isMultiSelectCategory(categoryKey as OptionCategory)) {
-    return ((currentValue as string[]) || []).includes(techId);
+    const selectedValues = Array.isArray(currentValue) ? currentValue : [];
+
+    if (techId === "none" && usesVirtualNoneSelection(category)) {
+      return selectedValues.length === 0 || selectedValues.includes("none");
+    }
+
+    return selectedValues.includes(techId);
   }
   return currentValue === techId;
 }
@@ -264,10 +335,13 @@ function SidebarAccordionItem({
   onToggle: () => void;
   stack: StackState;
   handleTechSelect: (cat: keyof typeof TECH_OPTIONS, techId: string) => void;
-  compatibilityNotes?: { notes: string[]; hasIssue: boolean };
+  compatibilityNotes?: CompatibilityNotes;
 }) {
-  const options = getVisibleOptions(stack, category, TECH_OPTIONS[category]);
-  if (!options || options.length === 0) return null;
+  const optionGroups = getCategoryRenderGroups(stack, category);
+  const options = optionGroups.flatMap((group) =>
+    group.options.map((option) => ({ option, category: group.category })),
+  );
+  if (options.length === 0) return null;
 
   const count = getSelectedCount(category, stack);
   const displayName = getCategoryDisplayName(category);
@@ -277,6 +351,7 @@ function SidebarAccordionItem({
       <button
         type="button"
         onClick={onToggle}
+        data-testid={`sidebar-category-toggle-${category}`}
         className={cn(
           "flex w-full items-center justify-between px-3 py-2.5 text-left text-sm transition-colors",
           isOpen
@@ -307,20 +382,21 @@ function SidebarAccordionItem({
             className="overflow-hidden"
           >
             <div className="space-y-0.5 px-2 py-1.5">
-              {options.map((option) => {
-                const selected = isSelectedCheck(stack, category, option.id);
-                const disabled = !isOptionCompatible(stack, category, option.id);
+              {options.map(({ option, category: optionCategory }) => {
+                const selected = isSelectedCheck(stack, optionCategory, option.id);
+                const disabled = !isOptionCompatible(stack, optionCategory, option.id);
                 const disabledReason = disabled
-                  ? getDisabledReason(stack, category, option.id)
+                  ? getDisabledReason(stack, optionCategory, option.id)
                   : null;
 
                 return (
                   <button
-                    key={option.id}
+                    key={`${optionCategory}-${option.id}`}
                     type="button"
+                    data-testid={`sidebar-option-${optionCategory}-${option.id}`}
                     onClick={() => {
                       if (!disabled) {
-                        handleTechSelect(category, option.id);
+                        handleTechSelect(optionCategory, option.id);
                       }
                     }}
                     disabled={disabled}
@@ -406,6 +482,11 @@ const SHADCN_SUB_CATEGORIES = new Set([
   "shadcnRadius",
 ]);
 
+const PreviewPanel = lazy(async () => {
+  const module = await import("./preview-panel");
+  return { default: module.PreviewPanel };
+});
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 const StackBuilder = () => {
@@ -457,19 +538,42 @@ const StackBuilder = () => {
     }
   }, [stack.ecosystem]);
 
+  const sidebarCategories = useMemo(() => {
+    const cats: (keyof typeof TECH_OPTIONS)[] = [];
+    for (const cat of categoryOrder) {
+      if (cat === "astroIntegration") {
+        if (stack.webFrontend.includes("astro")) {
+          cats.push(cat);
+        }
+        continue;
+      }
+
+      if (SHADCN_SUB_CATEGORIES.has(cat)) {
+        continue;
+      }
+
+      if (stack.ecosystem === "go" && cat === "auth") {
+        continue;
+      }
+
+      cats.push(cat);
+    }
+    return cats;
+  }, [categoryOrder, stack.ecosystem, stack.webFrontend]);
+
   // Open first category when ecosystem changes
   const prevEcosystem = useRef(stack.ecosystem);
   useEffect(() => {
     if (prevEcosystem.current !== stack.ecosystem) {
       prevEcosystem.current = stack.ecosystem;
       if (
-        categoryOrder.length > 0 &&
-        !categoryOrder.includes(openCategory as keyof typeof TECH_OPTIONS)
+        sidebarCategories.length > 0 &&
+        !sidebarCategories.includes(openCategory as keyof typeof TECH_OPTIONS)
       ) {
-        setOpenCategory(categoryOrder[0] || null);
+        setOpenCategory(sidebarCategories[0] || null);
       }
     }
-  }, [stack.ecosystem, categoryOrder, openCategory]);
+  }, [stack.ecosystem, sidebarCategories, openCategory]);
 
   // Get the main scroll viewport for scrollIntoView
   useEffect(() => {
@@ -551,6 +655,7 @@ const StackBuilder = () => {
           const currentArray = Array.isArray(currentValue) ? [...currentValue] : [];
           let nextArray = [...currentArray];
           const isSelected = currentArray.includes(techId);
+          const isVirtualNoneCategory = usesVirtualNoneSelection(catKey);
 
           if (catKey === "webFrontend") {
             if (techId === "none") {
@@ -573,11 +678,14 @@ const StackBuilder = () => {
               nextArray = [techId];
             }
           } else {
-            if (isSelected) {
+            if (isVirtualNoneCategory && techId === "none") {
+              nextArray = [];
+            } else if (isSelected) {
               nextArray = nextArray.filter((id) => id !== techId);
             } else {
               nextArray.push(techId);
             }
+
             if (nextArray.length > 1) {
               nextArray = nextArray.filter((id) => id !== "none");
             }
@@ -586,7 +694,8 @@ const StackBuilder = () => {
               (catKey === "codeQuality" ||
                 catKey === "documentation" ||
                 catKey === "appPlatforms" ||
-                catKey === "examples")
+                catKey === "examples" ||
+                isVirtualNoneCategory)
             ) {
               // These categories can be empty
             } else if (nextArray.length === 0) {
@@ -801,26 +910,6 @@ const StackBuilder = () => {
     });
   };
 
-  // ─── Build the categories to show in sidebar (with astro integration) ──
-
-  const sidebarCategories = useMemo(() => {
-    const cats: (keyof typeof TECH_OPTIONS)[] = [];
-    for (const cat of categoryOrder) {
-      if (cat === "astroIntegration") {
-        if (stack.webFrontend.includes("astro")) {
-          cats.push(cat);
-        }
-        continue;
-      }
-      // Skip individual shadcn sub-categories from sidebar — they render as a combined section
-      if (SHADCN_SUB_CATEGORIES.has(cat)) {
-        continue;
-      }
-      cats.push(cat);
-    }
-    return cats;
-  }, [categoryOrder, stack.webFrontend]);
-
   // ─── Render ─────────────────────────────────────────────────────────────
 
   return (
@@ -858,6 +947,9 @@ const StackBuilder = () => {
           <button
             type="button"
             onClick={() => setMobileTab("summary")}
+            data-testid="mobile-tab-summary"
+            aria-pressed={mobileTab === "summary"}
+            data-state={mobileTab === "summary" ? "active" : "inactive"}
             className={cn(
               "flex flex-1 items-center justify-center gap-2 border-b-2 px-1 py-3 text-xs font-medium transition-all hover:bg-muted/50",
               mobileTab === "summary"
@@ -871,6 +963,9 @@ const StackBuilder = () => {
           <button
             type="button"
             onClick={() => setMobileTab("configure")}
+            data-testid="mobile-tab-configure"
+            aria-pressed={mobileTab === "configure"}
+            data-state={mobileTab === "configure" ? "active" : "inactive"}
             className={cn(
               "flex flex-1 items-center justify-center gap-2 border-b-2 px-1 py-3 text-xs font-medium transition-all hover:bg-muted/50",
               mobileTab === "configure"
@@ -892,6 +987,7 @@ const StackBuilder = () => {
                 <button
                   key={eco.id}
                   type="button"
+                  data-testid={`ecosystem-${eco.id}`}
                   onClick={() => {
                     startTransition(() => {
                       setStack({ ecosystem: eco.id as Ecosystem });
@@ -901,7 +997,7 @@ const StackBuilder = () => {
                     "group relative flex items-center justify-center gap-2 px-3 py-3 transition-all sm:gap-2.5 sm:px-4 sm:py-3.5",
                     isActive
                       ? "text-foreground"
-                      : "text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30",
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
                   )}
                 >
                   {/* Active underline */}
@@ -960,7 +1056,14 @@ const StackBuilder = () => {
                         onToggle={() => handleAccordionToggle(category)}
                         stack={stack}
                         handleTechSelect={handleTechSelect}
-                        compatibilityNotes={compatibilityAnalysis.notes[category]}
+                        compatibilityNotes={
+                          stack.ecosystem === "go" && category === "goAuth"
+                            ? mergeCompatibilityNotes(
+                                compatibilityAnalysis.notes.goAuth,
+                                compatibilityAnalysis.notes.auth,
+                              )
+                            : compatibilityAnalysis.notes[category]
+                        }
                       />
                     ))}
                   </div>
@@ -1020,10 +1123,12 @@ const StackBuilder = () => {
                 type="button"
                 onClick={() => setViewMode("command")}
                 data-testid="tab-builder"
+                aria-pressed={viewMode === "command"}
+                data-state={viewMode === "command" ? "active" : "inactive"}
                 className={cn(
                   "flex items-center gap-1 rounded-md px-1.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:px-2.5 sm:text-[11px]",
                   viewMode === "command"
-                    ? "bg-primary/15 text-primary"
+                    ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
@@ -1034,10 +1139,12 @@ const StackBuilder = () => {
                 type="button"
                 onClick={() => setViewMode("presets")}
                 data-testid="tab-presets"
+                aria-pressed={viewMode === "presets"}
+                data-state={viewMode === "presets" ? "active" : "inactive"}
                 className={cn(
                   "flex items-center gap-1 rounded-md px-1.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:px-2.5 sm:text-[11px]",
                   viewMode === "presets"
-                    ? "bg-primary/15 text-primary"
+                    ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
@@ -1048,10 +1155,12 @@ const StackBuilder = () => {
                 type="button"
                 onClick={() => setViewMode("preview")}
                 data-testid="tab-preview"
+                aria-pressed={viewMode === "preview"}
+                data-state={viewMode === "preview" ? "active" : "inactive"}
                 className={cn(
                   "flex items-center gap-1 rounded-md px-1.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:px-2.5 sm:text-[11px]",
                   viewMode === "preview"
-                    ? "bg-primary/15 text-primary"
+                    ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
@@ -1062,10 +1171,12 @@ const StackBuilder = () => {
                 type="button"
                 onClick={() => setViewMode("saved")}
                 data-testid="tab-saved"
+                aria-pressed={viewMode === "saved"}
+                data-state={viewMode === "saved" ? "active" : "inactive"}
                 className={cn(
                   "flex items-center gap-1 rounded-md px-1.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors sm:px-2.5 sm:text-[11px]",
                   viewMode === "saved"
-                    ? "bg-primary/15 text-primary"
+                    ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
@@ -1177,6 +1288,8 @@ const StackBuilder = () => {
                       render={
                         <button
                           type="button"
+                          aria-label="Builder settings"
+                          title="Builder settings"
                           className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         />
                       }
@@ -1195,6 +1308,8 @@ const StackBuilder = () => {
                     render={
                       <button
                         type="button"
+                        aria-label="More actions"
+                        title="More actions"
                         className="flex items-center justify-center rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:hidden"
                       />
                     }
@@ -1281,18 +1396,22 @@ const StackBuilder = () => {
                         // Skip shadcn sub-categories - rendered conditionally after uiLibrary
                         if (SHADCN_SUB_CATEGORIES.has(categoryKey)) return null;
 
-                        const categoryOptions = getVisibleOptions(
+                        if (stack.ecosystem === "go" && categoryKey === "auth") return null;
+
+                        const categoryOptionGroups = getCategoryRenderGroups(
                           stack,
                           categoryKey as keyof typeof TECH_OPTIONS,
-                          TECH_OPTIONS[categoryKey as keyof typeof TECH_OPTIONS] || [],
                         );
                         const categoryDisplayName = getCategoryDisplayName(categoryKey);
-                        const categoryOptionGroups = getCategoryOptionGroups(
-                          categoryKey,
-                          categoryOptions,
-                        );
+                        const sectionCompatibilityNotes =
+                          stack.ecosystem === "go" && categoryKey === "goAuth"
+                            ? mergeCompatibilityNotes(
+                                compatibilityAnalysis.notes.goAuth,
+                                compatibilityAnalysis.notes.auth,
+                              )
+                            : compatibilityAnalysis.notes[categoryKey];
 
-                        if (categoryOptions.length === 0) return null;
+                        if (categoryOptionGroups.length === 0) return null;
 
                         const isSectionCollapsed = collapsedSections.has(categoryKey);
                         const sectionSelectedCount = getSelectedCount(
@@ -1307,18 +1426,20 @@ const StackBuilder = () => {
                                 sectionRefs.current[categoryKey] = el;
                               }}
                               id={`section-${categoryKey}`}
+                              data-testid={`category-${categoryKey}`}
                               className="mb-6 scroll-mt-4 sm:mb-8"
                             >
                               <button
                                 type="button"
                                 onClick={() => toggleSection(categoryKey)}
+                                data-testid={`category-toggle-${categoryKey}`}
                                 className="mb-3 flex w-full items-center gap-2 border-b border-border pb-2 text-left transition-opacity hover:opacity-80"
                               >
                                 <Terminal className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
                                 <h2 className="flex-1 font-mono text-foreground text-sm sm:text-base">
                                   {categoryDisplayName}
                                 </h2>
-                                {compatibilityAnalysis.notes[categoryKey]?.hasIssue && (
+                                {sectionCompatibilityNotes?.hasIssue && (
                                   <InfoIcon className="h-4 w-4 shrink-0 text-amber-500" />
                                 )}
                                 {isSectionCollapsed && sectionSelectedCount > 0 && (
@@ -1344,8 +1465,8 @@ const StackBuilder = () => {
                                   >
                                     <CategoryHint categoryKey={categoryKey} />
                                     <div className="space-y-4">
-                                      {categoryOptionGroups.map((group, groupIndex) => (
-                                        <div key={group.heading ?? `default-${groupIndex}`}>
+                                      {categoryOptionGroups.map((group) => (
+                                        <div key={group.key}>
                                           {group.heading && (
                                             <h3 className="mb-2 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                                               {group.heading}
@@ -1355,18 +1476,18 @@ const StackBuilder = () => {
                                             {group.options.map((tech) => {
                                               const isSelected = isSelectedCheck(
                                                 stack,
-                                                categoryKey,
+                                                group.category,
                                                 tech.id,
                                               );
                                               const isDisabled = !isOptionCompatible(
                                                 stack,
-                                                categoryKey as keyof typeof TECH_OPTIONS,
+                                                group.category,
                                                 tech.id,
                                               );
                                               const disabledReason = isDisabled
                                                 ? getDisabledReason(
                                                     stack,
-                                                    categoryKey as keyof typeof TECH_OPTIONS,
+                                                    group.category,
                                                     tech.id,
                                                   )
                                                 : null;
@@ -1374,6 +1495,7 @@ const StackBuilder = () => {
                                               return (
                                                 <motion.div
                                                   key={tech.id}
+                                                  data-testid={`option-${group.category}-${tech.id}`}
                                                   className={cn(
                                                     "group relative cursor-pointer rounded-lg border p-3 transition-all sm:p-4",
                                                     isSelected
@@ -1384,16 +1506,13 @@ const StackBuilder = () => {
                                                   )}
                                                   onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleTechSelect(
-                                                      categoryKey as keyof typeof TECH_OPTIONS,
-                                                      tech.id,
-                                                    );
+                                                    handleTechSelect(group.category, tech.id);
                                                   }}
                                                   title={disabledReason || undefined}
                                                 >
                                                   <div className="absolute top-2 right-2 flex items-center gap-1">
                                                     <TechResourceButtons
-                                                      category={categoryKey}
+                                                      category={group.category}
                                                       techId={tech.id}
                                                     />
                                                     {tech.default && !isSelected && (
@@ -1480,11 +1599,13 @@ const StackBuilder = () => {
                                     animate={{ opacity: 1, height: "auto" }}
                                     exit={{ opacity: 0, height: 0 }}
                                     transition={{ duration: 0.3, ease: "easeInOut" }}
+                                    data-testid="category-shadcnBase"
                                     className="mb-6 scroll-mt-4 sm:mb-8 overflow-hidden"
                                   >
                                     <button
                                       type="button"
                                       onClick={() => toggleSection("shadcnBase")}
+                                      data-testid="category-toggle-shadcnBase"
                                       className="mb-3 flex w-full items-center gap-2 border-b border-border pb-2 text-left transition-opacity hover:opacity-80"
                                     >
                                       <Terminal className="h-4 w-4 shrink-0 text-muted-foreground sm:h-5 sm:w-5" />
@@ -1550,6 +1671,7 @@ const StackBuilder = () => {
                                                     return (
                                                       <motion.div
                                                         key={tech.id}
+                                                        data-testid={`option-${key}-${tech.id}`}
                                                         className={cn(
                                                           "group relative cursor-pointer rounded-lg border p-2.5 transition-all sm:p-3",
                                                           isSelected
@@ -1653,6 +1775,7 @@ const StackBuilder = () => {
                                     animate={{ opacity: 1, height: "auto" }}
                                     exit={{ opacity: 0, height: 0 }}
                                     transition={{ duration: 0.3, ease: "easeInOut" }}
+                                    data-testid="category-astroIntegration"
                                     className="mb-6 scroll-mt-4 sm:mb-8 overflow-hidden"
                                   >
                                     <div className="mb-3 flex items-center gap-2 border-border border-b pb-2">
@@ -1676,6 +1799,7 @@ const StackBuilder = () => {
                                         return (
                                           <motion.div
                                             key={tech.id}
+                                            data-testid={`option-astroIntegration-${tech.id}`}
                                             className={cn(
                                               "group relative cursor-pointer rounded-lg border p-3 transition-all sm:p-4",
                                               isSelected
@@ -1766,11 +1890,19 @@ const StackBuilder = () => {
               </div>
             ) : viewMode === "preview" ? (
               <div className="min-h-0 flex-1 overflow-hidden">
-                <PreviewPanel
-                  stack={adjustedStack || stack}
-                  selectedFilePath={selectedFile || null}
-                  onSelectFile={setSelectedFile}
-                />
+                <Suspense
+                  fallback={
+                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                      Loading preview...
+                    </div>
+                  }
+                >
+                  <PreviewPanel
+                    stack={adjustedStack || stack}
+                    selectedFilePath={selectedFile || null}
+                    onSelectFile={setSelectedFile}
+                  />
+                </Suspense>
               </div>
             ) : viewMode === "presets" ? (
               <div className="min-h-0 flex-1 overflow-hidden">

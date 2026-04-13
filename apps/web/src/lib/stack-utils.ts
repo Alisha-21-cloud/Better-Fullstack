@@ -1,5 +1,10 @@
+import {
+  createCliDefaultProjectConfigBase,
+  type CliDefaultProjectConfigBase,
+} from "@better-fullstack/types/defaults";
+
 import { TECH_OPTIONS } from "@/lib/constant";
-import { DEFAULT_STACK, isStackDefault, type StackState } from "@/lib/stack-defaults";
+import { DEFAULT_STACK, type StackState } from "@/lib/stack-defaults";
 import { createStackSearchParams } from "@/lib/stack-url-state.shared";
 
 const PACKAGE_MANAGER_COMMANDS = {
@@ -75,6 +80,7 @@ const RUST_CATEGORY_ORDER: Array<keyof typeof TECH_OPTIONS> = [
   "rustLogging",
   "rustErrorHandling",
   "rustCaching",
+  "rustAuth",
   "aiDocs",
   "git",
   "install",
@@ -118,6 +124,203 @@ const CATEGORY_ORDER = [
     ...GO_CATEGORY_ORDER,
   ]),
 ] as Array<keyof typeof TECH_OPTIONS>;
+
+const RUST_CONFIG_KEYS = [
+  "rustWebFramework",
+  "rustFrontend",
+  "rustOrm",
+  "rustApi",
+  "rustCli",
+  "rustLibraries",
+  "rustLogging",
+  "rustErrorHandling",
+  "rustCaching",
+  "rustAuth",
+] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
+
+const PYTHON_CONFIG_KEYS = [
+  "pythonWebFramework",
+  "pythonOrm",
+  "pythonValidation",
+  "pythonAi",
+  "pythonAuth",
+  "pythonTaskQueue",
+  "pythonGraphql",
+  "pythonQuality",
+] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
+
+const GO_CONFIG_KEYS = [
+  "goWebFramework",
+  "goOrm",
+  "goApi",
+  "goCli",
+  "goLogging",
+  "goAuth",
+] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
+
+const SELF_BACKENDS = new Set([
+  "self-next",
+  "self-tanstack-start",
+  "self-astro",
+  "self-nuxt",
+  "self-svelte",
+  "self-solid-start",
+]);
+
+function formatArrayFlag(flag: string, values: readonly string[]) {
+  const filteredValues = toUniqueNonNoneArray(values);
+  return `--${flag} ${filteredValues.join(" ") || "none"}`;
+}
+
+function toUniqueNonNoneArray(values: readonly string[]) {
+  return [...new Set(values.filter((value) => value !== "none"))];
+}
+
+function areStringArraysEqual(left: readonly string[], right: readonly string[]) {
+  const sortedLeft = [...left].sort();
+  const sortedRight = [...right].sort();
+
+  return (
+    sortedLeft.length === sortedRight.length &&
+    sortedLeft.every((value, index) => value === sortedRight[index])
+  );
+}
+
+function stackToCliComparableConfig(
+  stack: StackState,
+  projectName: string,
+): CliDefaultProjectConfigBase {
+  const frontend = [
+    ...toUniqueNonNoneArray(stack.webFrontend),
+    ...toUniqueNonNoneArray(stack.nativeFrontend),
+  ] as CliDefaultProjectConfigBase["frontend"];
+
+  return {
+    projectName,
+    relativePath: projectName,
+    ecosystem: stack.ecosystem as CliDefaultProjectConfigBase["ecosystem"],
+    database: stack.database as CliDefaultProjectConfigBase["database"],
+    orm: stack.orm as CliDefaultProjectConfigBase["orm"],
+    backend: (SELF_BACKENDS.has(stack.backend) ? "self" : stack.backend) as CliDefaultProjectConfigBase["backend"],
+    runtime: stack.runtime as CliDefaultProjectConfigBase["runtime"],
+    frontend: frontend.length > 0 ? frontend : ["tanstack-router"],
+    addons: [
+      ...toUniqueNonNoneArray(stack.codeQuality),
+      ...toUniqueNonNoneArray(stack.documentation),
+      ...toUniqueNonNoneArray(stack.appPlatforms),
+    ] as CliDefaultProjectConfigBase["addons"],
+    examples: toUniqueNonNoneArray(stack.examples) as CliDefaultProjectConfigBase["examples"],
+    auth: stack.auth as CliDefaultProjectConfigBase["auth"],
+    payments: stack.payments as CliDefaultProjectConfigBase["payments"],
+    email: stack.email as CliDefaultProjectConfigBase["email"],
+    fileUpload: stack.fileUpload as CliDefaultProjectConfigBase["fileUpload"],
+    effect: stack.backendLibraries as CliDefaultProjectConfigBase["effect"],
+    ai: stack.aiSdk as CliDefaultProjectConfigBase["ai"],
+    stateManagement:
+      stack.stateManagement as CliDefaultProjectConfigBase["stateManagement"],
+    forms: stack.forms as CliDefaultProjectConfigBase["forms"],
+    testing: stack.testing as CliDefaultProjectConfigBase["testing"],
+    git: stack.git === "true",
+    packageManager: stack.packageManager as CliDefaultProjectConfigBase["packageManager"],
+    versionChannel: stack.versionChannel as CliDefaultProjectConfigBase["versionChannel"],
+    install: stack.install === "true",
+    dbSetup: stack.dbSetup as CliDefaultProjectConfigBase["dbSetup"],
+    api: stack.api as CliDefaultProjectConfigBase["api"],
+    webDeploy: stack.webDeploy as CliDefaultProjectConfigBase["webDeploy"],
+    serverDeploy: stack.serverDeploy as CliDefaultProjectConfigBase["serverDeploy"],
+    astroIntegration: stack.astroIntegration as CliDefaultProjectConfigBase["astroIntegration"],
+    cssFramework: stack.cssFramework as CliDefaultProjectConfigBase["cssFramework"],
+    uiLibrary: stack.uiLibrary as CliDefaultProjectConfigBase["uiLibrary"],
+    shadcnBase: stack.shadcnBase as CliDefaultProjectConfigBase["shadcnBase"],
+    shadcnStyle: stack.shadcnStyle as CliDefaultProjectConfigBase["shadcnStyle"],
+    shadcnIconLibrary:
+      stack.shadcnIconLibrary as CliDefaultProjectConfigBase["shadcnIconLibrary"],
+    shadcnColorTheme:
+      stack.shadcnColorTheme as CliDefaultProjectConfigBase["shadcnColorTheme"],
+    shadcnBaseColor: stack.shadcnBaseColor as CliDefaultProjectConfigBase["shadcnBaseColor"],
+    shadcnFont: stack.shadcnFont as CliDefaultProjectConfigBase["shadcnFont"],
+    shadcnRadius: stack.shadcnRadius as CliDefaultProjectConfigBase["shadcnRadius"],
+    validation: stack.validation as CliDefaultProjectConfigBase["validation"],
+    realtime: stack.realtime as CliDefaultProjectConfigBase["realtime"],
+    jobQueue: stack.jobQueue as CliDefaultProjectConfigBase["jobQueue"],
+    animation: stack.animation as CliDefaultProjectConfigBase["animation"],
+    logging: stack.logging as CliDefaultProjectConfigBase["logging"],
+    observability: stack.observability as CliDefaultProjectConfigBase["observability"],
+    featureFlags: stack.featureFlags as CliDefaultProjectConfigBase["featureFlags"],
+    analytics: stack.analytics as CliDefaultProjectConfigBase["analytics"],
+    cms: stack.cms as CliDefaultProjectConfigBase["cms"],
+    caching: stack.caching as CliDefaultProjectConfigBase["caching"],
+    i18n: stack.i18n as CliDefaultProjectConfigBase["i18n"],
+    search: stack.search as CliDefaultProjectConfigBase["search"],
+    fileStorage: stack.fileStorage as CliDefaultProjectConfigBase["fileStorage"],
+    rustWebFramework:
+      stack.rustWebFramework as CliDefaultProjectConfigBase["rustWebFramework"],
+    rustFrontend: stack.rustFrontend as CliDefaultProjectConfigBase["rustFrontend"],
+    rustOrm: stack.rustOrm as CliDefaultProjectConfigBase["rustOrm"],
+    rustApi: stack.rustApi as CliDefaultProjectConfigBase["rustApi"],
+    rustCli: stack.rustCli as CliDefaultProjectConfigBase["rustCli"],
+    rustLibraries:
+      toUniqueNonNoneArray(stack.rustLibraries) as CliDefaultProjectConfigBase["rustLibraries"],
+    rustLogging: stack.rustLogging as CliDefaultProjectConfigBase["rustLogging"],
+    rustErrorHandling:
+      stack.rustErrorHandling as CliDefaultProjectConfigBase["rustErrorHandling"],
+    rustCaching: stack.rustCaching as CliDefaultProjectConfigBase["rustCaching"],
+    rustAuth: stack.rustAuth as CliDefaultProjectConfigBase["rustAuth"],
+    pythonWebFramework:
+      stack.pythonWebFramework as CliDefaultProjectConfigBase["pythonWebFramework"],
+    pythonOrm: stack.pythonOrm as CliDefaultProjectConfigBase["pythonOrm"],
+    pythonValidation:
+      stack.pythonValidation as CliDefaultProjectConfigBase["pythonValidation"],
+    pythonAi:
+      toUniqueNonNoneArray(stack.pythonAi) as CliDefaultProjectConfigBase["pythonAi"],
+    pythonAuth: stack.pythonAuth as CliDefaultProjectConfigBase["pythonAuth"],
+    pythonTaskQueue:
+      stack.pythonTaskQueue as CliDefaultProjectConfigBase["pythonTaskQueue"],
+    pythonGraphql: stack.pythonGraphql as CliDefaultProjectConfigBase["pythonGraphql"],
+    pythonQuality: stack.pythonQuality as CliDefaultProjectConfigBase["pythonQuality"],
+    goWebFramework: stack.goWebFramework as CliDefaultProjectConfigBase["goWebFramework"],
+    goOrm: stack.goOrm as CliDefaultProjectConfigBase["goOrm"],
+    goApi: stack.goApi as CliDefaultProjectConfigBase["goApi"],
+    goCli: stack.goCli as CliDefaultProjectConfigBase["goCli"],
+    goLogging: stack.goLogging as CliDefaultProjectConfigBase["goLogging"],
+    goAuth: stack.goAuth as CliDefaultProjectConfigBase["goAuth"],
+    aiDocs: toUniqueNonNoneArray(stack.aiDocs) as CliDefaultProjectConfigBase["aiDocs"],
+  };
+}
+
+function isCliDefaultStack(stack: StackState, projectName: string) {
+  const comparableConfig = stackToCliComparableConfig(stack, projectName);
+  const cliDefaults = {
+    ...createCliDefaultProjectConfigBase(
+      stack.packageManager as CliDefaultProjectConfigBase["packageManager"],
+    ),
+    projectName,
+    relativePath: projectName,
+  };
+  const ignoredKeys =
+    stack.ecosystem === "typescript"
+      ? new Set<keyof CliDefaultProjectConfigBase>([
+          ...RUST_CONFIG_KEYS,
+          ...PYTHON_CONFIG_KEYS,
+          ...GO_CONFIG_KEYS,
+        ])
+      : new Set<keyof CliDefaultProjectConfigBase>();
+
+  return (Object.keys(cliDefaults) as Array<keyof CliDefaultProjectConfigBase>).every((key) => {
+    if (ignoredKeys.has(key)) {
+      return true;
+    }
+
+    const currentValue = comparableConfig[key];
+    const defaultValue = cliDefaults[key];
+
+    if (Array.isArray(currentValue) && Array.isArray(defaultValue)) {
+      return areStringArraysEqual(currentValue, defaultValue);
+    }
+
+    return currentValue === defaultValue;
+  });
+}
 
 export function generateStackSummary(stack: StackState) {
   const selectedTechs = CATEGORY_ORDER.flatMap((category) => {
@@ -169,11 +372,7 @@ export function generateStackCommand(stack: StackState) {
     PACKAGE_MANAGER_COMMANDS[stack.packageManager as keyof typeof PACKAGE_MANAGER_COMMANDS] ||
     PACKAGE_MANAGER_COMMANDS.default;
 
-  const isStackDefaultExceptProjectName = Object.entries(DEFAULT_STACK).every(
-    ([key]) =>
-      key === "projectName" ||
-      isStackDefault(stack, key as keyof StackState, stack[key as keyof StackState]),
-  );
+  const isStackDefaultExceptProjectName = isCliDefaultStack(stack, projectName);
 
   if (isStackDefaultExceptProjectName) {
     return `${base} ${projectName} --yes`;
@@ -220,7 +419,13 @@ export function generateStackCommand(stack: StackState) {
         ]
       : []),
     `--backend ${mapBackendToCli(stack.backend)}`,
-    `--runtime ${stack.runtime}`,
+    `--runtime ${
+      mapBackendToCli(stack.backend) === "self" ||
+      stack.backend === "convex" ||
+      stack.backend === "none"
+        ? "none"
+        : stack.runtime
+    }`,
     `--api ${stack.api}`,
     `--auth ${stack.auth}`,
     `--payments ${stack.payments}`,
@@ -285,8 +490,8 @@ export function generateStackCommand(stack: StackState) {
             .join(" ") || "none"
         : "none"
     }`,
-    `--examples ${stack.examples.join(" ") || "none"}`,
-    `--ai-docs ${stack.aiDocs.filter((d) => d !== "none").join(" ") || "none"}`,
+    formatArrayFlag("examples", stack.examples),
+    formatArrayFlag("ai-docs", stack.aiDocs),
   ];
 
   if (stack.yolo === "true") {
@@ -301,38 +506,21 @@ function generateRustCommand(stack: StackState, projectName: string) {
     PACKAGE_MANAGER_COMMANDS[stack.packageManager as keyof typeof PACKAGE_MANAGER_COMMANDS] ||
     PACKAGE_MANAGER_COMMANDS.default;
 
-  const flags: string[] = [`--ecosystem rust`];
+  const flags: string[] = [
+    `--ecosystem rust`,
+    `--rust-web-framework ${stack.rustWebFramework}`,
+    `--rust-frontend ${stack.rustFrontend}`,
+    `--rust-orm ${stack.rustOrm}`,
+    `--rust-api ${stack.rustApi}`,
+    `--rust-cli ${stack.rustCli}`,
+    formatArrayFlag("rust-libraries", stack.rustLibraries),
+    `--rust-logging ${stack.rustLogging}`,
+    `--rust-error-handling ${stack.rustErrorHandling}`,
+    `--rust-caching ${stack.rustCaching}`,
+    `--rust-auth ${stack.rustAuth}`,
+  ];
 
-  if (stack.rustWebFramework !== "none") {
-    flags.push(`--rust-web-framework ${stack.rustWebFramework}`);
-  }
-  if (stack.rustFrontend !== "none") {
-    flags.push(`--rust-frontend ${stack.rustFrontend}`);
-  }
-  if (stack.rustOrm !== "none") {
-    flags.push(`--rust-orm ${stack.rustOrm}`);
-  }
-  if (stack.rustApi !== "none") {
-    flags.push(`--rust-api ${stack.rustApi}`);
-  }
-  if (stack.rustCli !== "none") {
-    flags.push(`--rust-cli ${stack.rustCli}`);
-  }
-  if (stack.rustLibraries !== "none" && stack.rustLibraries !== "serde") {
-    flags.push(`--rust-libraries ${stack.rustLibraries}`);
-  }
-  if (stack.rustLogging !== "tracing") {
-    flags.push(`--rust-logging ${stack.rustLogging}`);
-  }
-  if (stack.rustErrorHandling !== "anyhow-thiserror") {
-    flags.push(`--rust-error-handling ${stack.rustErrorHandling}`);
-  }
-  if (stack.rustCaching !== "none") {
-    flags.push(`--rust-caching ${stack.rustCaching}`);
-  }
-  if (stack.aiDocs.length > 0 && !stack.aiDocs.includes("none")) {
-    flags.push(`--ai-docs ${stack.aiDocs.join(" ")}`);
-  }
+  flags.push(formatArrayFlag("ai-docs", stack.aiDocs));
   if (stack.git === "false") {
     flags.push("--no-git");
   }
@@ -348,34 +536,20 @@ function generatePythonCommand(stack: StackState, projectName: string) {
     PACKAGE_MANAGER_COMMANDS[stack.packageManager as keyof typeof PACKAGE_MANAGER_COMMANDS] ||
     PACKAGE_MANAGER_COMMANDS.default;
 
-  const flags: string[] = [`--ecosystem python`];
+  const flags: string[] = [
+    `--ecosystem python`,
+    `--python-web-framework ${stack.pythonWebFramework}`,
+    `--python-orm ${stack.pythonOrm}`,
+    `--python-validation ${stack.pythonValidation}`,
+  ];
 
-  if (stack.pythonWebFramework !== "none") {
-    flags.push(`--python-web-framework ${stack.pythonWebFramework}`);
-  }
-  if (stack.pythonOrm !== "none") {
-    flags.push(`--python-orm ${stack.pythonOrm}`);
-  }
-  if (stack.pythonValidation !== "none") {
-    flags.push(`--python-validation ${stack.pythonValidation}`);
-  }
   // Omitting this flag makes the CLI treat Python AI as unspecified and re-open the prompt.
-  flags.push(`--python-ai ${stack.pythonAi}`);
-  if (stack.pythonAuth !== "none") {
-    flags.push(`--python-auth ${stack.pythonAuth}`);
-  }
-  if (stack.pythonTaskQueue !== "none") {
-    flags.push(`--python-task-queue ${stack.pythonTaskQueue}`);
-  }
-  if (stack.pythonGraphql !== "none") {
-    flags.push(`--python-graphql ${stack.pythonGraphql}`);
-  }
-  if (stack.pythonQuality !== "none") {
-    flags.push(`--python-quality ${stack.pythonQuality}`);
-  }
-  if (stack.aiDocs.length > 0 && !stack.aiDocs.includes("none")) {
-    flags.push(`--ai-docs ${stack.aiDocs.join(" ")}`);
-  }
+  flags.push(formatArrayFlag("python-ai", stack.pythonAi));
+  flags.push(`--python-auth ${stack.pythonAuth}`);
+  flags.push(`--python-task-queue ${stack.pythonTaskQueue}`);
+  flags.push(`--python-graphql ${stack.pythonGraphql}`);
+  flags.push(`--python-quality ${stack.pythonQuality}`);
+  flags.push(formatArrayFlag("ai-docs", stack.aiDocs));
   if (stack.git === "false") {
     flags.push("--no-git");
   }
@@ -391,32 +565,18 @@ function generateGoCommand(stack: StackState, projectName: string) {
     PACKAGE_MANAGER_COMMANDS[stack.packageManager as keyof typeof PACKAGE_MANAGER_COMMANDS] ||
     PACKAGE_MANAGER_COMMANDS.default;
 
-  const flags: string[] = [`--ecosystem go`];
+  const flags: string[] = [
+    `--ecosystem go`,
+    `--go-web-framework ${stack.goWebFramework}`,
+    `--go-orm ${stack.goOrm}`,
+    `--go-api ${stack.goApi}`,
+    `--go-cli ${stack.goCli}`,
+    `--go-logging ${stack.goLogging}`,
+    `--go-auth ${stack.goAuth}`,
+    `--auth ${stack.auth}`,
+  ];
 
-  if (stack.goWebFramework !== "none") {
-    flags.push(`--go-web-framework ${stack.goWebFramework}`);
-  }
-  if (stack.goOrm !== "none") {
-    flags.push(`--go-orm ${stack.goOrm}`);
-  }
-  if (stack.goApi !== "none") {
-    flags.push(`--go-api ${stack.goApi}`);
-  }
-  if (stack.goCli !== "none") {
-    flags.push(`--go-cli ${stack.goCli}`);
-  }
-  if (stack.goLogging !== "none") {
-    flags.push(`--go-logging ${stack.goLogging}`);
-  }
-  if (stack.goAuth !== "none") {
-    flags.push(`--go-auth ${stack.goAuth}`);
-  }
-  if (stack.auth !== "none") {
-    flags.push(`--auth ${stack.auth}`);
-  }
-  if (stack.aiDocs.length > 0 && !stack.aiDocs.includes("none")) {
-    flags.push(`--ai-docs ${stack.aiDocs.join(" ")}`);
-  }
+  flags.push(formatArrayFlag("ai-docs", stack.aiDocs));
   if (stack.git === "false") {
     flags.push("--no-git");
   }
