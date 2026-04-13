@@ -128,6 +128,13 @@ export type CompatibilityInput = {
   animation: string;
   cssFramework: string;
   uiLibrary: string;
+  shadcnBase: string;
+  shadcnStyle: string;
+  shadcnIconLibrary: string;
+  shadcnColorTheme: string;
+  shadcnBaseColor: string;
+  shadcnFont: string;
+  shadcnRadius: string;
   cms: string;
   i18n: string;
   search: string;
@@ -151,14 +158,15 @@ export type CompatibilityInput = {
   rustOrm: string;
   rustApi: string;
   rustCli: string;
-  rustLibraries: string;
+  rustLibraries: string[];
   rustLogging: string;
   rustErrorHandling: string;
   rustCaching: string;
+  rustAuth: string;
   pythonWebFramework: string;
   pythonOrm: string;
   pythonValidation: string;
-  pythonAi: string;
+  pythonAi: string[];
   pythonAuth: string;
   pythonTaskQueue: string;
   pythonGraphql: string;
@@ -313,6 +321,7 @@ export const getCategoryDisplayName = (categoryKey: string): string => {
     rustLogging: "Rust Logging",
     rustErrorHandling: "Rust Error Handling",
     rustCaching: "Rust Caching",
+    rustAuth: "Rust Auth",
   };
 
   // Custom display names for Python categories

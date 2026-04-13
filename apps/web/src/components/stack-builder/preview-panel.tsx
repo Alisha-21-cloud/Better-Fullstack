@@ -7,13 +7,13 @@ import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip
 import { stackStateToProjectConfig } from "@/lib/preview-config";
 import { cn } from "@/lib/utils";
 
-import type { PreflightWarning } from "@better-fullstack/template-generator";
+import type { PreflightWarning } from "@better-fullstack/template-generator/browser";
 
 // Client-side generation via dynamic import — the ~354KB template-generator
 // bundle is only loaded when the user actually opens the Preview tab.
 const generatePreview = async (stack: StackState) => {
   const { generateVirtualProject, EMBEDDED_TEMPLATES, validatePreflightConfig } =
-    await import("@better-fullstack/template-generator");
+    await import("@better-fullstack/template-generator/browser");
   const config = stackStateToProjectConfig(stack);
   const result = await generateVirtualProject({
     config,
@@ -127,7 +127,7 @@ export function PreviewPanel({ stack, selectedFilePath, onSelectFile }: PreviewP
 
   if (isLoading && !tree) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div data-testid="preview-loading" className="flex h-full items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
       </div>
     );
@@ -135,7 +135,7 @@ export function PreviewPanel({ stack, selectedFilePath, onSelectFile }: PreviewP
 
   if (error && !tree) {
     return (
-      <div className="flex h-full items-center justify-center text-destructive">
+      <div data-testid="preview-error" className="flex h-full items-center justify-center text-destructive">
         <p className="text-sm">{error}</p>
       </div>
     );
@@ -143,7 +143,7 @@ export function PreviewPanel({ stack, selectedFilePath, onSelectFile }: PreviewP
 
   if (!tree) {
     return (
-      <div className="flex h-full items-center justify-center text-muted-foreground">
+      <div data-testid="preview-pending" className="flex h-full items-center justify-center text-muted-foreground">
         <p className="text-sm">Generating preview...</p>
       </div>
     );

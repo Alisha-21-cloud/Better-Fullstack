@@ -53,6 +53,7 @@ import type {
   RustLogging,
   RustErrorHandling,
   RustCaching,
+  RustAuth,
   RustOrm,
   RustWebFramework,
   Runtime,
@@ -324,6 +325,10 @@ export function processFlags(options: CLIInput, projectName?: string) {
     config.rustCaching = options.rustCaching as RustCaching;
   }
 
+  if (options.rustAuth !== undefined) {
+    config.rustAuth = options.rustAuth as RustAuth;
+  }
+
   // Python ecosystem options
   if (options.pythonWebFramework !== undefined) {
     config.pythonWebFramework = options.pythonWebFramework as PythonWebFramework;
@@ -406,4 +411,7 @@ export function validateArrayOptions(options: CLIInput) {
   validateNoneExclusivity(options.frontend, "frontend options");
   validateNoneExclusivity(options.addons, "addons");
   validateNoneExclusivity(options.examples, "examples");
+  validateNoneExclusivity(options.aiDocs, "ai docs");
+  validateNoneExclusivity(options.rustLibraries, "rust libraries");
+  validateNoneExclusivity(options.pythonAi, "python ai libraries");
 }
