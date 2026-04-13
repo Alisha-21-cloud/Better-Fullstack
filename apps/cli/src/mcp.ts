@@ -88,7 +88,7 @@ For existing projects:
 
 CRITICAL RULES:
 - Dependency installation is ALWAYS skipped in MCP mode (timeout risk). After scaffolding, tell the user to run install manually.
-- "frontend" is an ARRAY (multiple frontends in one monorepo). All other fields are strings.
+- Array fields: "frontend", "addons", "examples", "aiDocs", "rustLibraries", and "pythonAi". Most other option fields are strings.
 - "none" means "skip this feature entirely", not "use the default".
 - Always specify "ecosystem" first — it determines which other fields are relevant.
 - TypeScript-specific fields (frontend, backend, orm, etc.) are IGNORED for rust/python/go ecosystems.
@@ -119,6 +119,8 @@ function getGuidance() {
         "Must be set first. Determines which other fields are relevant.",
       frontend:
         "ARRAY of strings. TypeScript only. Supports multiple frontends in one monorepo. Use [] for API-only.",
+      arrayFields:
+        'Use arrays for frontend, addons, examples, aiDocs, rustLibraries, and pythonAi. Use [] for "none" on multi-select fields.',
       backend:
         'String. "self" means fullstack mode (Next.js/TanStack Start/Nuxt/Astro API routes). "none" for frontend-only.',
       runtime:
@@ -128,7 +130,7 @@ function getGuidance() {
     },
     ambiguityRules: [
       "If the user request leaves major stack choices unspecified, ASK the user before proceeding. Do not guess.",
-      'Do not infer addons, examples, or optional features the user did not mention. Default to "none".',
+      'Do not infer addons, examples, or optional features the user did not mention. Default strings to "none" and multi-select arrays to [].',
       "When the user says 'fullstack Next.js', use backend='self', frontend=['next'], runtime='none'.",
       "When the user says 'React + Hono', use frontend=['tanstack-router'] (or ask which React framework), backend='hono'.",
     ],
@@ -416,6 +418,13 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
     animation: (input.animation as string) ?? "none",
     cssFramework: (input.cssFramework as string) ?? "tailwind",
     uiLibrary: (input.uiLibrary as string) ?? "none",
+    shadcnBase: (input.shadcnBase as string) ?? "radix",
+    shadcnStyle: (input.shadcnStyle as string) ?? "nova",
+    shadcnIconLibrary: (input.shadcnIconLibrary as string) ?? "lucide",
+    shadcnColorTheme: (input.shadcnColorTheme as string) ?? "neutral",
+    shadcnBaseColor: (input.shadcnBaseColor as string) ?? "neutral",
+    shadcnFont: (input.shadcnFont as string) ?? "inter",
+    shadcnRadius: (input.shadcnRadius as string) ?? "default",
     cms: (input.cms as string) ?? "none",
     search: (input.search as string) ?? "none",
     fileStorage: (input.fileStorage as string) ?? "none",
@@ -438,7 +447,7 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
     rustOrm: (input.rustOrm as string) ?? "none",
     rustApi: (input.rustApi as string) ?? "none",
     rustCli: (input.rustCli as string) ?? "none",
-    rustLibraries: ((input.rustLibraries as string[]) ?? []).join(",") || "none",
+    rustLibraries: (input.rustLibraries as string[]) ?? [],
     rustLogging: (input.rustLogging as string) ?? "none",
     rustErrorHandling: (input.rustErrorHandling as string) ?? "none",
     rustCaching: (input.rustCaching as string) ?? "none",
@@ -446,7 +455,7 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
     pythonWebFramework: (input.pythonWebFramework as string) ?? "none",
     pythonOrm: (input.pythonOrm as string) ?? "none",
     pythonValidation: (input.pythonValidation as string) ?? "none",
-    pythonAi: ((input.pythonAi as string[]) ?? []).join(",") || "none",
+    pythonAi: (input.pythonAi as string[]) ?? [],
     pythonAuth: (input.pythonAuth as string) ?? "none",
     pythonTaskQueue: (input.pythonTaskQueue as string) ?? "none",
     pythonGraphql: (input.pythonGraphql as string) ?? "none",
