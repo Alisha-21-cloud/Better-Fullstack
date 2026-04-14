@@ -101,6 +101,14 @@ describe("Default package manager matrix", () => {
           ["--yes", "--package-manager", testCase.manager, "--no-git"],
           {
             cliPath: CLI_BINARY_PATH,
+            env: testCase.manager === "yarn"
+              ? {
+                  CI: "true",
+                  GITHUB_ACTIONS: "true",
+                  YARN_ENABLE_HARDENED_MODE: "1",
+                  YARN_ENABLE_IMMUTABLE_INSTALLS: "true",
+                }
+              : undefined,
             timeout: EXPLICIT_TIMEOUT_MS[testCase.manager],
             expectedFiles,
           },
