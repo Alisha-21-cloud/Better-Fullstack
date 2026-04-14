@@ -5,6 +5,20 @@ import pc from "picocolors";
 
 import type { Addons, PackageManager } from "../../types";
 
+export function getInstallEnvironment(packageManager: PackageManager): NodeJS.ProcessEnv | undefined {
+  if (packageManager !== "yarn") {
+    return undefined;
+  }
+
+  return {
+    // Fresh generated workspaces need to create yarn.lock on first install.
+    // GitHub Actions public-PR runs can force immutable/hardened Yarn behavior,
+    // which is correct for existing repos but breaks first-install scaffolds.
+    YARN_ENABLE_HARDENED_MODE: "0",
+    YARN_ENABLE_IMMUTABLE_INSTALLS: "false",
+  };
+}
+
 export async function installDependencies({
   projectDir,
   packageManager,
@@ -20,6 +34,10 @@ export async function installDependencies({
 
     await $({
       cwd: projectDir,
+      env: {
+        ...process.env,
+        ...getInstallEnvironment(packageManager),
+      },
       stderr: "inherit",
     })`${packageManager} install`;
 
