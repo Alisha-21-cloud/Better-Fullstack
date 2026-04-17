@@ -28,6 +28,7 @@ import {
 import { validatePreflightConfig, generateVirtualProject, EMBEDDED_TEMPLATES } from "@better-fullstack/template-generator";
 
 import { displayPreflightWarnings } from "../../utils/preflight-display";
+import { canPromptInteractively } from "../../utils/prompt-environment";
 import { createProject } from "./create-project";
 
 export interface CreateHandlerOptions {
@@ -39,7 +40,7 @@ function shouldPromptForVersionChannel(input: CreateInput & { projectName?: stri
     return false;
   }
 
-  return process.stdin.isTTY === true && process.stdout.isTTY === true && process.env.CI !== "true";
+  return canPromptInteractively();
 }
 
 export async function createProjectHandler(

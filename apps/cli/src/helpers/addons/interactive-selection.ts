@@ -2,6 +2,7 @@ import { isCancel, log, select, type Option } from "@clack/prompts";
 
 import { isSilent } from "../../utils/context";
 import { exitCancelled } from "../../utils/errors";
+import { canPromptInteractively, type PromptEnvironment } from "../../utils/prompt-environment";
 
 type AddonSelectParams<T extends string> = {
   addonName: string;
@@ -10,37 +11,8 @@ type AddonSelectParams<T extends string> = {
   defaultValue: T;
 };
 
-type PromptEnvironment = {
-  silent?: boolean;
-  stdinIsTTY?: boolean;
-  stdoutIsTTY?: boolean;
-  ci?: string | undefined;
-};
-
-function resolveCiValue(environment?: PromptEnvironment): string | undefined {
-  if (environment && Object.prototype.hasOwnProperty.call(environment, "ci")) {
-    return environment.ci;
-  }
-
-  return process.env.CI;
-}
-
-function isCiEnvironment(value: string | undefined): boolean {
-  if (!value) {
-    return false;
-  }
-
-  const normalizedValue = value.trim().toLowerCase();
-  return normalizedValue !== "" && normalizedValue !== "0" && normalizedValue !== "false";
-}
-
 export function shouldPromptForAddonSelection(environment: PromptEnvironment = {}): boolean {
-  const silent = environment.silent ?? isSilent();
-  const stdinIsTTY = environment.stdinIsTTY ?? (process.stdin.isTTY === true);
-  const stdoutIsTTY = environment.stdoutIsTTY ?? (process.stdout.isTTY === true);
-  const ci = resolveCiValue(environment);
-
-  return !silent && stdinIsTTY && stdoutIsTTY && !isCiEnvironment(ci);
+  return canPromptInteractively(environment);
 }
 
 export async function selectAddonOptionOrDefault<T extends string>({

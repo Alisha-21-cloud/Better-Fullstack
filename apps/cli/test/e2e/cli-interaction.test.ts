@@ -6,10 +6,94 @@ import { spawn } from "node:child_process";
 
 const SMOKE_DIR = join(import.meta.dir, "..", "..", ".smoke-interaction");
 const CLI_PATH = join(import.meta.dir, "..", "..", "dist", "cli.mjs");
+const EXPLICIT_TS_FLAGS = [
+  "--ecosystem", "typescript",
+  "--package-manager", "bun",
+  "--frontend", "tanstack-router",
+  "--backend", "hono",
+  "--runtime", "bun",
+  "--api", "trpc",
+  "--database", "sqlite",
+  "--orm", "drizzle",
+  "--db-setup", "none",
+  "--auth", "none",
+  "--payments", "none",
+  "--email", "none",
+  "--file-upload", "none",
+  "--logging", "none",
+  "--observability", "none",
+  "--feature-flags", "none",
+  "--analytics", "none",
+  "--effect", "none",
+  "--state-management", "none",
+  "--forms", "react-hook-form",
+  "--validation", "zod",
+  "--testing", "vitest",
+  "--ai", "none",
+  "--realtime", "none",
+  "--job-queue", "none",
+  "--animation", "none",
+  "--css-framework", "tailwind",
+  "--ui-library", "none",
+  "--cms", "none",
+  "--caching", "none",
+  "--i18n", "none",
+  "--search", "none",
+  "--file-storage", "none",
+  "--addons", "none",
+  "--examples", "none",
+  "--ai-docs", "none",
+  "--web-deploy", "none",
+  "--server-deploy", "none",
+  "--no-install",
+  "--no-git",
+] as const;
+const OPENTUI_FLAGS = [
+  "--ecosystem", "typescript",
+  "--package-manager", "bun",
+  "--frontend", "qwik",
+  "--backend", "none",
+  "--runtime", "none",
+  "--api", "none",
+  "--database", "none",
+  "--orm", "none",
+  "--db-setup", "none",
+  "--auth", "none",
+  "--payments", "none",
+  "--email", "none",
+  "--file-upload", "uploadthing",
+  "--logging", "none",
+  "--observability", "none",
+  "--feature-flags", "none",
+  "--analytics", "none",
+  "--effect", "none",
+  "--state-management", "xstate",
+  "--forms", "modular-forms",
+  "--validation", "none",
+  "--testing", "jest",
+  "--ai", "none",
+  "--realtime", "none",
+  "--job-queue", "none",
+  "--animation", "none",
+  "--css-framework", "postcss-only",
+  "--ui-library", "none",
+  "--cms", "none",
+  "--caching", "none",
+  "--i18n", "none",
+  "--search", "none",
+  "--file-storage", "none",
+  "--addons", "opentui",
+  "--examples", "none",
+  "--ai-docs", "none",
+  "--web-deploy", "none",
+  "--server-deploy", "none",
+  "--no-install",
+  "--no-git",
+] as const;
 
 function runCLI(
   args: string[],
-  options?: { timeout?: number },
+  options?: { timeout?: number; env?: NodeJS.ProcessEnv },
 ): Promise<{ exitCode: number; stdout: string; stderr: string }> {
   const timeout = options?.timeout ?? 30_000;
 
@@ -28,7 +112,7 @@ function runCLI(
     const child = spawn("node", [CLI_PATH, projectName, ...restArgs], {
       stdio: "pipe",
       cwd: parentDir,
-      env: { ...process.env, NO_COLOR: "1", TERM: "dumb" },
+      env: { ...process.env, NO_COLOR: "1", TERM: "dumb", ...options?.env },
     });
 
     child.stdout?.on("data", (d: Buffer) => {
@@ -73,11 +157,47 @@ describe("CLI Interaction Tests", () => {
       expect(existsSync(join(dir, "package.json"))).toBe(true);
     });
 
+    it("creates project in CI with --yes and --no-install", async () => {
+      const dir = join(SMOKE_DIR, "yes-mode-ci");
+      const result = await runCLI([dir, "--yes", "--no-install", "--no-git"], {
+        env: { CI: "true" },
+      });
+      expect(result.exitCode).toBe(0);
+      expect(existsSync(join(dir, "bts.jsonc"))).toBe(true);
+      expect(existsSync(join(dir, "package.json"))).toBe(true);
+    });
+
     it("outputs a reproducible command", async () => {
       const dir = join(SMOKE_DIR, "repro");
       const result = await runCLI([dir, "--yes", "--no-install", "--no-git"]);
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toContain("create-better-fullstack");
+    });
+  });
+
+  describe("prompt fallback behavior", () => {
+    it("uses addon defaults in CI without prompting for template selection", async () => {
+      const dir = join(SMOKE_DIR, "opentui-ci");
+      const result = await runCLI([dir, ...OPENTUI_FLAGS], {
+        env: { CI: "true" },
+        timeout: 120_000,
+      });
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).toContain("Using default OpenTUI template: Core");
+      expect(result.stdout).not.toContain("Choose a template");
+      expect(existsSync(join(dir, "bts.jsonc"))).toBe(true);
+      expect(existsSync(join(dir, "apps", "tui"))).toBe(true);
+    });
+
+    it("scaffolds without TTY when all flags are provided and version channel is omitted", async () => {
+      const dir = join(SMOKE_DIR, "explicit-no-tty");
+      const result = await runCLI([dir, ...EXPLICIT_TS_FLAGS], {
+        timeout: 120_000,
+      });
+      expect(result.exitCode).toBe(0);
+      expect(result.stdout).not.toContain("Choose dependency version channel");
+      expect(existsSync(join(dir, "bts.jsonc"))).toBe(true);
+      expect(existsSync(join(dir, "package.json"))).toBe(true);
     });
   });
 
