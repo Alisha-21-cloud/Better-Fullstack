@@ -873,8 +873,41 @@ function displayGoInstructions(config: ProjectConfig & { depsInstalled: boolean 
   consola.box(output);
 }
 
+const JAVA_GROUP_ID = "com.example";
+const JAVA_RESERVED_WORDS = new Set([
+  "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
+  "class", "const", "continue", "default", "do", "double", "else", "enum",
+  "extends", "final", "finally", "float", "for", "goto", "if", "implements",
+  "import", "instanceof", "int", "interface", "long", "native", "new",
+  "non-sealed", "package", "private", "protected", "public", "return",
+  "sealed", "short", "static", "strictfp", "super", "switch", "synchronized",
+  "this", "throw", "throws", "transient", "try", "void", "volatile", "while",
+  "yield", "record", "permits",
+  "true", "false", "null",
+]);
+
+function sanitizeJavaPackageSuffix(projectName: string): string {
+  const alphanumericOnly = projectName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const withLetterPrefix = /^[a-z]/.test(alphanumericOnly)
+    ? alphanumericOnly
+    : `app${alphanumericOnly}`;
+  const guarded = JAVA_RESERVED_WORDS.has(withLetterPrefix)
+    ? `app${withLetterPrefix}`
+    : withLetterPrefix;
+  return guarded || "app";
+}
+
+function getJavaMainClass(projectName: string): string {
+  return `${JAVA_GROUP_ID}.${sanitizeJavaPackageSuffix(projectName)}.Application`;
+}
+
+function getJavaMainSourcePath(projectName: string): string {
+  return `src/main/java/${getJavaMainClass(projectName).replace(/\./g, "/")}.java`;
+}
+
 function displayJavaInstructions(config: ProjectConfig & { depsInstalled: boolean }) {
   const {
+    projectName,
     relativePath,
     depsInstalled,
     javaWebFramework,
@@ -886,6 +919,13 @@ function displayJavaInstructions(config: ProjectConfig & { depsInstalled: boolea
   } = config;
 
   const cdCmd = `cd ${relativePath}`;
+  const isSpringBoot = javaWebFramework === "spring-boot" && javaBuildTool !== "none";
+  const effectiveJavaLibraries = isSpringBoot
+    ? javaLibraries.filter((library) => library !== "none")
+    : [];
+  const effectiveJavaTestingLibraries = javaBuildTool === "none"
+    ? []
+    : javaTestingLibraries.filter((library) => library !== "none");
   const buildToolCommand = javaBuildTool === "none"
     ? null
     :
@@ -897,36 +937,51 @@ function displayJavaInstructions(config: ProjectConfig & { depsInstalled: boolea
         ? "mvnw.cmd"
         : "./mvnw";
   const runCommand = buildToolCommand
-    ? javaBuildTool === "gradle"
-      ? `${buildToolCommand} bootRun`
-      : `${buildToolCommand} spring-boot:run`
+    ? isSpringBoot
+      ? javaBuildTool === "gradle"
+        ? `${buildToolCommand} bootRun`
+        : `${buildToolCommand} spring-boot:run`
+      : javaBuildTool === "gradle"
+        ? `${buildToolCommand} run`
+        : `${buildToolCommand} exec:java`
     : null;
   const packageCommand = buildToolCommand
     ? javaBuildTool === "gradle"
       ? `${buildToolCommand} build`
       : `${buildToolCommand} package`
     : null;
+  const sourceCompileCommand = buildToolCommand
+    ? null
+    : `javac -d out ${getJavaMainSourcePath(projectName)}`;
+  const sourceRunCommand = buildToolCommand
+    ? null
+    : `java -cp out ${getJavaMainClass(projectName)}`;
 
   let output = `${pc.bold("Next steps")}\n${pc.cyan("1.")} ${cdCmd}\n`;
   let stepCounter = 2;
 
-  if (!depsInstalled && buildToolCommand) {
+  if (!depsInstalled && buildToolCommand && effectiveJavaTestingLibraries.length > 0) {
     output += `${pc.cyan(`${stepCounter++}.`)} ${buildToolCommand} test\n`;
   }
 
   if (runCommand) {
     output += `${pc.cyan(`${stepCounter++}.`)} ${runCommand}\n`;
+  } else if (sourceCompileCommand && sourceRunCommand) {
+    output += `${pc.cyan(`${stepCounter++}.`)} ${sourceCompileCommand}\n`;
+    output += `${pc.cyan(`${stepCounter++}.`)} ${sourceRunCommand}\n`;
   } else {
     output += `${pc.cyan(`${stepCounter++}.`)} Add Maven or Gradle, then run the app\n`;
   }
 
   output += `\n${pc.bold("Your Java project includes:")}\n`;
 
-  if (javaWebFramework && javaWebFramework !== "none") {
+  if (isSpringBoot) {
     const frameworkNames: Record<string, string> = {
       "spring-boot": "Spring Boot",
     };
     output += `${pc.cyan("•")} Web Framework: ${frameworkNames[javaWebFramework] || javaWebFramework}\n`;
+  } else {
+    output += `${pc.cyan("•")} Scaffold: Plain Java\n`;
   }
 
   if (javaBuildTool && javaBuildTool !== "none") {
@@ -935,47 +990,43 @@ function displayJavaInstructions(config: ProjectConfig & { depsInstalled: boolea
       gradle: "Gradle Wrapper",
     };
     output += `${pc.cyan("•")} Build Tool: ${buildToolNames[javaBuildTool] || javaBuildTool}\n`;
+  } else {
+    output += `${pc.cyan("•")} Build Tool: None\n`;
   }
 
-  if (javaOrm && javaOrm !== "none") {
+  if (isSpringBoot && javaOrm && javaOrm !== "none") {
     const ormNames: Record<string, string> = {
       "spring-data-jpa": "Spring Data JPA",
     };
     output += `${pc.cyan("•")} ORM: ${ormNames[javaOrm] || javaOrm}\n`;
   }
 
-  if (javaAuth && javaAuth !== "none") {
+  if (isSpringBoot && javaAuth && javaAuth !== "none") {
     const authNames: Record<string, string> = {
       "spring-security": "Spring Security",
     };
     output += `${pc.cyan("•")} Auth: ${authNames[javaAuth] || javaAuth}\n`;
   }
 
-  if (javaLibraries && javaLibraries.length > 0 && !javaLibraries.includes("none")) {
+  if (effectiveJavaLibraries.length > 0) {
     const libraryNames: Record<string, string> = {
       "spring-actuator": "Spring Actuator",
       "spring-validation": "Spring Validation",
       flyway: "Flyway",
     };
-    const libraryList = javaLibraries
-      .filter((library) => library !== "none")
+    const libraryList = effectiveJavaLibraries
       .map((library) => libraryNames[library] || library)
       .join(", ");
     output += `${pc.cyan("•")} Libraries: ${libraryList}\n`;
   }
 
-  if (
-    javaTestingLibraries &&
-    javaTestingLibraries.length > 0 &&
-    !javaTestingLibraries.includes("none")
-  ) {
+  if (effectiveJavaTestingLibraries.length > 0) {
     const testingNames: Record<string, string> = {
       junit5: "JUnit 5",
       mockito: "Mockito",
       testcontainers: "Testcontainers",
     };
-    const testingList = javaTestingLibraries
-      .filter((library) => library !== "none")
+    const testingList = effectiveJavaTestingLibraries
       .map((library) => testingNames[library] || library)
       .join(", ");
     output += `${pc.cyan("•")} Testing: ${testingList}\n`;
@@ -983,15 +1034,22 @@ function displayJavaInstructions(config: ProjectConfig & { depsInstalled: boolea
 
   output += `\n${pc.bold("Common Java commands:")}\n`;
   if (buildToolCommand && runCommand && packageCommand) {
-    output += `${pc.cyan("•")} Test: ${buildToolCommand} test\n`;
+    if (effectiveJavaTestingLibraries.length > 0) {
+      output += `${pc.cyan("•")} Test: ${buildToolCommand} test\n`;
+    }
     output += `${pc.cyan("•")} Run: ${runCommand}\n`;
     output += `${pc.cyan("•")} Package: ${packageCommand}\n`;
+  } else if (sourceCompileCommand && sourceRunCommand) {
+    output += `${pc.cyan("•")} Compile: ${sourceCompileCommand}\n`;
+    output += `${pc.cyan("•")} Run: ${sourceRunCommand}\n`;
   } else {
     output += `${pc.cyan("•")} Configure Maven or Gradle before running build commands\n`;
   }
 
-  output += `\n${pc.bold("Your project will be available at:")}\n`;
-  output += `${pc.cyan("•")} API: http://localhost:8080\n`;
+  if (isSpringBoot) {
+    output += `\n${pc.bold("Your project will be available at:")}\n`;
+    output += `${pc.cyan("•")} API: http://localhost:8080\n`;
+  }
 
   output += `\n${pc.bold(
     "Enjoying Better Fullstack?",

@@ -18,9 +18,13 @@ const JAVA_TEMPLATES = {
   "java-base/gradle/wrapper/gradle-wrapper.properties": "distributionUrl=https://example",
   "java-base/src/main/java/__javaPackagePath__/Application.java.hbs":
     "package {{javaPackageName}};",
+  "java-base/src/main/java/__javaPackagePath__/controller/HealthController.java.hbs":
+    "spring controller",
   "java-base/src/main/java/__javaPackagePath__/domain/AppUser.java.hbs":
     "package {{javaPackageName}}.domain;",
+  "java-base/src/main/resources/application.yml.hbs": "spring:",
   "java-base/src/main/resources/db/migration/V1__init.sql.hbs": "-- migration",
+  "java-base/src/test/java/__javaPackagePath__/ApplicationTests.java.hbs": "test",
 };
 
 describe("processJavaBaseTemplate", () => {
@@ -34,19 +38,19 @@ describe("processJavaBaseTemplate", () => {
     expect(vfs.getFileCount()).toBe(0);
   });
 
-  it("skips all java emission when javaBuildTool is 'none' and warns", async () => {
+  it("emits a source-only plain Java scaffold when javaBuildTool is 'none'", async () => {
     const vfs = new VirtualFileSystem();
-    // NOTE: Bun's `mockRestore()` clears `mock.calls` as well as restoring the
-    // original implementation, so we must assert BEFORE restoring. We still
-    // restore in a `finally` to keep test isolation if any assertion throws.
     const warn = spyOn(console, "warn").mockImplementation(() => {});
     try {
       await processJavaBaseTemplate(
         vfs,
         makeTemplates(JAVA_TEMPLATES),
         makeConfig({
+          projectName: "my-app",
+          projectDir: "/tmp/my-app",
+          relativePath: "my-app",
           ecosystem: "java",
-          javaWebFramework: "spring-boot",
+          javaWebFramework: "none",
           javaBuildTool: "none",
           javaOrm: "none",
           javaAuth: "none",
@@ -55,14 +59,46 @@ describe("processJavaBaseTemplate", () => {
         }),
       );
 
-      expect(vfs.getFileCount()).toBe(0);
-      expect(warn).toHaveBeenCalledTimes(1);
-      const firstCall = warn.mock.calls[0];
-      expect(firstCall).toBeDefined();
-      expect(firstCall?.[0]).toContain("javaBuildTool is 'none'");
+      expect(vfs.exists("src/main/java/com/example/myapp/Application.java")).toBe(true);
+      expect(vfs.exists("pom.xml")).toBe(false);
+      expect(vfs.exists("build.gradle.kts")).toBe(false);
+      expect(vfs.exists("src/main/resources/application.yml")).toBe(false);
+      expect(vfs.exists("src/main/java/com/example/myapp/controller/HealthController.java")).toBe(
+        false,
+      );
+      expect(vfs.exists("src/test/java/com/example/myapp/ApplicationTests.java")).toBe(false);
+      expect(warn).not.toHaveBeenCalled();
     } finally {
       warn.mockRestore();
     }
+  });
+
+  it("skips Spring-only templates when javaWebFramework is 'none'", async () => {
+    const vfs = new VirtualFileSystem();
+    await processJavaBaseTemplate(
+      vfs,
+      makeTemplates(JAVA_TEMPLATES),
+      makeConfig({
+        projectName: "my-app",
+        projectDir: "/tmp/my-app",
+        relativePath: "my-app",
+        ecosystem: "java",
+        javaWebFramework: "none",
+        javaBuildTool: "maven",
+        javaOrm: "none",
+        javaAuth: "none",
+        javaLibraries: ["spring-actuator"],
+        javaTestingLibraries: ["junit5"],
+      }),
+    );
+
+    expect(vfs.exists("pom.xml")).toBe(true);
+    expect(vfs.exists("src/main/java/com/example/myapp/Application.java")).toBe(true);
+    expect(vfs.exists("src/main/resources/application.yml")).toBe(false);
+    expect(vfs.exists("src/main/java/com/example/myapp/controller/HealthController.java")).toBe(
+      false,
+    );
+    expect(vfs.exists("src/test/java/com/example/myapp/ApplicationTests.java")).toBe(true);
   });
 
   it("emits only maven-related build files when javaBuildTool is 'maven'", async () => {

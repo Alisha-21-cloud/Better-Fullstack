@@ -1260,6 +1260,61 @@ export const analyzeStackCompatibility = (
   }
 
   // ============================================
+  // JAVA ECOSYSTEM CONSTRAINTS
+  // ============================================
+
+  if (nextStack.ecosystem === "java") {
+    if (nextStack.javaBuildTool === "none") {
+      if (nextStack.javaWebFramework !== "none") {
+        nextStack.javaWebFramework = "none";
+        changed = true;
+        changes.push({
+          category: "javaBuildTool",
+          message: "Java web framework set to 'None' (source-only Java does not use a framework)",
+        });
+      }
+
+      if (nextStack.javaTestingLibraries.some((library) => library !== "none")) {
+        nextStack.javaTestingLibraries = [];
+        changed = true;
+        changes.push({
+          category: "javaBuildTool",
+          message: "Java testing libraries cleared (a build tool is required for test dependencies)",
+        });
+      }
+    }
+
+    if (nextStack.javaWebFramework !== "spring-boot" || nextStack.javaBuildTool === "none") {
+      if (nextStack.javaOrm !== "none") {
+        nextStack.javaOrm = "none";
+        changed = true;
+        changes.push({
+          category: "javaWebFramework",
+          message: "Java ORM set to 'None' (current scaffold only supports it with Spring Boot)",
+        });
+      }
+
+      if (nextStack.javaAuth !== "none") {
+        nextStack.javaAuth = "none";
+        changed = true;
+        changes.push({
+          category: "javaWebFramework",
+          message: "Java auth set to 'None' (current scaffold only supports it with Spring Boot)",
+        });
+      }
+
+      if (nextStack.javaLibraries.some((library) => library !== "none")) {
+        nextStack.javaLibraries = [];
+        changed = true;
+        changes.push({
+          category: "javaWebFramework",
+          message: "Java libraries cleared (Spring libraries require Spring Boot)",
+        });
+      }
+    }
+  }
+
+  // ============================================
   // DEPLOYMENT CONSTRAINTS
   // ============================================
 
@@ -2012,9 +2067,65 @@ export const getDisabledReason = (
   // ============================================
   // JAVA ECOSYSTEM RULES
   // ============================================
+  if (category === "javaWebFramework") {
+    if (optionId === "spring-boot" && currentStack.javaBuildTool === "none") {
+      return "Spring Boot requires Maven or Gradle";
+    }
+  }
+
+  if (category === "javaBuildTool") {
+    if (optionId === "none") {
+      if (currentStack.javaWebFramework === "spring-boot") {
+        return "Spring Boot requires Maven or Gradle";
+      }
+      if (currentStack.javaOrm !== "none") {
+        return "Java ORM support requires Maven or Gradle";
+      }
+      if (currentStack.javaAuth !== "none") {
+        return "Java auth support requires Maven or Gradle";
+      }
+      if (currentStack.javaLibraries.some((library) => library !== "none")) {
+        return "Java libraries require Maven or Gradle";
+      }
+      if (currentStack.javaTestingLibraries.some((library) => library !== "none")) {
+        return "Java testing libraries require Maven or Gradle";
+      }
+    }
+  }
+
+  if (category === "javaOrm") {
+    if (optionId !== "none" && currentStack.javaWebFramework !== "spring-boot") {
+      return "Java ORM support currently requires Spring Boot";
+    }
+    if (optionId !== "none" && currentStack.javaBuildTool === "none") {
+      return "Java ORM support requires Maven or Gradle";
+    }
+  }
+
+  if (category === "javaAuth") {
+    if (optionId !== "none" && currentStack.javaWebFramework !== "spring-boot") {
+      return "Java auth support currently requires Spring Boot";
+    }
+    if (optionId !== "none" && currentStack.javaBuildTool === "none") {
+      return "Java auth support requires Maven or Gradle";
+    }
+  }
+
   if (category === "javaLibraries") {
+    if (optionId !== "none" && currentStack.javaWebFramework !== "spring-boot") {
+      return "Spring libraries currently require Spring Boot in the Java scaffold";
+    }
+    if (optionId !== "none" && currentStack.javaBuildTool === "none") {
+      return "Java libraries require Maven or Gradle";
+    }
     if (optionId === "flyway" && currentStack.javaOrm !== "spring-data-jpa") {
       return "Flyway currently requires Spring Data JPA in the Java scaffold";
+    }
+  }
+
+  if (category === "javaTestingLibraries") {
+    if (optionId !== "none" && currentStack.javaBuildTool === "none") {
+      return "Java testing libraries require Maven or Gradle";
     }
   }
 

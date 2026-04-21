@@ -1,11 +1,28 @@
 plugins {
+{{#if isJavaSpringBoot}}
 	java
 	id("org.springframework.boot") version "4.0.5"
 	id("io.spring.dependency-management") version "1.1.7"
+{{else}}
+	java
+	application
+{{/if}}
 }
 
 group = "{{javaGroupId}}"
 version = "0.0.1-SNAPSHOT"
+
+{{#unless isJavaSpringBoot}}
+application {
+	mainClass = "{{javaPackageName}}.Application"
+}
+
+tasks.jar {
+	manifest {
+		attributes["Main-Class"] = "{{javaPackageName}}.Application"
+	}
+}
+{{/unless}}
 
 java {
 	toolchain {
@@ -18,6 +35,7 @@ repositories {
 }
 
 dependencies {
+{{#if isJavaSpringBoot}}
 {{#if hasJavaJpa}}
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 {{/if}}
@@ -51,6 +69,20 @@ dependencies {
 	testImplementation("org.testcontainers:testcontainers-junit-jupiter")
 {{/if}}
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+{{/if}}
+{{else}}
+{{#if hasJavaTests}}
+	testImplementation(platform("org.junit:junit-bom:5.12.2"))
+	testImplementation("org.junit.jupiter:junit-jupiter")
+{{#if hasJavaMockito}}
+	testImplementation("org.mockito:mockito-junit-jupiter:5.15.2")
+{{/if}}
+{{#if hasJavaTestcontainers}}
+	testImplementation(platform("org.testcontainers:testcontainers-bom:1.20.4"))
+	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation("org.testcontainers:testcontainers")
+{{/if}}
+{{/if}}
 {{/if}}
 }
 

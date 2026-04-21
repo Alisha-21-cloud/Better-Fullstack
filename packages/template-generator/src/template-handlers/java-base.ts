@@ -10,8 +10,11 @@ type JavaTemplateContext = ProjectConfig & {
   javaGroupId: string;
   javaPackageName: string;
   javaPackagePath: string;
+  hasJavaBuildTool: boolean;
   isJavaMaven: boolean;
   isJavaGradle: boolean;
+  isJavaSpringBoot: boolean;
+  isJavaPlainJava: boolean;
   hasJavaJpa: boolean;
   hasJavaSecurity: boolean;
   hasJavaActuator: boolean;
@@ -64,8 +67,16 @@ function sanitizeJavaPackageSuffix(projectName: string): string {
 function createJavaTemplateContext(config: ProjectConfig): JavaTemplateContext {
   const javaArtifactId = sanitizeJavaArtifactId(config.projectName);
   const javaPackageName = `${JAVA_GROUP_ID}.${sanitizeJavaPackageSuffix(config.projectName)}`;
-  const hasJavaJpa = config.javaOrm === "spring-data-jpa";
-  const rawLibraries = (config.javaLibraries || []).filter((library) => library !== "none");
+  const hasJavaBuildTool = config.javaBuildTool !== "none";
+  // A "no framework" Java scaffold is plain Java. Spring Boot also requires
+  // Maven/Gradle, so if validation is bypassed and the user selects
+  // `javaWebFramework=spring-boot` with `javaBuildTool=none`, fall back to the
+  // plain-Java path instead of emitting uncompilable Spring sources.
+  const isJavaSpringBoot = config.javaWebFramework === "spring-boot" && hasJavaBuildTool;
+  const hasJavaJpa = isJavaSpringBoot && config.javaOrm === "spring-data-jpa";
+  const rawLibraries = isJavaSpringBoot
+    ? (config.javaLibraries || []).filter((library) => library !== "none")
+    : [];
   // Flyway requires Spring Data JPA in the current Java scaffold
   // (see compatibility.ts `getDisabledReason` for the matching compat rule).
   // If the user selects Flyway without JPA, we silently drop it here so the
@@ -75,9 +86,9 @@ function createJavaTemplateContext(config: ProjectConfig): JavaTemplateContext {
   const javaLibraries = rawLibraries.filter(
     (library) => library !== "flyway" || hasJavaJpa,
   );
-  const testingLibraries = (config.javaTestingLibraries || []).filter(
-    (library) => library !== "none",
-  );
+  const testingLibraries = hasJavaBuildTool
+    ? (config.javaTestingLibraries || []).filter((library) => library !== "none")
+    : [];
   const hasJavaMockito = testingLibraries.includes("mockito");
   const hasJavaTestcontainers = testingLibraries.includes("testcontainers");
   const hasJavaTests = testingLibraries.length > 0;
@@ -88,10 +99,13 @@ function createJavaTemplateContext(config: ProjectConfig): JavaTemplateContext {
     javaGroupId: JAVA_GROUP_ID,
     javaPackageName,
     javaPackagePath: javaPackageName.replace(/\./g, "/"),
+    hasJavaBuildTool,
     isJavaMaven: config.javaBuildTool === "maven",
     isJavaGradle: config.javaBuildTool === "gradle",
+    isJavaSpringBoot,
+    isJavaPlainJava: !isJavaSpringBoot,
     hasJavaJpa,
-    hasJavaSecurity: config.javaAuth === "spring-security",
+    hasJavaSecurity: isJavaSpringBoot && config.javaAuth === "spring-security",
     hasJavaActuator: javaLibraries.includes("spring-actuator"),
     hasJavaValidation: javaLibraries.includes("spring-validation"),
     hasJavaFlyway: javaLibraries.includes("flyway"),
@@ -114,6 +128,15 @@ function shouldSkipJavaTemplate(templatePath: string, context: JavaTemplateConte
         templatePath.startsWith("java-base/gradle/") ||
         templatePath === "java-base/gradlew" ||
         templatePath === "java-base/gradlew.bat"))
+  ) {
+    return true;
+  }
+
+  if (
+    !context.isJavaSpringBoot &&
+    (templatePath.includes("/config/") ||
+      templatePath.includes("/controller/") ||
+      templatePath.includes("src/main/resources/"))
   ) {
     return true;
   }
@@ -169,17 +192,6 @@ export async function processJavaBaseTemplate(
   config: ProjectConfig,
 ): Promise<void> {
   if (config.ecosystem !== "java") return;
-
-  // Without a build tool the scaffold emits sources that can't be compiled or
-  // run. Refuse to emit anything Java-specific so the user doesn't end up
-  // with a silently broken project; the CLI post-install step already shows
-  // an "Add Maven or Gradle, then run the app" fallback message.
-  if (config.javaBuildTool === "none") {
-    console.warn(
-      "[better-fullstack] java scaffold skipped: javaBuildTool is 'none' — pick 'maven' or 'gradle' to emit a runnable project.",
-    );
-    return;
-  }
 
   const prefix = "java-base/";
   const context = createJavaTemplateContext(config);

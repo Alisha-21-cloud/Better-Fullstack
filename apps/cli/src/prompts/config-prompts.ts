@@ -567,18 +567,30 @@ export async function gatherConfig(
       },
       javaOrm: ({ results }) => {
         if (results.ecosystem !== "java") return Promise.resolve("none" as JavaOrm);
+        if (results.javaWebFramework !== "spring-boot" || results.javaBuildTool === "none") {
+          return Promise.resolve("none" as JavaOrm);
+        }
         return getJavaOrmChoice(flags.javaOrm);
       },
       javaAuth: ({ results }) => {
         if (results.ecosystem !== "java") return Promise.resolve("none" as JavaAuth);
+        if (results.javaWebFramework !== "spring-boot" || results.javaBuildTool === "none") {
+          return Promise.resolve("none" as JavaAuth);
+        }
         return getJavaAuthChoice(flags.javaAuth);
       },
       javaLibraries: ({ results }) => {
         if (results.ecosystem !== "java") return Promise.resolve([] as JavaLibraries[]);
+        if (results.javaWebFramework !== "spring-boot" || results.javaBuildTool === "none") {
+          return Promise.resolve([] as JavaLibraries[]);
+        }
         return getJavaLibrariesChoice(flags.javaLibraries);
       },
       javaTestingLibraries: ({ results }) => {
         if (results.ecosystem !== "java") return Promise.resolve([] as JavaTestingLibraries[]);
+        if (results.javaBuildTool === "none") {
+          return Promise.resolve([] as JavaTestingLibraries[]);
+        }
         return getJavaTestingLibrariesChoice(flags.javaTestingLibraries);
       },
       // Keep at end

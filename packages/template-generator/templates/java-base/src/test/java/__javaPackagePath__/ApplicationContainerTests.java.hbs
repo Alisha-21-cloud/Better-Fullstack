@@ -3,13 +3,17 @@ package {{javaPackageName}};
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
+{{#if isJavaSpringBoot}}
 import org.springframework.boot.test.context.SpringBootTest;
+{{/if}}
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
+{{#if isJavaSpringBoot}}
 @SpringBootTest
+{{/if}}
 class ApplicationContainerTests {
 
   @Container

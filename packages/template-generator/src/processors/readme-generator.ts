@@ -2,6 +2,19 @@ import { getLocalWebDevPort, type ProjectConfig } from "@better-fullstack/types"
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
 
+const JAVA_GROUP_ID = "com.example";
+const JAVA_RESERVED_WORDS = new Set([
+  "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
+  "class", "const", "continue", "default", "do", "double", "else", "enum",
+  "extends", "final", "finally", "float", "for", "goto", "if", "implements",
+  "import", "instanceof", "int", "interface", "long", "native", "new",
+  "non-sealed", "package", "private", "protected", "public", "return",
+  "sealed", "short", "static", "strictfp", "super", "switch", "synchronized",
+  "this", "throw", "throws", "transient", "try", "void", "volatile", "while",
+  "yield", "record", "permits",
+  "true", "false", "null",
+]);
+
 export function processReadme(vfs: VirtualFileSystem, config: ProjectConfig): void {
   let content: string;
   if (config.ecosystem === "rust") {
@@ -18,32 +31,85 @@ export function processReadme(vfs: VirtualFileSystem, config: ProjectConfig): vo
   vfs.writeFile("README.md", content);
 }
 
+function sanitizeJavaPackageSuffix(projectName: string): string {
+  const alphanumericOnly = projectName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const withLetterPrefix = /^[a-z]/.test(alphanumericOnly)
+    ? alphanumericOnly
+    : `app${alphanumericOnly}`;
+  const guarded = JAVA_RESERVED_WORDS.has(withLetterPrefix)
+    ? `app${withLetterPrefix}`
+    : withLetterPrefix;
+  return guarded || "app";
+}
+
+function getJavaMainClass(config: ProjectConfig): string {
+  return `${JAVA_GROUP_ID}.${sanitizeJavaPackageSuffix(config.projectName)}.Application`;
+}
+
+function getJavaMainSourcePath(config: ProjectConfig): string {
+  return `src/main/java/${getJavaMainClass(config).replace(/\./g, "/")}.java`;
+}
+
+function isSpringBootJavaProject(config: ProjectConfig): boolean {
+  return config.javaWebFramework === "spring-boot" && config.javaBuildTool !== "none";
+}
+
+function getEffectiveJavaLibraries(config: ProjectConfig): string[] {
+  return isSpringBootJavaProject(config)
+    ? (config.javaLibraries || []).filter((library) => library !== "none")
+    : [];
+}
+
+function getEffectiveJavaTestingLibraries(config: ProjectConfig): string[] {
+  return config.javaBuildTool === "none"
+    ? []
+    : (config.javaTestingLibraries || []).filter((library) => library !== "none");
+}
+
+function getJavaBuildToolCommand(config: ProjectConfig): string | null {
+  return config.javaBuildTool === "gradle"
+    ? "./gradlew"
+    : config.javaBuildTool === "maven"
+      ? "./mvnw"
+      : null;
+}
+
 function generateJavaReadmeContent(config: ProjectConfig): string {
-  const buildToolCommand =
-    config.javaBuildTool === "gradle"
-      ? "./gradlew"
-      : config.javaBuildTool === "maven"
-        ? "./mvnw"
-        : null;
+  const isSpringBoot = isSpringBootJavaProject(config);
+  const buildToolCommand = getJavaBuildToolCommand(config);
   const runCommand = buildToolCommand
-    ? config.javaBuildTool === "gradle"
-      ? `${buildToolCommand} bootRun`
-      : `${buildToolCommand} spring-boot:run`
+    ? isSpringBoot
+      ? config.javaBuildTool === "gradle"
+        ? `${buildToolCommand} bootRun`
+        : `${buildToolCommand} spring-boot:run`
+      : config.javaBuildTool === "gradle"
+        ? `${buildToolCommand} run`
+        : `${buildToolCommand} exec:java`
     : null;
   const packageCommand = buildToolCommand
     ? config.javaBuildTool === "gradle"
       ? `${buildToolCommand} build`
       : `${buildToolCommand} package`
     : null;
-  const javaLibraries = (config.javaLibraries || []).filter((library) => library !== "none");
-  const testingLibraries = (config.javaTestingLibraries || []).filter((library) => library !== "none");
+  const testCommand = buildToolCommand && getEffectiveJavaTestingLibraries(config).length > 0
+    ? `${buildToolCommand} test`
+    : null;
+  const compileCommand = buildToolCommand
+    ? null
+    : `javac -d out ${getJavaMainSourcePath(config)}`;
+  const sourceOnlyRunCommand = buildToolCommand
+    ? null
+    : `java -cp out ${getJavaMainClass(config)}`;
+  const javaLibraries = getEffectiveJavaLibraries(config);
+  const testingLibraries = getEffectiveJavaTestingLibraries(config);
   const features = [
     "Java 21",
-    config.javaWebFramework === "spring-boot" ? "Spring Boot 4" : null,
+    isSpringBoot ? "Spring Boot 4" : "Plain Java",
     config.javaBuildTool === "maven" ? "Maven Wrapper" : null,
     config.javaBuildTool === "gradle" ? "Gradle Wrapper" : null,
-    config.javaOrm === "spring-data-jpa" ? "Spring Data JPA + H2" : null,
-    config.javaAuth === "spring-security" ? "Spring Security" : null,
+    config.javaBuildTool === "none" ? "No build tool" : null,
+    isSpringBoot && config.javaOrm === "spring-data-jpa" ? "Spring Data JPA + H2" : null,
+    isSpringBoot && config.javaAuth === "spring-security" ? "Spring Security" : null,
     javaLibraries.length > 0 ? `Libraries: ${javaLibraries.join(", ")}` : null,
     testingLibraries.length > 0 ? `Testing: ${testingLibraries.join(", ")}` : null,
   ].filter(Boolean) as string[];
@@ -52,16 +118,22 @@ function generateJavaReadmeContent(config: ProjectConfig): string {
     `${config.projectName}/`,
     config.javaBuildTool === "gradle"
       ? "├── gradle/                # Gradle Wrapper configuration"
-      : "├── .mvn/                  # Maven Wrapper configuration",
+      : config.javaBuildTool === "maven"
+        ? "├── .mvn/                  # Maven Wrapper configuration"
+        : null,
     config.javaBuildTool === "gradle"
       ? "├── gradlew                # Gradle Wrapper launcher"
-      : "├── mvnw                   # Maven Wrapper launcher",
+      : config.javaBuildTool === "maven"
+        ? "├── mvnw                   # Maven Wrapper launcher"
+        : null,
     config.javaBuildTool === "gradle"
       ? "├── build.gradle.kts       # Gradle build definition"
-      : "├── pom.xml                # Build and dependency configuration",
+      : config.javaBuildTool === "maven"
+        ? "├── pom.xml                # Build and dependency configuration"
+        : null,
     "├── src/main/java/         # Application source code",
-    "├── src/main/resources/    # Spring configuration",
-  ];
+    isSpringBoot ? "├── src/main/resources/    # Spring configuration" : null,
+  ].filter(Boolean) as string[];
 
   if (testingLibraries.length > 0) {
     structureLines.push("├── src/test/java/         # Test suite");
@@ -79,21 +151,37 @@ ${features.map((feature) => `- ${feature}`).join("\n")}
 
 Make sure Java 21 or newer is installed.
 
-Run the test suite:
+${testCommand ? `Run the test suite:
 
 \`\`\`bash
-${buildToolCommand ?? "# add Maven or Gradle first"}
+${testCommand}
 \`\`\`
 
-Start the Spring Boot application:
+` : ""}${buildToolCommand && runCommand
+    ? `${isSpringBoot ? "Start the Spring Boot application" : "Run the application"}:
 
 \`\`\`bash
-${runCommand ?? "# configure a Java build tool first"}
+${runCommand}
 \`\`\`
 
-The health endpoint is available at \`http://localhost:8080/health\`.
+`
+    : compileCommand && sourceOnlyRunCommand
+      ? `Compile the application:
+
+\`\`\`bash
+${compileCommand}
+\`\`\`
+
+Run the application:
+
+\`\`\`bash
+${sourceOnlyRunCommand}
+\`\`\`
+
+`
+      : ""}${isSpringBoot ? "The health endpoint is available at `http://localhost:8080/health`.\n" : ""}
 ${
-  config.javaOrm === "spring-data-jpa"
+  isSpringBoot && config.javaOrm === "spring-data-jpa"
     ? "\nThe generated JPA example also exposes `GET /users` and `POST /users`, backed by an embedded H2 database.\n"
     : ""
 }
@@ -103,7 +191,7 @@ ${
     : ""
 }
 ${
-  config.javaAuth === "spring-security"
+  isSpringBoot && config.javaAuth === "spring-security"
     ? "\n## Authentication\n\nHTTP Basic auth protects application endpoints except `/health`.\n\nSet these environment variables before running locally:\n\n- `APP_BASIC_USERNAME`\n- `APP_BASIC_PASSWORD`\n"
     : ""
 }
@@ -118,10 +206,12 @@ ${structureLines.join("\n")}
 
 ${
   buildToolCommand && runCommand && packageCommand
-    ? `- \`${buildToolCommand} test\` - Run the test suite
-- \`${runCommand}\` - Start the application
+    ? `${testCommand ? `- \`${testCommand}\` - Run the test suite\n` : ""}- \`${runCommand}\` - Start the application
 - \`${packageCommand}\` - Build the jar`
-    : "- Configure Maven or Gradle before running build commands"
+    : compileCommand && sourceOnlyRunCommand
+      ? `- \`${compileCommand}\` - Compile the application
+- \`${sourceOnlyRunCommand}\` - Run the application`
+      : "- Configure Maven or Gradle before running build commands"
 }
 `;
 }

@@ -4,6 +4,8 @@ import { describe, expect, it } from "bun:test";
 
 import { createVirtual } from "../src/index";
 import {
+  analyzeStackCompatibility,
+  type CompatibilityInput,
   EcosystemSchema,
   JavaAuthSchema,
   JavaBuildToolSchema,
@@ -40,6 +42,98 @@ function hasFile(node: VirtualNode, path: string): boolean {
 
 function getFileContent(node: VirtualNode, path: string): string | undefined {
   return findFile(node, path)?.content;
+}
+
+function createJavaCompatibilityInput(
+  overrides: Partial<CompatibilityInput> = {},
+): CompatibilityInput {
+  return {
+    ecosystem: "java",
+    projectName: "java-compatibility",
+    webFrontend: ["none"],
+    nativeFrontend: ["none"],
+    astroIntegration: "none",
+    runtime: "none",
+    backend: "none",
+    database: "none",
+    orm: "none",
+    dbSetup: "none",
+    auth: "none",
+    payments: "none",
+    email: "none",
+    fileUpload: "none",
+    logging: "none",
+    observability: "none",
+    featureFlags: "none",
+    analytics: "none",
+    backendLibraries: "none",
+    stateManagement: "none",
+    forms: "none",
+    validation: "none",
+    testing: "none",
+    realtime: "none",
+    jobQueue: "none",
+    caching: "none",
+    i18n: "none",
+    search: "none",
+    fileStorage: "none",
+    animation: "none",
+    cssFramework: "none",
+    uiLibrary: "none",
+    shadcnBase: "radix",
+    shadcnStyle: "nova",
+    shadcnIconLibrary: "lucide",
+    shadcnColorTheme: "neutral",
+    shadcnBaseColor: "neutral",
+    shadcnFont: "inter",
+    shadcnRadius: "default",
+    cms: "none",
+    codeQuality: [],
+    documentation: [],
+    appPlatforms: [],
+    packageManager: "bun",
+    versionChannel: "stable",
+    examples: [],
+    aiSdk: "none",
+    aiDocs: [],
+    git: "false",
+    install: "false",
+    api: "none",
+    webDeploy: "none",
+    serverDeploy: "none",
+    yolo: "false",
+    rustWebFramework: "none",
+    rustFrontend: "none",
+    rustOrm: "none",
+    rustApi: "none",
+    rustCli: "none",
+    rustLibraries: [],
+    rustLogging: "none",
+    rustErrorHandling: "none",
+    rustCaching: "none",
+    rustAuth: "none",
+    pythonWebFramework: "none",
+    pythonOrm: "none",
+    pythonValidation: "none",
+    pythonAi: [],
+    pythonAuth: "none",
+    pythonTaskQueue: "none",
+    pythonGraphql: "none",
+    pythonQuality: "none",
+    goWebFramework: "none",
+    goOrm: "none",
+    goApi: "none",
+    goCli: "none",
+    goLogging: "none",
+    goAuth: "none",
+    javaWebFramework: "spring-boot",
+    javaBuildTool: "maven",
+    javaOrm: "none",
+    javaAuth: "none",
+    javaLibraries: [],
+    javaTestingLibraries: ["junit5"],
+    ...overrides,
+  };
 }
 
 const ECOSYSTEMS = extractEnumValues(EcosystemSchema);
@@ -165,6 +259,82 @@ describe("Java Ecosystem", () => {
       expect(cursorRules).toContain("Use ./gradlew for all Gradle commands.");
     });
 
+    it("should create a plain Java Maven project when no framework is selected", async () => {
+      const result = await createVirtual({
+        projectName: "java-plain-maven",
+        ecosystem: "java",
+        javaWebFramework: "none",
+        javaBuildTool: "maven",
+        javaOrm: "none",
+        javaAuth: "none",
+        javaLibraries: [],
+        javaTestingLibraries: ["junit5", "mockito"],
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+
+      expect(hasFile(root, "pom.xml")).toBe(true);
+      expect(hasFile(root, "mvnw")).toBe(true);
+      expect(hasFile(root, "src/main/java/com/example/javaplainmaven/Application.java")).toBe(
+        true,
+      );
+      expect(hasFile(root, "src/main/resources/application.yml")).toBe(false);
+      expect(
+        hasFile(root, "src/main/java/com/example/javaplainmaven/controller/HealthController.java"),
+      ).toBe(false);
+      expect(hasFile(root, "src/test/java/com/example/javaplainmaven/ApplicationTests.java")).toBe(
+        true,
+      );
+
+      const pomContent = getFileContent(root, "pom.xml");
+      const readmeContent = getFileContent(root, "README.md");
+
+      expect(pomContent).toContain("exec-maven-plugin");
+      expect(pomContent).not.toContain("spring-boot-starter-parent");
+      expect(pomContent).not.toContain("spring-boot-starter-webmvc");
+      expect(readmeContent).toContain("./mvnw exec:java");
+      expect(readmeContent).not.toContain("spring-boot:run");
+    });
+
+    it("should create a source-only plain Java project when no build tool is selected", async () => {
+      const result = await createVirtual({
+        projectName: "java-source-only",
+        ecosystem: "java",
+        javaWebFramework: "none",
+        javaBuildTool: "none",
+        javaOrm: "none",
+        javaAuth: "none",
+        javaLibraries: [],
+        javaTestingLibraries: [],
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+
+      expect(hasFile(root, "pom.xml")).toBe(false);
+      expect(hasFile(root, "build.gradle.kts")).toBe(false);
+      expect(hasFile(root, "mvnw")).toBe(false);
+      expect(hasFile(root, "gradlew")).toBe(false);
+      expect(hasFile(root, "src/main/java/com/example/javasourceonly/Application.java")).toBe(
+        true,
+      );
+      expect(hasFile(root, "src/main/resources/application.yml")).toBe(false);
+      expect(hasFile(root, "src/test/java/com/example/javasourceonly/ApplicationTests.java")).toBe(
+        false,
+      );
+
+      const readmeContent = getFileContent(root, "README.md");
+      const claudeContent = getFileContent(root, "CLAUDE.md");
+
+      expect(readmeContent).toContain(
+        "javac -d out src/main/java/com/example/javasourceonly/Application.java",
+      );
+      expect(readmeContent).toContain("java -cp out com.example.javasourceonly.Application");
+      expect(claudeContent).toContain("Scaffold: plain-java");
+      expect(claudeContent).not.toContain("Build Tool:");
+    });
+
     it("should add JPA, security, libraries, and testing scaffolding when selected", async () => {
       const result = await createVirtual({
         projectName: "java-full",
@@ -251,6 +421,53 @@ describe("Java Ecosystem", () => {
       );
       expect(hasFile(root, "src/test/java/com/example/javaminimal/ApplicationTests.java")).toBe(
         false,
+      );
+    });
+  });
+
+  describe("Java Compatibility Analysis", () => {
+    it("should clear Spring-only Java features when the framework is none", () => {
+      const result = analyzeStackCompatibility(
+        createJavaCompatibilityInput({
+          javaWebFramework: "none",
+          javaBuildTool: "maven",
+          javaOrm: "spring-data-jpa",
+          javaAuth: "spring-security",
+          javaLibraries: ["spring-actuator", "flyway"],
+          javaTestingLibraries: ["junit5", "mockito"],
+        }),
+      );
+
+      expect(result.adjustedStack?.javaWebFramework).toBe("none");
+      expect(result.adjustedStack?.javaOrm).toBe("none");
+      expect(result.adjustedStack?.javaAuth).toBe("none");
+      expect(result.adjustedStack?.javaLibraries).toEqual([]);
+      expect(result.adjustedStack?.javaTestingLibraries).toEqual(["junit5", "mockito"]);
+      expect(result.changes.some((adjustment) => adjustment.category === "javaWebFramework")).toBe(
+        true,
+      );
+    });
+
+    it("should clear the Java framework and testing libraries when the build tool is none", () => {
+      const result = analyzeStackCompatibility(
+        createJavaCompatibilityInput({
+          javaWebFramework: "spring-boot",
+          javaBuildTool: "none",
+          javaOrm: "spring-data-jpa",
+          javaAuth: "spring-security",
+          javaLibraries: ["spring-actuator"],
+          javaTestingLibraries: ["junit5"],
+        }),
+      );
+
+      expect(result.adjustedStack?.javaWebFramework).toBe("none");
+      expect(result.adjustedStack?.javaBuildTool).toBe("none");
+      expect(result.adjustedStack?.javaOrm).toBe("none");
+      expect(result.adjustedStack?.javaAuth).toBe("none");
+      expect(result.adjustedStack?.javaLibraries).toEqual([]);
+      expect(result.adjustedStack?.javaTestingLibraries).toEqual([]);
+      expect(result.changes.some((adjustment) => adjustment.category === "javaBuildTool")).toBe(
+        true,
       );
     });
   });
