@@ -3475,7 +3475,7 @@ export const ECOSYSTEMS: {
     id: "java",
     name: "Java",
     description: "Modern Java ecosystem",
-    icon: "https://cdn.simpleicons.org/openjdk/F80000",
+    icon: "/icon/java.svg",
     color: "from-red-500 to-orange-600",
   },
 ];

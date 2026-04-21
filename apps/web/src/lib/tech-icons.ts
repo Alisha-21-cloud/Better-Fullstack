@@ -56,7 +56,7 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   rust: { type: "si", slug: "rust", hex: "000000" },
   python: { type: "si", slug: "python", hex: "3776AB" },
   go: { type: "si", slug: "go", hex: "00ADD8" },
-  java: { type: "si", slug: "openjdk", hex: "F80000" },
+  java: { type: "local", src: "/icon/java.svg" },
 
   // ─── API ───────────────────────────────────────────────────────────────────
   trpc: { type: "si", slug: "trpc", hex: "398CCB" },
