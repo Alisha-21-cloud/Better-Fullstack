@@ -57,7 +57,9 @@ describe("processJavaBaseTemplate", () => {
 
       expect(vfs.getFileCount()).toBe(0);
       expect(warn).toHaveBeenCalledTimes(1);
-      expect(warn.mock.calls[0][0]).toContain("javaBuildTool is 'none'");
+      const firstCall = warn.mock.calls[0];
+      expect(firstCall).toBeDefined();
+      expect(firstCall?.[0]).toContain("javaBuildTool is 'none'");
     } finally {
       warn.mockRestore();
     }
