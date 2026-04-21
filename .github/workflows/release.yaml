@@ -72,7 +72,10 @@ jobs:
         if: steps.check-version.outputs.exists == 'false'
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          # Bun 1.3.13 regressed `bun publish` against npm in this workflow.
+          # Keep the last known-good release version pinned until upstream is
+          # verified and we intentionally bump it.
+          bun-version: 1.3.12
 
       - name: Cache Dependencies
         if: steps.check-version.outputs.exists == 'false'
@@ -208,4 +211,3 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### GitHub Release" >> $GITHUB_STEP_SUMMARY
           echo "[v$VERSION](https://github.com/${{ github.repository }}/releases/tag/v$VERSION)" >> $GITHUB_STEP_SUMMARY
-
