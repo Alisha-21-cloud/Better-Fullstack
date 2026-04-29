@@ -1718,6 +1718,14 @@ export const getDisabledReason = (
     if (optionId === "tauri" && !hasTauriCompatibleFrontend(currentStack.webFrontend)) {
       return "Tauri requires TanStack Router, React Router, Nuxt, Svelte, Solid, Next.js, or Astro";
     }
+    if (optionId === "docker-compose") {
+      if (currentStack.backend === "convex") {
+        return "Docker Compose is not compatible with Convex backend (managed service)";
+      }
+      if (currentStack.runtime === "workers") {
+        return "Docker Compose is not compatible with Cloudflare Workers runtime";
+      }
+    }
     if (optionId === "tanstack-query" && currentStack.api !== "none") {
       return "TanStack Query is already included via your API layer";
     }
@@ -2165,7 +2173,7 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
     "nuxt", "svelte", "solid", "solid-start", "angular", "astro", "redwood",
   ],
   "docker-compose": [
-    "tanstack-router", "react-router", "tanstack-start", "next",
+    "tanstack-router", "react-router", "react-vite", "tanstack-start", "next",
     "nuxt", "svelte", "solid", "astro",
   ],
   none: [],

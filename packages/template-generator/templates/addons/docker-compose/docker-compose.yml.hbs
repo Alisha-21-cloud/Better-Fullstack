@@ -3,14 +3,16 @@ name: {{projectName}}
 services:
   web:
     build:
-      context: ./apps/web
+      context: .
 {{#if (includes frontend "next")}}
-      dockerfile: Dockerfile.next
+      dockerfile: apps/web/Dockerfile.next
 {{else}}
-      dockerfile: Dockerfile.vite
+      dockerfile: apps/web/Dockerfile.vite
+      args:
+        VITE_SERVER_URL: http://localhost:3000
 {{/if}}
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       - NODE_ENV=production
 {{#unless (eq backend "self")}}
@@ -32,14 +34,24 @@ services:
 {{#unless (eq backend "none")}}
   server:
     build:
-      context: ./apps/server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/server/Dockerfile
     ports:
-      - "3001:3001"
+      - "3000:3000"
     environment:
       - NODE_ENV=production
+      - PORT=3000
+      - CORS_ORIGIN=http://localhost:3001
 {{#unless (eq database "none")}}
+{{#if (eq database "postgres")}}
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/{{projectName}}
+{{else if (eq database "mysql")}}
+      - DATABASE_URL=mysql://root:password@db:3306/{{projectName}}
+{{else if (eq database "mongodb")}}
+      - DATABASE_URL=mongodb://root:password@db:27017/{{projectName}}?authSource=admin
+{{else}}
       - DATABASE_URL=${DATABASE_URL}
+{{/if}}
     depends_on:
       db:
         condition: service_healthy
@@ -56,7 +68,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-{{projectNameWithClosingBrace}}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD?POSTGRES_PASSWORD is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
@@ -78,7 +90,7 @@ volumes:
     # WARNING: Configure database credentials via environment variables before production use.
     environment:
       MYSQL_DATABASE: {{projectName}}
-      MYSQL_USER: user
+      MYSQL_USER: ${MYSQL_USER:-user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
     ports:

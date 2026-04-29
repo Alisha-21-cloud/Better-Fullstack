@@ -470,6 +470,7 @@ export function generateStackCommand(stack: StackState) {
                 "lefthook",
                 "husky",
                 "turborepo",
+                "docker-compose",
                 "ultracite",
                 "fumadocs",
                 "oxlint",

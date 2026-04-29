@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { readFileSync,existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import type { Addons, Frontend } from "../src";
@@ -322,9 +322,9 @@ describe("Addon Configurations", () => {
         expectSuccess(result);
       });
 
-      it("should fail with docker-compose + React Vite", async () => {
+      it("should work with docker-compose + React Vite", async () => {
         const result = await runTRPCTest({
-          projectName: "docker-compose-react-vite-fail",
+          projectName: "docker-compose-react-vite",
           addons: ["docker-compose"],
           frontend: ["react-vite"],
           backend: "hono",
@@ -337,10 +337,10 @@ describe("Addon Configurations", () => {
           dbSetup: "none",
           webDeploy: "none",
           serverDeploy: "none",
-          expectError: true,
+          install: false,
         });
 
-        expectError(result, "docker-compose addon requires one of these frontends");
+        expectSuccess(result);
       });
 
       describe("Docker Compose File Generation", () => {
@@ -367,7 +367,13 @@ describe("Addon Configurations", () => {
 
           const dockerComposeYml = join(result.projectDir!, "docker-compose.yml");
           expect(existsSync(dockerComposeYml)).toBe(true);
-          expect(readFileSync(dockerComposeYml, "utf8")).toContain("dockerfile: Dockerfile.vite");
+          const compose = readFileSync(dockerComposeYml, "utf8");
+          expect(compose).toContain("context: .");
+          expect(compose).toContain("dockerfile: apps/web/Dockerfile.vite");
+          expect(compose).toContain('      - "3001:3000"');
+          expect(compose).toContain("dockerfile: apps/server/Dockerfile");
+          expect(compose).toContain('      - "3000:3000"');
+          expect(compose).toContain("DATABASE_URL=postgresql://postgres:postgres@db:5432/docker-compose-files-root");
         });
 
         it("should generate Dockerfile in apps/server when backend exists", async () => {
@@ -393,6 +399,10 @@ describe("Addon Configurations", () => {
 
           const serverDockerfile = join(result.projectDir!, "apps", "server", "Dockerfile");
           expect(existsSync(serverDockerfile)).toBe(true);
+          const dockerfile = readFileSync(serverDockerfile, "utf8");
+          expect(dockerfile).toContain("COPY . .");
+          expect(dockerfile).toContain("bun run --filter server build");
+          expect(dockerfile).toContain("WORKDIR /app/apps/server");
         });
 
         it("should generate Dockerfile in apps/web for Vite-based frontend", async () => {
@@ -419,6 +429,11 @@ describe("Addon Configurations", () => {
           // Vite-based frontends get Dockerfile.vite
           const webDockerfile = join(result.projectDir!, "apps", "web", "Dockerfile.vite");
           expect(existsSync(webDockerfile)).toBe(true);
+          const dockerfile = readFileSync(webDockerfile, "utf8");
+          expect(dockerfile).toContain("COPY . .");
+          expect(dockerfile).toContain("ARG VITE_SERVER_URL=http://localhost:3000");
+          expect(dockerfile).toContain("bun run --filter web build");
+          expect(dockerfile).toContain("/app/apps/web/dist");
         });
 
         it("should generate Dockerfile in apps/web for Next.js + self backend", async () => {
@@ -449,7 +464,7 @@ describe("Addon Configurations", () => {
 
           expect(existsSync(dockerComposeYml)).toBe(true);
           expect(existsSync(webDockerfile)).toBe(true);
-          expect(readFileSync(dockerComposeYml, "utf8")).toContain("dockerfile: Dockerfile.next");
+          expect(readFileSync(dockerComposeYml, "utf8")).toContain("dockerfile: apps/web/Dockerfile.next");
         });
 
         it("should generate .dockerignore files", async () => {

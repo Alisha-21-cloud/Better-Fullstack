@@ -96,6 +96,7 @@ export async function processAddonTemplates(
           [
             "tanstack-router",
             "react-router",
+            "react-vite",
             "tanstack-start",
             "solid",
             "svelte",
