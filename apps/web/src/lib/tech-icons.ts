@@ -56,6 +56,7 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   rust: { type: "si", slug: "rust", hex: "000000" },
   python: { type: "si", slug: "python", hex: "3776AB" },
   go: { type: "si", slug: "go", hex: "00ADD8" },
+  java: { type: "local", src: "/icon/java.svg" },
 
   // ─── API ───────────────────────────────────────────────────────────────────
   trpc: { type: "si", slug: "trpc", hex: "398CCB" },
@@ -351,4 +352,34 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   fiber: { type: "si", slug: "gofiber", hex: "00ACD7" },
   chi: { type: "local", src: "/icon/go.svg" },
   "grpc-go": { type: "local", src: "/icon/grpc.svg" },
+
+  // ─── Java ──────────────────────────────────────────────────────────────────
+  "spring-boot": { type: "si", slug: "springboot", hex: "6DB33F" },
+  maven: { type: "si", slug: "apachemaven", hex: "C71A36" },
+  gradle: { type: "si", slug: "gradle", hex: "02303A" },
+  "spring-data-jpa": { type: "si", slug: "hibernate", hex: "59666C" },
+  "spring-security": { type: "si", slug: "springsecurity", hex: "6DB33F" },
+  "spring-actuator": { type: "si", slug: "spring", hex: "6DB33F" },
+  "spring-validation": { type: "si", slug: "spring", hex: "6DB33F" },
+  flyway: { type: "si", slug: "flyway", hex: "CC0200" },
+  liquibase: { type: "si", slug: "liquibase", hex: "2962FF" },
+  "springdoc-openapi": { type: "si", slug: "swagger", hex: "85EA2D" },
+  lombok: { type: "local", src: "https://projectlombok.org/favicon.ico" },
+  mapstruct: { type: "local", src: "https://mapstruct.org/images/mapstruct.png" },
+  caffeine: {
+    type: "local",
+    src: "https://raw.githubusercontent.com/ben-manes/caffeine/master/wiki/logo.png",
+  },
+  junit5: { type: "si", slug: "junit5", hex: "25A162" },
+  mockito: { type: "si", slug: "mockito", hex: "78A641" },
+  testcontainers: { type: "si", slug: "testcontainers", hex: "2496ED" },
+  assertj: { type: "local", src: "https://assertj.github.io/doc/images/favicon.png" },
+  "rest-assured": { type: "local", src: "https://rest-assured.io/img/logo-transparent.png" },
+  wiremock: { type: "local", src: "https://wiremock.org/images/favicon.svg" },
+  awaitility: {
+    type: "local",
+    src: "https://raw.githubusercontent.com/awaitility/awaitility/master/resources/Awaitility_logo_red_small.png",
+  },
+  archunit: { type: "local", src: "https://www.archunit.org/assets/ArchUnit-Logo.png" },
+  jqwik: { type: "local", src: "https://jqwik.net/assets/images/favicon.ico" },
 };

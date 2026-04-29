@@ -25,6 +25,12 @@ import {
   GO_LOGGING_VALUES,
   GO_ORM_VALUES,
   GO_WEB_FRAMEWORK_VALUES,
+  JAVA_AUTH_VALUES,
+  JAVA_BUILD_TOOL_VALUES,
+  JAVA_LIBRARIES_VALUES,
+  JAVA_ORM_VALUES,
+  JAVA_TESTING_LIBRARIES_VALUES,
+  JAVA_WEB_FRAMEWORK_VALUES,
   JOB_QUEUE_VALUES,
   LOGGING_VALUES,
   OBSERVABILITY_VALUES,
@@ -144,7 +150,13 @@ export type OptionCategory =
   | "goApi"
   | "goCli"
   | "goLogging"
-  | "goAuth";
+  | "goAuth"
+  | "javaWebFramework"
+  | "javaBuildTool"
+  | "javaOrm"
+  | "javaAuth"
+  | "javaLibraries"
+  | "javaTestingLibraries";
 
 export type OptionSelectionMode = "single" | "multiple";
 
@@ -247,6 +259,8 @@ const MULTI_SELECT_CATEGORIES = new Set<OptionCategory>([
   "aiDocs",
   "rustLibraries",
   "pythonAi",
+  "javaLibraries",
+  "javaTestingLibraries",
 ]);
 
 const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
@@ -326,6 +340,12 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   goCli: GO_CLI_VALUES,
   goLogging: GO_LOGGING_VALUES,
   goAuth: GO_AUTH_VALUES,
+  javaWebFramework: JAVA_WEB_FRAMEWORK_VALUES,
+  javaBuildTool: JAVA_BUILD_TOOL_VALUES,
+  javaOrm: JAVA_ORM_VALUES,
+  javaAuth: JAVA_AUTH_VALUES,
+  javaLibraries: JAVA_LIBRARIES_VALUES,
+  javaTestingLibraries: JAVA_TESTING_LIBRARIES_VALUES,
 };
 
 const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<string, string>>>> = {
@@ -652,6 +672,39 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     casbin: "Casbin",
     jwt: "golang-jwt",
   },
+  javaWebFramework: {
+    "spring-boot": "Spring Boot",
+  },
+  javaBuildTool: {
+    maven: "Maven",
+  },
+  javaOrm: {
+    "spring-data-jpa": "Spring Data JPA",
+  },
+  javaAuth: {
+    "spring-security": "Spring Security",
+  },
+  javaLibraries: {
+    "spring-actuator": "Spring Boot Actuator",
+    "spring-validation": "Spring Validation",
+    flyway: "Flyway",
+    liquibase: "Liquibase",
+    "springdoc-openapi": "Springdoc OpenAPI",
+    lombok: "Lombok",
+    mapstruct: "MapStruct",
+    caffeine: "Caffeine",
+  },
+  javaTestingLibraries: {
+    junit5: "JUnit 5",
+    mockito: "Mockito",
+    testcontainers: "Testcontainers",
+    assertj: "AssertJ",
+    "rest-assured": "REST Assured",
+    wiremock: "WireMock",
+    awaitility: "Awaitility",
+    archunit: "ArchUnit",
+    jqwik: "jqwik",
+  },
 };
 
 const OPTION_ALIASES: Partial<Record<OptionCategory, Partial<Record<string, readonly string[]>>>> =
@@ -809,6 +862,12 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   goCli: buildCategoryMetadata("goCli"),
   goLogging: buildCategoryMetadata("goLogging"),
   goAuth: buildCategoryMetadata("goAuth"),
+  javaWebFramework: buildCategoryMetadata("javaWebFramework"),
+  javaBuildTool: buildCategoryMetadata("javaBuildTool"),
+  javaOrm: buildCategoryMetadata("javaOrm"),
+  javaAuth: buildCategoryMetadata("javaAuth"),
+  javaLibraries: buildCategoryMetadata("javaLibraries"),
+  javaTestingLibraries: buildCategoryMetadata("javaTestingLibraries"),
 };
 
 const OPTION_LOOKUP = Object.fromEntries(

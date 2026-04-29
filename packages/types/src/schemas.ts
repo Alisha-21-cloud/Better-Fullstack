@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 export const EcosystemSchema = z
-  .enum(["typescript", "rust", "python", "go"])
-  .describe("Language ecosystem (typescript, rust, python, or go)");
+  .enum(["typescript", "rust", "python", "go", "java"])
+  .describe("Language ecosystem (typescript, rust, python, go, or java)");
 
 export const DatabaseSchema = z
   .enum(["none", "sqlite", "postgres", "mysql", "mongodb", "edgedb", "redis"])
@@ -303,13 +303,9 @@ export const RustErrorHandlingSchema = z
   .enum(["anyhow-thiserror", "eyre", "none"])
   .describe("Rust error handling library");
 
-export const RustCachingSchema = z
-  .enum(["moka", "redis", "none"])
-  .describe("Rust caching library");
+export const RustCachingSchema = z.enum(["moka", "redis", "none"]).describe("Rust caching library");
 
-export const RustAuthSchema = z
-  .enum(["oauth2", "none"])
-  .describe("Rust authentication library");
+export const RustAuthSchema = z.enum(["oauth2", "none"]).describe("Rust authentication library");
 
 // Python ecosystem schemas
 export const PythonWebFrameworkSchema = z
@@ -334,22 +330,74 @@ export const PythonAuthSchema = z
 
 export const PythonTaskQueueSchema = z.enum(["celery", "none"]).describe("Python task queue");
 
-export const PythonGraphqlSchema = z.enum(["strawberry", "none"]).describe("Python GraphQL framework");
+export const PythonGraphqlSchema = z
+  .enum(["strawberry", "none"])
+  .describe("Python GraphQL framework");
 
 export const PythonQualitySchema = z.enum(["ruff", "none"]).describe("Python code quality tool");
 
 // Go ecosystem schemas
-export const GoWebFrameworkSchema = z.enum(["gin", "echo", "fiber", "chi", "none"]).describe("Go web framework");
+export const GoWebFrameworkSchema = z
+  .enum(["gin", "echo", "fiber", "chi", "none"])
+  .describe("Go web framework");
 
-export const GoOrmSchema = z.enum(["gorm", "sqlc", "ent", "none"]).describe("Go ORM/database layer");
+export const GoOrmSchema = z
+  .enum(["gorm", "sqlc", "ent", "none"])
+  .describe("Go ORM/database layer");
 
 export const GoApiSchema = z.enum(["grpc-go", "none"]).describe("Go API layer (gRPC)");
 
 export const GoCliSchema = z.enum(["cobra", "bubbletea", "none"]).describe("Go CLI tools");
 
-export const GoLoggingSchema = z.enum(["zap", "zerolog", "slog", "none"]).describe("Go logging library");
+export const GoLoggingSchema = z
+  .enum(["zap", "zerolog", "slog", "none"])
+  .describe("Go logging library");
 
 export const GoAuthSchema = z.enum(["casbin", "jwt", "none"]).describe("Go authentication library");
+
+// Java ecosystem schemas
+export const JavaWebFrameworkSchema = z
+  .enum(["spring-boot", "none"])
+  .describe("Java web framework");
+
+export const JavaBuildToolSchema = z.enum(["maven", "gradle", "none"]).describe("Java build tool");
+
+export const JavaOrmSchema = z
+  .enum(["spring-data-jpa", "none"])
+  .describe("Java ORM/database layer");
+
+export const JavaAuthSchema = z
+  .enum(["spring-security", "none"])
+  .describe("Java authentication library");
+
+export const JavaLibrariesSchema = z
+  .enum([
+    "spring-actuator",
+    "spring-validation",
+    "flyway",
+    "liquibase",
+    "springdoc-openapi",
+    "lombok",
+    "mapstruct",
+    "caffeine",
+    "none",
+  ])
+  .describe("Java application libraries");
+
+export const JavaTestingLibrariesSchema = z
+  .enum([
+    "junit5",
+    "mockito",
+    "testcontainers",
+    "assertj",
+    "rest-assured",
+    "wiremock",
+    "awaitility",
+    "archunit",
+    "jqwik",
+    "none",
+  ])
+  .describe("Java testing libraries");
 
 export const AiDocsSchema = z
   .enum(["claude-md", "agents-md", "cursorrules", "none"])
@@ -543,6 +591,13 @@ export const CreateInputSchema = z.object({
   goCli: GoCliSchema.optional(),
   goLogging: GoLoggingSchema.optional(),
   goAuth: GoAuthSchema.optional(),
+  // Java ecosystem options
+  javaWebFramework: JavaWebFrameworkSchema.optional(),
+  javaBuildTool: JavaBuildToolSchema.optional(),
+  javaOrm: JavaOrmSchema.optional(),
+  javaAuth: JavaAuthSchema.optional(),
+  javaLibraries: z.array(JavaLibrariesSchema).optional(),
+  javaTestingLibraries: z.array(JavaTestingLibrariesSchema).optional(),
   // AI documentation files
   aiDocs: z.array(AiDocsSchema).optional(),
 });
@@ -639,6 +694,13 @@ export const ProjectConfigSchema = z.object({
   goCli: GoCliSchema,
   goLogging: GoLoggingSchema,
   goAuth: GoAuthSchema,
+  // Java ecosystem options
+  javaWebFramework: JavaWebFrameworkSchema,
+  javaBuildTool: JavaBuildToolSchema,
+  javaOrm: JavaOrmSchema,
+  javaAuth: JavaAuthSchema,
+  javaLibraries: z.array(JavaLibrariesSchema),
+  javaTestingLibraries: z.array(JavaTestingLibrariesSchema),
   // AI documentation files
   aiDocs: z.array(AiDocsSchema),
 });
@@ -719,6 +781,13 @@ export const BetterTStackConfigSchema = z.object({
   goCli: GoCliSchema,
   goLogging: GoLoggingSchema,
   goAuth: GoAuthSchema,
+  // Java ecosystem options
+  javaWebFramework: JavaWebFrameworkSchema,
+  javaBuildTool: JavaBuildToolSchema,
+  javaOrm: JavaOrmSchema,
+  javaAuth: JavaAuthSchema,
+  javaLibraries: z.array(JavaLibrariesSchema),
+  javaTestingLibraries: z.array(JavaTestingLibrariesSchema),
   // AI documentation files
   aiDocs: z.array(AiDocsSchema),
 });
@@ -810,6 +879,12 @@ export const GO_API_VALUES = GoApiSchema.options;
 export const GO_CLI_VALUES = GoCliSchema.options;
 export const GO_LOGGING_VALUES = GoLoggingSchema.options;
 export const GO_AUTH_VALUES = GoAuthSchema.options;
+export const JAVA_WEB_FRAMEWORK_VALUES = JavaWebFrameworkSchema.options;
+export const JAVA_BUILD_TOOL_VALUES = JavaBuildToolSchema.options;
+export const JAVA_ORM_VALUES = JavaOrmSchema.options;
+export const JAVA_AUTH_VALUES = JavaAuthSchema.options;
+export const JAVA_LIBRARIES_VALUES = JavaLibrariesSchema.options;
+export const JAVA_TESTING_LIBRARIES_VALUES = JavaTestingLibrariesSchema.options;
 export const AI_DOCS_VALUES = AiDocsSchema.options;
 export const SHADCN_BASE_VALUES = ShadcnBaseSchema.options;
 export const SHADCN_STYLE_VALUES = ShadcnStyleSchema.options;

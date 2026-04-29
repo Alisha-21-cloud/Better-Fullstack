@@ -132,6 +132,19 @@ import {
   type GoLogging,
   GoAuthSchema,
   type GoAuth,
+  JavaWebFrameworkSchema,
+  type JavaWebFramework,
+  JavaBuildToolSchema,
+  type JavaBuildTool,
+  JavaLibrariesSchema,
+  type JavaLibraries,
+  JavaOrmSchema,
+  type JavaOrm,
+  JavaAuthSchema,
+  type JavaAuth,
+  JavaTestingLibrariesSchema,
+  type JavaTestingLibraries,
+  OPTION_CATEGORY_METADATA,
   AiDocsSchema,
   type AiDocs,
   ShadcnBaseSchema,
@@ -148,10 +161,15 @@ import { openUrl } from "./utils/open-url";
 import { renderTitle } from "./utils/render-title";
 import { displaySponsors, fetchSponsors } from "./utils/sponsors";
 
+const OPTION_ENTRY_COUNT = Object.values(OPTION_CATEGORY_METADATA).reduce(
+  (sum, metadata) => sum + metadata.options.length,
+  0,
+);
+
 export const router = os.router({
   create: os
     .meta({
-      description: "Scaffold a new Better Fullstack project from 270+ compatible stack options",
+      description: `Scaffold a new Better Fullstack project from ${OPTION_ENTRY_COUNT} compatible stack options`,
       default: true,
       negateBooleans: true,
     })
@@ -476,6 +494,12 @@ export async function createVirtual(
       goCli: options.goCli || "none",
       goLogging: options.goLogging || "none",
       goAuth: options.goAuth || "none",
+      javaWebFramework: options.javaWebFramework || (options.ecosystem === "java" ? "spring-boot" : "none"),
+      javaBuildTool: options.javaBuildTool || (options.ecosystem === "java" ? "maven" : "none"),
+      javaOrm: options.javaOrm || "none",
+      javaAuth: options.javaAuth || "none",
+      javaLibraries: options.javaLibraries || [],
+      javaTestingLibraries: options.javaTestingLibraries || (options.ecosystem === "java" ? ["junit5"] : []),
       // AI documentation files
       aiDocs: options.aiDocs || ["claude-md"],
     };
@@ -548,6 +572,12 @@ export type {
   GoCli,
   GoLogging,
   GoAuth,
+  JavaWebFramework,
+  JavaBuildTool,
+  JavaLibraries,
+  JavaOrm,
+  JavaAuth,
+  JavaTestingLibraries,
   AiDocs,
   AddResult,
 };

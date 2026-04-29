@@ -1,0 +1,37 @@
+package {{javaPackageName}};
+
+{{#if hasJavaAssertj}}
+import static org.assertj.core.api.Assertions.assertThat;
+{{else}}
+import static org.junit.jupiter.api.Assertions.assertTrue;
+{{/if}}
+
+import org.junit.jupiter.api.Test;
+{{#if isJavaSpringBoot}}
+import org.springframework.boot.test.context.SpringBootTest;
+{{/if}}
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@Testcontainers
+{{#if isJavaSpringBoot}}
+@SpringBootTest
+{{/if}}
+class ApplicationContainerTests {
+
+  @Container
+  static GenericContainer<?> demoContainer = new GenericContainer<>("nginx:1.27-alpine")
+    .withExposedPorts(80);
+
+  @Test
+  void containerStarts() {
+{{#if hasJavaAssertj}}
+    assertThat(demoContainer.isRunning()).isTrue();
+    assertThat(demoContainer.getFirstMappedPort()).isGreaterThan(0);
+{{else}}
+    assertTrue(demoContainer.isRunning());
+    assertTrue(demoContainer.getFirstMappedPort() > 0);
+{{/if}}
+  }
+}

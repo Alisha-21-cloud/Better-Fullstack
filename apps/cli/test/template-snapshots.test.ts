@@ -194,7 +194,43 @@ const SNAPSHOT_CONFIGS: Array<{
       auth: "none",
     },
   },
+  {
+    name: "java-spring-boot-jpa-security",
+    config: {
+      ecosystem: "java",
+      javaWebFramework: "spring-boot",
+      javaBuildTool: "gradle",
+      javaOrm: "spring-data-jpa",
+      javaAuth: "spring-security",
+      javaLibraries: ["spring-actuator", "flyway"],
+      javaTestingLibraries: ["junit5", "mockito"],
+    },
+  },
+  {
+    name: "java-spring-boot-extended-libraries",
+    config: {
+      ecosystem: "java",
+      javaWebFramework: "spring-boot",
+      javaBuildTool: "maven",
+      javaOrm: "spring-data-jpa",
+      javaAuth: "none",
+      javaLibraries: ["liquibase", "springdoc-openapi", "lombok", "mapstruct", "caffeine"],
+      javaTestingLibraries: [
+        "junit5",
+        "assertj",
+        "rest-assured",
+        "wiremock",
+        "awaitility",
+        "archunit",
+        "jqwik",
+      ],
+    },
+  },
 ];
+
+const KEY_FILE_SNAPSHOT_CONFIGS = SNAPSHOT_CONFIGS.filter(
+  ({ name }) => name !== "java-spring-boot-extended-libraries",
+);
 
 // Default values to fill in missing config options
 const DEFAULT_CONFIG: Partial<ProjectConfig> = {
@@ -245,7 +281,7 @@ describe("Template Snapshots", () => {
   });
 
   describe("Key File Content Snapshots", () => {
-    for (const { name, config } of SNAPSHOT_CONFIGS) {
+    for (const { name, config } of KEY_FILE_SNAPSHOT_CONFIGS) {
       it(`key files: ${name}`, async () => {
         const result = await createVirtual({
           projectName: `snapshot-${name}`,
