@@ -191,6 +191,18 @@ const SMOKE_TEST_PRESETS: Record<string, PresetDef> = {
     },
   },
 
+  "vinext-basic": {
+    ecosystem: "typescript",
+    overrides: {
+      frontend: ["vinext"],
+      backend: "none",
+      runtime: "none",
+      cssFramework: "tailwind",
+      uiLibrary: "none",
+      addons: ["turborepo"],
+    },
+  },
+
   "react-hono": {
     ecosystem: "typescript",
     overrides: {
@@ -535,6 +547,7 @@ const PRESET_GROUPS = {
     "solid-start-express",
     "angular-fets",
     "vinext-minimal",
+    "vinext-basic",
   ],
 } as const satisfies Record<Exclude<PresetGroupId, "all">, readonly string[]>;
 
