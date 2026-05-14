@@ -16,7 +16,7 @@
 
 <div align="center">
 
-**Scaffold production-ready fullstack apps in seconds. Pick your stack from 425 options — the CLI wires everything together.**
+**Scaffold production-ready fullstack apps in seconds. Browse 450+ tools across five ecosystems — the CLI wires everything together.**
 
 <br>
 
@@ -34,7 +34,7 @@
 
 Most scaffolding tools lock you into one framework and one opinion. Better Fullstack doesn't.
 
-- **425 options** — frontend, backend, database, auth, payments, AI, DevOps, and more
+- **450+ tools** — frontend, backend, database, auth, payments, AI, DevOps, and more
 - **5 ecosystems** — TypeScript, Rust, Python, Go, Java — with more coming
 - **Visual builder** — configure your stack in the browser, get a ready-to-run CLI command
 - **Wired for you** — no manual glue code; every picked integration is preconfigured and working out of the box
@@ -78,8 +78,6 @@ npx create-better-fullstack@latest
 yarn create better-fullstack@latest
 ```
 
-Bun is only required when you choose Bun as the generated app runtime or package manager. Node.js with npm works for Node-based projects.
-
 </td>
 </tr>
 </table>
@@ -103,10 +101,33 @@ Bun is only required when you choose Bun as the generated app runtime or package
 
 <br>
 
-## 🧩 The Stack
+## Built Like a Product, Not a Template
+
+Better Fullstack is organized around the decisions that matter: pick an ecosystem, choose the layers you actually need, and ship a runnable project without hand-wiring the glue.
+
+<div align="center">
+<table>
+<tr>
+<td width="33%">
+<strong>450+ tools</strong><br>
+Only the relevant options surface for the stack you pick.
+</td>
+<td width="33%">
+<strong>5 ecosystems</strong><br>
+TypeScript, Rust, Python, Go, Java.
+</td>
+<td width="33%">
+<strong>One command</strong><br>
+Visual builder or CLI, same generated output.
+</td>
+</tr>
+</table>
+</div>
+
+<br>
 
 <details>
-<summary><strong>Ecosystems</strong> — TypeScript · Rust · Python · Go · Java</summary>
+<summary><strong>Ecosystem Surface</strong> — TypeScript · Rust · Python · Go · Java</summary>
 <br>
 
 | | |
@@ -120,7 +141,7 @@ Bun is only required when you choose Bun as the generated app runtime or package
 </details>
 
 <details>
-<summary><strong>Application Layer</strong></summary>
+<summary><strong>Application Primitives</strong></summary>
 <br>
 
 **TypeScript**
@@ -151,7 +172,7 @@ Bun is only required when you choose Bun as the generated app runtime or package
 </details>
 
 <details>
-<summary><strong>Data Layer</strong></summary>
+<summary><strong>Persistence</strong></summary>
 <br>
 
 **TypeScript**
@@ -181,7 +202,7 @@ Databases and hosting providers are shared across all ecosystems.
 </details>
 
 <details>
-<summary><strong>Services</strong></summary>
+<summary><strong>Platform Services</strong></summary>
 <br>
 
 **TypeScript**
@@ -202,7 +223,7 @@ Databases and hosting providers are shared across all ecosystems.
 </details>
 
 <details>
-<summary><strong>AI</strong></summary>
+<summary><strong>AI Stack</strong></summary>
 <br>
 
 **TypeScript**
@@ -296,42 +317,6 @@ Got questions or feedback? Open a [GitHub issue](https://github.com/Marve10s/Bet
 If Better Fullstack saves you time, consider supporting:
 
 [![Patreon](https://img.shields.io/badge/Patreon-Support-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/c/marve10s)
-
-<br>
-
-## Contributors
-
-<table>
-  <tr>
-    <td align="center">
-      <a href="https://github.com/Divith123">
-        <img src="https://avatars.githubusercontent.com/u/106373840?v=4" width="80" style="border-radius:50%" alt="Divith123"/>
-        <br /><sub><b>Divith S</b></sub>
-        <br /><sub>Version channels, builder parity</sub>
-        <br /><sub><a href="https://github.com/Marve10s/Better-Fullstack/pull/104">#104</a></sub>
-        <br /><sub><code>+1,072</code> <code>−139</code></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/Kavin-Bakyaraj">
-        <img src="https://avatars.githubusercontent.com/u/154714641?v=4" width="80" style="border-radius:50%" alt="Kavin-Bakyaraj"/>
-        <br /><sub><b>Kavin B</b></sub>
-        <br /><sub>Elasticsearch search engine support</sub>
-        <br /><sub><a href="https://github.com/Marve10s/Better-Fullstack/pull/111">#111</a></sub>
-        <br /><sub><code>+643</code> <code>−26</code></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/Alisha-21-cloud">
-        <img src="https://avatars.githubusercontent.com/u/206520298?v=4" width="80" style="border-radius:50%" alt="Alisha-21-cloud"/>
-        <br /><sub><b>Syed Ahmad Alisha</b></sub>
-        <br /><sub>Polar payments for Convex + Better Auth</sub>
-        <br /><sub><a href="https://github.com/Marve10s/Better-Fullstack/pull/110">#110</a></sub>
-        <br /><sub><code>+483</code> <code>−46</code></sub>
-      </a>
-    </td>
-  </tr>
-</table>
 
 <br>
 

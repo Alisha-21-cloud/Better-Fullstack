@@ -7,9 +7,11 @@ import {
   DEFAULT_STACK,
   ECOSYSTEMS,
   ECOSYSTEM_CATEGORIES,
+  PRESET_CATEGORIES,
   TECH_OPTIONS,
   type StackState,
 } from "../src/lib/constant";
+import { ICON_REGISTRY } from "../src/lib/tech-icons";
 import {
   CATEGORY_ORDER,
   RUST_CATEGORY_ORDER,
@@ -37,7 +39,7 @@ describe("Rust Ecosystem Tab", () => {
       const rustEcosystem = ECOSYSTEMS.find((e) => e.id === "rust");
       expect(rustEcosystem).toBeDefined();
       expect(rustEcosystem?.name).toBe("Rust");
-      expect(rustEcosystem?.icon).toContain("rust");
+      expect(rustEcosystem?.icon).toBe("");
       expect(rustEcosystem?.description).toBe("High-performance Rust ecosystem");
     });
 
@@ -78,6 +80,41 @@ describe("Rust Ecosystem Tab", () => {
       expect(tsCategories).not.toContain("rustWebFramework");
       expect(tsCategories).not.toContain("rustFrontend");
       expect(tsCategories).not.toContain("rustOrm");
+    });
+  });
+
+  describe("Rust icon registry", () => {
+    it("should not use a fallback icon for the Rust preset card", () => {
+      const rustPresetCategory = PRESET_CATEGORIES.find((category) => category.id === "rust");
+
+      expect(rustPresetCategory).toBeDefined();
+      expect(rustPresetCategory?.icon).toBe("");
+    });
+
+    it("should register local icons for the Rust tools that have them", () => {
+      expect(ICON_REGISTRY.axum).toEqual({ type: "local", src: "/icon/axum.svg" });
+      expect(ICON_REGISTRY["actix-web"]).toEqual({ type: "local", src: "/icon/actix.svg" });
+      expect(ICON_REGISTRY.leptos).toEqual({ type: "local", src: "/icon/leptos.svg" });
+      expect(ICON_REGISTRY.dioxus).toEqual({ type: "local", src: "/icon/dioxus.svg" });
+      expect(ICON_REGISTRY["sea-orm"]).toEqual({ type: "local", src: "/icon/seaorm.svg" });
+      expect(ICON_REGISTRY.tonic).toEqual({ type: "local", src: "/icon/tonic.svg" });
+      expect(ICON_REGISTRY.rocket).toBeUndefined();
+      expect(ICON_REGISTRY.diesel).toBeUndefined();
+      expect(ICON_REGISTRY.uuid).toBeUndefined();
+      expect(ICON_REGISTRY.chrono).toBeUndefined();
+      expect(ICON_REGISTRY.reqwest).toBeUndefined();
+      expect(ICON_REGISTRY.config).toBeUndefined();
+      expect(ICON_REGISTRY.dashmap).toBeUndefined();
+      expect(ICON_REGISTRY["parking-lot"]).toBeUndefined();
+      expect(ICON_REGISTRY.secrecy).toBeUndefined();
+      expect(ICON_REGISTRY["tokio-util"]).toBeUndefined();
+      expect(ICON_REGISTRY.utoipa).toBeUndefined();
+      expect(ICON_REGISTRY.tracing).toBeUndefined();
+      expect(ICON_REGISTRY["env-logger"]).toBeUndefined();
+      expect(ICON_REGISTRY["anyhow-thiserror"]).toBeUndefined();
+      expect(ICON_REGISTRY.eyre).toBeUndefined();
+      expect(ICON_REGISTRY.moka).toBeUndefined();
+      expect(ICON_REGISTRY.oauth2).toBeUndefined();
     });
   });
 
@@ -126,6 +163,7 @@ describe("Rust Ecosystem Tab", () => {
       const actixOption = options.find((o) => o.id === "actix-web");
       expect(actixOption).toBeDefined();
       expect(actixOption?.name).toBe("Actix-web");
+      expect(actixOption?.icon).toBe("");
     });
 
     it("should have Leptos as default for rustFrontend", () => {
@@ -144,6 +182,28 @@ describe("Rust Ecosystem Tab", () => {
       expect(noneOption).toBeDefined();
       expect(noneOption?.default).toBe(false);
       expect(noneOption?.name).toBe("No WASM Frontend");
+    });
+
+    it("should keep Rust options without real logos icon-free", () => {
+      expect(TECH_OPTIONS.rustWebFramework.find((o) => o.id === "rocket")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustOrm.find((o) => o.id === "diesel")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustApi.find((o) => o.id === "async-graphql")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLibraries.find((o) => o.id === "uuid")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLibraries.find((o) => o.id === "chrono")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLibraries.find((o) => o.id === "reqwest")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLibraries.find((o) => o.id === "config")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLibraries.find((o) => o.id === "dashmap")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLibraries.find((o) => o.id === "parking-lot")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLibraries.find((o) => o.id === "secrecy")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLibraries.find((o) => o.id === "tokio-util")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLibraries.find((o) => o.id === "utoipa")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLogging.find((o) => o.id === "tracing")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustLogging.find((o) => o.id === "env-logger")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustErrorHandling.find((o) => o.id === "anyhow-thiserror")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustErrorHandling.find((o) => o.id === "eyre")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustCaching.find((o) => o.id === "moka")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustCaching.find((o) => o.id === "redis")?.icon).toBe("");
+      expect(TECH_OPTIONS.rustAuth.find((o) => o.id === "oauth2")?.icon).toBe("");
     });
 
     it("should expose Serde as a selectable rust library", () => {
