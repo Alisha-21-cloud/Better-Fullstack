@@ -1,14 +1,29 @@
-/** @jsxImportSource chat */
 import { createDiscordAdapter } from "@chat-adapter/discord";
 import { createMemoryState } from "@chat-adapter/state-memory";
 import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { Actions, Button, Card, CardText as Text, Chat, Divider } from "chat";
 
+function requiredEnv(name: string, buildFallback: string) {
+  const value = process.env[name];
+  if (value) return value;
+  if (process.env.npm_lifecycle_event === "build") {
+    return buildFallback;
+  }
+  throw new Error(`${name} is required for the Discord Chat SDK adapter.`);
+}
+
 export const chatBot = new Chat({
   userName: process.env.BOT_USERNAME || "support-bot",
   adapters: {
-    discord: createDiscordAdapter(),
+    discord: createDiscordAdapter({
+      applicationId: requiredEnv("DISCORD_APPLICATION_ID", "000000000000000000"),
+      botToken: requiredEnv("DISCORD_BOT_TOKEN", "development-bot-token"),
+      publicKey: requiredEnv(
+        "DISCORD_PUBLIC_KEY",
+        "0000000000000000000000000000000000000000000000000000000000000000",
+      ),
+    }),
   },
   state: createMemoryState(),
 });
@@ -16,15 +31,14 @@ export const chatBot = new Chat({
 chatBot.onNewMention(async (thread) => {
   await thread.subscribe();
   await thread.post(
-    <Card title="Support">
-      <Text>Hey! I'm here to help. Ask your question in this thread.</Text>
-      <Divider />
-      <Actions>
-        <Button id="escalate" style="danger">
-          Escalate to Human
-        </Button>
-      </Actions>
-    </Card>,
+    Card({
+      title: "Support",
+      children: [
+        Text("Hey! I'm here to help. Ask your question in this thread."),
+        Divider(),
+        Actions([Button({ id: "escalate", label: "Escalate to Human", style: "danger" })]),
+      ],
+    }),
   );
 });
 
@@ -42,6 +56,7 @@ chatBot.onSubscribedMessage(async (thread, message) => {
 });
 
 chatBot.onAction("escalate", async (event) => {
+  if (!event.thread) return;
   await event.thread.post(
     `${event.user.fullName} requested human support. A team member will follow up shortly.`,
   );

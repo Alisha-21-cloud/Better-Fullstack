@@ -208,7 +208,7 @@ describe("Java Ecosystem", () => {
         javaOrm: "none",
         javaAuth: "none",
         javaLibraries: [],
-        javaTestingLibraries: ["junit5"],
+        javaTestingLibraries: ["junit5", "wiremock", "archunit"],
       });
 
       expect(result.success).toBe(true);
@@ -239,7 +239,7 @@ describe("Java Ecosystem", () => {
         javaOrm: "none",
         javaAuth: "none",
         javaLibraries: [],
-        javaTestingLibraries: ["junit5"],
+        javaTestingLibraries: ["junit5", "wiremock", "archunit"],
       });
 
       expect(result.success).toBe(true);
@@ -261,7 +261,7 @@ describe("Java Ecosystem", () => {
         javaOrm: "none",
         javaAuth: "none",
         javaLibraries: [],
-        javaTestingLibraries: ["junit5"],
+        javaTestingLibraries: ["junit5", "wiremock", "archunit"],
         aiDocs: ["claude-md"],
       });
 
@@ -296,6 +296,8 @@ describe("Java Ecosystem", () => {
       expect(pomContent).toContain("<quarkus.platform.version>3.35.2</quarkus.platform.version>");
       expect(pomContent).toContain("<artifactId>quarkus-rest</artifactId>");
       expect(pomContent).toContain("<artifactId>quarkus-junit5</artifactId>");
+      expect(pomContent).toContain("<artifactId>wiremock</artifactId>");
+      expect(pomContent).toContain("<artifactId>archunit-junit5</artifactId>");
       expect(pomContent).toContain("<artifactId>quarkus-maven-plugin</artifactId>");
       expect(pomContent).not.toContain("spring-boot-starter-parent");
       expect(applicationContent).toContain("@QuarkusMain");
@@ -315,7 +317,7 @@ describe("Java Ecosystem", () => {
         javaOrm: "none",
         javaAuth: "none",
         javaLibraries: [],
-        javaTestingLibraries: ["junit5"],
+        javaTestingLibraries: ["junit5", "wiremock", "archunit"],
       });
 
       expect(result.success).toBe(true);
@@ -337,6 +339,10 @@ describe("Java Ecosystem", () => {
       );
       expect(gradleContent).toContain('implementation("io.quarkus:quarkus-rest")');
       expect(gradleContent).toContain('testImplementation("io.quarkus:quarkus-junit5")');
+      expect(gradleContent).toContain('testImplementation("org.wiremock:wiremock:3.13.2")');
+      expect(gradleContent).toContain(
+        'testImplementation("com.tngtech.archunit:archunit-junit5:1.4.2")',
+      );
       expect(gradleContent).not.toContain("org.springframework.boot");
       expect(readmeContent).toContain("./gradlew quarkusDev");
     });

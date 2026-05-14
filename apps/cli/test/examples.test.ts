@@ -413,6 +413,12 @@ describe("Example Configurations", () => {
 
       expect(routeFile).toContain("chatBot.webhooks");
       expect(botFile).toContain("createSlackAdapter");
+      expect(botFile).toContain("SLACK_SIGNING_SECRET");
+      expect(botFile).toContain("requiredEnv");
+      expect(botFile).toContain("Card({");
+      expect(botFile).toContain('Button({ id: "hello", label: "Say Hello", style: "primary" })');
+      expect(botFile).toContain("if (!event.thread) return;");
+      expect(botFile).not.toContain("<Card");
       expect(webPkg.dependencies.chat).toBeDefined();
       expect(webPkg.dependencies["@chat-adapter/slack"]).toBeDefined();
       expect(webPkg.dependencies["@chat-adapter/state-memory"]).toBeDefined();
@@ -442,10 +448,16 @@ describe("Example Configurations", () => {
 
       const projectDir = result.projectDir!;
       const routeFile = await Bun.file(join(projectDir, "apps/web/src/routes/api/webhooks/$.ts")).text();
+      const botFile = await Bun.file(join(projectDir, "apps/web/src/lib/chat-bot.tsx")).text();
       const webPkg = await Bun.file(join(projectDir, "apps/web/package.json")).json();
 
       expect(routeFile).toContain("createFileRoute(\"/api/webhooks/$\")");
       expect(routeFile).toContain("chatBot.webhooks");
+      expect(botFile).toContain("Card({");
+      expect(botFile).toContain("SLACK_SIGNING_SECRET");
+      expect(botFile).toContain("requiredEnv");
+      expect(botFile).toContain("if (!event.thread) return;");
+      expect(botFile).not.toContain("<Card");
       expect(webPkg.dependencies["@chat-adapter/slack"]).toBeDefined();
     });
 
@@ -480,6 +492,12 @@ describe("Example Configurations", () => {
       const webPkg = await Bun.file(join(projectDir, "apps/web/package.json")).json();
 
       expect(botFile).toContain("createDiscordAdapter");
+      expect(botFile).toContain("DISCORD_PUBLIC_KEY");
+      expect(botFile).toContain("requiredEnv");
+      expect(botFile).toContain("Card({");
+      expect(botFile).toContain('Button({ id: "escalate", label: "Escalate to Human", style: "danger" })');
+      expect(botFile).toContain("if (!event.thread) return;");
+      expect(botFile).not.toContain("<Card");
       expect(gatewayFile).toContain("startGatewayListener");
       expect(webEnv).toContain("DISCORD_BOT_TOKEN");
       expect(webEnv).toContain("ANTHROPIC_API_KEY");

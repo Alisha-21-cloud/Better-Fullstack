@@ -66,6 +66,32 @@
 		<quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
 		<quarkus.platform.version>3.35.2</quarkus.platform.version>
 		<surefire-plugin.version>3.5.3</surefire-plugin.version>
+{{#if hasJavaTests}}
+{{#if hasJavaAssertj}}
+		<assertj.version>3.27.7</assertj.version>
+{{/if}}
+{{#if hasJavaMockito}}
+		<mockito.version>5.23.0</mockito.version>
+{{/if}}
+{{#if hasJavaTestcontainers}}
+		<testcontainers.version>1.20.4</testcontainers.version>
+{{/if}}
+{{#if hasJavaRestAssured}}
+		<rest-assured.version>6.0.0</rest-assured.version>
+{{/if}}
+{{#if hasJavaWireMock}}
+		<wiremock.version>3.13.2</wiremock.version>
+{{/if}}
+{{#if hasJavaAwaitility}}
+		<awaitility.version>4.3.0</awaitility.version>
+{{/if}}
+{{#if hasJavaArchunit}}
+		<archunit.version>1.4.2</archunit.version>
+{{/if}}
+{{#if hasJavaJqwik}}
+		<jqwik.version>1.9.3</jqwik.version>
+{{/if}}
+{{/if}}
 {{else}}
 		<maven.compiler.release>21</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -395,6 +421,76 @@
 			<artifactId>quarkus-junit5</artifactId>
 			<scope>test</scope>
 		</dependency>
+{{#if hasJavaAssertj}}
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>${assertj.version}</version>
+			<scope>test</scope>
+		</dependency>
+{{/if}}
+{{#if hasJavaMockito}}
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+{{/if}}
+{{#if hasJavaTestcontainers}}
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>testcontainers</artifactId>
+			<version>${testcontainers.version}</version>
+			<scope>test</scope>
+		</dependency>
+{{/if}}
+{{#if hasJavaRestAssured}}
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>${rest-assured.version}</version>
+			<scope>test</scope>
+		</dependency>
+{{/if}}
+{{#if hasJavaWireMock}}
+		<dependency>
+			<groupId>org.wiremock</groupId>
+			<artifactId>wiremock</artifactId>
+			<version>${wiremock.version}</version>
+			<scope>test</scope>
+		</dependency>
+{{/if}}
+{{#if hasJavaAwaitility}}
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>${awaitility.version}</version>
+			<scope>test</scope>
+		</dependency>
+{{/if}}
+{{#if hasJavaArchunit}}
+		<dependency>
+			<groupId>com.tngtech.archunit</groupId>
+			<artifactId>archunit-junit5</artifactId>
+			<version>${archunit.version}</version>
+			<scope>test</scope>
+		</dependency>
+{{/if}}
+{{#if hasJavaJqwik}}
+		<dependency>
+			<groupId>net.jqwik</groupId>
+			<artifactId>jqwik</artifactId>
+			<version>${jqwik.version}</version>
+			<scope>test</scope>
+		</dependency>
+{{/if}}
 {{/if}}
 {{else}}
 {{#if hasJavaTests}}
