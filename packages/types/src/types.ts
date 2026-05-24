@@ -44,6 +44,13 @@ import type {
   ObservabilitySchema,
   FeatureFlagsSchema,
   AnalyticsSchema,
+  MobileNavigationSchema,
+  MobileUISchema,
+  MobileStorageSchema,
+  MobileTestingSchema,
+  MobilePushSchema,
+  MobileOTASchema,
+  MobileDeepLinkingSchema,
   CMSSchema,
   CachingSchema,
   I18nSchema,
@@ -81,6 +88,21 @@ import type {
   JavaAuthSchema,
   JavaLibrariesSchema,
   JavaTestingLibrariesSchema,
+  ElixirWebFrameworkSchema,
+  ElixirOrmSchema,
+  ElixirAuthSchema,
+  ElixirApiSchema,
+  ElixirRealtimeSchema,
+  ElixirJobsSchema,
+  ElixirValidationSchema,
+  ElixirHttpSchema,
+  ElixirJsonSchema,
+  ElixirEmailSchema,
+  ElixirCachingSchema,
+  ElixirObservabilitySchema,
+  ElixirTestingSchema,
+  ElixirQualitySchema,
+  ElixirDeploySchema,
   AiDocsSchema,
   ShadcnBaseSchema,
   ShadcnStyleSchema,
@@ -128,6 +150,13 @@ export type Logging = z.infer<typeof LoggingSchema>;
 export type Observability = z.infer<typeof ObservabilitySchema>;
 export type FeatureFlags = z.infer<typeof FeatureFlagsSchema>;
 export type Analytics = z.infer<typeof AnalyticsSchema>;
+export type MobileNavigation = z.infer<typeof MobileNavigationSchema>;
+export type MobileUI = z.infer<typeof MobileUISchema>;
+export type MobileStorage = z.infer<typeof MobileStorageSchema>;
+export type MobileTesting = z.infer<typeof MobileTestingSchema>;
+export type MobilePush = z.infer<typeof MobilePushSchema>;
+export type MobileOTA = z.infer<typeof MobileOTASchema>;
+export type MobileDeepLinking = z.infer<typeof MobileDeepLinkingSchema>;
 export type CMS = z.infer<typeof CMSSchema>;
 export type Caching = z.infer<typeof CachingSchema>;
 export type I18n = z.infer<typeof I18nSchema>;
@@ -165,6 +194,21 @@ export type JavaOrm = z.infer<typeof JavaOrmSchema>;
 export type JavaAuth = z.infer<typeof JavaAuthSchema>;
 export type JavaLibraries = z.infer<typeof JavaLibrariesSchema>;
 export type JavaTestingLibraries = z.infer<typeof JavaTestingLibrariesSchema>;
+export type ElixirWebFramework = z.infer<typeof ElixirWebFrameworkSchema>;
+export type ElixirOrm = z.infer<typeof ElixirOrmSchema>;
+export type ElixirAuth = z.infer<typeof ElixirAuthSchema>;
+export type ElixirApi = z.infer<typeof ElixirApiSchema>;
+export type ElixirRealtime = z.infer<typeof ElixirRealtimeSchema>;
+export type ElixirJobs = z.infer<typeof ElixirJobsSchema>;
+export type ElixirValidation = z.infer<typeof ElixirValidationSchema>;
+export type ElixirHttp = z.infer<typeof ElixirHttpSchema>;
+export type ElixirJson = z.infer<typeof ElixirJsonSchema>;
+export type ElixirEmail = z.infer<typeof ElixirEmailSchema>;
+export type ElixirCaching = z.infer<typeof ElixirCachingSchema>;
+export type ElixirObservability = z.infer<typeof ElixirObservabilitySchema>;
+export type ElixirTesting = z.infer<typeof ElixirTestingSchema>;
+export type ElixirQuality = z.infer<typeof ElixirQualitySchema>;
+export type ElixirDeploy = z.infer<typeof ElixirDeploySchema>;
 export type AiDocs = z.infer<typeof AiDocsSchema>;
 export type ShadcnBase = z.infer<typeof ShadcnBaseSchema>;
 export type ShadcnStyle = z.infer<typeof ShadcnStyleSchema>;

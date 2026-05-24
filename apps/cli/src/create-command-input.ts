@@ -17,6 +17,21 @@ import {
   DatabaseSetupSchema,
   DirectoryConflictSchema,
   EcosystemSchema,
+  ElixirApiSchema,
+  ElixirAuthSchema,
+  ElixirCachingSchema,
+  ElixirDeploySchema,
+  ElixirEmailSchema,
+  ElixirHttpSchema,
+  ElixirJobsSchema,
+  ElixirJsonSchema,
+  ElixirObservabilitySchema,
+  ElixirOrmSchema,
+  ElixirQualitySchema,
+  ElixirRealtimeSchema,
+  ElixirTestingSchema,
+  ElixirValidationSchema,
+  ElixirWebFrameworkSchema,
   EffectSchema,
   EmailSchema,
   ExamplesSchema,
@@ -24,6 +39,13 @@ import {
   FileStorageSchema,
   FileUploadSchema,
   FormsSchema,
+  MobileDeepLinkingSchema,
+  MobileNavigationSchema,
+  MobileOTASchema,
+  MobilePushSchema,
+  MobileStorageSchema,
+  MobileTestingSchema,
+  MobileUISchema,
   FrontendSchema,
   GoApiSchema,
   GoAuthSchema,
@@ -98,7 +120,9 @@ export const CreateCommandOptionsSchema = z.object({
     .optional()
     .default(false)
     .describe("Preview generated file tree without writing to disk"),
-  ecosystem: EcosystemSchema.optional().describe("Language ecosystem (typescript, rust, python, go, or java)"),
+  ecosystem: EcosystemSchema.optional().describe(
+    "Language ecosystem (typescript, react-native, rust, python, go, java, or elixir)",
+  ),
   database: DatabaseSchema.optional(),
   orm: ORMSchema.optional(),
   auth: AuthSchema.optional(),
@@ -123,6 +147,13 @@ export const CreateCommandOptionsSchema = z.object({
   i18n: I18nSchema.optional().describe("Internationalization (i18n) library"),
   search: SearchSchema.optional().describe("Search engine solution"),
   fileStorage: FileStorageSchema.optional().describe("File storage solution (S3, R2)"),
+  mobileNavigation: MobileNavigationSchema.optional().describe("Mobile navigation (expo-router, react-navigation)"),
+  mobileUI: MobileUISchema.optional().describe("Mobile UI (tamagui, gluestack-ui, uniwind, unistyles)"),
+  mobileStorage: MobileStorageSchema.optional().describe("Mobile storage (mmkv)"),
+  mobileTesting: MobileTestingSchema.optional().describe("Mobile testing (maestro, react-native-testing-library)"),
+  mobilePush: MobilePushSchema.optional().describe("Mobile push notifications (expo-notifications)"),
+  mobileOTA: MobileOTASchema.optional().describe("Mobile OTA updates (expo-updates)"),
+  mobileDeepLinking: MobileDeepLinkingSchema.optional().describe("Mobile deep linking (expo-linking)"),
   frontend: z.array(FrontendSchema).optional(),
   astroIntegration: AstroIntegrationSchema.optional().describe(
     "Astro UI framework integration (react, vue, svelte, solid)",
@@ -219,6 +250,39 @@ export const CreateCommandOptionsSchema = z.object({
     .array(JavaTestingLibrariesSchema)
     .optional()
     .describe("Java testing libraries"),
+  elixirWebFramework: ElixirWebFrameworkSchema.optional().describe(
+    "Elixir web framework (phoenix, phoenix-live-view, none)",
+  ),
+  elixirOrm: ElixirOrmSchema.optional().describe("Elixir ORM/database (ecto, ecto-sql, none)"),
+  elixirAuth: ElixirAuthSchema.optional().describe(
+    "Elixir auth (phx-gen-auth, ueberauth, guardian, none)",
+  ),
+  elixirApi: ElixirApiSchema.optional().describe("Elixir API layer (rest, absinthe, none)"),
+  elixirRealtime: ElixirRealtimeSchema.optional().describe(
+    "Elixir realtime (channels, presence, pubsub, live-view-streams, none)",
+  ),
+  elixirJobs: ElixirJobsSchema.optional().describe("Elixir jobs (oban, quantum, none)"),
+  elixirValidation: ElixirValidationSchema.optional().describe(
+    "Elixir validation (ecto-changesets, nimble-options, none)",
+  ),
+  elixirHttp: ElixirHttpSchema.optional().describe("Elixir HTTP client (req, finch, none)"),
+  elixirJson: ElixirJsonSchema.optional().describe("Elixir JSON library (jason, none)"),
+  elixirEmail: ElixirEmailSchema.optional().describe("Elixir email library (swoosh, none)"),
+  elixirCaching: ElixirCachingSchema.optional().describe(
+    "Elixir caching (cachex, nebulex, none)",
+  ),
+  elixirObservability: ElixirObservabilitySchema.optional().describe(
+    "Elixir observability (telemetry, opentelemetry, prom_ex, none)",
+  ),
+  elixirTesting: ElixirTestingSchema.optional().describe(
+    "Elixir testing (ex_unit, mox, bypass, wallaby, none)",
+  ),
+  elixirQuality: ElixirQualitySchema.optional().describe(
+    "Elixir code quality (credo, dialyxir, sobelow, none)",
+  ),
+  elixirDeploy: ElixirDeploySchema.optional().describe(
+    "Elixir deploy target (docker, fly, gigalixir, mix-release, none)",
+  ),
   aiDocs: z
     .array(AiDocsSchema)
     .optional()

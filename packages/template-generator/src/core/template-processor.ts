@@ -73,6 +73,52 @@ Handlebars.registerHelper("projectNameWithClosingBrace", function (this: Project
   return `${this.projectName ?? ""}}`;
 });
 
+export function normalizeElixirAppName(projectName?: string): string {
+  const rawName = String(projectName ?? "my_app").toLowerCase();
+  const parts: string[] = [];
+  let pendingSeparator = false;
+
+  for (const char of rawName) {
+    const code = char.charCodeAt(0);
+    const isLowercaseLetter = code >= 97 && code <= 122;
+    const isDigit = code >= 48 && code <= 57;
+
+    if (isLowercaseLetter || isDigit) {
+      if (pendingSeparator && parts.length > 0) {
+        parts.push("_");
+      }
+      parts.push(char);
+      pendingSeparator = false;
+    } else {
+      pendingSeparator = parts.length > 0;
+    }
+  }
+
+  const appName = parts.join("") || "my_app";
+  const firstCode = appName.charCodeAt(0);
+  const startsWithLetter = firstCode >= 97 && firstCode <= 122;
+
+  return startsWithLetter ? appName : `app_${appName}`;
+}
+
+export function elixirModuleName(projectName?: string): string {
+  const appName = normalizeElixirAppName(projectName);
+
+  return appName
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+}
+
+Handlebars.registerHelper("elixirAppName", function (this: ProjectConfig) {
+  return normalizeElixirAppName(this.projectName);
+});
+
+Handlebars.registerHelper("elixirModuleName", function (this: ProjectConfig) {
+  return elixirModuleName(this.projectName);
+});
+
 /** Returns the CSS font-family string for the chosen shadcn font. */
 Handlebars.registerHelper("shadcnFontFamily", function (this: ProjectConfig) {
   const font = this.shadcnFont ?? "inter";

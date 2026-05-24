@@ -76,13 +76,14 @@ const PYTHON_QUALITIES = extractEnumValues(PythonQualitySchema);
 
 describe("Python Language Support", () => {
   describe("Schema Definitions", () => {
-    it("should have ecosystem schema with typescript, rust, python, go, and java", () => {
+    it("should include Python alongside the other ecosystem schema values", () => {
       expect(ECOSYSTEMS).toContain("typescript");
       expect(ECOSYSTEMS).toContain("rust");
       expect(ECOSYSTEMS).toContain("python");
       expect(ECOSYSTEMS).toContain("go");
       expect(ECOSYSTEMS).toContain("java");
-      expect(ECOSYSTEMS.length).toBe(5);
+      expect(ECOSYSTEMS).toContain("react-native");
+      expect(ECOSYSTEMS).toContain("elixir");
     });
 
     it("should have python web framework options", () => {

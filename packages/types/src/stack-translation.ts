@@ -34,6 +34,13 @@ export const DEFAULT_STACK_SELECTION: StackSelectionState = {
   observability: "none",
   featureFlags: "none",
   analytics: "none",
+  mobileNavigation: "none",
+  mobileUI: "none",
+  mobileStorage: "none",
+  mobileTesting: "none",
+  mobilePush: "none",
+  mobileOTA: "none",
+  mobileDeepLinking: "none",
   backendLibraries: "none",
   stateManagement: "none",
   forms: "react-hook-form",
@@ -101,6 +108,21 @@ export const DEFAULT_STACK_SELECTION: StackSelectionState = {
   javaAuth: "none",
   javaLibraries: [],
   javaTestingLibraries: ["junit5"],
+  elixirWebFramework: "phoenix",
+  elixirOrm: "ecto-sql",
+  elixirAuth: "none",
+  elixirApi: "rest",
+  elixirRealtime: "channels",
+  elixirJobs: "none",
+  elixirValidation: "ecto-changesets",
+  elixirHttp: "req",
+  elixirJson: "jason",
+  elixirEmail: "none",
+  elixirCaching: "none",
+  elixirObservability: "telemetry",
+  elixirTesting: "ex_unit",
+  elixirQuality: "credo",
+  elixirDeploy: "none",
 };
 
 export type StackSelectionKey = keyof StackSelectionState;
@@ -130,6 +152,13 @@ export const STACK_SELECTION_OPTION_CATEGORY_BY_KEY: Record<
   observability: "observability",
   featureFlags: "featureFlags",
   analytics: "analytics",
+  mobileNavigation: "mobileNavigation",
+  mobileUI: "mobileUI",
+  mobileStorage: "mobileStorage",
+  mobileTesting: "mobileTesting",
+  mobilePush: "mobilePush",
+  mobileOTA: "mobileOTA",
+  mobileDeepLinking: "mobileDeepLinking",
   backendLibraries: "backendLibraries",
   stateManagement: "stateManagement",
   forms: "forms",
@@ -196,6 +225,21 @@ export const STACK_SELECTION_OPTION_CATEGORY_BY_KEY: Record<
   javaAuth: "javaAuth",
   javaLibraries: "javaLibraries",
   javaTestingLibraries: "javaTestingLibraries",
+  elixirWebFramework: "elixirWebFramework",
+  elixirOrm: "elixirOrm",
+  elixirAuth: "elixirAuth",
+  elixirApi: "elixirApi",
+  elixirRealtime: "elixirRealtime",
+  elixirJobs: "elixirJobs",
+  elixirValidation: "elixirValidation",
+  elixirHttp: "elixirHttp",
+  elixirJson: "elixirJson",
+  elixirEmail: "elixirEmail",
+  elixirCaching: "elixirCaching",
+  elixirObservability: "elixirObservability",
+  elixirTesting: "elixirTesting",
+  elixirQuality: "elixirQuality",
+  elixirDeploy: "elixirDeploy",
 };
 
 export const VIRTUAL_NONE_MULTI_SELECT_STACK_SELECTION_KEYS = [
@@ -231,6 +275,13 @@ export const STACK_SELECTION_URL_KEYS = {
   observability: "obs",
   featureFlags: "ff",
   analytics: "an",
+  mobileNavigation: "mn",
+  mobileUI: "mui",
+  mobileStorage: "mst",
+  mobileTesting: "mte",
+  mobilePush: "mpu",
+  mobileOTA: "mota",
+  mobileDeepLinking: "mdl",
   backendLibraries: "bl",
   stateManagement: "sm",
   forms: "frm",
@@ -298,6 +349,21 @@ export const STACK_SELECTION_URL_KEYS = {
   javaAuth: "jauth",
   javaLibraries: "jlib",
   javaTestingLibraries: "jtest",
+  elixirWebFramework: "ewf",
+  elixirOrm: "eorm",
+  elixirAuth: "eauth",
+  elixirApi: "eapi",
+  elixirRealtime: "ert",
+  elixirJobs: "ejob",
+  elixirValidation: "eval",
+  elixirHttp: "ehttp",
+  elixirJson: "ejson",
+  elixirEmail: "emailx",
+  elixirCaching: "ecache",
+  elixirObservability: "eobs",
+  elixirTesting: "etest",
+  elixirQuality: "eq",
+  elixirDeploy: "edeploy",
 } as const satisfies Record<StackSelectionKey, string>;
 
 export const STACK_SELECTION_KEYS = Object.keys(
@@ -514,6 +580,13 @@ const CLI_SCALAR_CONFIG_FIELDS = [
   ["search", "search"],
   ["fileStorage", "fileStorage"],
   ["analytics", "analytics"],
+  ["mobileNavigation", "mobileNavigation"],
+  ["mobileUI", "mobileUI"],
+  ["mobileStorage", "mobileStorage"],
+  ["mobileTesting", "mobileTesting"],
+  ["mobilePush", "mobilePush"],
+  ["mobileOTA", "mobileOTA"],
+  ["mobileDeepLinking", "mobileDeepLinking"],
   ["featureFlags", "featureFlags"],
   ["fileUpload", "fileUpload"],
   ["git", "git"],
@@ -561,6 +634,21 @@ const CLI_SCALAR_CONFIG_FIELDS = [
   ["javaBuildTool", "javaBuildTool"],
   ["javaOrm", "javaOrm"],
   ["javaAuth", "javaAuth"],
+  ["elixirWebFramework", "elixirWebFramework"],
+  ["elixirOrm", "elixirOrm"],
+  ["elixirAuth", "elixirAuth"],
+  ["elixirApi", "elixirApi"],
+  ["elixirRealtime", "elixirRealtime"],
+  ["elixirJobs", "elixirJobs"],
+  ["elixirValidation", "elixirValidation"],
+  ["elixirHttp", "elixirHttp"],
+  ["elixirJson", "elixirJson"],
+  ["elixirEmail", "elixirEmail"],
+  ["elixirCaching", "elixirCaching"],
+  ["elixirObservability", "elixirObservability"],
+  ["elixirTesting", "elixirTesting"],
+  ["elixirQuality", "elixirQuality"],
+  ["elixirDeploy", "elixirDeploy"],
 ] as const satisfies readonly (readonly [keyof CLIInput, keyof ProjectConfig])[];
 
 const CLI_NON_EMPTY_ARRAY_CONFIG_FIELDS = [
@@ -635,6 +723,34 @@ const JAVA_CONFIG_KEYS = [
   "javaAuth",
   "javaLibraries",
   "javaTestingLibraries",
+] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
+
+const ELIXIR_CONFIG_KEYS = [
+  "elixirWebFramework",
+  "elixirOrm",
+  "elixirAuth",
+  "elixirApi",
+  "elixirRealtime",
+  "elixirJobs",
+  "elixirValidation",
+  "elixirHttp",
+  "elixirJson",
+  "elixirEmail",
+  "elixirCaching",
+  "elixirObservability",
+  "elixirTesting",
+  "elixirQuality",
+  "elixirDeploy",
+] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
+
+const REACT_NATIVE_CONFIG_KEYS = [
+  "mobileNavigation",
+  "mobileUI",
+  "mobileStorage",
+  "mobileTesting",
+  "mobilePush",
+  "mobileOTA",
+  "mobileDeepLinking",
 ] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
 
 const COMMAND_ADDONS = new Set([
@@ -837,6 +953,13 @@ function buildProjectConfigBase(
     observability: stack.observability as ProjectConfig["observability"],
     featureFlags: stack.featureFlags as ProjectConfig["featureFlags"],
     analytics: stack.analytics as ProjectConfig["analytics"],
+    mobileNavigation: stack.mobileNavigation as ProjectConfig["mobileNavigation"],
+    mobileUI: stack.mobileUI as ProjectConfig["mobileUI"],
+    mobileStorage: stack.mobileStorage as ProjectConfig["mobileStorage"],
+    mobileTesting: stack.mobileTesting as ProjectConfig["mobileTesting"],
+    mobilePush: stack.mobilePush as ProjectConfig["mobilePush"],
+    mobileOTA: stack.mobileOTA as ProjectConfig["mobileOTA"],
+    mobileDeepLinking: stack.mobileDeepLinking as ProjectConfig["mobileDeepLinking"],
     cms: stack.cms as ProjectConfig["cms"],
     caching: stack.caching as ProjectConfig["caching"],
     i18n: stack.i18n as ProjectConfig["i18n"],
@@ -875,6 +998,21 @@ function buildProjectConfigBase(
     javaTestingLibraries: toUniqueNonNoneArray(
       stack.javaTestingLibraries,
     ) as ProjectConfig["javaTestingLibraries"],
+    elixirWebFramework: stack.elixirWebFramework as ProjectConfig["elixirWebFramework"],
+    elixirOrm: stack.elixirOrm as ProjectConfig["elixirOrm"],
+    elixirAuth: stack.elixirAuth as ProjectConfig["elixirAuth"],
+    elixirApi: stack.elixirApi as ProjectConfig["elixirApi"],
+    elixirRealtime: stack.elixirRealtime as ProjectConfig["elixirRealtime"],
+    elixirJobs: stack.elixirJobs as ProjectConfig["elixirJobs"],
+    elixirValidation: stack.elixirValidation as ProjectConfig["elixirValidation"],
+    elixirHttp: stack.elixirHttp as ProjectConfig["elixirHttp"],
+    elixirJson: stack.elixirJson as ProjectConfig["elixirJson"],
+    elixirEmail: stack.elixirEmail as ProjectConfig["elixirEmail"],
+    elixirCaching: stack.elixirCaching as ProjectConfig["elixirCaching"],
+    elixirObservability: stack.elixirObservability as ProjectConfig["elixirObservability"],
+    elixirTesting: stack.elixirTesting as ProjectConfig["elixirTesting"],
+    elixirQuality: stack.elixirQuality as ProjectConfig["elixirQuality"],
+    elixirDeploy: stack.elixirDeploy as ProjectConfig["elixirDeploy"],
     aiDocs: toUniqueNonNoneArray(stack.aiDocs) as ProjectConfig["aiDocs"],
   };
 }
@@ -917,12 +1055,14 @@ export function isCliDefaultStackSelection(
     relativePath: projectName,
   };
   const ignoredKeys =
-    selection.ecosystem === "typescript"
+    selection.ecosystem === "typescript" || selection.ecosystem === "react-native"
       ? new Set<keyof CliDefaultProjectConfigBase>([
           ...RUST_CONFIG_KEYS,
           ...PYTHON_CONFIG_KEYS,
           ...GO_CONFIG_KEYS,
           ...JAVA_CONFIG_KEYS,
+          ...ELIXIR_CONFIG_KEYS,
+          ...(selection.ecosystem === "typescript" ? REACT_NATIVE_CONFIG_KEYS : []),
         ])
       : new Set<keyof CliDefaultProjectConfigBase>();
 
@@ -1029,6 +1169,35 @@ function generateTypeScriptCommand(selection: StackSelectionInput, projectName: 
   return `${base} ${projectName} ${flags.join(" ")}`;
 }
 
+function generateReactNativeCommand(selection: StackSelectionInput, projectName: string) {
+  const flags = [
+    "--ecosystem react-native",
+    `--frontend ${
+      selection.nativeFrontend
+        .filter((value, _, values) => value !== "none" || values.length === 1)
+        .join(" ") || "native-bare"
+    }`,
+    `--auth ${selection.auth}`,
+    `--mobile-navigation ${selection.mobileNavigation}`,
+    `--mobile-ui ${selection.mobileUI}`,
+    `--mobile-storage ${selection.mobileStorage}`,
+    `--mobile-testing ${selection.mobileTesting}`,
+    `--mobile-push ${selection.mobilePush}`,
+    `--mobile-ota ${selection.mobileOTA}`,
+    `--mobile-deep-linking ${selection.mobileDeepLinking}`,
+    `--package-manager ${selection.packageManager}`,
+    selection.git === "false" ? "--no-git" : "--git",
+    selection.install === "false" ? "--no-install" : "--install",
+    formatArrayFlag("ai-docs", selection.aiDocs),
+  ];
+
+  if (selection.yolo === "true") {
+    flags.push("--yolo");
+  }
+
+  return `${getBaseCommand(selection)} ${projectName} ${flags.join(" ")}`;
+}
+
 function generateRustCommand(selection: StackSelectionInput, projectName: string) {
   const flags: string[] = [
     "--ecosystem rust",
@@ -1125,10 +1294,39 @@ function generateJavaCommand(selection: StackSelectionInput, projectName: string
   return `${getBaseCommand(selection)} ${projectName} ${flags.join(" ")}`;
 }
 
+function generateElixirCommand(selection: StackSelectionInput, projectName: string) {
+  const flags: string[] = [
+    "--ecosystem elixir",
+    `--elixir-web-framework ${selection.elixirWebFramework}`,
+    `--elixir-orm ${selection.elixirOrm}`,
+    `--elixir-auth ${selection.elixirAuth}`,
+    `--elixir-api ${selection.elixirApi}`,
+    `--elixir-realtime ${selection.elixirRealtime}`,
+    `--elixir-jobs ${selection.elixirJobs}`,
+    `--elixir-validation ${selection.elixirValidation}`,
+    `--elixir-http ${selection.elixirHttp}`,
+    `--elixir-json ${selection.elixirJson}`,
+    `--elixir-email ${selection.elixirEmail}`,
+    `--elixir-caching ${selection.elixirCaching}`,
+    `--elixir-observability ${selection.elixirObservability}`,
+    `--elixir-testing ${selection.elixirTesting}`,
+    `--elixir-quality ${selection.elixirQuality}`,
+    `--elixir-deploy ${selection.elixirDeploy}`,
+    formatArrayFlag("ai-docs", selection.aiDocs),
+  ];
+
+  if (selection.git === "false") flags.push("--no-git");
+  if (selection.install === "false") flags.push("--no-install");
+
+  return `${getBaseCommand(selection)} ${projectName} ${flags.join(" ")}`;
+}
+
 export function generateStackSelectionCommand(selection: StackSelectionInput): string {
   const projectName = getProjectName(selection);
 
   switch (selection.ecosystem) {
+    case "react-native":
+      return generateReactNativeCommand(selection, projectName);
     case "rust":
       return generateRustCommand(selection, projectName);
     case "python":
@@ -1137,6 +1335,8 @@ export function generateStackSelectionCommand(selection: StackSelectionInput): s
       return generateGoCommand(selection, projectName);
     case "java":
       return generateJavaCommand(selection, projectName);
+    case "elixir":
+      return generateElixirCommand(selection, projectName);
     case "typescript":
     default:
       return generateTypeScriptCommand(selection, projectName);

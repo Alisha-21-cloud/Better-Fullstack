@@ -150,7 +150,8 @@ describe("Java Ecosystem", () => {
   describe("Schema Definitions", () => {
     it("should expose java as a valid ecosystem", () => {
       expect(ECOSYSTEMS).toContain("java");
-      expect(ECOSYSTEMS).toHaveLength(5);
+      expect(ECOSYSTEMS).toContain("react-native");
+      expect(ECOSYSTEMS).toContain("elixir");
     });
 
     it("should expose scaffolded Java web framework values", () => {
@@ -478,6 +479,9 @@ describe("Java Ecosystem", () => {
       expect(gradleContent).toContain("application");
       expect(gradleContent).toContain('mainClass = "com.example.javaplaingradletests.Application"');
       expect(gradleContent).toContain('testImplementation(platform("org.junit:junit-bom:5.12.2"))');
+      expect(gradleContent).toContain(
+        'testRuntimeOnly("org.junit.platform:junit-platform-launcher")',
+      );
       expect(gradleContent).toContain(
         'testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")',
       );

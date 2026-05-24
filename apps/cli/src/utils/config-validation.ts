@@ -559,6 +559,21 @@ export function validateFrontendConstraints(
   const { frontend } = config;
 
   if (frontend && frontend.length > 0) {
+    if (
+      config.ecosystem === "react-native" &&
+      frontend.some((item) => !item.startsWith("native-") && item !== "none")
+    ) {
+      incompatibilityError({
+        message: "React Native ecosystem only supports native Expo frontends.",
+        provided: { ecosystem: "react-native", frontend: frontend.join(" ") },
+        suggestions: [
+          "Use --frontend native-bare",
+          "Use --frontend native-uniwind",
+          "Use --frontend native-unistyles",
+        ],
+      });
+    }
+
     ensureSingleWebAndNative(frontend);
 
     if (providedFlags.has("api") && providedFlags.has("frontend") && config.api) {
@@ -634,6 +649,167 @@ export function validateJavaConstraints(
         "Use --java-build-tool maven or --java-build-tool gradle to enable JUnit/Mockito/Testcontainers",
         "Set --java-testing-libraries none for a source-only plain Java scaffold",
       ],
+    });
+  }
+}
+
+export function validateElixirConstraints(config: Partial<ProjectConfig>) {
+  if (config.ecosystem !== "elixir") return;
+
+  const hasPhoenix = config.elixirWebFramework !== "none";
+  const hasEcto = config.elixirOrm !== "none";
+
+  const unsupportedSelections = [
+    {
+      flag: "elixir-orm",
+      value: config.elixirOrm,
+      unsupported: ["ecto"],
+      message: "Plain Ecto without SQL Repo wiring is not generated yet.",
+      suggestions: ["Use --elixir-orm ecto-sql", "Use --elixir-orm none"],
+    },
+    {
+      flag: "elixir-auth",
+      value: config.elixirAuth,
+      unsupported: ["ueberauth", "guardian"],
+      message: "Only phx.gen.auth currently generates Phoenix auth files.",
+      suggestions: ["Use --elixir-auth phx-gen-auth", "Use --elixir-auth none"],
+    },
+    {
+      flag: "elixir-validation",
+      value: config.elixirValidation,
+      unsupported: ["nimble-options"],
+      message: "NimbleOptions is not generated yet.",
+      suggestions: ["Use --elixir-validation ecto-changesets", "Use --elixir-validation none"],
+    },
+    {
+      flag: "elixir-caching",
+      value: config.elixirCaching,
+      unsupported: ["nebulex"],
+      message: "Nebulex cache modules are not generated yet.",
+      suggestions: ["Use --elixir-caching cachex", "Use --elixir-caching none"],
+    },
+    {
+      flag: "elixir-observability",
+      value: config.elixirObservability,
+      unsupported: ["opentelemetry", "prom_ex"],
+      message: "OpenTelemetry and PromEx setup are not generated yet.",
+      suggestions: ["Use --elixir-observability telemetry", "Use --elixir-observability none"],
+    },
+    {
+      flag: "elixir-testing",
+      value: config.elixirTesting,
+      unsupported: ["mox", "bypass", "wallaby"],
+      message: "Generated Phoenix projects currently include ExUnit tests only.",
+      suggestions: ["Use --elixir-testing ex_unit"],
+    },
+    {
+      flag: "elixir-deploy",
+      value: config.elixirDeploy,
+      unsupported: ["fly", "gigalixir"],
+      message: "Fly.io and Gigalixir config files are not generated yet.",
+      suggestions: ["Use --elixir-deploy docker", "Use --elixir-deploy mix-release"],
+    },
+  ];
+
+  for (const selection of unsupportedSelections) {
+    if (selection.value && selection.unsupported.includes(selection.value)) {
+      incompatibilityError({
+        message: selection.message,
+        provided: { [selection.flag]: selection.value },
+        suggestions: selection.suggestions,
+      });
+    }
+  }
+
+  if (!hasPhoenix) {
+    const phoenixOnlySelections = [
+      {
+        flag: "elixir-auth",
+        value: config.elixirAuth,
+        message: "Elixir auth scaffolds require Phoenix.",
+      },
+      {
+        flag: "elixir-api",
+        value: config.elixirApi,
+        message: "Elixir API scaffolds require Phoenix.",
+      },
+      {
+        flag: "elixir-realtime",
+        value: config.elixirRealtime,
+        message: "Elixir realtime scaffolds require Phoenix.",
+      },
+    ];
+
+    for (const selection of phoenixOnlySelections) {
+      if (!selection.value || selection.value === "none") continue;
+
+      incompatibilityError({
+        message: selection.message,
+        provided: {
+          "elixir-web-framework": config.elixirWebFramework ?? "none",
+          [selection.flag]: selection.value,
+        },
+        suggestions: [
+          "Use --elixir-web-framework phoenix",
+          "Use --elixir-web-framework phoenix-live-view",
+          `Use --${selection.flag} none`,
+        ],
+      });
+    }
+  }
+
+  if (hasPhoenix && config.elixirJson === "none") {
+    incompatibilityError({
+      message: "Phoenix JSON scaffolds require Jason.",
+      provided: { "elixir-json": "none" },
+      suggestions: ["Use --elixir-json jason"],
+    });
+  }
+
+  if (config.elixirAuth === "phx-gen-auth" && !hasEcto) {
+    incompatibilityError({
+      message: "phx.gen.auth requires Ecto in the generated Phoenix scaffold.",
+      provided: {
+        "elixir-auth": "phx-gen-auth",
+        "elixir-orm": config.elixirOrm ?? "none",
+      },
+      suggestions: ["Use --elixir-orm ecto-sql", "Use --elixir-auth none"],
+    });
+  }
+
+  if (config.elixirJobs === "oban" && config.elixirOrm !== "ecto-sql") {
+    incompatibilityError({
+      message: "Oban requires Ecto SQL with PostgreSQL in the generated Phoenix scaffold.",
+      provided: {
+        "elixir-jobs": "oban",
+        "elixir-orm": config.elixirOrm ?? "none",
+      },
+      suggestions: ["Use --elixir-orm ecto-sql", "Use --elixir-jobs none"],
+    });
+  }
+
+  if (
+    config.elixirRealtime === "live-view-streams" &&
+    config.elixirWebFramework !== "phoenix-live-view"
+  ) {
+    incompatibilityError({
+      message: "LiveView Streams require Phoenix LiveView.",
+      provided: {
+        "elixir-realtime": "live-view-streams",
+        "elixir-web-framework": config.elixirWebFramework ?? "none",
+      },
+      suggestions: ["Use --elixir-web-framework phoenix-live-view", "Use --elixir-realtime channels"],
+    });
+  }
+
+  if (config.elixirApi === "absinthe" && !hasEcto) {
+    incompatibilityError({
+      message: "Absinthe GraphQL requires Ecto in the current generated Phoenix scaffold.",
+      provided: {
+        "elixir-api": "absinthe",
+        "elixir-orm": config.elixirOrm ?? "none",
+      },
+      suggestions: ["Use --elixir-orm ecto-sql", "Use --elixir-api rest"],
     });
   }
 }
@@ -811,6 +987,7 @@ export function validateFullConfig(
   validateCachingConstraints(config);
   validateSearchConstraints(config);
   validateJavaConstraints(config, providedFlags);
+  validateElixirConstraints(config);
 
   validateServerDeployRequiresBackend(config.serverDeploy, config.backend);
 
@@ -905,6 +1082,7 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
     validateCachingConstraints(config);
     validateSearchConstraints(config);
     validateJavaConstraints(config);
+    validateElixirConstraints(config);
 
     validatePaymentsCompatibility(config.payments, config.auth, config.backend, config.frontend);
 

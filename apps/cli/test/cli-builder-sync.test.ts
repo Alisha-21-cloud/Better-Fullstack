@@ -13,6 +13,7 @@ import {
   resolveJavaTestingLibrariesPrompt,
 } from "../src/prompts/java-ecosystem";
 import { resolveRustLibrariesPrompt } from "../src/prompts/rust-ecosystem";
+import { resolveSearchPrompt } from "../src/prompts/search";
 import { DEFAULT_CONFIG } from "../src/constants";
 import { validateArrayOptions } from "../src/utils/config-processing";
 import { STACK_STATE_OPTION_CATEGORY_BY_KEY } from "../../web/src/lib/stack-contract";
@@ -254,6 +255,32 @@ describe("CLI prompts vs schemas parity", () => {
       "go-better-auth",
     );
     expect(goResolution.options.map((option) => option.value)).toContain("go-better-auth");
+  });
+
+  it("auto-resolves shared service prompts for ecosystems that do not use them", () => {
+    for (const prompt of ["email", "observability", "caching"] as const) {
+      const reactNativeResolution = PROMPT_RESOLVER_REGISTRY[prompt].resolve({
+        ecosystem: "react-native",
+        backend: "none",
+      });
+      const elixirResolution = PROMPT_RESOLVER_REGISTRY[prompt].resolve({
+        ecosystem: "elixir",
+        backend: "none",
+      });
+
+      expect(reactNativeResolution.shouldPrompt).toBe(false);
+      expect(reactNativeResolution.autoValue).toBe("none");
+      expect(elixirResolution.shouldPrompt).toBe(false);
+      expect(elixirResolution.autoValue).toBe("none");
+    }
+
+    const searchResolution = resolveSearchPrompt({
+      ecosystem: "elixir",
+      backend: "none",
+    });
+
+    expect(searchResolution.shouldPrompt).toBe(false);
+    expect(searchResolution.autoValue).toBe("none");
   });
 
   it("keeps the Rust libraries prompt default aligned with CLI defaults", () => {

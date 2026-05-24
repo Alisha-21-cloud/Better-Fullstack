@@ -97,6 +97,13 @@ function getTypeScriptFlags(config: ProjectConfig) {
   flags.push(`--cms ${config.cms}`);
   flags.push(`--search ${config.search}`);
   flags.push(`--file-storage ${config.fileStorage}`);
+  flags.push(`--mobile-navigation ${config.mobileNavigation}`);
+  flags.push(`--mobile-ui ${config.mobileUI}`);
+  flags.push(`--mobile-storage ${config.mobileStorage}`);
+  flags.push(`--mobile-testing ${config.mobileTesting}`);
+  flags.push(`--mobile-push ${config.mobilePush}`);
+  flags.push(`--mobile-ota ${config.mobileOTA}`);
+  flags.push(`--mobile-deep-linking ${config.mobileDeepLinking}`);
 
   if (config.addons && config.addons.length > 0) {
     flags.push(`--addons ${config.addons.join(" ")}`);
@@ -113,6 +120,29 @@ function getTypeScriptFlags(config: ProjectConfig) {
   flags.push(`--db-setup ${config.dbSetup}`);
   flags.push(`--web-deploy ${config.webDeploy}`);
   flags.push(`--server-deploy ${config.serverDeploy}`);
+
+  appendCommonFlags(flags, config);
+
+  return flags;
+}
+
+function getReactNativeFlags(config: ProjectConfig) {
+  const flags = ["--ecosystem react-native"];
+
+  if (config.frontend && config.frontend.length > 0) {
+    flags.push(`--frontend ${config.frontend.join(" ")}`);
+  } else {
+    flags.push("--frontend native-bare");
+  }
+
+  flags.push(`--auth ${config.auth}`);
+  flags.push(`--mobile-navigation ${config.mobileNavigation}`);
+  flags.push(`--mobile-ui ${config.mobileUI}`);
+  flags.push(`--mobile-storage ${config.mobileStorage}`);
+  flags.push(`--mobile-testing ${config.mobileTesting}`);
+  flags.push(`--mobile-push ${config.mobilePush}`);
+  flags.push(`--mobile-ota ${config.mobileOTA}`);
+  flags.push(`--mobile-deep-linking ${config.mobileDeepLinking}`);
 
   appendCommonFlags(flags, config);
 
@@ -191,10 +221,37 @@ function getJavaFlags(config: ProjectConfig) {
   return flags;
 }
 
+function getElixirFlags(config: ProjectConfig) {
+  const flags = ["--ecosystem elixir"];
+
+  flags.push(`--elixir-web-framework ${config.elixirWebFramework}`);
+  flags.push(`--elixir-orm ${config.elixirOrm}`);
+  flags.push(`--elixir-auth ${config.elixirAuth}`);
+  flags.push(`--elixir-api ${config.elixirApi}`);
+  flags.push(`--elixir-realtime ${config.elixirRealtime}`);
+  flags.push(`--elixir-jobs ${config.elixirJobs}`);
+  flags.push(`--elixir-validation ${config.elixirValidation}`);
+  flags.push(`--elixir-http ${config.elixirHttp}`);
+  flags.push(`--elixir-json ${config.elixirJson}`);
+  flags.push(`--elixir-email ${config.elixirEmail}`);
+  flags.push(`--elixir-caching ${config.elixirCaching}`);
+  flags.push(`--elixir-observability ${config.elixirObservability}`);
+  flags.push(`--elixir-testing ${config.elixirTesting}`);
+  flags.push(`--elixir-quality ${config.elixirQuality}`);
+  flags.push(`--elixir-deploy ${config.elixirDeploy}`);
+
+  appendCommonFlags(flags, config);
+
+  return flags;
+}
+
 export function generateReproducibleCommand(config: ProjectConfig) {
   let flags: string[];
 
   switch (config.ecosystem) {
+    case "react-native":
+      flags = getReactNativeFlags(config);
+      break;
     case "rust":
       flags = getRustFlags(config);
       break;
@@ -206,6 +263,9 @@ export function generateReproducibleCommand(config: ProjectConfig) {
       break;
     case "java":
       flags = getJavaFlags(config);
+      break;
+    case "elixir":
+      flags = getElixirFlags(config);
       break;
     case "typescript":
     default:
