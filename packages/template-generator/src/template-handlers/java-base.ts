@@ -290,7 +290,11 @@ function shouldSkipJavaTemplate(templatePath: string, context: JavaTemplateConte
     return true;
   }
 
-  if (!context.hasJavaMockito && templatePath.endsWith("/service/AppUserServiceTest.java.hbs")) {
+  if (
+    !context.hasJavaMockito &&
+    (templatePath.endsWith("/service/AppUserServiceTest.java.hbs") ||
+      templatePath.endsWith("/MockitoSmokeTest.java.hbs"))
+  ) {
     return true;
   }
 

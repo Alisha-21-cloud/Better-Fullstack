@@ -209,7 +209,7 @@ describe("Java Ecosystem", () => {
         javaOrm: "none",
         javaAuth: "none",
         javaLibraries: [],
-        javaTestingLibraries: ["junit5", "wiremock", "archunit"],
+        javaTestingLibraries: ["junit5", "wiremock", "archunit", "mockito"],
       });
 
       expect(result.success).toBe(true);
@@ -240,7 +240,7 @@ describe("Java Ecosystem", () => {
         javaOrm: "none",
         javaAuth: "none",
         javaLibraries: [],
-        javaTestingLibraries: ["junit5", "wiremock", "archunit"],
+        javaTestingLibraries: ["junit5", "wiremock", "archunit", "mockito"],
       });
 
       expect(result.success).toBe(true);
@@ -262,7 +262,7 @@ describe("Java Ecosystem", () => {
         javaOrm: "none",
         javaAuth: "none",
         javaLibraries: [],
-        javaTestingLibraries: ["junit5", "wiremock", "archunit"],
+        javaTestingLibraries: ["junit5", "wiremock", "archunit", "mockito"],
         aiDocs: ["claude-md"],
       });
 
@@ -299,7 +299,11 @@ describe("Java Ecosystem", () => {
       expect(pomContent).toContain("<artifactId>quarkus-junit5</artifactId>");
       expect(pomContent).toContain("<artifactId>wiremock</artifactId>");
       expect(pomContent).toContain("<artifactId>archunit-junit5</artifactId>");
+      expect(pomContent).toContain("<artifactId>mockito-junit-jupiter</artifactId>");
       expect(pomContent).toContain("<artifactId>quarkus-maven-plugin</artifactId>");
+      expect(hasFile(root, "src/test/java/com/example/javaquarkusmaven/MockitoSmokeTest.java")).toBe(
+        true,
+      );
       expect(pomContent).not.toContain("spring-boot-starter-parent");
       expect(applicationContent).toContain("@QuarkusMain");
       expect(resourceContent).toContain('@Path("/hello")');
@@ -357,7 +361,7 @@ describe("Java Ecosystem", () => {
         javaOrm: "none",
         javaAuth: "none",
         javaLibraries: ["spring-actuator"],
-        javaTestingLibraries: ["junit5"],
+        javaTestingLibraries: ["junit5", "mockito"],
         aiDocs: ["claude-md", "cursorrules"],
       });
 
@@ -375,9 +379,16 @@ describe("Java Ecosystem", () => {
       const readmeContent = getFileContent(root, "README.md");
       const claudeContent = getFileContent(root, "CLAUDE.md");
       const cursorRules = getFileContent(root, ".cursorrules");
+      const gradleContent = getFileContent(root, "build.gradle.kts");
 
       expect(readmeContent).toContain("./gradlew test");
       expect(readmeContent).toContain("./gradlew bootRun");
+      expect(gradleContent).toContain(
+        'testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")',
+      );
+      expect(hasFile(root, "src/test/java/com/example/javagradlecheck/MockitoSmokeTest.java")).toBe(
+        true,
+      );
       expect(claudeContent).toContain("Build Tool: gradle");
       expect(claudeContent).toContain("Libraries: spring-actuator");
       expect(claudeContent).toContain("./gradlew test");
@@ -410,6 +421,9 @@ describe("Java Ecosystem", () => {
       expect(hasFile(root, "src/test/java/com/example/javaplainmaven/ApplicationTests.java")).toBe(
         true,
       );
+      expect(
+        hasFile(root, "src/test/java/com/example/javaplainmaven/MockitoSmokeTest.java"),
+      ).toBe(true);
 
       const pomContent = getFileContent(root, "pom.xml");
       const readmeContent = getFileContent(root, "README.md");
@@ -590,6 +604,10 @@ describe("Java Ecosystem", () => {
       expect(pomContent).toContain("spring-boot-starter-validation");
       expect(pomContent).toContain("spring-boot-starter-flyway");
       expect(pomContent).toContain("spring-boot-testcontainers");
+      expect(pomContent).toContain(
+        "<groupId>org.testcontainers</groupId>\n\t\t\t<artifactId>junit-jupiter</artifactId>",
+      );
+      expect(pomContent).not.toContain("testcontainers-junit-jupiter");
       expect(applicationConfig).toContain("jdbc:h2:file:./data/java-full");
       expect(applicationConfig).toContain("ddl-auto: validate");
       expect(applicationConfig).toContain("include: health,info,metrics");
@@ -630,6 +648,7 @@ describe("Java Ecosystem", () => {
           "awaitility",
           "archunit",
           "jqwik",
+          "testcontainers",
         ],
       });
 
@@ -664,6 +683,9 @@ describe("Java Ecosystem", () => {
       );
       expect(hasFile(root, "src/test/java/com/example/javaextended/PropertyBasedTest.java")).toBe(
         true,
+      );
+      expect(hasFile(root, "src/test/java/com/example/javaextended/MockitoSmokeTest.java")).toBe(
+        false,
       );
 
       const pomContent = getFileContent(root, "pom.xml");
@@ -748,6 +770,7 @@ describe("Java Ecosystem", () => {
           "awaitility",
           "archunit",
           "jqwik",
+          "testcontainers",
         ],
       });
 
@@ -807,10 +830,13 @@ describe("Java Ecosystem", () => {
       expect(gradleContent).toContain('testImplementation("io.rest-assured:rest-assured:6.0.0")');
       expect(gradleContent).toContain('testImplementation("org.wiremock:wiremock:3.13.2")');
       expect(gradleContent).toContain('testImplementation("org.awaitility:awaitility:4.3.0")');
+      expect(gradleContent).not.toContain("mockito-junit-jupiter");
       expect(gradleContent).toContain(
         'testImplementation("com.tngtech.archunit:archunit-junit5:1.4.2")',
       );
       expect(gradleContent).toContain('testImplementation("net.jqwik:jqwik:1.9.3")');
+      expect(gradleContent).toContain('testImplementation("org.testcontainers:junit-jupiter")');
+      expect(gradleContent).not.toContain("testcontainers-junit-jupiter");
       expect(gradleContent).not.toContain("spring-boot-starter-flyway");
       expect(applicationConfig).toContain(
         "change-log: classpath:db/changelog/db.changelog-master.yaml",

@@ -51,6 +51,9 @@
 {{#if hasJavaAwaitility}}
 		<awaitility.version>4.3.0</awaitility.version>
 {{/if}}
+{{#if hasJavaMockito}}
+		<mockito.version>5.23.0</mockito.version>
+{{/if}}
 {{#if hasJavaArchunit}}
 		<archunit.version>1.4.2</archunit.version>
 {{/if}}
@@ -381,6 +384,14 @@
 			<scope>test</scope>
 		</dependency>
 {{/if}}
+{{#if hasJavaMockito}}
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+{{/if}}
 {{#if hasJavaArchunit}}
 		<dependency>
 			<groupId>com.tngtech.archunit</groupId>
@@ -405,7 +416,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.testcontainers</groupId>
-			<artifactId>testcontainers-junit-jupiter</artifactId>
+			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
 {{/if}}

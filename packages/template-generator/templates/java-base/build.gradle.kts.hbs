@@ -136,6 +136,9 @@ dependencies {
 {{#if hasJavaAwaitility}}
 	testImplementation("org.awaitility:awaitility:4.3.0")
 {{/if}}
+{{#if hasJavaMockito}}
+	testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
+{{/if}}
 {{#if hasJavaArchunit}}
 	testImplementation("com.tngtech.archunit:archunit-junit5:1.4.2")
 {{/if}}
@@ -144,7 +147,7 @@ dependencies {
 {{/if}}
 {{#if hasJavaTestcontainers}}
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
-	testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+	testImplementation("org.testcontainers:junit-jupiter")
 {{/if}}
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 {{/if}}
