@@ -19,10 +19,31 @@ const RELEASE_BASE_URL = "https://github.com/Marve10s/Better-Fullstack/releases/
 
 export const changelogReleases: ChangelogRelease[] = [
   {
+    version: "v2.0.0",
+    publishedAt: "2026-06-03T14:11:44Z",
+    displayDate: "June 3, 2026",
+    isLatest: true,
+    href: `${RELEASE_BASE_URL}/v2.0.0`,
+    title: "Multi-ecosystem support",
+    summary:
+      "Better Fullstack 2.0 introduces multi-ecosystem project generation, a new stack graph model, scoped CLI parts, and a redesigned builder for composing full products across frontend, backend, database, and mobile roles.",
+    highlights: [
+      "Added the stack graph foundation so projects can model connected frontend, backend, database, mobile, and ecosystem-specific parts instead of one flat stack.",
+      "Added scoped CLI part parsing, validation, and reproducible command output for multi-ecosystem generation.",
+      "Redesigned the web builder around Frontend, Backend, Database, Mobile, and Finalize steps with a first-class Multi-Ecosystem mode.",
+    ],
+    image: {
+      src: "https://images.unsplash.com/photo-1779446183287-4c75bbaae734?q=80&w=1015&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      alt: "Abstract diagonal motion blur in pink, coral, and teal tones",
+      credit: "Unsplash",
+      creditHref:
+        "https://images.unsplash.com/photo-1779446183287-4c75bbaae734?q=80&w=1015&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+  },
+  {
     version: "v1.8.1",
     publishedAt: "2026-05-26T18:05:00Z",
     displayDate: "May 26, 2026",
-    isLatest: true,
     href: `${RELEASE_BASE_URL}/v1.8.1`,
     title: "Requested stack options",
     summary:
