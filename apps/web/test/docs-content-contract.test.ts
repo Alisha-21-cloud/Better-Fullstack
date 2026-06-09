@@ -283,4 +283,26 @@ describe("docs content contract", () => {
     expect(searchDataSource).toContain("buildSearchSections");
     expect(searchDataSource).toContain("rawSource: page.raw");
   });
+
+  it("does not crash docs search when raw MDX text is unavailable", () => {
+    const sections = buildSearchSections([
+      {
+        url: "/docs/missing-raw",
+        rawSource: undefined,
+        frontmatter: {
+          title: "Missing Raw",
+          description: "Fallback metadata still keeps the page searchable.",
+        },
+      },
+    ]);
+
+    expect(sections).toEqual([
+      expect.objectContaining({
+        pageTitle: "Missing Raw",
+        pageUrl: "/docs/missing-raw",
+        sectionTitle: "Missing Raw",
+        body: "",
+      }),
+    ]);
+  });
 });
