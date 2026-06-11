@@ -265,7 +265,6 @@ const fadeUpTransition = { duration: 0.6 } as const;
 const builderSearch = { view: "command", file: "" } as const;
 
 const h1Style: CSSProperties = { fontSize: "clamp(2.5rem, 8vw, 5.5rem)", lineHeight: 0.94 };
-const heroNumberStyle: CSSProperties = { fontSize: "clamp(4.5rem, 12vw, 9rem)" };
 const h2Style: CSSProperties = { fontSize: "clamp(1.85rem, 5vw, 3.4rem)", lineHeight: 0.98 };
 
 function McpPage() {
@@ -273,7 +272,6 @@ function McpPage() {
     <main className="min-h-svh">
       <div className="mx-auto max-w-[1480px] border-x border-border">
         <HeroSection />
-        <SetupSection />
         <ToolsSection />
         <WorkflowSection />
         <CtaSection />
@@ -333,18 +331,12 @@ function HeroSection() {
             whileInView={fadeUpVisible}
             viewport={viewportOnce}
             transition={fadeUpTransition}
-            className="col-span-12 lg:col-span-5 lg:text-right"
+            className="col-span-12 lg:col-span-5"
           >
-            <div
-              className="font-mono font-black leading-none tracking-[-0.05em]"
-              style={heroNumberStyle}
-            >
-              <NumberFlow value={inView ? 677 : 0} transformTiming={numberFlowTiming} />
-              <span className={cn("text-[0.4em]", ACCENT_TEXT)}>✦</span>
-            </div>
-            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-              configurable options exposed to your agent
+            <p className={cn("font-mono text-[11px] uppercase tracking-[0.22em]", ACCENT_TEXT)}>
+              ✦ add it to your agent
             </p>
+            <AgentInstallCard />
           </motion.div>
         </div>
 
@@ -397,7 +389,7 @@ function StatCell({
   );
 }
 
-function SetupSection() {
+function AgentInstallCard() {
   const [agentId, setAgentId] = useState<string>(AGENTS[0].id);
   const [copied, setCopied] = useState(false);
   const agent = AGENTS.find((a) => a.id === agentId) ?? AGENTS[0];
@@ -420,83 +412,56 @@ function SetupSection() {
   }, []);
 
   return (
-    <section className="border-b border-border bg-muted/20">
-      <div className="px-4 py-20 sm:px-8 sm:py-24">
-        <div className="grid grid-cols-12 gap-x-6 gap-y-10">
-          <div className="col-span-12 lg:col-span-4">
-            <p className={cn("font-mono text-[11px] uppercase tracking-[0.22em]", ACCENT_TEXT)}>
-              ✦ setup
-            </p>
-            <h2
-              className="mt-4 max-w-[12ch] text-balance font-mono font-bold tracking-[-0.04em]"
-              style={h2Style}
-            >
-              Pick your <span className="italic text-muted-foreground">agent.</span>
-            </h2>
-            <p className="mt-5 max-w-sm text-pretty text-sm text-muted-foreground sm:text-base">
-              One paste and your agent has the full toolbox. Terminal command or config file —
-              whatever your client prefers.
-            </p>
-            <a
-              href="/docs/ai/mcp"
-              className={cn(
-                "group mt-5 inline-flex items-center gap-1.5 font-mono text-xs font-semibold transition-colors hover:text-foreground",
-                ACCENT_TEXT,
-              )}
-            >
-              full documentation
-              <ArrowUpRight className="size-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </a>
-          </div>
-
-          <div className="col-span-12 lg:col-span-8">
-            <div className="overflow-hidden rounded-md border border-border bg-card">
-              <div className="flex flex-wrap border-b border-border">
-                {AGENTS.map((a) => (
-                  <AgentTabButton
-                    key={a.id}
-                    agent={a}
-                    active={agentId === a.id}
-                    onSelect={selectAgent}
-                  />
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/30 px-4 py-2 sm:px-5">
-                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                  {agent.file}
-                </span>
-                <button
-                  type="button"
-                  onClick={copyConfig}
-                  aria-label={`Copy ${agent.name} configuration`}
-                  className={cn(
-                    "flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors active:translate-y-[1px]",
-                    copied
-                      ? "text-lime-700 dark:text-[#C6E853]"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
-                </button>
-              </div>
-
-              <pre className="overflow-x-auto px-4 py-4 sm:px-5">
-                <code className="font-mono text-xs leading-relaxed sm:text-sm">
-                  {agent.shell ? (
-                    <span className="text-lime-700 dark:text-[#C6E853]">$ </span>
-                  ) : null}
-                  {agent.config}
-                </code>
-              </pre>
-            </div>
-            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              {agent.shell ? "run in your terminal" : `paste into ${agent.file}`}
-            </p>
-          </div>
+    <div className="mt-3">
+      <div className="overflow-hidden rounded-md border border-border bg-card">
+        <div className="flex flex-wrap border-b border-border">
+          {AGENTS.map((a) => (
+            <AgentTabButton key={a.id} agent={a} active={agentId === a.id} onSelect={selectAgent} />
+          ))}
         </div>
+
+        <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/30 px-4 py-2">
+          <span className="truncate font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            {agent.file}
+          </span>
+          <button
+            type="button"
+            onClick={copyConfig}
+            aria-label={`Copy ${agent.name} configuration`}
+            className={cn(
+              "flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors active:translate-y-[1px]",
+              copied
+                ? "text-lime-700 dark:text-[#C6E853]"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+          </button>
+        </div>
+
+        <pre className="overflow-x-auto px-4 py-4">
+          <code className="font-mono text-xs leading-relaxed">
+            {agent.shell ? <span className="text-lime-700 dark:text-[#C6E853]">$ </span> : null}
+            {agent.config}
+          </code>
+        </pre>
       </div>
-    </section>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          {agent.shell ? "run in your terminal" : `paste into ${agent.file}`}
+        </p>
+        <a
+          href="/docs/ai/mcp"
+          className={cn(
+            "group inline-flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] transition-colors hover:text-foreground",
+            ACCENT_TEXT,
+          )}
+        >
+          full docs
+          <ArrowUpRight className="size-3 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </a>
+      </div>
+    </div>
   );
 }
 
