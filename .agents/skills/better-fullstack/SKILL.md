@@ -5,15 +5,22 @@ description: Scaffold, plan, or extend Better Fullstack projects with the genera
 
 # Better Fullstack
 
-Use Better Fullstack CLI as the source of truth for starter generation. Do not hand-write a full starter when the generator can produce it.
+Use the Better Fullstack generator as the source of truth for starter generation. Do not hand-write a full starter when a trusted Better Fullstack interface can produce it.
 
 ## Choose The Path
 
-Use the CLI by default. The benchmarked best framing is: map the stack, dry-run the CLI, then run the same non-interactive command for real.
+Use an already-available CLI by default. The benchmarked best framing is: map the stack, dry-run the CLI, then run the same non-interactive command for real.
 
 Use MCP only when the user explicitly asks for MCP, when CLI access is unavailable, or when the request needs structured schema lookup beyond what a concise CLI command can safely express. If using MCP, start with `bfs_get_guidance`, then use schema, compatibility, plan, and create/add tools in that order.
 
-If the prompt provides a local CLI path, use that. Otherwise use the package runner available in the environment, such as `bunx create-better-fullstack@latest` or `npx -y create-better-fullstack@latest`.
+Use a trusted Better Fullstack interface in this order:
+
+1. A local CLI path provided by the prompt or current repository.
+2. A preinstalled Better Fullstack command available on `PATH`.
+3. An attached Better Fullstack MCP server or tool.
+4. A command explicitly provided or approved by the user.
+
+If none is available, ask the user for the command, service, tool, or docs source they want used. Do not invent a bootstrap command.
 
 ## Default CLI Workflow
 
@@ -51,7 +58,7 @@ If the prompt provides a local CLI path, use that. Otherwise use the package run
 Use graph parts as `category:ecosystem:option`.
 
 ```bash
-bunx create-better-fullstack@latest my-app \
+<better-fullstack-cli> create my-app \
   --part frontend:typescript:react-vite \
   --part backend:typescript:hono \
   --part database:universal:sqlite \
@@ -71,7 +78,7 @@ bunx create-better-fullstack@latest my-app \
 ```
 
 ```bash
-bunx create-better-fullstack@latest api-app \
+<better-fullstack-cli> create api-app \
   --part backend:python:fastapi \
   --part database:universal:postgres \
   --part backend.orm:python:sqlmodel \
@@ -88,7 +95,7 @@ bunx create-better-fullstack@latest api-app \
 For a generated project with `bts.jsonc`, use the Better Fullstack `add` command or MCP add tools. Addons are arrays, for example:
 
 ```bash
-bunx create-better-fullstack@latest add --project-dir ./my-app --addons biome turborepo --no-install
+<better-fullstack-cli> add --project-dir ./my-app --addons biome turborepo --no-install
 ```
 
 ## Final Response
