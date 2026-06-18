@@ -360,6 +360,7 @@ const WORKSPACE_TOOLING_ADDONS = new Set([
   "nx",
   "docker-compose",
   "devcontainer",
+  "github-actions",
   "ruler",
   "mcp",
   "skills",

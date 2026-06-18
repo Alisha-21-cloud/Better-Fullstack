@@ -2294,6 +2294,14 @@ export const TECH_OPTIONS: Record<
       default: false,
     },
     {
+      id: "github-actions",
+      name: "GitHub Actions",
+      description: "Ship a CI workflow (install, lint, type-check, build)",
+      icon: "https://cdn.simpleicons.org/githubactions/2088FF",
+      color: "from-slate-500 to-slate-800",
+      default: false,
+    },
+    {
       id: "wxt",
       name: "WXT",
       description: "Build browser extensions",

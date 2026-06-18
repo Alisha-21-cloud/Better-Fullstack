@@ -3310,6 +3310,7 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
   "backend-utils": [],
   "docker-compose": [],
   devcontainer: [],
+  "github-actions": [],
   none: [],
 };
 

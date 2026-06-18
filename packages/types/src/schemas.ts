@@ -166,6 +166,7 @@ export const AddonsSchema = z
     "backend-utils",
     "devcontainer",
     "docker-compose",
+    "github-actions",
     "none",
   ])
   .describe("Additional addons");

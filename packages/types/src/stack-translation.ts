@@ -939,6 +939,7 @@ const COMMAND_ADDONS = new Set([
   "nx",
   "docker-compose",
   "devcontainer",
+  "github-actions",
   "ultracite",
   "fumadocs",
   "oxlint",

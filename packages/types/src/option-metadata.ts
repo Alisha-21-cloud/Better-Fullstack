@@ -694,6 +694,7 @@ const APP_PLATFORM_VALUES = [
   "backend-utils",
   "devcontainer",
   "docker-compose",
+  "github-actions",
 ] as const satisfies readonly string[];
 
 const EXAMPLE_VALUES = ["ai", "chat-sdk"] as const satisfies readonly string[];
@@ -1084,6 +1085,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     "tanstack-pacer": "TanStack Pacer",
     devcontainer: "DevContainer",
     "docker-compose": "Docker Compose",
+    "github-actions": "GitHub Actions",
   },
   versionChannel: {
     stable: "Stable",
