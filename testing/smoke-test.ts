@@ -32,6 +32,7 @@ const SUPPORTED_SMOKE_ECOSYSTEMS: readonly Ecosystem[] = [
   "go",
   "java",
   "elixir",
+  "dotnet",
 ];
 
 // ── Types ───────────────────────────────────────────────────────────────
