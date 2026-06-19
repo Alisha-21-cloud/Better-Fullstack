@@ -63,6 +63,7 @@ export function createCliDefaultProjectConfigBase(
     rateLimit: "none",
     i18n: "none",
     search: "none",
+    vectorDb: "none",
     fileStorage: "none",
     rustWebFramework: "none",
     rustFrontend: "none",

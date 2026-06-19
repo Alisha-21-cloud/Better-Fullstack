@@ -28,6 +28,7 @@ export const StackPartRoleSchema = z
     "observability",
     "email",
     "search",
+    "vectorDb",
     "fileStorage",
     "jobQueue",
     "rateLimit",
@@ -332,6 +333,12 @@ export const SearchSchema = z
   .enum(["meilisearch", "typesense", "elasticsearch", "opensearch", "algolia", "none"])
   .describe(
     "Search engine solution (meilisearch, typesense, elasticsearch, opensearch, or algolia for fast search experiences)",
+  );
+
+export const VectorDbSchema = z
+  .enum(["pgvector", "qdrant", "chroma", "pinecone", "none"])
+  .describe(
+    "Vector database for AI embeddings/semantic search (pgvector on Postgres, or Qdrant, Chroma, or Pinecone)",
   );
 
 export const FileStorageSchema = z
@@ -913,6 +920,7 @@ export const CreateInputSchema = z.object({
   rateLimit: RateLimitSchema.optional(),
   i18n: I18nSchema.optional(),
   search: SearchSchema.optional(),
+  vectorDb: VectorDbSchema.optional(),
   fileStorage: FileStorageSchema.optional(),
   mobileNavigation: MobileNavigationSchema.optional(),
   mobileUI: MobileUISchema.optional(),
@@ -1072,6 +1080,7 @@ export const ProjectConfigSchema = z.object({
   rateLimit: RateLimitSchema,
   i18n: I18nSchema,
   search: SearchSchema,
+  vectorDb: VectorDbSchema,
   fileStorage: FileStorageSchema,
   mobileNavigation: MobileNavigationSchema,
   mobileUI: MobileUISchema,
@@ -1226,6 +1235,7 @@ export const BetterTStackConfigSchema = z.object({
   rateLimit: RateLimitSchema,
   i18n: I18nSchema,
   search: SearchSchema,
+  vectorDb: VectorDbSchema,
   fileStorage: FileStorageSchema,
   mobileNavigation: MobileNavigationSchema,
   mobileUI: MobileUISchema,
@@ -1400,6 +1410,7 @@ export const CACHING_VALUES = CachingSchema.options;
 export const RATE_LIMIT_VALUES = RateLimitSchema.options;
 export const I18N_VALUES = I18nSchema.options;
 export const SEARCH_VALUES = SearchSchema.options;
+export const VECTOR_DB_VALUES = VectorDbSchema.options;
 export const FILE_STORAGE_VALUES = FileStorageSchema.options;
 export const ECOSYSTEM_VALUES = EcosystemSchema.options;
 export const RUST_WEB_FRAMEWORK_VALUES = RustWebFrameworkSchema.options;

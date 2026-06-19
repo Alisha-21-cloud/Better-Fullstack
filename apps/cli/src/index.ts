@@ -112,6 +112,7 @@ export async function createVirtual(
       rateLimit: options.rateLimit || "none",
       i18n: options.i18n || "none",
       search: options.search || "none",
+      vectorDb: options.vectorDb || "none",
       fileStorage: options.fileStorage || "none",
       // Rust ecosystem options
       rustWebFramework: options.rustWebFramework || "none",

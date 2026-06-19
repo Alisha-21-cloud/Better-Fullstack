@@ -119,6 +119,7 @@ import {
   RustOrmSchema,
   RustWebFrameworkSchema,
   SearchSchema,
+  VectorDbSchema,
   ServerDeploySchema,
   ShadcnBaseColorSchema,
   ShadcnBaseSchema,
@@ -196,6 +197,9 @@ export const CreateCommandOptionsSchema = z.object({
   rateLimit: RateLimitSchema.optional().describe("Rate limiting solution"),
   i18n: I18nSchema.optional().describe("Internationalization (i18n) library"),
   search: SearchSchema.optional().describe("Search engine solution"),
+  vectorDb: VectorDbSchema.optional().describe(
+    "Vector database for AI embeddings (pgvector, qdrant, chroma, pinecone)",
+  ),
   fileStorage: FileStorageSchema.optional().describe("File storage solution (S3, R2)"),
   mobileNavigation: MobileNavigationSchema.optional().describe(
     "Mobile navigation (expo-router, react-navigation)",

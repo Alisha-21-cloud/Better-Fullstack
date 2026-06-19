@@ -125,6 +125,7 @@ import {
   RustOrmSchema,
   RustWebFrameworkSchema,
   SearchSchema,
+  VectorDbSchema,
   ServerDeploySchema,
   StateManagementSchema,
   TestingSchema,
@@ -218,6 +219,8 @@ function getGuidance() {
         "String. TypeScript supports multiple providers; Rust, Python, Go, and Java currently support sentry or none.",
       search:
         "String. TypeScript supports multiple providers; Rust, Python, Go, and Java currently support meilisearch or none.",
+      vectorDb:
+        "String. TypeScript-only vector database for AI embeddings: pgvector, qdrant, chroma, pinecone, or none. Each provider is a standalone service (pgvector connects to a dedicated Postgres+pgvector instance via PGVECTOR_DATABASE_URL). Requires a standalone backend (not convex/none).",
     },
     ambiguityRules: [
       "If the user request leaves major stack choices unspecified, ASK the user before proceeding. Do not guess.",
@@ -469,6 +472,7 @@ const MCP_COMPATIBILITY_DEFAULTS = {
   shadcnRadius: "default",
   cms: "none",
   search: "none",
+  vectorDb: "none",
   fileStorage: "none",
   mobileUI: "none",
   mobileStorage: "none",
@@ -1578,6 +1582,7 @@ export async function startMcpServer() {
         rateLimit: RateLimitSchema.optional().describe("Rate limiting solution"),
         i18n: I18nSchema.optional().describe("Internationalization library"),
         search: SearchSchema.optional().describe("Search engine"),
+        vectorDb: VectorDbSchema.optional().describe("Vector database (TypeScript only)"),
         fileStorage: FileStorageSchema.optional().describe("File storage"),
         ...mobileInputSchema,
         ...deploymentInputSchema,
@@ -1670,6 +1675,7 @@ export async function startMcpServer() {
     observability: ObservabilitySchema.optional().describe("Observability"),
     featureFlags: FeatureFlagsSchema.optional().describe("Feature flag provider"),
     search: SearchSchema.optional().describe("Search engine"),
+    vectorDb: VectorDbSchema.optional().describe("Vector database (TypeScript only)"),
     caching: CachingSchema.optional().describe("Caching solution"),
     rateLimit: RateLimitSchema.optional().describe("Rate limiting solution"),
     i18n: I18nSchema.optional().describe("Internationalization (i18n) library"),

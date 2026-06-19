@@ -298,6 +298,7 @@ export function buildBtsConfigForPersistence(
     rateLimit: persistedConfig.rateLimit,
     i18n: persistedConfig.i18n,
     search: persistedConfig.search,
+    vectorDb: persistedConfig.vectorDb,
     fileStorage: persistedConfig.fileStorage,
     rustWebFramework: persistedConfig.rustWebFramework,
     rustFrontend: persistedConfig.rustFrontend,

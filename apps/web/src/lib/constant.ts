@@ -2762,6 +2762,48 @@ export const TECH_OPTIONS: Record<
       default: true,
     },
   ],
+  vectorDb: [
+    {
+      id: "pgvector",
+      name: "pgvector",
+      description: "Self-hosted Postgres + pgvector extension for embeddings and semantic search",
+      icon: "https://cdn.simpleicons.org/postgresql/4169E1",
+      color: "from-blue-500 to-indigo-700",
+      default: false,
+    },
+    {
+      id: "qdrant",
+      name: "Qdrant",
+      description: "High-performance open-source vector database for AI embeddings",
+      icon: "https://cdn.simpleicons.org/qdrant/DC244C",
+      color: "from-red-500 to-rose-700",
+      default: false,
+    },
+    {
+      id: "chroma",
+      name: "Chroma",
+      description: "Lightweight open-source embedding database for AI applications",
+      icon: "https://cdn.simpleicons.org/chromadb/FF6F00",
+      color: "from-amber-400 to-orange-600",
+      default: false,
+    },
+    {
+      id: "pinecone",
+      name: "Pinecone",
+      description: "Fully managed serverless vector database for production AI",
+      icon: "https://cdn.simpleicons.org/pinecone/000000",
+      color: "from-emerald-500 to-teal-700",
+      default: false,
+    },
+    {
+      id: "none",
+      name: "No Vector DB",
+      description: "Skip vector database setup",
+      icon: "",
+      color: "from-gray-400 to-gray-600",
+      default: true,
+    },
+  ],
   fileStorage: [
     {
       id: "s3",

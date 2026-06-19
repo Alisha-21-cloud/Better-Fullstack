@@ -69,6 +69,7 @@ export const DEFAULT_STACK_SELECTION: StackSelectionState = {
   shadcnRadius: "default",
   cms: "none",
   search: "none",
+  vectorDb: "none",
   fileStorage: "none",
   codeQuality: [],
   documentation: [],
@@ -223,6 +224,7 @@ export const STACK_SELECTION_OPTION_CATEGORY_BY_KEY: Record<
   shadcnRadius: "shadcnRadius",
   cms: "cms",
   search: "search",
+  vectorDb: "vectorDb",
   fileStorage: "fileStorage",
   codeQuality: "codeQuality",
   documentation: "documentation",
@@ -384,6 +386,7 @@ export const STACK_SELECTION_URL_KEYS = {
   shadcnRadius: "scr",
   cms: "cms",
   search: "srch",
+  vectorDb: "vdb",
   fileStorage: "fs",
   codeQuality: "cq",
   documentation: "doc",
@@ -692,6 +695,7 @@ const CLI_SCALAR_CONFIG_FIELDS = [
   ["rateLimit", "rateLimit"],
   ["i18n", "i18n"],
   ["search", "search"],
+  ["vectorDb", "vectorDb"],
   ["fileStorage", "fileStorage"],
   ["analytics", "analytics"],
   ["mobileNavigation", "mobileNavigation"],
@@ -1102,6 +1106,7 @@ const GRAPH_TYPESCRIPT_BACKEND_PART_SELECTION_KEYS = [
   ["rateLimit", "rateLimit"],
   ["cms", "cms"],
   ["search", "search"],
+  ["vectorDb", "vectorDb"],
   ["fileStorage", "fileStorage"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
@@ -1207,6 +1212,7 @@ const GRAPH_TYPESCRIPT_BACKEND_PART_CLI_KEYS = [
   ["rateLimit", "rateLimit"],
   ["cms", "cms"],
   ["search", "search"],
+  ["vectorDb", "vectorDb"],
   ["fileStorage", "fileStorage"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
@@ -1834,6 +1840,7 @@ function buildProjectConfigBase(
     rateLimit: stack.rateLimit as ProjectConfig["rateLimit"],
     i18n: stack.i18n as ProjectConfig["i18n"],
     search: stack.search as ProjectConfig["search"],
+    vectorDb: stack.vectorDb as ProjectConfig["vectorDb"],
     fileStorage: stack.fileStorage as ProjectConfig["fileStorage"],
     rustWebFramework: stack.rustWebFramework as ProjectConfig["rustWebFramework"],
     rustFrontend: stack.rustFrontend as ProjectConfig["rustFrontend"],
@@ -2124,6 +2131,7 @@ function generateTypeScriptCommand(selection: StackSelectionInput, projectName: 
     `--rate-limit ${selection.rateLimit}`,
     `--i18n ${selection.i18n}`,
     `--search ${selection.search}`,
+    `--vector-db ${selection.vectorDb}`,
     `--file-storage ${selection.fileStorage}`,
     `--cms ${selection.cms}`,
     `--effect ${selection.backendLibraries}`,

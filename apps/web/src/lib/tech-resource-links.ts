@@ -962,6 +962,22 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://www.algolia.com/doc/",
     githubUrl: "https://github.com/algolia/algoliasearch-client-javascript",
   },
+  pgvector: {
+    docsUrl: "https://github.com/pgvector/pgvector",
+    githubUrl: "https://github.com/pgvector/pgvector",
+  },
+  qdrant: {
+    docsUrl: "https://qdrant.tech/documentation/",
+    githubUrl: "https://github.com/qdrant/qdrant",
+  },
+  chroma: {
+    docsUrl: "https://docs.trychroma.com/",
+    githubUrl: "https://github.com/chroma-core/chroma",
+  },
+  pinecone: {
+    docsUrl: "https://docs.pinecone.io/",
+    githubUrl: "https://github.com/pinecone-io/pinecone-ts-client",
+  },
   s3: {
     docsUrl: "https://docs.aws.amazon.com/AmazonS3/",
     githubUrl: "https://github.com/aws/aws-sdk-js-v3",

@@ -52,6 +52,7 @@ import {
   processCMSTemplates,
   processI18nTemplates,
   processSearchTemplates,
+  processVectorDbTemplates,
   processFileStorageTemplates,
   processTestingTemplates,
 } from "./template-handlers";
@@ -128,6 +129,7 @@ async function processGraphTemplates(
     await processCMSTemplates(vfs, templates, tsConfig);
     await processI18nTemplates(vfs, templates, tsConfig);
     await processSearchTemplates(vfs, templates, tsConfig);
+    await processVectorDbTemplates(vfs, templates, tsConfig);
     await processFileStorageTemplates(vfs, templates, tsConfig);
     await processTestingTemplates(vfs, templates, tsConfig);
     processPackageConfigs(vfs, tsConfig);
@@ -238,6 +240,7 @@ export async function generateVirtualProject(options: GeneratorOptions): Promise
       await processCMSTemplates(vfs, templates, config);
       await processI18nTemplates(vfs, templates, config);
       await processSearchTemplates(vfs, templates, config);
+      await processVectorDbTemplates(vfs, templates, config);
       await processFileStorageTemplates(vfs, templates, config);
       await processTestingTemplates(vfs, templates, config);
 

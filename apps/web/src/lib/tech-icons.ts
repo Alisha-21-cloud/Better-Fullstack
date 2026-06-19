@@ -396,6 +396,12 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   opensearch: { type: "si", slug: "opensearch", hex: "005EB8" },
   algolia: { type: "si", slug: "algolia", hex: "003DFF" },
 
+  // ─── Vector DB ───────────────────────────────────────────────────────────────
+  pgvector: { type: "si", slug: "postgresql", hex: "4169E1" },
+  qdrant: { type: "si", slug: "qdrant", hex: "DC244C" },
+  chroma: { type: "si", slug: "chromadb", hex: "FF6F00" },
+  pinecone: { type: "si", slug: "pinecone", hex: "000000" },
+
   // ─── File Storage ──────────────────────────────────────────────────────────
   s3: { type: "local", src: "/icon/aws-s3.svg" },
   r2: { type: "si", slug: "cloudflare", hex: "F38020" },

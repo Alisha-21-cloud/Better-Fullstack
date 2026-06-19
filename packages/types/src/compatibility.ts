@@ -121,6 +121,7 @@ export type CompatibilityInput = {
   cms: string;
   i18n: string;
   search: string;
+  vectorDb: string;
   fileStorage: string;
   mobileNavigation: string;
   mobileUI: string;
@@ -329,6 +330,7 @@ export const analyzeStackCompatibility = (
       dbSetup: "none",
       serverDeploy: "none",
       search: "none",
+      vectorDb: "none",
       rateLimit: "none",
       fileStorage: "none",
     };
@@ -398,6 +400,7 @@ export const analyzeStackCompatibility = (
       serverDeploy: "none",
       payments: "none",
       search: "none",
+      vectorDb: "none",
       rateLimit: "none",
       fileStorage: "none",
     };
@@ -971,6 +974,7 @@ export const analyzeStackCompatibility = (
       ["payments", "none", "Payments set to 'None' (React Native ecosystem)"],
       ["email", "none", "Email set to 'None' (React Native ecosystem)"],
       ["search", "none", "Search set to 'None' (React Native ecosystem)"],
+      ["vectorDb", "none", "Vector database set to 'None' (React Native ecosystem)"],
       ["rateLimit", "none", "Rate limiting set to 'None' (React Native ecosystem)"],
       ["fileStorage", "none", "File storage set to 'None' (React Native ecosystem)"],
       ["cms", "none", "CMS set to 'None' (React Native ecosystem)"],
@@ -1566,6 +1570,9 @@ export const getDisabledReason = (
     if (category === "search" && optionId !== "none") {
       return "Search requires a standalone backend";
     }
+    if (category === "vectorDb" && optionId !== "none") {
+      return "Vector database requires a standalone backend (Convex has built-in vector search)";
+    }
     if (category === "rateLimit" && optionId !== "none") {
       return "Rate limiting requires a standalone backend";
     }
@@ -1639,6 +1646,9 @@ export const getDisabledReason = (
       return "No backend selected";
     }
     if (category === "search" && optionId !== "none") {
+      return "No backend selected";
+    }
+    if (category === "vectorDb" && optionId !== "none") {
       return "No backend selected";
     }
     if (category === "rateLimit" && optionId !== "none") {
@@ -2106,6 +2116,16 @@ export const getDisabledReason = (
   if (category === "search" && optionId !== "none") {
     if (currentStack.ecosystem !== "typescript") {
       return null;
+    }
+  }
+
+  // ============================================
+  // VECTOR DATABASE CONSTRAINTS
+  // ============================================
+  if (category === "vectorDb" && optionId !== "none") {
+    // Vector DB is a TypeScript-ecosystem feature only.
+    if (currentStack.ecosystem !== "typescript") {
+      return "Vector database is only available for the TypeScript ecosystem";
     }
   }
 

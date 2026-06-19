@@ -773,6 +773,18 @@ export const dependencyVersionMap = {
   // Search - Algolia
   algoliasearch: "^5.54.0",
 
+  // Vector DB - pgvector (Postgres driver)
+  postgres: "^3.4.7",
+
+  // Vector DB - Qdrant
+  "@qdrant/js-client-rest": "^1.15.1",
+
+  // Vector DB - Chroma
+  chromadb: "^1.10.5",
+
+  // Vector DB - Pinecone
+  "@pinecone-database/pinecone": "^6.1.2",
+
   // EdgeDB
   edgedb: "^2.0.1",
   "@edgedb/generate": "^0.6.1",

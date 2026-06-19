@@ -38,6 +38,7 @@ import { processReadme } from "./readme-generator";
 import { processRealtimeDeps } from "./realtime-deps";
 import { processRuntimeDeps } from "./runtime-deps";
 import { processSearchDeps } from "./search-deps";
+import { processVectorDbDeps } from "./vector-db-deps";
 import { processStateManagementDeps } from "./state-management-deps";
 import { processTestingDeps } from "./testing-deps";
 import { processNxConfig } from "./nx-generator";
@@ -79,6 +80,7 @@ export function processDependencies(vfs: VirtualFileSystem, config: ProjectConfi
   processCachingDeps(vfs, config);
   processI18nDeps(vfs, config);
   processSearchDeps(vfs, config);
+  processVectorDbDeps(vfs, config);
   processFileStorageDeps(vfs, config);
   processNxConfig(vfs, config);
   processTurboConfig(vfs, config);
@@ -95,6 +97,7 @@ export {
   processCachingDeps,
   processI18nDeps,
   processSearchDeps,
+  processVectorDbDeps,
   processFileStorageDeps,
   processCMSDeps,
   processCSSAndUILibraryDeps,
