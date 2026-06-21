@@ -907,7 +907,7 @@ describe("Addon Configurations", () => {
         ]);
         expect(devcontainer.runServices).toEqual(["devcontainer", "web", "server", "db"]);
         expect(devcontainer.forwardPorts).toEqual([3001, 3000, 5432]);
-        expect(devcontainer.postCreateCommand).toBe("bun install && bun run --if-present db:push");
+        expect(devcontainer.postCreateCommand).toBe("bun install");
         expect(devcontainer.customizations.vscode.extensions).toEqual([
           "ms-azuretools.vscode-docker",
           "dbaeumer.vscode-eslint",

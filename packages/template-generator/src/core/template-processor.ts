@@ -207,15 +207,15 @@ function getDevcontainerImage(config: ProjectConfig) {
 
 function getTypeScriptPostCreateCommand(packageManager: ProjectConfig["packageManager"]) {
   if (packageManager === "bun") {
-    return "bun install && bun run --if-present db:push";
+    return "bun install";
   }
   if (packageManager === "pnpm") {
-    return "corepack enable && pnpm install && pnpm run --if-present db:push";
+    return "corepack enable && pnpm install";
   }
   if (packageManager === "yarn") {
-    return "corepack enable && yarn install && if node -e \"process.exit(require('./package.json').scripts?.['db:push'] ? 0 : 1)\"; then yarn run db:push; fi";
+    return "corepack enable && yarn install";
   }
-  return "npm install && npm run db:push --if-present";
+  return "npm install";
 }
 
 function getDevcontainerPostCreateCommand(config: ProjectConfig) {
