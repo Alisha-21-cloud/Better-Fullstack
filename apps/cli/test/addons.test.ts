@@ -915,7 +915,7 @@ describe("Addon Configurations", () => {
           "bradlc.vscode-tailwindcss",
         ]);
         expect(override).toContain('image: "oven/bun:1"');
-        expect(override).toContain("- ..:/workspaces/devcontainer-hono-postgres:cached");
+        expect(override).toContain("- .:/workspaces/devcontainer-hono-postgres:cached");
       });
 
       it("should generate language-aware DevContainer files for Python Docker Compose stacks", async () => {
@@ -963,6 +963,7 @@ describe("Addon Configurations", () => {
           "ms-python.vscode-pylance",
         ]);
         expect(override).toContain('image: "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm"');
+        expect(override).toContain("- .:/workspaces/devcontainer-python-postgres:cached");
       });
     });
 
