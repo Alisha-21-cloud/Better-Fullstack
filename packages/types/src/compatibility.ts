@@ -1906,6 +1906,34 @@ export const getDisabledReason = (
     }
   }
 
+  if (category === "api" && optionId === "apollo-server") {
+    const needsReactFrontend = currentStack.webFrontend.some((f) =>
+      ["nuxt", "svelte", "solid", "solid-start"].includes(f),
+    );
+    if (needsReactFrontend) {
+      const frontendName = currentStack.webFrontend.find((f) =>
+        ["nuxt", "svelte", "solid", "solid-start"].includes(f),
+      );
+      return `${frontendName} requires oRPC, not Apollo Server`;
+    }
+    if (
+      currentStack.webFrontend.includes("astro") &&
+      currentStack.astroIntegration !== "react" &&
+      currentStack.astroIntegration !== "none"
+    ) {
+      return `Astro with ${currentStack.astroIntegration} integration requires oRPC, not Apollo Server`;
+    }
+    if (currentStack.backend === "self") {
+      return "Apollo Server scaffolding currently requires a standalone TypeScript backend";
+    }
+    if (currentStack.nativeFrontend.length > 0) {
+      return "Apollo Server is currently available for web frontends, not React Native";
+    }
+    if (!["hono", "express", "fastify", "elysia"].includes(currentStack.backend)) {
+      return "Apollo Server currently supports Hono, Express, Fastify, and Elysia backends";
+    }
+  }
+
   if (category === "appPlatforms" && optionId === "nx" && currentStack.appPlatforms.includes("turborepo")) {
     return "Choose either Nx or Turborepo, not both";
   }
@@ -1921,9 +1949,13 @@ export const getDisabledReason = (
     if (!currentStack.webFrontend.includes("astro") && optionId !== "none") {
       return "Astro integration requires Astro frontend";
     }
-    // tRPC requires React integration
-    if (currentStack.api === "trpc" && optionId !== "react" && optionId !== "none") {
-      return "tRPC requires React integration with Astro";
+    // React-only APIs require React integration
+    if (
+      (currentStack.api === "trpc" || currentStack.api === "apollo-server") &&
+      optionId !== "react" &&
+      optionId !== "none"
+    ) {
+      return `${currentStack.api === "apollo-server" ? "Apollo Server" : "tRPC"} requires React integration with Astro`;
     }
   }
 
@@ -3252,7 +3284,16 @@ export function allowedApisForFrontends(
   const includesNative = frontends.some((frontend) =>
     ["native-bare", "native-uniwind", "native-unistyles"].includes(frontend),
   );
-  const base: API[] = ["trpc", "orpc", "ts-rest", "garph", "graphql-yoga", "openapi", "none"];
+  const base: API[] = [
+    "trpc",
+    "orpc",
+    "ts-rest",
+    "garph",
+    "graphql-yoga",
+    "apollo-server",
+    "openapi",
+    "none",
+  ];
 
   if (includesNative) {
     return ["trpc", "orpc", "ts-rest", "garph", "none"] as API[];
@@ -3278,6 +3319,7 @@ function getReactOnlyApiDisplayName(api: API) {
   if (api === "trpc") return "tRPC";
   if (api === "ts-rest") return "ts-rest";
   if (api === "openapi") return "OpenAPI";
+  if (api === "apollo-server") return "Apollo Server";
   return "garph";
 }
 
@@ -3297,7 +3339,8 @@ export function getApiFrontendCompatibilityIssue(
   const includesRedwood = frontends.includes("redwood");
   const includesFresh = frontends.includes("fresh");
   const includesSolidStart = frontends.includes("solid-start");
-  const isReactOnlyApi = api === "trpc" || api === "ts-rest" || api === "garph";
+  const isReactOnlyApi =
+    api === "trpc" || api === "ts-rest" || api === "garph" || api === "apollo-server";
 
   if ((includesNuxt || includesSvelte || includesSolid || includesSolidStart) && isReactOnlyApi) {
     const incompatibleFrontend = includesNuxt

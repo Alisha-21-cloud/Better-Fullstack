@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 
 import {
   analyzeStackCompatibility,
+  allowedApisForFrontends,
   evaluateCompatibility,
   getAIFrontendCompatibilityIssue,
   getApiFrontendCompatibilityIssue,
@@ -37,6 +38,61 @@ describe("compatibility issue helpers", () => {
 
   it("allows frontend-agnostic API options", () => {
     expect(getApiFrontendCompatibilityIssue("orpc", ["svelte"])).toBeUndefined();
+  });
+
+  it("treats Apollo Server as a React-only API option", () => {
+    const issue = getApiFrontendCompatibilityIssue("apollo-server", ["svelte"]);
+
+    expect(issue).toMatchObject({
+      code: "API_REQUIRES_REACT_FRONTEND",
+      message: "Apollo Server API requires React-based frontends.",
+      category: "api",
+      optionId: "apollo-server",
+      provided: { api: "apollo-server", frontend: "svelte" },
+    });
+    expect(allowedApisForFrontends(["tanstack-router"])).toContain("apollo-server");
+    expect(allowedApisForFrontends(["svelte"])).not.toContain("apollo-server");
+  });
+
+  it("disables Apollo Server for unsupported backend and frontend selections", () => {
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "self",
+          nativeFrontend: [],
+          webFrontend: ["tanstack-router"],
+        },
+        "api",
+        "apollo-server",
+      ),
+    ).toBe("Apollo Server scaffolding currently requires a standalone TypeScript backend");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "hono",
+          nativeFrontend: [],
+          webFrontend: ["svelte"],
+        },
+        "api",
+        "apollo-server",
+      ),
+    ).toBe("svelte requires oRPC, not Apollo Server");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "hono",
+          nativeFrontend: [],
+          webFrontend: ["tanstack-router"],
+        },
+        "api",
+        "apollo-server",
+      ),
+    ).toBeNull();
   });
 
   it("returns structured TanStack AI frontend issues", () => {
