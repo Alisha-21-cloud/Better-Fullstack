@@ -1076,6 +1076,30 @@ function createTypeScriptBackendCompatibilityIssue(
     }
   }
 
+  if (part.role === "cms" && part.toolId === "keystatic") {
+    const frontendTool = context.primaryToolIdsByRole?.frontend;
+    if (frontendTool !== "next" && frontendTool !== "astro") {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Keystatic is currently scaffolded for Next.js and Astro frontends.",
+      });
+    }
+
+    const runtimeTool = context.siblingToolIdsByRole?.runtime ?? "bun";
+    if (frontendTool === "astro" && runtimeTool === "workers") {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Keystatic with Astro requires a Node-compatible runtime.",
+      });
+    }
+  }
+
   if (part.role === "ai") {
     const frontendTool = context.primaryToolIdsByRole?.frontend;
     const frontendTools = frontendTool ? [frontendTool] : [];

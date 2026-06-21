@@ -230,6 +230,51 @@ describe("compatibility issue helpers", () => {
     expect(getDisabledReason(DEFAULT_STACK_SELECTION, "cms", "payload")).toBe(
       "Payload CMS v3 requires a Next.js frontend.",
     );
+    expect(getDisabledReason(DEFAULT_STACK_SELECTION, "cms", "keystatic")).toBe(
+      "Keystatic is currently scaffolded for Next.js and Astro frontends.",
+    );
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["nuxt"],
+        },
+        "cms",
+        "keystatic",
+      ),
+    ).toBe("Keystatic is currently scaffolded for Next.js and Astro frontends.");
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["astro"],
+          runtime: "workers",
+        },
+        "cms",
+        "keystatic",
+      ),
+    ).toBe("Keystatic with Astro requires a Node-compatible runtime.");
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["next"],
+        },
+        "cms",
+        "keystatic",
+      ),
+    ).toBeNull();
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["astro"],
+          runtime: "node",
+        },
+        "cms",
+        "keystatic",
+      ),
+    ).toBeNull();
 
     expect(
       getDisabledReason(

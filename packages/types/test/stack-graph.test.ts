@@ -484,6 +484,62 @@ describe("stack graph", () => {
     );
   });
 
+  it("validates Keystatic CMS graph frontend and runtime support", () => {
+    const tanstackRouterParts = parseStackPartSpecs([
+      "frontend:typescript:tanstack-router",
+      "backend:typescript:hono",
+      "backend.cms:typescript:keystatic",
+    ]);
+    const nuxtParts = parseStackPartSpecs([
+      "frontend:typescript:nuxt",
+      "backend:typescript:hono",
+      "backend.cms:typescript:keystatic",
+    ]);
+    const astroWorkersParts = parseStackPartSpecs([
+      "frontend:typescript:astro",
+      "backend:typescript:hono",
+      "backend.runtime:typescript:workers",
+      "backend.cms:typescript:keystatic",
+    ]);
+    const nextParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "backend:typescript:hono",
+      "backend.cms:typescript:keystatic",
+    ]);
+    const astroNodeParts = parseStackPartSpecs([
+      "frontend:typescript:astro",
+      "backend:typescript:hono",
+      "backend.runtime:typescript:node",
+      "backend.cms:typescript:keystatic",
+    ]);
+
+    for (const parts of [tanstackRouterParts, nuxtParts]) {
+      expect(validateStackParts(parts).issues).toContainEqual(
+        expect.objectContaining({
+          code: "INCOMPATIBLE_GRAPH_SELECTION",
+          role: "cms",
+          toolId: "keystatic",
+          message: "Keystatic is currently scaffolded for Next.js and Astro frontends.",
+        }),
+      );
+    }
+    expect(validateStackParts(astroWorkersParts).issues).toContainEqual(
+      expect.objectContaining({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        role: "cms",
+        toolId: "keystatic",
+        message: "Keystatic with Astro requires a Node-compatible runtime.",
+      }),
+    );
+    for (const parts of [nextParts, astroNodeParts]) {
+      expect(
+        validateStackParts(parts).issues.filter(
+          (issue) => issue.role === "cms" && issue.toolId === "keystatic",
+        ),
+      ).toEqual([]);
+    }
+  });
+
   it("rejects incompatible backend-owned TypeScript AI graph selections", () => {
     const chatSdkParts = parseStackPartSpecs([
       "frontend:typescript:nuxt",
@@ -885,7 +941,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
 
   function getCompatibleBackendSingleConfig(field: string, value: string): Partial<ProjectConfig> {
     const config = { ...TS_BASE, [field]: value };
-    if (field === "cms" && value === "payload") {
+    if (field === "cms" && (value === "payload" || value === "keystatic")) {
       config.frontend = ["next"];
     }
     return config;
