@@ -715,6 +715,7 @@ export const dependencyVersionMap = {
   // Headless CMS - Strapi
   "@strapi/client": "^1.6.2",
   qs: "^6.15.2",
+  "@types/qs": "^6.14.0",
 
   // Headless CMS - Directus
   "@directus/sdk": "^22.0.0",

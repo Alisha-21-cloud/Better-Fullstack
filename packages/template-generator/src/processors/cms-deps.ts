@@ -90,6 +90,7 @@ export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): v
       vfs,
       packagePath: webPath,
       dependencies: ["@strapi/client", "qs"],
+      devDependencies: ["@types/qs"],
     });
   }
 
