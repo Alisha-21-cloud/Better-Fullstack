@@ -117,6 +117,7 @@ const backendFeature = (
 
 const PREFLIGHT_RULES: readonly PreflightRule[] = [
   serverFeature("search-no-server", "search", "Search"),
+  serverFeature("vector-db-no-server", "vectorDb", "Vector database"),
   serverFeature("file-storage-no-server", "fileStorage", "File Storage"),
   serverFeature("job-queue-no-server", "jobQueue", "Job Queue"),
 

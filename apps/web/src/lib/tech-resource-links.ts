@@ -353,6 +353,10 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://containers.dev/",
     githubUrl: "https://github.com/devcontainers/spec",
   },
+  "github-actions": {
+    docsUrl: "https://docs.github.com/actions",
+    githubUrl: "https://github.com/features/actions",
+  },
   cloudflare: {
     docsUrl: "https://developers.cloudflare.com/",
     githubUrl: "https://github.com/cloudflare/cloudflare-docs",
@@ -957,6 +961,22 @@ const BASE_LINKS: LinkMap = {
   algolia: {
     docsUrl: "https://www.algolia.com/doc/",
     githubUrl: "https://github.com/algolia/algoliasearch-client-javascript",
+  },
+  pgvector: {
+    docsUrl: "https://github.com/pgvector/pgvector",
+    githubUrl: "https://github.com/pgvector/pgvector",
+  },
+  qdrant: {
+    docsUrl: "https://qdrant.tech/documentation/",
+    githubUrl: "https://github.com/qdrant/qdrant",
+  },
+  chroma: {
+    docsUrl: "https://docs.trychroma.com/",
+    githubUrl: "https://github.com/chroma-core/chroma",
+  },
+  pinecone: {
+    docsUrl: "https://docs.pinecone.io/",
+    githubUrl: "https://github.com/pinecone-io/pinecone-ts-client",
   },
   s3: {
     docsUrl: "https://docs.aws.amazon.com/AmazonS3/",

@@ -130,6 +130,10 @@ function getAddonDisplay(addon: Addons): { label: string; hint: string } {
       label = "Docker Compose";
       hint = "Containerize your app for deployment";
       break;
+    case "github-actions":
+      label = "GitHub Actions";
+      hint = "Ship a CI workflow (install, lint, type-check, build)";
+      break;
     default:
       label = addon;
       hint = `Add ${addon}`;
@@ -139,7 +143,7 @@ function getAddonDisplay(addon: Addons): { label: string; hint: string } {
 }
 
 const ADDON_GROUPS: Record<string, Addons[]> = {
-  Tooling: ["turborepo", "nx", "biome", "oxlint", "ultracite", "husky", "lefthook"],
+  Tooling: ["turborepo", "nx", "github-actions", "biome", "oxlint", "ultracite", "husky", "lefthook"],
   Documentation: ["starlight", "fumadocs"],
   Extensions: ["pwa", "tauri", "opentui", "wxt", "ruler", "devcontainer", "docker-compose"],
   Integrations: ["msw", "storybook", "backend-utils"],

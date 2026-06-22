@@ -112,6 +112,7 @@ export async function createVirtual(
       rateLimit: options.rateLimit || "none",
       i18n: options.i18n || "none",
       search: options.search || "none",
+      vectorDb: options.vectorDb || "none",
       fileStorage: options.fileStorage || "none",
       // Rust ecosystem options
       rustWebFramework: options.rustWebFramework || "none",
@@ -203,8 +204,8 @@ export async function createVirtual(
       elixirQuality: options.elixirQuality || (options.ecosystem === "elixir" ? "credo" : "none"),
       elixirDeploy: options.elixirDeploy || "none",
       elixirLibraries: options.elixirLibraries || [],
-      // AI documentation files
-      aiDocs: options.aiDocs || ["claude-md"],
+      // AI documentation files (canonical default ships both CLAUDE.md + AGENTS.md)
+      aiDocs: options.aiDocs || ["claude-md", "agents-md"],
     };
     if (options.stackParts) {
       config.stackParts = options.stackParts;

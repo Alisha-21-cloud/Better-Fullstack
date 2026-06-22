@@ -79,6 +79,7 @@ export const ADDON_COMPATIBILITY = {
   wxt: [],
   devcontainer: [],
   "docker-compose": [],
+  "github-actions": [],
   msw: [],
   storybook: ["tanstack-router", "react-router", "react-vite", "next", "vinext", "nuxt", "svelte", "solid"],
   swr: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro", "redwood"],

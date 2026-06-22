@@ -2294,6 +2294,14 @@ export const TECH_OPTIONS: Record<
       default: false,
     },
     {
+      id: "github-actions",
+      name: "GitHub Actions",
+      description: "Ship a CI workflow (install, lint, type-check, build)",
+      icon: "https://cdn.simpleicons.org/githubactions/2088FF",
+      color: "from-slate-500 to-slate-800",
+      default: false,
+    },
+    {
       id: "wxt",
       name: "WXT",
       description: "Build browser extensions",
@@ -2754,6 +2762,48 @@ export const TECH_OPTIONS: Record<
       default: true,
     },
   ],
+  vectorDb: [
+    {
+      id: "pgvector",
+      name: "pgvector",
+      description: "Self-hosted Postgres + pgvector extension for embeddings and semantic search",
+      icon: "https://cdn.simpleicons.org/postgresql/4169E1",
+      color: "from-blue-500 to-indigo-700",
+      default: false,
+    },
+    {
+      id: "qdrant",
+      name: "Qdrant",
+      description: "High-performance open-source vector database for AI embeddings",
+      icon: "https://cdn.simpleicons.org/qdrant/DC244C",
+      color: "from-red-500 to-rose-700",
+      default: false,
+    },
+    {
+      id: "chroma",
+      name: "Chroma",
+      description: "Lightweight open-source embedding database for AI applications",
+      icon: "/icon/chroma.svg",
+      color: "from-amber-400 to-orange-600",
+      default: false,
+    },
+    {
+      id: "pinecone",
+      name: "Pinecone",
+      description: "Fully managed serverless vector database for production AI",
+      icon: "/icon/pinecone.svg",
+      color: "from-emerald-500 to-teal-700",
+      default: false,
+    },
+    {
+      id: "none",
+      name: "No Vector DB",
+      description: "Skip vector database setup",
+      icon: "",
+      color: "from-gray-400 to-gray-600",
+      default: true,
+    },
+  ],
   fileStorage: [
     {
       id: "s3",
@@ -2958,7 +3008,7 @@ export const TECH_OPTIONS: Record<
     },
     {
       id: "agents-md",
-      name: "Agents.md",
+      name: "AGENTS.md",
       description: "Generic AI assistant docs",
       icon: "",
       color: "from-purple-400 to-purple-600",

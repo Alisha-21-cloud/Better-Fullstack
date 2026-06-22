@@ -215,6 +215,7 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   docker: { type: "si", slug: "docker", hex: "2496ED" },
   "docker-compose": { type: "si", slug: "docker", hex: "2496ED" },
   devcontainer: { type: "si", slug: "docker", hex: "2496ED" },
+  "github-actions": { type: "si", slug: "githubactions", hex: "2088FF" },
   nx: { type: "si", slug: "nx", hex: "143055", needsInvert: "dark" },
 
   // ─── Deploy ────────────────────────────────────────────────────────────────
@@ -394,6 +395,12 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   elasticsearch: { type: "si", slug: "elasticsearch", hex: "005571" },
   opensearch: { type: "si", slug: "opensearch", hex: "005EB8" },
   algolia: { type: "si", slug: "algolia", hex: "003DFF" },
+
+  // ─── Vector DB ───────────────────────────────────────────────────────────────
+  pgvector: { type: "si", slug: "postgresql", hex: "4169E1" },
+  qdrant: { type: "si", slug: "qdrant", hex: "DC244C" },
+  chroma: { type: "local", src: "/icon/chroma.svg" },
+  pinecone: { type: "local", src: "/icon/pinecone.svg" },
 
   // ─── File Storage ──────────────────────────────────────────────────────────
   s3: { type: "local", src: "/icon/aws-s3.svg" },

@@ -715,6 +715,7 @@ export const dependencyVersionMap = {
   // Headless CMS - Strapi
   "@strapi/client": "^1.6.2",
   qs: "^6.15.2",
+  "@types/qs": "^6.14.0",
 
   // Headless CMS - Directus
   "@directus/sdk": "^22.0.0",
@@ -772,6 +773,18 @@ export const dependencyVersionMap = {
 
   // Search - Algolia
   algoliasearch: "^5.54.0",
+
+  // Vector DB - pgvector (Postgres driver)
+  postgres: "^3.4.7",
+
+  // Vector DB - Qdrant
+  "@qdrant/js-client-rest": "^1.15.1",
+
+  // Vector DB - Chroma
+  chromadb: "^1.10.5",
+
+  // Vector DB - Pinecone
+  "@pinecone-database/pinecone": "^6.1.2",
 
   // EdgeDB
   edgedb: "^2.0.1",

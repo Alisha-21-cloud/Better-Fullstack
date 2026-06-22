@@ -2,6 +2,7 @@
 
 exports[`Template Snapshots File Structure Snapshots file structure: tanstack-router-minimal 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -58,6 +59,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: tanstack-ro
 
 exports[`Template Snapshots File Structure Snapshots file structure: next-self-fullstack 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/web/.env",
@@ -122,6 +124,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: next-self-f
 
 exports[`Template Snapshots File Structure Snapshots file structure: astro-react-integration 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/web/.env",
@@ -164,6 +167,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: astro-react
 
 exports[`Template Snapshots File Structure Snapshots file structure: nuxt-standalone 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/web/.env",
@@ -206,6 +210,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: nuxt-standa
 
 exports[`Template Snapshots File Structure Snapshots file structure: express-node-trpc 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -261,6 +266,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: express-nod
 
 exports[`Template Snapshots File Structure Snapshots file structure: hono-bun-orpc 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -317,6 +323,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: hono-bun-or
 
 exports[`Template Snapshots File Structure Snapshots file structure: hono-openapi 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -381,6 +388,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: hono-openap
 
 exports[`Template Snapshots File Structure Snapshots file structure: hono-apollo-server 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -444,6 +452,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: hono-apollo
 
 exports[`Template Snapshots File Structure Snapshots file structure: better-auth-full 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -509,6 +518,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: better-auth
 
 exports[`Template Snapshots File Structure Snapshots file structure: convex-clerk 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/web/.env",
@@ -557,6 +567,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: convex-cler
 
 exports[`Template Snapshots File Structure Snapshots file structure: self-next-clerk 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/web/.env",
@@ -613,6 +624,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: self-next-c
 
 exports[`Template Snapshots File Structure Snapshots file structure: self-tanstack-start-clerk 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/web/.env",
@@ -666,6 +678,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: self-tansta
 
 exports[`Template Snapshots File Structure Snapshots file structure: mongodb-mongoose 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -719,6 +732,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: mongodb-mon
 
 exports[`Template Snapshots File Structure Snapshots file structure: postgres-prisma 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -774,6 +788,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: postgres-pr
 
 exports[`Template Snapshots File Structure Snapshots file structure: algolia-search-hono 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -831,6 +846,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: algolia-sea
 
 exports[`Template Snapshots File Structure Snapshots file structure: opensearch-search-hono 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -888,6 +904,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: opensearch-
 
 exports[`Template Snapshots File Structure Snapshots file structure: cms-keystatic-next 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/web/.env",
@@ -947,6 +964,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: cms-keystat
 
 exports[`Template Snapshots File Structure Snapshots file structure: i18n-paraglide-tanstack-router 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -1007,6 +1025,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: i18n-paragl
 exports[`Template Snapshots File Structure Snapshots file structure: ai-cli-root-tooling 1`] = `
 [
   ".env",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -1063,6 +1082,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: ai-cli-root
 
 exports[`Template Snapshots File Structure Snapshots file structure: nx-root-tooling 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/server/.env",
@@ -1120,6 +1140,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: nx-root-too
 
 exports[`Template Snapshots File Structure Snapshots file structure: frontend-only-no-backend 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/web/.env",
@@ -1159,6 +1180,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: frontend-on
 
 exports[`Template Snapshots File Structure Snapshots file structure: native-react-native 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/native/.env",
@@ -1215,6 +1237,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: native-reac
 
 exports[`Template Snapshots File Structure Snapshots file structure: native-mobile-integrations 1`] = `
 [
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "apps/native/.env",
@@ -1267,6 +1290,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: native-mobi
 exports[`Template Snapshots File Structure Snapshots file structure: java-spring-boot-jpa-security 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "build.gradle.kts",
@@ -1294,6 +1318,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: java-spring
 [
   ".env.example",
   ".mvn/wrapper/maven-wrapper.properties",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "mvnw",
@@ -1323,8 +1348,12 @@ exports[`Template Snapshots File Structure Snapshots file structure: java-spring
 
 exports[`Template Snapshots Key File Content Snapshots key files: tanstack-router-minimal 1`] = `
 {
-  "fileCount": 56,
+  "fileCount": 57,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -1815,7 +1844,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-tanstack-router-minimal/config": "workspace:*"
@@ -1963,6 +1994,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -2097,8 +2129,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: next-self-fullstack 1`] = `
 {
-  "fileCount": 65,
+  "fileCount": 66,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/web/.env",
@@ -2130,6 +2166,7 @@ export default nextConfig;
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "check-types": "tsc --noEmit",
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start"
@@ -2438,7 +2475,9 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "^6.0.3",
     "@snapshot-next-self-fullstack/config": "workspace:*"
@@ -2546,7 +2585,9 @@ export type AppRouter = typeof appRouter;
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "^6.0.3",
     "@snapshot-next-self-fullstack/config": "workspace:*"
@@ -2692,6 +2733,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
@@ -2918,8 +2960,12 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 exports[`Template Snapshots Key File Content Snapshots key files: astro-react-integration 1`] = `
 {
-  "fileCount": 42,
+  "fileCount": 43,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/web/.env",
@@ -3123,7 +3169,9 @@ export const orpc = createTanstackQueryUtils(client)
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-astro-react-integration/config": "workspace:*"
@@ -3269,6 +3317,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -3402,8 +3451,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: nuxt-standalone 1`] = `
 {
-  "fileCount": 42,
+  "fileCount": 43,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/web/.env",
@@ -3646,7 +3699,9 @@ export default defineNuxtConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-nuxt-standalone/config": "workspace:*"
@@ -3792,6 +3847,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -3927,8 +3983,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: express-node-trpc 1`] = `
 {
-  "fileCount": 55,
+  "fileCount": 56,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -4417,7 +4477,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-express-node-trpc/config": "workspace:*",
@@ -4544,6 +4606,7 @@ export type AppRouter = typeof appRouter;
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit --declaration false --declarationMap false --composite false",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
@@ -4674,8 +4737,12 @@ export default prisma;
 
 exports[`Template Snapshots Key File Content Snapshots key files: hono-bun-orpc 1`] = `
 {
-  "fileCount": 56,
+  "fileCount": 57,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -5204,7 +5271,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-hono-bun-orpc/config": "workspace:*"
@@ -5351,6 +5420,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -5485,8 +5555,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: hono-openapi 1`] = `
 {
-  "fileCount": 65,
+  "fileCount": 66,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -6034,6 +6108,7 @@ export default defineConfig({
   },
   "type": "module",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "openapi:verify": "bun src/verify-openapi.ts"
   },
   "devDependencies": {
@@ -6227,7 +6302,9 @@ export const openApiDocument = createOpenApiDocument();
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-hono-openapi/config": "workspace:*"
@@ -6379,6 +6456,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -6623,8 +6701,12 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 exports[`Template Snapshots Key File Content Snapshots key files: hono-apollo-server 1`] = `
 {
-  "fileCount": 64,
+  "fileCount": 65,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -7109,7 +7191,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-hono-apollo-server/config": "workspace:*"
@@ -7306,7 +7390,9 @@ export async function executeApolloRequest(
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-hono-apollo-server/config": "workspace:*"
@@ -7458,6 +7544,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -7702,8 +7789,12 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 exports[`Template Snapshots Key File Content Snapshots key files: better-auth-full 1`] = `
 {
-  "fileCount": 66,
+  "fileCount": 67,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -8232,7 +8323,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-better-auth-full/config": "workspace:*"
@@ -8340,7 +8433,9 @@ export type AppRouter = typeof appRouter;
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-better-auth-full/config": "workspace:*"
@@ -8492,6 +8587,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
@@ -8717,8 +8813,12 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 exports[`Template Snapshots Key File Content Snapshots key files: convex-clerk 1`] = `
 {
-  "fileCount": 46,
+  "fileCount": 47,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/web/.env",
@@ -9248,8 +9348,12 @@ export default defineSchema({});
 
 exports[`Template Snapshots Key File Content Snapshots key files: self-next-clerk 1`] = `
 {
-  "fileCount": 56,
+  "fileCount": 57,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/web/.env",
@@ -9281,6 +9385,7 @@ export default nextConfig;
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "check-types": "tsc --noEmit",
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start"
@@ -9562,7 +9667,9 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "^6.0.3",
     "@snapshot-self-next-clerk/config": "workspace:*"
@@ -9710,6 +9817,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -9845,8 +9953,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: self-tanstack-start-clerk 1`] = `
 {
-  "fileCount": 52,
+  "fileCount": 53,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/web/.env",
@@ -10256,7 +10368,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-self-tanstack-start-clerk/config": "workspace:*"
@@ -10402,6 +10516,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -10536,8 +10651,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: mongodb-mongoose 1`] = `
 {
-  "fileCount": 53,
+  "fileCount": 54,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -11019,7 +11138,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-mongodb-mongoose/config": "workspace:*"
@@ -11145,7 +11266,9 @@ export type AppRouter = typeof appRouter;
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-mongodb-mongoose/config": "workspace:*"
@@ -11259,8 +11382,12 @@ export { client };
 
 exports[`Template Snapshots Key File Content Snapshots key files: postgres-prisma 1`] = `
 {
-  "fileCount": 55,
+  "fileCount": 56,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -11748,7 +11875,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-postgres-prisma/config": "workspace:*"
@@ -11875,6 +12004,7 @@ export type AppRouter = typeof appRouter;
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit --declaration false --declarationMap false --composite false",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
@@ -12005,8 +12135,12 @@ export default prisma;
 
 exports[`Template Snapshots Key File Content Snapshots key files: algolia-search-hono 1`] = `
 {
-  "fileCount": 57,
+  "fileCount": 58,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -12502,7 +12636,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-algolia-search-hono/config": "workspace:*"
@@ -12650,6 +12786,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -12784,8 +12921,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: opensearch-search-hono 1`] = `
 {
-  "fileCount": 57,
+  "fileCount": 58,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -13281,7 +13422,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-opensearch-search-hono/config": "workspace:*"
@@ -13429,6 +13572,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -13563,8 +13707,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: cms-keystatic-next 1`] = `
 {
-  "fileCount": 59,
+  "fileCount": 60,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/web/.env",
@@ -13600,6 +13748,7 @@ export default nextConfig;
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "check-types": "tsc --noEmit",
     "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start"
@@ -13891,7 +14040,9 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "^6.0.3",
     "@snapshot-cms-keystatic-next/config": "workspace:*"
@@ -14039,6 +14190,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -14174,8 +14326,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: i18n-paraglide-tanstack-router 1`] = `
 {
-  "fileCount": 59,
+  "fileCount": 60,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -14685,7 +14841,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-i18n-paraglide-tanstack-router/config": "workspace:*"
@@ -14833,6 +14991,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -14967,11 +15126,15 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: ai-cli-root-tooling 1`] = `
 {
-  "fileCount": 57,
+  "fileCount": 58,
   "files": [
     {
       "content": "[exists]",
       "path": ".env",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -15469,7 +15632,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-ai-cli-root-tooling/config": "workspace:*"
@@ -15617,6 +15782,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -15751,8 +15917,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: nx-root-tooling 1`] = `
 {
-  "fileCount": 57,
+  "fileCount": 58,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/server/.env",
@@ -16248,7 +16418,9 @@ export default defineConfig({
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-nx-root-tooling/config": "workspace:*"
@@ -16396,6 +16568,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -16530,8 +16703,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: frontend-only-no-backend 1`] = `
 {
-  "fileCount": 36,
+  "fileCount": 37,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/web/.env",
@@ -16931,8 +17108,12 @@ export default defineConfig({
 
 exports[`Template Snapshots Key File Content Snapshots key files: native-react-native 1`] = `
 {
-  "fileCount": 66,
+  "fileCount": 67,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/native/.env",
@@ -17181,6 +17362,7 @@ fontWeight: "bold",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "dev": "expo start --clear",
     "build": "expo export",
     "android": "expo run:android",
@@ -17210,6 +17392,7 @@ fontWeight: "bold",
     "expo-web-browser": "^56.0.5",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "@babel/runtime": "^7.29.7",
     "react-native": "^0.86.0",
     "react-native-gesture-handler": "^3.0.1",
     "react-native-reanimated": "^4.4.1",
@@ -17455,7 +17638,9 @@ export default app;
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-native-react-native/config": "workspace:*"
@@ -17603,6 +17788,7 @@ export default defineConfig({
     }
   },
   "scripts": {
+    "check-types": "tsc --noEmit",
     "db:local": "turso dev --db-file local.db",
     "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
@@ -17737,8 +17923,12 @@ export const db = drizzle({ client, schema });
 
 exports[`Template Snapshots Key File Content Snapshots key files: native-mobile-integrations 1`] = `
 {
-  "fileCount": 60,
+  "fileCount": 61,
   "files": [
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
     {
       "content": "[exists]",
       "path": "apps/native/__tests__/mobile-ui-provider.test.tsx",
@@ -17884,6 +18074,7 @@ registerRootComponent(App);
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "check-types": "tsc --noEmit",
     "dev": "expo start --clear",
     "build": "expo export",
     "android": "expo run:android",
@@ -17917,6 +18108,7 @@ registerRootComponent(App);
     "expo-web-browser": "^56.0.5",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "@babel/runtime": "^7.29.7",
     "react-native": "^0.86.0",
     "react-native-mmkv": "^4.3.1",
     "react-native-gesture-handler": "^3.0.1",
@@ -18206,7 +18398,9 @@ export default app;
     }
   },
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "@snapshot-native-mobile-integrations/config": "workspace:*"
@@ -18383,7 +18577,7 @@ export type AppRouterClient = RouterClient<typeof appRouter>;
 
 exports[`Template Snapshots Key File Content Snapshots key files: java-spring-boot-jpa-security 1`] = `
 {
-  "fileCount": 23,
+  "fileCount": 24,
   "files": [
     {
       "content": 
@@ -18394,6 +18588,10 @@ APP_BASIC_PASSWORD=change-me
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -18482,6 +18680,7 @@ CORS_ORIGIN=http://localhost:3001"
 exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file structure: axum-leptos-seaorm 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "Cargo.toml",
   "README.md",
@@ -18506,6 +18705,7 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
 exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file structure: actix-dioxus-sqlx 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "Cargo.toml",
   "README.md",
@@ -18529,6 +18729,7 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
 exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file structure: cli-clap 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "Cargo.toml",
   "README.md",
@@ -18550,6 +18751,7 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
 exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file structure: axum-envlogger 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "Cargo.toml",
   "README.md",
@@ -18569,6 +18771,7 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
 exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file structure: axum-eyre 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "Cargo.toml",
   "README.md",
@@ -18588,6 +18791,7 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
 exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file structure: rocket-seaorm 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "Cargo.toml",
   "README.md",
@@ -18606,7 +18810,7 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: axum-leptos-seaorm 1`] = `
 {
-  "fileCount": 20,
+  "fileCount": 21,
   "files": [
     {
       "content": 
@@ -18630,6 +18834,10 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": 
@@ -19033,7 +19241,7 @@ async fn main() -> anyhow::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: actix-dioxus-sqlx 1`] = `
 {
-  "fileCount": 19,
+  "fileCount": 20,
   "files": [
     {
       "content": 
@@ -19057,6 +19265,10 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": 
@@ -19451,7 +19663,7 @@ async fn main() -> anyhow::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: cli-clap 1`] = `
 {
-  "fileCount": 17,
+  "fileCount": 18,
   "files": [
     {
       "content": 
@@ -19475,6 +19687,10 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": 
@@ -19866,7 +20082,7 @@ async fn main() -> anyhow::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: axum-envlogger 1`] = `
 {
-  "fileCount": 15,
+  "fileCount": 16,
   "files": [
     {
       "content": 
@@ -19890,6 +20106,10 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": 
@@ -20127,7 +20347,7 @@ async fn main() -> anyhow::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: axum-eyre 1`] = `
 {
-  "fileCount": 15,
+  "fileCount": 16,
   "files": [
     {
       "content": 
@@ -20151,6 +20371,10 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": 
@@ -20361,7 +20585,7 @@ async fn main() -> eyre::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: rocket-seaorm 1`] = `
 {
-  "fileCount": 15,
+  "fileCount": 16,
   "files": [
     {
       "content": 
@@ -20385,6 +20609,10 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": 
@@ -20611,6 +20839,7 @@ async fn rocket() -> _ {
 exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file structure: gin-gorm-zap 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "cmd/server/main.go",
@@ -20624,6 +20853,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
 exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file structure: echo-sqlc-grpc 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "cmd/server/main.go",
@@ -20645,6 +20875,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
 exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file structure: fiber-gorm-zap 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "cmd/server/main.go",
@@ -20658,6 +20889,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
 exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file structure: chi-gorm 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "cmd/server/main.go",
@@ -20671,6 +20903,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
 exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file structure: cli-cobra 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "cmd/cli/main.go",
@@ -20682,6 +20915,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
 exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file structure: gin-gorm-zerolog 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "cmd/server/main.go",
@@ -20695,6 +20929,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
 exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file structure: echo-sqlc-slog 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "cmd/server/main.go",
@@ -20712,6 +20947,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
 exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file structure: gin-casbin 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "auth_model.conf",
@@ -20726,6 +20962,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
 exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file structure: echo-jwt-auth 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "cmd/server/main.go",
@@ -20737,7 +20974,7 @@ exports[`Template Snapshots - Go Ecosystem Go File Structure Snapshots file stru
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: gin-gorm-zap 1`] = `
 {
-  "fileCount": 9,
+  "fileCount": 10,
   "files": [
     {
       "content": 
@@ -20756,6 +20993,10 @@ LOG_LEVEL=debug
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -20791,7 +21032,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: echo-sqlc-grpc 1`] = `
 {
-  "fileCount": 17,
+  "fileCount": 18,
   "files": [
     {
       "content": 
@@ -20810,6 +21051,10 @@ LOG_LEVEL=debug
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -20877,7 +21122,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: fiber-gorm-zap 1`] = `
 {
-  "fileCount": 9,
+  "fileCount": 10,
   "files": [
     {
       "content": 
@@ -20896,6 +21141,10 @@ LOG_LEVEL=debug
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -20931,7 +21180,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: chi-gorm 1`] = `
 {
-  "fileCount": 9,
+  "fileCount": 10,
   "files": [
     {
       "content": 
@@ -20950,6 +21199,10 @@ LOG_LEVEL=debug
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -20985,7 +21238,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: cli-cobra 1`] = `
 {
-  "fileCount": 7,
+  "fileCount": 8,
   "files": [
     {
       "content": 
@@ -21004,6 +21257,10 @@ LOG_LEVEL=debug
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21031,7 +21288,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: gin-gorm-zerolog 1`] = `
 {
-  "fileCount": 9,
+  "fileCount": 10,
   "files": [
     {
       "content": 
@@ -21050,6 +21307,10 @@ LOG_LEVEL=debug
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21085,7 +21346,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: echo-sqlc-slog 1`] = `
 {
-  "fileCount": 13,
+  "fileCount": 14,
   "files": [
     {
       "content": 
@@ -21104,6 +21365,10 @@ LOG_LEVEL=debug
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21155,7 +21420,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: gin-casbin 1`] = `
 {
-  "fileCount": 10,
+  "fileCount": 11,
   "files": [
     {
       "content": 
@@ -21178,6 +21443,10 @@ CASBIN_POLICY=auth_policy.csv
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21217,7 +21486,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key files: echo-jwt-auth 1`] = `
 {
-  "fileCount": 8,
+  "fileCount": 9,
   "files": [
     {
       "content": 
@@ -21239,6 +21508,10 @@ JWT_SECRET=change-me-to-a-real-secret
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21271,6 +21544,7 @@ CORS_ORIGIN=http://localhost:3001"
 exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots file structure: fastapi-sqlalchemy-celery 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "alembic.ini",
@@ -21296,6 +21570,7 @@ exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots f
 exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots file structure: django-sqlmodel-langchain 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "alembic.ini",
@@ -21319,6 +21594,7 @@ exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots f
 exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots file structure: fastapi-ai-multi 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "pyproject.toml",
@@ -21338,6 +21614,7 @@ exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots f
 exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots file structure: flask-pydantic-ruff 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "pyproject.toml",
@@ -21353,6 +21630,7 @@ exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots f
 exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots file structure: litestar-pydantic-ruff 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "pyproject.toml",
@@ -21368,6 +21646,7 @@ exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots f
 exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots file structure: fastapi-tortoise-orm 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "pyproject.toml",
@@ -21384,7 +21663,7 @@ exports[`Template Snapshots - Python Ecosystem Python File Structure Snapshots f
 
 exports[`Template Snapshots - Python Ecosystem Python Key File Content Snapshots key files: fastapi-sqlalchemy-celery 1`] = `
 {
-  "fileCount": 21,
+  "fileCount": 22,
   "files": [
     {
       "content": 
@@ -21411,6 +21690,10 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/0
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21494,7 +21777,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Python Ecosystem Python Key File Content Snapshots key files: django-sqlmodel-langchain 1`] = `
 {
-  "fileCount": 19,
+  "fileCount": 20,
   "files": [
     {
       "content": 
@@ -21521,6 +21804,10 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/0
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21596,7 +21883,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Python Ecosystem Python Key File Content Snapshots key files: fastapi-ai-multi 1`] = `
 {
-  "fileCount": 15,
+  "fileCount": 16,
   "files": [
     {
       "content": 
@@ -21623,6 +21910,10 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/0
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21682,7 +21973,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Python Ecosystem Python Key File Content Snapshots key files: flask-pydantic-ruff 1`] = `
 {
-  "fileCount": 11,
+  "fileCount": 12,
   "files": [
     {
       "content": 
@@ -21709,6 +22000,10 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/0
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21752,7 +22047,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Python Ecosystem Python Key File Content Snapshots key files: litestar-pydantic-ruff 1`] = `
 {
-  "fileCount": 11,
+  "fileCount": 12,
   "files": [
     {
       "content": 
@@ -21779,6 +22074,10 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/0
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21822,7 +22121,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Python Ecosystem Python Key File Content Snapshots key files: fastapi-tortoise-orm 1`] = `
 {
-  "fileCount": 13,
+  "fileCount": 14,
   "files": [
     {
       "content": 
@@ -21849,6 +22148,10 @@ CELERY_RESULT_BACKEND=redis://localhost:6379/0
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -21901,6 +22204,7 @@ CORS_ORIGIN=http://localhost:3001"
 exports[`Template Snapshots - Elixir Ecosystem Elixir File Structure Snapshots file structure: phoenix-ecto-rest 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "README.md",
   "config/config.exs",
@@ -21938,6 +22242,7 @@ exports[`Template Snapshots - Elixir Ecosystem Elixir File Structure Snapshots f
 exports[`Template Snapshots - Elixir Ecosystem Elixir File Structure Snapshots file structure: phoenix-liveview-full 1`] = `
 [
   ".env.example",
+  "AGENTS.md",
   "CLAUDE.md",
   "Dockerfile",
   "README.md",
@@ -21986,7 +22291,7 @@ exports[`Template Snapshots - Elixir Ecosystem Elixir File Structure Snapshots f
 
 exports[`Template Snapshots - Elixir Ecosystem Elixir Key File Content Snapshots key files: phoenix-ecto-rest 1`] = `
 {
-  "fileCount": 33,
+  "fileCount": 34,
   "files": [
     {
       "content": 
@@ -22002,6 +22307,10 @@ POSTGRES_TEST_DB=snapshot_elixir_phoenix_ecto_rest_test
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
@@ -22133,7 +22442,7 @@ CORS_ORIGIN=http://localhost:3001"
 
 exports[`Template Snapshots - Elixir Ecosystem Elixir Key File Content Snapshots key files: phoenix-liveview-full 1`] = `
 {
-  "fileCount": 45,
+  "fileCount": 46,
   "files": [
     {
       "content": 
@@ -22149,6 +22458,10 @@ POSTGRES_TEST_DB=snapshot_elixir_phoenix_liveview_full_test
 CORS_ORIGIN=http://localhost:3001"
 ,
       "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
     },
     {
       "content": "[exists]",
