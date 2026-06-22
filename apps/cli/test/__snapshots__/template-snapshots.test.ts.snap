@@ -4606,7 +4606,7 @@ export type AppRouter = typeof appRouter;
     }
   },
   "scripts": {
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit --declaration false --declarationMap false --composite false",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
@@ -12004,7 +12004,7 @@ export type AppRouter = typeof appRouter;
     }
   },
   "scripts": {
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit --declaration false --declarationMap false --composite false",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
