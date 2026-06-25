@@ -24,7 +24,8 @@ export type FailureTag =
   | "validation-failed"
   | "build-failed"
   | "budget-exhausted"
-  | "toolchain-missing";
+  | "toolchain-missing"
+  | "stack-unwired";
 
 export type RunOutcome = "success" | "model-failure" | "infra-inconclusive";
 
@@ -131,7 +132,10 @@ export type RunResult = {
     terminalReason?: string;
   };
   validation: ProjectValidation;
+  /** Primary "right libs" signal: libraries actually wired in the generated tree. */
   stackScore: StackScore;
+  /** Assisted-path diagnostic: whether bts.jsonc echoes the requested stack. */
+  generatorFaithfulness?: StackScore;
   toolCompliance: ToolCompliance;
   failureTags: FailureTag[];
 };
@@ -167,6 +171,7 @@ type SummaryAggregate = {
   passRate: number;
   passCi95: { low: number; high: number };
   stackPercent: number;
+  faithfulnessPercent?: number;
   commandDisciplinePercent: number;
   avgDurationMs: number;
   avgOutputTokens?: number;
@@ -1065,7 +1070,9 @@ export async function runScaffbench(options: ScaffbenchOptions, log = console.lo
           const validation = options.skipValidation
             ? { projectExists: projectDir !== null, steps: {} }
             : await validateProject(spec, projectDir, options);
-          const stackScore = projectDir ? await scoreProject(spec, projectDir) : emptyScore(spec);
+          const scored = projectDir
+            ? await scoreProject(spec, projectDir)
+            : { artifact: emptyArtifactScore(spec), faithfulness: undefined };
           const toolCompliance = await scoreToolCompliance(pathMode, projectDir, claude);
           const result: RunResult = {
             id,
@@ -1091,7 +1098,8 @@ export async function runScaffbench(options: ScaffbenchOptions, log = console.lo
               terminalReason: parsed?.terminal_reason,
             },
             validation,
-            stackScore,
+            stackScore: scored.artifact,
+            generatorFaithfulness: scored.faithfulness,
             toolCompliance,
             failureTags: [],
           };
@@ -1641,12 +1649,35 @@ async function readPackageScripts(packageJsonPath: string) {
   }
 }
 
-export async function scoreProject(spec: BenchmarkSpec, projectDir: string) {
-  const btsPath = path.join(projectDir, "bts.jsonc");
-  if (existsSync(btsPath)) {
-    return scoreBts(spec, await readFile(btsPath, "utf8"));
-  }
+/**
+ * Score the libraries actually wired into the generated tree (dependency
+ * declarations + source imports + required files). This is the primary
+ * "right libs" signal for EVERY creation path, so a broken or empty generated
+ * package (e.g. a db package that declares nothing and is imported nowhere) no
+ * longer earns full stack credit on the strength of bts.jsonc alone.
+ */
+export async function scoreArtifact(spec: BenchmarkSpec, projectDir: string): Promise<StackScore> {
   return scoreMarkers(spec, await collectProjectIndex(projectDir));
+}
+
+/**
+ * Two complementary stack signals:
+ * - `artifact`: what is actually wired in the emitted project (primary).
+ * - `faithfulness`: assisted paths only — whether Better-Fullstack's own
+ *   bts.jsonc echoes the requested stack. A generator-honesty diagnostic, not
+ *   the capability metric. A high faithfulness with a low artifact score is the
+ *   signature of a generator that recorded a library it never wired.
+ */
+export async function scoreProject(
+  spec: BenchmarkSpec,
+  projectDir: string,
+): Promise<{ artifact: StackScore; faithfulness?: StackScore }> {
+  const artifact = await scoreArtifact(spec, projectDir);
+  const btsPath = path.join(projectDir, "bts.jsonc");
+  const faithfulness = existsSync(btsPath)
+    ? scoreBts(spec, await readFile(btsPath, "utf8"))
+    : undefined;
+  return { artifact, faithfulness };
 }
 
 export function scoreBts(spec: BenchmarkSpec, raw: string): StackScore {
@@ -1772,6 +1803,15 @@ function scoreFromCounts(matched: number, total: number, misses: string[]): Stac
     total,
     percent: total > 0 ? Math.round((matched / total) * 100) : 0,
     misses,
+  };
+}
+
+function emptyArtifactScore(spec: BenchmarkSpec): StackScore {
+  return {
+    matched: 0,
+    total: spec.strictMarkers.length,
+    percent: 0,
+    misses: ["project not found or unscorable"],
   };
 }
 
@@ -1996,6 +2036,15 @@ export function deriveFailureTags(result: RunResult): FailureTag[] {
   if (isBudgetExhausted(result.claude.terminalReason)) tags.add("budget-exhausted");
   if (!result.validation.projectExists) tags.add("project-not-found");
   if (result.stackScore.matched < result.stackScore.total) tags.add("stack-mismatch");
+  // bts.jsonc records the full stack but the artifact does not wire it (e.g. an
+  // empty generated package): the generator claimed more than it produced.
+  if (
+    result.generatorFaithfulness &&
+    result.generatorFaithfulness.percent === 100 &&
+    result.stackScore.percent < 100
+  ) {
+    tags.add("stack-unwired");
+  }
   if (result.toolCompliance.checks.some((check) => check.status === "fail")) {
     tags.add("tool-violation");
     tags.add("command-discipline");
@@ -2066,6 +2115,9 @@ function aggregateBy(
         passRate: scored.length > 0 ? Math.round((passCount / scored.length) * 100) : 0,
         passCi95: ci,
         stackPercent: average(group.map((result) => result.stackScore.percent)),
+        faithfulnessPercent: maybeAverage(
+          group.map((result) => result.generatorFaithfulness?.percent),
+        ),
         commandDisciplinePercent: average(
           group.map((result) =>
             result.toolCompliance.total > 0
@@ -2157,6 +2209,9 @@ export function renderMarkdown(summary: ScaffbenchSummary) {
         result.claude.totalCostUsd?.toFixed(3) ?? "",
         result.stackScore.percent,
         `${result.stackScore.matched}/${result.stackScore.total}`,
+        result.generatorFaithfulness
+          ? `${result.generatorFaithfulness.matched}/${result.generatorFaithfulness.total}`
+          : "—",
         result.validation.install?.exitCode ?? "",
         result.validation.build?.exitCode ?? "",
         result.validation.checkTypes?.exitCode ?? "",
@@ -2177,6 +2232,7 @@ export function renderMarkdown(summary: ScaffbenchSummary) {
         aggregate.inconclusiveCount > 0 ? `${aggregate.inconclusiveCount}/${aggregate.runs}` : "0",
         `${aggregate.passRate}% (${aggregate.passCi95.low}-${aggregate.passCi95.high})`,
         `${aggregate.stackPercent}%`,
+        aggregate.faithfulnessPercent != null ? `${aggregate.faithfulnessPercent}%` : "—",
         `${aggregate.commandDisciplinePercent}%`,
         formatSeconds(aggregate.avgDurationMs),
         aggregate.avgOutputTokens ?? "",
@@ -2199,16 +2255,18 @@ Prompt style: ${summary.options.promptStyle}
 This is an ablation across creation paths and reasoning effort for one agent
 (Claude Code), not a cross-vendor leaderboard. Pass rate is over *scored* runs:
 infra-inconclusive runs (missing toolchain, validation timeout, exhausted token
-budget, or a crash with no output) are excluded from the denominator.
+budget, or a crash with no output) are excluded from the denominator. "Wired
+libs" is scored from the generated artifact (deps + imports + files);
+"Faithful" is the assisted-path bts.jsonc-vs-requested diagnostic.
 
-| Model | Effort | Effective reasoning | Path | Pass@1 | Inconclusive | Pass rate CI95 | Right libs | Command discipline | Avg time | Avg output tokens | Avg cost | Failure tags |
-| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Model | Effort | Effective reasoning | Path | Pass@1 | Inconclusive | Pass rate CI95 | Wired libs | Faithful | Command discipline | Avg time | Avg output tokens | Avg cost | Failure tags |
+| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
 ${aggregateRows}
 
 ## Runs
 
-| Spec | Trial | Effort | Effective reasoning | Model | Path | Validation | Failure tags | Claude exit | Time | Output tokens | Cost | Right libs % | Right libs | Install | Build | Typecheck | Lint | Test |
-| --- | ---: | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Spec | Trial | Effort | Effective reasoning | Model | Path | Validation | Failure tags | Claude exit | Time | Output tokens | Cost | Wired % | Wired | Faithful | Install | Build | Typecheck | Lint | Test |
+| --- | ---: | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 ${rows}
 `;
 }

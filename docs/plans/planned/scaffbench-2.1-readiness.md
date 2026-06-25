@@ -93,9 +93,16 @@ Primary quality signal:
 
 - validation pass/fail across install, build, typecheck, native checks, and optional quality gates
 
-Secondary diagnostic signals:
+Right-library scoring is artifact-grounded for every path:
 
-- right-library score from `bts.jsonc` or strict dependency/source/file markers
+- `Wired libs` (primary) scores the libraries actually present in the generated
+  tree (dependencies + source imports + required files) via strict markers.
+- `Faithful` (assisted-path diagnostic) scores whether `bts.jsonc` echoes the
+  requested stack. A 100% faithful but sub-100% wired run is tagged
+  `stack-unwired` — the signature of a generator that recorded a library it
+  never wired.
+
+Secondary diagnostic signals:
 - command discipline and tool-path compliance
 - failure taxonomy tags
 - average cost, output tokens, and wall time
@@ -122,6 +129,7 @@ The harness emits stable failure tags:
 - `validation-failed`
 - `budget-exhausted`
 - `toolchain-missing`
+- `stack-unwired`
 
 ## Scope and run-outcome semantics (post-2.1 hardening)
 

@@ -1,4 +1,7 @@
 import { describe, expect, it } from "bun:test";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
   aggregateResults,
@@ -8,7 +11,9 @@ import {
   parseArgs,
   promptFor,
   runCommand,
+  scoreArtifact,
   scoreBts,
+  scoreProject,
   SCAFFBENCH_2_1_SPECS,
   validationPassed,
   type RunResult,
@@ -302,6 +307,60 @@ describe("ScaffBench 2.1 scoring", () => {
       passRate: 50,
       failureTags: { "install-failed": 1, "validation-failed": 1 },
     });
+  });
+});
+
+describe("ScaffBench 2.1 artifact-grounded scoring", () => {
+  it("scores libraries wired in the generated artifact, not just declared", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "sb21-artifact-"));
+    try {
+      await writeFile(
+        join(dir, "package.json"),
+        JSON.stringify({ dependencies: { hono: "^4", "@qdrant/js-client-rest": "^1" } }),
+      );
+      const spec = {
+        ...aiSpec,
+        strictMarkers: [
+          { id: "backend:hono", deps: ["hono"] },
+          { id: "vectorDb:qdrant", deps: ["@qdrant/js-client-rest"] },
+          { id: "search:opensearch", deps: ["@opensearch-project/opensearch"] },
+          { id: "forbidden:stripe", forbiddenDeps: ["stripe"] },
+        ],
+      };
+
+      const score = await scoreArtifact(spec, dir);
+
+      // hono + qdrant wired, stripe correctly absent => 3; opensearch missing.
+      expect(score).toMatchObject({ matched: 3, total: 4 });
+      expect(score.misses).toEqual(["search:opensearch"]);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("separates artifact from faithfulness and flags a claimed-but-unwired stack", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "sb21-unwired-"));
+    try {
+      // bts.jsonc records the full requested stack => 100% faithful...
+      await writeFile(
+        join(dir, "bts.jsonc"),
+        JSON.stringify({
+          ...Object.fromEntries(Object.entries(aiSpec.expectedConfig ?? {})),
+          addons: aiSpec.expectedAddons,
+        }),
+      );
+      // ...but the emitted tree wires almost nothing => low artifact score.
+      await writeFile(join(dir, "package.json"), JSON.stringify({ dependencies: { hono: "^4" } }));
+
+      const { artifact, faithfulness } = await scoreProject(aiSpec, dir);
+      expect(faithfulness?.percent).toBe(100);
+      expect(artifact.percent).toBeLessThan(100);
+
+      const run = makeRun({ stackScore: artifact, generatorFaithfulness: faithfulness });
+      expect(deriveFailureTags(run)).toContain("stack-unwired");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 });
 
