@@ -152,6 +152,19 @@ The harness emits stable failure tags:
   127 (a broken `build`/`test` script) stays a `model-failure`, as does a generation timeout (cf.
   SWE-bench).
 
+## Per-spec solvability gate
+
+`apps/cli/test/e2e/scaffbench-solvability.test.ts` scaffolds each spec from its
+**own `canonicalFlags`** (not a hand-maintained preset that can drift) and runs
+the harness's `validateProject` to assert the expected stack installs / builds /
+type-checks. This guarantees a Better-Fullstack generator regression surfaces
+here rather than being silently charged to the model in the benchmark. It is
+toolchain-gated (a spec is skipped, with a logged warning, when its toolchain is
+absent) and runs as the scheduled / `workflow_dispatch` `scaffbench-solvability`
+CI job across all five ecosystems — it does not block per-PR checks. Run a
+single ecosystem locally with
+`SCAFFBENCH_SOLVABILITY_SPECS=<id> bun run scaffbench:solvability`.
+
 ## Notes
 
 - `--route-check` is implemented as an opt-in lane only. Do not use it for default runs unless the

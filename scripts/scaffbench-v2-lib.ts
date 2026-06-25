@@ -1388,7 +1388,7 @@ async function archiveProjectSource(srcDir: string, destDir: string) {
   });
 }
 
-async function validateProject(
+export async function validateProject(
   spec: BenchmarkSpec,
   projectDir: string | null,
   options: ScaffbenchOptions,
