@@ -9,6 +9,7 @@ import {
   useReducedMotion,
 } from "motion/react";
 import {
+  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -864,6 +865,8 @@ interface ModelLeaderRow {
   label: string;
   /** reasoning-effort tag (e.g. "max"), or "" for the v1 cross-vendor models. */
   effort: string;
+  /** "free" pins the row below the paid tier, under a divider, in every view. */
+  tier: "paid" | "free";
   /** bar fill color. */
   color: string;
   /** Pass 1 as a 0–100 percentage; doubles as the bar fill width. */
@@ -883,9 +886,14 @@ function mean(values: readonly number[]): number {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-// Best models first, cheaper as the tiebreak.
+// Paid tier first, then free tier (free never outranks a paid config, even when
+// the scaffolder hands a weak free model an easy MCP pass). Within a tier: best
+// pass-rate first, cheaper as the tiebreak.
+const TIER_RANK: Record<ModelLeaderRow["tier"], number> = { paid: 0, free: 1 };
 function sortLeaderRows(rows: ModelLeaderRow[]): ModelLeaderRow[] {
-  return [...rows].sort((a, b) => b.pass - a.pass || a.costNum - b.costNum);
+  return [...rows].sort(
+    (a, b) => TIER_RANK[a.tier] - TIER_RANK[b.tier] || b.pass - a.pass || a.costNum - b.costNum,
+  );
 }
 
 // V2: one row per (model, effort), pooled over the chosen path's scored cells.
@@ -911,6 +919,10 @@ function computeV2ModelRows(
       key: model.key,
       label: model.label,
       effort: model.effort,
+      tier:
+        model.provider === "opencode" || model.provider === "kilo"
+          ? ("free" as const)
+          : ("paid" as const),
       color: PROVIDER_BAR_COLOR[model.provider],
       pass: formatPercent(passing, scored.length),
       costNum: costs.length > 0 ? mean(costs) : Number.POSITIVE_INFINITY,
@@ -933,6 +945,7 @@ function computeV1ModelRows(leaderPath: LeaderPath): ModelLeaderRow[] {
       key: m,
       label: getModelLabel(m),
       effort: "",
+      tier: "paid" as const,
       color: CHART_PALETTE.models[m],
       pass: combos.length > 0 ? Math.round(mean(combos.map((combo) => combo.pass))) : 0,
       costNum: Number.POSITIVE_INFINITY,
@@ -2300,9 +2313,16 @@ function ScaffbenchLeaderboardCard() {
                 exit={leaderFadeHidden}
                 transition={leaderFadeTransition}
               >
-                {rows.map((row) => (
-                  <ModelLeaderRow key={row.key} row={row} />
-                ))}
+                {rows.map((row, index) => {
+                  const startsFreeTier =
+                    row.tier === "free" && (index === 0 || rows[index - 1]?.tier !== "free");
+                  return (
+                    <Fragment key={row.key}>
+                      {startsFreeTier ? <LeaderTierDivider /> : null}
+                      <ModelLeaderRow row={row} />
+                    </Fragment>
+                  );
+                })}
               </motion.div>
             </AnimatePresence>
 
@@ -2366,6 +2386,23 @@ function PillButton<T extends string>({
     >
       {label}
     </button>
+  );
+}
+
+// Separates the free-tier rows from the paid configs above them. The label sits
+// in the model column; a hairline runs across the bar column.
+function LeaderTierDivider() {
+  return (
+    <div className={cn(LEADERBOARD_GRID, "mt-2.5 mb-1")} aria-hidden>
+      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#9c9a93] dark:text-[#6c6a61]">
+        Free tier
+      </span>
+      <span className="h-px w-full self-center bg-[#e1e0d8] dark:bg-[rgba(237,235,228,0.10)]" />
+      <span />
+      <span />
+      <span />
+      <span />
+    </div>
   );
 }
 
