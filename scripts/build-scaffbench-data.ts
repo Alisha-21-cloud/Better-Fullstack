@@ -52,27 +52,36 @@ function prettyModel(model: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// A step is green when it actually ran and exited 0. A "skip" (a gate check that
+// should have run but no tool was configured) is NOT green — it carries exitCode
+// null and disqualifies the run. (Matches validationPassed in the harness lib.)
+function stepGreen(s: any): boolean {
+  return s.status !== "skip" && s.exitCode === 0 && !s.timedOut && !s.spawnError;
+}
+
 function corePass(result: any): boolean {
   const v = result?.validation;
   if (!v || !v.projectExists) return false;
-  const core = Object.entries(v.steps || {}).filter(([k]) => !GATE.test(k));
+  // "na" steps are excluded (not applicable); core steps are the non-gate ones.
+  const core = Object.entries(v.steps || {})
+    .filter(([k]) => !GATE.test(k))
+    .filter(([, s]: any) => s.status !== "na");
   if (!core.length) return false;
-  return core.every(([, s]: any) => s.exitCode === 0 && !s.timedOut && !s.spawnError);
+  return core.every(([, s]: any) => stepGreen(s));
 }
 
-// Full pass = every validation step (core + quality gate) passed. We compute it
-// here instead of trusting the harness `passRate === 100` because passRate is
-// VACUOUSLY 100 when zero steps ran — e.g. a model emits a project with no
-// recognizable build entrypoint, the harness validates nothing, and 0/0 reads as
-// "100%". Those are model failures, not passes (they're exactly how a weak free
-// model would otherwise leapfrog Opus). Require projectExists + at least one real
-// step, mirroring corePass; this also guarantees fullPass ⊆ corePass.
+// Full pass = Core pass AND every applicable quality-gate step actually ran and
+// passed. We compute it here (not via the harness `passRate === 100`) so the
+// status semantics are honored: passRate was VACUOUSLY 100 when zero steps ran,
+// and skipped lint/test / a `biome check --write` format step exited 0 and passed
+// silently (the Finding-1 inflation). "na" steps (genuinely testless scaffolds)
+// are excluded; a "skip" disqualifies. This also keeps fullPass ⊆ corePass.
 function fullPass(result: any): boolean {
-  const v = result?.validation;
-  if (!v || !v.projectExists) return false;
-  const steps = Object.entries(v.steps || {});
-  if (!steps.length) return false;
-  return steps.every(([, s]: any) => s.exitCode === 0 && !s.timedOut && !s.spawnError);
+  if (!corePass(result)) return false;
+  const v = result.validation;
+  const applicable = Object.entries(v.steps || {}).filter(([, s]: any) => s.status !== "na");
+  if (!applicable.length) return false;
+  return applicable.every(([, s]: any) => stepGreen(s));
 }
 
 type Cell = {
