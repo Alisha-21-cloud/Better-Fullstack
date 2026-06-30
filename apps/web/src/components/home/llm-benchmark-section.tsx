@@ -828,7 +828,7 @@ const headingStyle: CSSProperties = {
   lineHeight: 0.98,
 };
 
-const blogPostParams = { _splat: "scaffbench-2" } as const;
+const blogPostParams = { _splat: "scaffbench-2-1" } as const;
 
 // ── ScaffBench 2 leaderboard ────────────────────────────────────────────────
 // A pass-rate bar chart + data table for the per-path (MCP / CLI / Prompt)

@@ -1,10 +1,11 @@
 // AUTO-GENERATED from the ScaffBench V2.1 run summaries (see scripts/build-scaffbench-2-1-data.ts).
 // V2.1 is the expanded 13-spec suite (adds Java + Elixir ecosystems and two
-// prompt-only frontier specs; .NET validated for real). First run: Claude Opus
-// 4.8 at low effort, Prompt path only — a single-agent ablation on the new suite,
-// so the leaderboard shows one model row until more configs are run. Per-cell
-// signals from the harness bySpecCell aggregate; corePass derived from validation
-// steps minus the quality gate; steps from the saved trajectory; cost metered.
+// prompt-only frontier specs; .NET validated for real). Rows: Opus 4.8 low (full
+// 13-spec ablation), Opus 4.8 max + Claude Sonnet 5 max (the 8 specs validated for
+// both so far). Per-cell signals from the harness bySpecCell aggregate; corePass
+// from validation steps minus the quality gate; a run with zero core steps is
+// INCONCLUSIVE (scored:false) — e.g. multi-ts-go-grpc's frontend/+backend/ layout
+// the root-only validator can't locate. Cost metered; steps from the trajectory.
 import type { ScaffbenchCell, ScaffbenchModel } from "./scaffbench-2-data";
 
 export const SCAFFBENCH21_META = {
@@ -14,9 +15,18 @@ export const SCAFFBENCH21_META = {
   indexWeights: { macroPass: 0.6, wired: 0.25, cmd: 0.15 },
 } as const;
 
-export const SCAFFBENCH21_SPECS = ["ai-search-workbench","rust-leptos-axum","python-ingestion-api","go-realtime-api","multi-dotnet-ops","ts-svelte-edge-orpc","dotnet-blazor-cqrs","multi-ts-go-grpc","java-spring-jooq-keycloak","elixir-broadway-absinthe","react-native-expo","frontier-polyglot-proto","frontier-effect-eventsourcing"] as const;
+export const SCAFFBENCH21_SPECS = ["python-ingestion-api","multi-dotnet-ops","go-realtime-api","frontier-effect-eventsourcing","dotnet-blazor-cqrs","ts-svelte-edge-orpc","java-spring-jooq-keycloak","elixir-broadway-absinthe","multi-ts-go-grpc","rust-leptos-axum","ai-search-workbench","react-native-expo","frontier-polyglot-proto"] as const;
 
 export const SCAFFBENCH21_MODELS: readonly ScaffbenchModel[] = [
+  {
+    "key": "claude-opus-4-8|max",
+    "model": "claude-opus-4-8",
+    "effort": "max",
+    "effectiveReasoning": "max",
+    "provider": "claude",
+    "label": "Opus 4.8",
+    "sortIndex": 56
+  },
   {
     "key": "claude-opus-4-8|low",
     "model": "claude-opus-4-8",
@@ -24,36 +34,123 @@ export const SCAFFBENCH21_MODELS: readonly ScaffbenchModel[] = [
     "effectiveReasoning": "low",
     "provider": "claude",
     "label": "Opus 4.8",
-    "sortIndex": 52
+    "sortIndex": 55
+  },
+  {
+    "key": "claude-sonnet-5|max",
+    "model": "claude-sonnet-5",
+    "effort": "max",
+    "effectiveReasoning": "max",
+    "provider": "claude",
+    "label": "Sonnet 5",
+    "sortIndex": 48
   }
 ];
 
 export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
   {
-    "modelKey": "claude-opus-4-8|low",
+    "modelKey": "claude-opus-4-8|max",
     "path": "prompt",
-    "spec": "ai-search-workbench",
+    "spec": "python-ingestion-api",
     "scored": true,
-    "corePass": false,
-    "fullPass": false,
-    "wiredPct": 90,
+    "corePass": true,
+    "fullPass": true,
+    "wiredPct": 100,
     "cmdPct": 100,
-    "costUsd": 3.0851255,
-    "outTokens": 35195,
-    "steps": 73
+    "costUsd": 0.367595,
+    "outTokens": 5821,
+    "steps": 185
   },
   {
-    "modelKey": "claude-opus-4-8|low",
+    "modelKey": "claude-opus-4-8|max",
     "path": "prompt",
-    "spec": "rust-leptos-axum",
+    "spec": "multi-dotnet-ops",
     "scored": true,
     "corePass": false,
     "fullPass": false,
     "wiredPct": 92,
     "cmdPct": 100,
-    "costUsd": 1.030279,
-    "outTokens": 14078,
-    "steps": 26
+    "costUsd": 14.84610225,
+    "outTokens": 188239,
+    "steps": 118
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "go-realtime-api",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 92,
+    "cmdPct": 100,
+    "costUsd": 6.9638355,
+    "outTokens": 124821,
+    "steps": 53
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "dotnet-blazor-cqrs",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 9.9249945,
+    "outTokens": 156780,
+    "steps": 83
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "ts-svelte-edge-orpc",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": null,
+    "outTokens": null,
+    "steps": 161
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "multi-ts-go-grpc",
+    "scored": false,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 88,
+    "cmdPct": 100,
+    "costUsd": 7.48473325,
+    "outTokens": 165059,
+    "steps": 65
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "rust-leptos-axum",
+    "scored": true,
+    "corePass": true,
+    "fullPass": true,
+    "wiredPct": 92,
+    "cmdPct": 100,
+    "costUsd": 6.45492675,
+    "outTokens": 112604,
+    "steps": 62
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "ai-search-workbench",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 13.19089525,
+    "outTokens": 179187,
+    "steps": 118
   },
   {
     "modelKey": "claude-opus-4-8|low",
@@ -66,6 +163,19 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
     "cmdPct": 100,
     "costUsd": 1.542961,
     "outTokens": 18772,
+    "steps": 42
+  },
+  {
+    "modelKey": "claude-opus-4-8|low",
+    "path": "prompt",
+    "spec": "multi-dotnet-ops",
+    "scored": true,
+    "corePass": true,
+    "fullPass": false,
+    "wiredPct": 92,
+    "cmdPct": 100,
+    "costUsd": 1.64473,
+    "outTokens": 21178,
     "steps": 42
   },
   {
@@ -84,28 +194,15 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
   {
     "modelKey": "claude-opus-4-8|low",
     "path": "prompt",
-    "spec": "multi-dotnet-ops",
-    "scored": true,
-    "corePass": true,
-    "fullPass": false,
-    "wiredPct": 92,
-    "cmdPct": 100,
-    "costUsd": 1.64473,
-    "outTokens": 21178,
-    "steps": 42
-  },
-  {
-    "modelKey": "claude-opus-4-8|low",
-    "path": "prompt",
-    "spec": "ts-svelte-edge-orpc",
+    "spec": "frontier-effect-eventsourcing",
     "scored": true,
     "corePass": false,
     "fullPass": false,
     "wiredPct": 100,
     "cmdPct": 100,
-    "costUsd": 1.45217525,
-    "outTokens": 18532,
-    "steps": 38
+    "costUsd": 0.802224,
+    "outTokens": 13824,
+    "steps": 15
   },
   {
     "modelKey": "claude-opus-4-8|low",
@@ -123,15 +220,15 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
   {
     "modelKey": "claude-opus-4-8|low",
     "path": "prompt",
-    "spec": "multi-ts-go-grpc",
+    "spec": "ts-svelte-edge-orpc",
     "scored": true,
     "corePass": false,
     "fullPass": false,
-    "wiredPct": 94,
+    "wiredPct": 100,
     "cmdPct": 100,
-    "costUsd": 2.031828,
-    "outTokens": 28724,
-    "steps": 44
+    "costUsd": 1.45217525,
+    "outTokens": 18532,
+    "steps": 38
   },
   {
     "modelKey": "claude-opus-4-8|low",
@@ -162,6 +259,45 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
   {
     "modelKey": "claude-opus-4-8|low",
     "path": "prompt",
+    "spec": "multi-ts-go-grpc",
+    "scored": false,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 94,
+    "cmdPct": 100,
+    "costUsd": 2.031828,
+    "outTokens": 28724,
+    "steps": 44
+  },
+  {
+    "modelKey": "claude-opus-4-8|low",
+    "path": "prompt",
+    "spec": "rust-leptos-axum",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 92,
+    "cmdPct": 100,
+    "costUsd": 1.030279,
+    "outTokens": 14078,
+    "steps": 26
+  },
+  {
+    "modelKey": "claude-opus-4-8|low",
+    "path": "prompt",
+    "spec": "ai-search-workbench",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 90,
+    "cmdPct": 100,
+    "costUsd": 3.0851255,
+    "outTokens": 35195,
+    "steps": 73
+  },
+  {
+    "modelKey": "claude-opus-4-8|low",
+    "path": "prompt",
     "spec": "react-native-expo",
     "scored": true,
     "corePass": false,
@@ -176,7 +312,7 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
     "modelKey": "claude-opus-4-8|low",
     "path": "prompt",
     "spec": "frontier-polyglot-proto",
-    "scored": true,
+    "scored": false,
     "corePass": false,
     "fullPass": false,
     "wiredPct": 75,
@@ -186,16 +322,107 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
     "steps": 22
   },
   {
-    "modelKey": "claude-opus-4-8|low",
+    "modelKey": "claude-sonnet-5|max",
     "path": "prompt",
-    "spec": "frontier-effect-eventsourcing",
+    "spec": "python-ingestion-api",
+    "scored": true,
+    "corePass": true,
+    "fullPass": true,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 0.93944505,
+    "outTokens": 5502,
+    "steps": 187
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
+    "spec": "multi-dotnet-ops",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 92,
+    "cmdPct": 100,
+    "costUsd": 7.96741305,
+    "outTokens": 182012,
+    "steps": 267
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
+    "spec": "go-realtime-api",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 92,
+    "cmdPct": 100,
+    "costUsd": 7.35636615,
+    "outTokens": 179707,
+    "steps": 97
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
+    "spec": "dotnet-blazor-cqrs",
     "scored": true,
     "corePass": false,
     "fullPass": false,
     "wiredPct": 100,
     "cmdPct": 100,
-    "costUsd": 0.802224,
-    "outTokens": 13824,
-    "steps": 15
+    "costUsd": 1.3724337000000002,
+    "outTokens": 14886,
+    "steps": 320
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
+    "spec": "ts-svelte-edge-orpc",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 3.4871388,
+    "outTokens": 92636,
+    "steps": 95
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
+    "spec": "multi-ts-go-grpc",
+    "scored": false,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 88,
+    "cmdPct": 100,
+    "costUsd": 11.462255100000002,
+    "outTokens": 248104,
+    "steps": 160
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
+    "spec": "rust-leptos-axum",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 92,
+    "cmdPct": 100,
+    "costUsd": 11.99229645,
+    "outTokens": 217208,
+    "steps": 295
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
+    "spec": "ai-search-workbench",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 5.995577550000001,
+    "outTokens": 188079,
+    "steps": 194
   }
 ];

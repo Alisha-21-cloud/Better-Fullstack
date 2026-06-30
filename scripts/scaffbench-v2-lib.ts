@@ -328,7 +328,14 @@ function resolveSpecPaths(
 // many minutes on a hard scaffold task. A tight timeout cuts thorough runs off
 // mid-work AND loses their cost/token accounting (the result JSON only lands on
 // a clean exit) — so a longer-working agent must not be silently penalised.
-const CLAUDE_TIMEOUT_MS = 30 * 60_000;
+// 90 min: at MAX reasoning effort the heaviest specs blow past even 60 min while
+// still actively reasoning — ts-svelte-edge-orpc (a constraint-cascade spec) was
+// SIGTERM'd at exactly 60 min mid-thinking (10/10 wired, not stuck). classifyOutcome
+// scores a gen timeout as a real model-failure, so the ceiling must be generous
+// enough that only a genuinely stuck agent ever hits it. The $25/spec budget cap
+// is the real cost backstop. Note: this only takes effect for NEWLY spawned runs;
+// a run already in flight keeps the value it started with.
+const CLAUDE_TIMEOUT_MS = 90 * 60_000;
 const VALIDATION_TIMEOUT_MS = 10 * 60_000;
 const FAST_TIMEOUT_MS = 60_000;
 const QUEUE_POLL_MS = 5_000;
@@ -2571,6 +2578,7 @@ const CLAUDE_PRICING: Record<string, { input: number; output: number }> = {
   "claude-opus-4-7": { input: 5, output: 25 },
   "claude-opus-4-6": { input: 5, output: 25 },
   "claude-opus-4-5": { input: 5, output: 25 },
+  "claude-sonnet-5": { input: 3, output: 15 },
   "claude-sonnet-4-6": { input: 3, output: 15 },
   "claude-haiku-4-5": { input: 1, output: 5 },
   // Bare aliases the harness/CLI may pass through as the model string.
