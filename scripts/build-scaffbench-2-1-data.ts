@@ -38,7 +38,9 @@ const COMMON_8 = [
 // cells are emitted (omit = all specs in the summary).
 const RUN_SOURCES: { dir: string; specs?: string[] }[] = [
   { dir: "testing/llm-benchmarks/v2/opus48-low-prompt-2026-06-30" },
-  { dir: "testing/llm-benchmarks/v2/opus48-max-prompt-2026-06-30", specs: COMMON_8 },
+  // Opus max is a COMPLETE 13-spec run — publish all of it (full low-vs-max).
+  { dir: "testing/llm-benchmarks/v2/opus48-max-prompt-2026-06-30" },
+  // Sonnet max is still generating; publish only the 8 specs validated so far.
   { dir: "testing/llm-benchmarks/early-sonnet/sonnet5-max-EARLY", specs: COMMON_8 },
 ];
 

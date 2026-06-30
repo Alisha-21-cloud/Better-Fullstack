@@ -90,6 +90,19 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
   {
     "modelKey": "claude-opus-4-8|max",
     "path": "prompt",
+    "spec": "frontier-effect-eventsourcing",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 5.75943525,
+    "outTokens": 146791,
+    "steps": 41
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
     "spec": "dotnet-blazor-cqrs",
     "scored": true,
     "corePass": false,
@@ -112,6 +125,32 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
     "costUsd": null,
     "outTokens": null,
     "steps": 161
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "java-spring-jooq-keycloak",
+    "scored": true,
+    "corePass": true,
+    "fullPass": true,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 10.91312725,
+    "outTokens": 215400,
+    "steps": 88
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "elixir-broadway-absinthe",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 18.76200325,
+    "outTokens": 262128,
+    "steps": 126
   },
   {
     "modelKey": "claude-opus-4-8|max",
@@ -151,6 +190,32 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
     "costUsd": 13.19089525,
     "outTokens": 179187,
     "steps": 118
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "react-native-expo",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 88,
+    "cmdPct": 100,
+    "costUsd": 4.96633025,
+    "outTokens": 88165,
+    "steps": 49
+  },
+  {
+    "modelKey": "claude-opus-4-8|max",
+    "path": "prompt",
+    "spec": "frontier-polyglot-proto",
+    "scored": false,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 2.2866665,
+    "outTokens": 59707,
+    "steps": 27
   },
   {
     "modelKey": "claude-opus-4-8|low",

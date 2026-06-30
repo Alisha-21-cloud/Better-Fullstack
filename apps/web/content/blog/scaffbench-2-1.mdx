@@ -31,41 +31,59 @@ ScaffBench 2.1 pushes on two axes at once:
   the builds should follow.* So we re-ran the prompt path at **`max`** effort — and added the new
   **Claude Sonnet 5** alongside **Claude Opus 4.8** to see whether a newer model closes the gap.
 
-This is an in-progress snapshot: both `max` runs are still generating the back half of the suite, so
-the head-to-head below is the **eight specs both models have validated so far**. We'll fill in the
-rest as the runs land. Here's what maximum effort actually bought.
+Opus 4.8 has now finished the **full 13-spec run at both efforts**, so the low-vs-max comparison below
+is complete. The Sonnet 5 max run is still generating its back half, so its cross-model numbers are
+the **eight specs validated so far**; we'll fill in the rest as it lands. Here's what maximum effort
+actually bought.
 
 ## Headline: more thinking didn't buy more builds
 
-The tidy hypothesis was wrong. Maximum reasoning effort produced essentially the **same** prompt-path
-pass rate as low effort — it just cost far more to get there.
+The tidy hypothesis was wrong. On the same 13 specs, maximum reasoning effort produced the **exact
+same** prompt-path build rate as low effort — at 5–10× the cost.
 
 | Config | CORE pass@1 | Avg cost / spec | Wired libs |
 | --- | :---: | ---: | :---: |
-| Claude Opus 4.8 · **low** (13 specs) | **3 / 11** | $1.60 | ~95% |
-| Claude Opus 4.8 · **max** (8 specs) | **2 / 7** | ~$8 | ~96% |
-| Claude Sonnet 5 · **max** (8 specs) | **1 / 7** | ~$6 | ~96% |
+| Claude Opus 4.8 · **low** (13 specs) | **3 / 11** (27%) | $1.60 | ~95% |
+| Claude Opus 4.8 · **max** (13 specs) | **3 / 11** (27%) | ~$8 | ~96% |
+| Claude Sonnet 5 · **max** (8 specs, in progress) | **1 / 7** | ~$6 | ~96% |
 
 <Callout kind="info">
-  **Rates, not raw counts.** The `max` rows are the eight specs both models share so far; the `low`
-  row is the full thirteen. Read the *rate*: Opus is ~27% at low and ~29% at max — statistically
-  flat. Maximum reasoning effort did not move the prompt-path build rate.
+  Both Opus rows are the full thirteen specs (eleven measurable; two are
+  [inconclusive](#the-honest-part)). The rate is **identical — 27% — at low and at max.** Maximum
+  reasoning effort did not move the prompt-path build rate at all.
 </Callout>
+
+### Where the effort went: a reshuffle, not a gain
+
+The tie hides the most interesting result. Max effort didn't build the *same* three projects as low —
+it **fixed two and broke two**:
+
+| Spec | Opus 4.8 · low | Opus 4.8 · max | Cost low → max |
+| --- | :---: | :---: | --- |
+| `python-ingestion-api` | ✅ | ✅ | $1.54 → $0.37 |
+| `rust-leptos-axum` | ❌ | **✅ fixed** | $1.03 → $6.45 |
+| `java-spring-jooq-keycloak` | ❌ | **✅ fixed** | $1.41 → $10.91 |
+| `go-realtime-api` | ✅ | **❌ broke** | $1.74 → $6.96 |
+| `multi-dotnet-ops` | ✅ | **❌ broke** | $1.64 → $14.85 |
+
+So the worry that "a better-reasoning run scores *lower*" doesn't hold — it scores the **same**. But
+the deeper point is subtler and more useful: extra deliberation **trades one project's success for
+another's** rather than lifting the total. More thinking changed *which* hard stacks Opus assembled
+correctly, not *how many*.
 
 Three things stand out:
 
-1. **Effort is not the bottleneck.** Opus 4.8 at `max` spent **5–10× more** per spec than at `low`
-   and landed on the same ~1-in-4 build rate. It even passed a *different* set — `rust` and `python`
-   at max, versus `python`, `go`, and `multi-dotnet` at low — so the extra reasoning reshuffled
-   *which* projects built without raising *how many* did.
+1. **Effort is not the bottleneck.** Same 3/11 at `max` as at `low`, for 5–10× the spend. If a model
+   can't assemble a hard stack with a small reasoning budget, a large one mostly reshuffles the wins
+   rather than adding them.
 2. **The models still pick the right stack.** Wired-libraries stays ~96% across the board, exactly as
    in ScaffBench 2: the agent knows *which* libraries the spec wants; it just can't assemble them into
    something that compiles. "Looks right, isn't" remains the dominant failure mode — and `max` effort
    doesn't fix it.
 3. **Max effort is the worst cost/reliability trade in the suite.** Opus 4.8 burned **$13.19** on the
-   TypeScript AI-search workbench and **$14.85** on the .NET ops graph — and *neither* built.
-   Authoring a hard, multi-library project token-by-token at maximum reasoning is both the most
-   expensive and least reliable way to start one.
+   TypeScript AI-search workbench, **$14.85** on the .NET ops graph, and **$18.76** on the Elixir
+   spec — and *none* of the three built. Authoring a hard, multi-library project token-by-token at
+   maximum reasoning is both the most expensive and least reliable way to start one.
 
 ## Opus 4.8 vs Sonnet 5, spec by spec (max effort)
 
