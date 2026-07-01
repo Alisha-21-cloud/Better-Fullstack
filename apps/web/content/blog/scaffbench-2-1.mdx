@@ -26,8 +26,7 @@ Opus 4.8** at both low and maximum reasoning effort, on an expanded suite of **1
 eight ecosystems**. The prompt path is the purest measure of raw capability: the agent reads the spec
 and writes every file itself.
 
-Opus 4.8 has finished the full 13-spec run at both efforts. Sonnet 5's max run is still generating, so
-its numbers below are the **nine specs validated so far**. Here's where things stand.
+All three configurations have now finished the full 13-spec run. Here's where things stand.
 
 ## Leaderboard
 
@@ -36,18 +35,18 @@ better; cost and steps are per project.
 
 | Config | CORE pass@1 | Avg cost | Out tokens | Tool steps | Wired libs |
 | --- | :---: | ---: | ---: | ---: | :---: |
-| Claude Opus 4.8 · **low** | **3 / 11** (27%) | $1.63 | 21.5k | 38 | 96% |
+| Claude Opus 4.8 · **low** | **3 / 11** (27%) | $1.63 | 21k | 38 | 96% |
 | Claude Opus 4.8 · **max** | **3 / 11** (27%) | $9.21 | 148k | 99 | 97% |
-| Claude Sonnet 5 · **max** | **1 / 8** (13%) | $4.99 | 111k | 230 | 97% |
+| Claude Sonnet 5 · **max** | **2 / 10** (20%) | $5.26 | 113k | 215 | 96% |
 
 <BenchBarChart
   title="CORE build pass@1 · prompt-only"
   bars={[
     { label: "Opus 4.8 · low", value: 27, display: "3 / 11 · 27%" },
     { label: "Opus 4.8 · max", value: 27, display: "3 / 11 · 27%" },
-    { label: "Sonnet 5 · max", value: 13, display: "1 / 8 · 13%", highlight: true },
+    { label: "Sonnet 5 · max", value: 20, display: "2 / 10 · 20%", highlight: true },
   ]}
-  caption="Sonnet 5 = 9 of 13 specs so far (run in progress). Inconclusive specs excluded — see The honest part."
+  caption="Inconclusive specs (validator couldn't measure the project) are excluded — see The honest part."
 />
 
 <Callout kind="info">
@@ -59,41 +58,46 @@ better; cost and steps are per project.
 
 ## Claude Sonnet 5: strong instincts, fewer builds
 
-Sonnet 5 selects the right stack as well as Opus — **97% wired, matching it spec-for-spec** — but it
-turns fewer of those into projects that compile: **1 of 8, versus Opus's 3 of 11**. The one spec both
-reliably build is `python-ingestion-api`; the dense multi-service specs defeat both.
+Sonnet 5 selects the right stack as well as Opus — **96% wired, matching it spec-for-spec** — but it
+turns fewer of those into projects that compile: **2 of 10, versus Opus's 3 of 11**. And the two aren't
+strangers to the same specs: each model uniquely builds one the other can't.
 
 | Spec | Ecosystem | Opus 4.8 · max | Sonnet 5 · max |
 | --- | --- | :---: | :---: |
 | `python-ingestion-api` | Python | ✅ builds | ✅ builds |
 | `rust-leptos-axum` | Rust | ✅ builds | ❌ no build |
 | `java-spring-jooq-keycloak` | Java | ✅ builds | ❌ no build |
+| `elixir-broadway-absinthe` | Elixir | ❌ no build | ✅ builds |
 | `ai-search-workbench` | TypeScript | ❌ no build | ❌ no build |
 | `go-realtime-api` | Go | ❌ no build | ❌ no build |
 | `multi-dotnet-ops` | Multi (TS + .NET) | ❌ no build | ❌ no build |
 | `ts-svelte-edge-orpc` | TypeScript | ❌ timeout | ❌ no build |
 | `dotnet-blazor-cqrs` | .NET | ❌ no build | ❌ no build |
+| `react-native-expo` | React Native | ❌ no build | ❌ no build |
+| `frontier-effect-eventsourcing` | TypeScript | ❌ no build | ⚪ timeout |
+| `frontier-polyglot-proto` | Multi | ⚪ inconclusive | ⚪ timeout |
 | `multi-ts-go-grpc` | Multi (TS + Go) | ⚪ inconclusive | ⚪ inconclusive |
 
-Opus uniquely landed two builds Sonnet couldn't — `rust-leptos-axum` and `java-spring-jooq-keycloak`.
+Opus uniquely lands `rust-leptos-axum` and `java-spring-jooq-keycloak`; **Sonnet 5 uniquely lands
+`elixir-broadway-absinthe`** — the two flagship models have genuinely different strong suits. `python`
+is the one spec both reliably build; the dense multi-service specs defeat both.
 
-Sonnet 5 is also the **busiest** run in the field. It averaged **230 tool steps** per project — more
-than double Opus at max (99) and 6× Opus at low (38) — grinding through far more edits and retries, and
-still landing the fewest builds:
+Sonnet 5 is also the **busiest** run in the field. It averaged **215 tool steps** per project — more
+than double Opus at max (99) and ~6× Opus at low (38) — grinding through far more edits and retries,
+and still landing fewer builds:
 
 <BenchBarChart
   title="Avg tool steps per project (more ≠ better)"
-  unit=""
   bars={[
     { label: "Opus 4.8 · low", value: 38, display: "38 steps" },
     { label: "Opus 4.8 · max", value: 99, display: "99 steps" },
-    { label: "Sonnet 5 · max", value: 230, display: "230 steps", highlight: true },
+    { label: "Sonnet 5 · max", value: 215, display: "215 steps", highlight: true },
   ]}
-  caption="Tool-use calls per generated project, averaged over scored specs."
+  caption="Tool-use calls per generated project, averaged over scored specs. Sonnet also timed out on both frontier specs."
 />
 
 The read on Sonnet 5: a great sense of *what* to use, a weaker hand at *assembling* a dense stack into
-something coherent — and it works harder to get there.
+something coherent — and it works harder, and longer, to get there.
 
 ## Maximum reasoning didn't buy more builds
 
@@ -105,10 +109,9 @@ cost**:
 
 <BenchBarChart
   title="Avg cost per project ($)"
-  unit=""
   bars={[
     { label: "Opus 4.8 · low", value: 1.63, display: "$1.63" },
-    { label: "Sonnet 5 · max", value: 4.99, display: "$4.99", highlight: true },
+    { label: "Sonnet 5 · max", value: 5.26, display: "$5.26", highlight: true },
     { label: "Opus 4.8 · max", value: 9.21, display: "$9.21" },
   ]}
   caption="Metered from token usage. Opus at max spent $13–19 on the heaviest specs — none of which built."
@@ -144,7 +147,8 @@ reasoning — it's coherent assembly.
 
 ## The honest part
 
-Two of the results aren't clean build verdicts, and the benchmark is only useful if we say so.
+Three of Sonnet's specs and two of Opus's aren't clean build verdicts, and the benchmark is only useful
+if we say so.
 
 <Callout kind="warn">
   **`multi-ts-go-grpc` is inconclusive for both models — and it's our bug, not theirs.** Both agents
@@ -154,9 +158,10 @@ Two of the results aren't clean build verdicts, and the benchmark is only useful
   (Teaching the validator to find manifests in subdirectories is the next fix.)
 </Callout>
 
-The second caveat is `ts-svelte-edge-orpc` for Opus 4.8 at max: it was **still actively reasoning** when
-it hit the per-spec time ceiling and was cut off. Per our SWE-bench-style taxonomy a generation timeout
-counts as a model failure — but it's a softer failure than a clean non-build, and worth flagging.
+The rest are timeouts. Opus 4.8 was cut off mid-reasoning on `ts-svelte-edge-orpc`; Sonnet 5 ran out
+the clock on both **frontier** specs without producing a measurable project. Per our SWE-bench-style
+taxonomy a generation timeout is a model failure, but it's a softer signal than a clean non-build, so
+we surface it separately rather than folding it into the headline rate.
 
 ## How we score
 
@@ -171,12 +176,13 @@ counts as a model failure — but it's a softer failure than a clean non-build, 
 ## Takeaways
 
 - **Sonnet 5 knows the stack, but assembles fewer builds.** It ties the field on library selection
-  (~97% wired) yet trails on projects that actually compile (1/8), while doing the most work to get
-  there (230 steps/project).
+  (~96% wired) yet trails on projects that actually compile (2/10 vs Opus's 3/11), while doing the most
+  work to get there (215 steps/project). It does have its own strength — it's the only config that
+  built the Elixir spec.
 - **Reasoning effort isn't the lever.** Opus built the same 3/11 at max as at low, for 5–10× the cost —
   extra deliberation reshuffles which stacks assemble, not how many.
-- **Stack selection is solved; coherent assembly isn't.** ~97% wired at a ~13–27% build rate is the
+- **Stack selection is solved; coherent assembly isn't.** ~96% wired at a ~20–27% build rate is the
   whole story in one line — and it's exactly the gap a scaffolder closes, which is why the MCP and CLI
   paths in ScaffBench 2 sat near 100% while prompt-only struggled.
 
-We'll update this post with Sonnet 5's remaining specs and more models as the full runs complete.
+More models are on the bench next — we'll keep the leaderboard growing.

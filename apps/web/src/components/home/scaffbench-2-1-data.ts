@@ -43,7 +43,7 @@ export const SCAFFBENCH21_MODELS: readonly ScaffbenchModel[] = [
     "effectiveReasoning": "max",
     "provider": "claude",
     "label": "Sonnet 5",
-    "sortIndex": 47
+    "sortIndex": 51
   }
 ];
 
@@ -428,6 +428,19 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
   {
     "modelKey": "claude-sonnet-5|max",
     "path": "prompt",
+    "spec": "frontier-effect-eventsourcing",
+    "scored": false,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 0,
+    "cmdPct": 100,
+    "costUsd": null,
+    "outTokens": null,
+    "steps": 0
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
     "spec": "dotnet-blazor-cqrs",
     "scored": true,
     "corePass": false,
@@ -467,6 +480,19 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
   {
     "modelKey": "claude-sonnet-5|max",
     "path": "prompt",
+    "spec": "elixir-broadway-absinthe",
+    "scored": true,
+    "corePass": true,
+    "fullPass": true,
+    "wiredPct": 100,
+    "cmdPct": 100,
+    "costUsd": 7.38704505,
+    "outTokens": 128562,
+    "steps": 104
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
     "spec": "multi-ts-go-grpc",
     "scored": false,
     "corePass": false,
@@ -502,5 +528,31 @@ export const SCAFFBENCH21_CELLS: readonly ScaffbenchCell[] = [
     "costUsd": 5.995577550000001,
     "outTokens": 188079,
     "steps": 194
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
+    "spec": "react-native-expo",
+    "scored": true,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 88,
+    "cmdPct": 100,
+    "costUsd": null,
+    "outTokens": null,
+    "steps": 199
+  },
+  {
+    "modelKey": "claude-sonnet-5|max",
+    "path": "prompt",
+    "spec": "frontier-polyglot-proto",
+    "scored": false,
+    "corePass": false,
+    "fullPass": false,
+    "wiredPct": 0,
+    "cmdPct": 100,
+    "costUsd": null,
+    "outTokens": null,
+    "steps": 0
   }
 ];
