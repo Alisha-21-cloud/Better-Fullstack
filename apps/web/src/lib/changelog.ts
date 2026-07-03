@@ -19,10 +19,34 @@ const RELEASE_BASE_URL = "https://github.com/Marve10s/Better-Fullstack/releases/
 
 export const changelogReleases: ChangelogRelease[] = [
   {
+    version: "v2.1.4",
+    publishedAt: "2026-07-03T12:40:54Z",
+    displayDate: "July 3, 2026",
+    isLatest: true,
+    href: `${RELEASE_BASE_URL}/v2.1.4`,
+    title: "Verified stack updates, Supabase Auth for TanStack Start, and release hardening",
+    summary:
+      "This release turns the stack graph into a more visible source of truth: public verified-combination docs, an API badge endpoint, planner-backed CLI add flows, and tighter generated-project CI coverage. It also ships Supabase Auth for TanStack Start fullstack projects and fixes the final release-blocking generator regressions found by broad smoke coverage.",
+    highlights: [
+      "Added Supabase Auth support for TanStack Start fullstack projects, including server/browser clients, OAuth callback routing, login and dashboard routes, env typing, user-menu wiring, and cookie preservation.",
+      "Published verified-combination evidence through docs, generated web data, and a Shields-compatible API endpoint so release claims are backed by smoke, ScaffBench, and release-guard artifacts.",
+      "Routed explicit `create-better-fullstack add` stack flags through the stack-update planner/apply path, with dry-run previews, edited-file blockers, richer graph summaries, and regression coverage.",
+      "Hardened generated GitHub Actions output for graph-selected addons across TypeScript and graph-only Rust, Python, Go, Java, Elixir, and .NET projects.",
+      "Fixed TanStack Start OpenAPI/Kysely smoke failures by always declaring React Query devtools where the base template imports it, and updated the release snapshots.",
+      "Registered the new CLI `check` docs page in navigation and refreshed planning docs around graph authority, verified combinations, and the next stack-update phase.",
+    ],
+    image: {
+      src: "https://images.unsplash.com/photo-1777711391050-7e0cefd4b33b?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      alt: "Abstract colorful gradient artwork",
+      credit: "Unsplash",
+      creditHref:
+        "https://images.unsplash.com/photo-1777711391050-7e0cefd4b33b?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+  },
+  {
     version: "v2.1.3",
     publishedAt: "2026-06-29T20:06:24Z",
     displayDate: "June 29, 2026",
-    isLatest: true,
     href: `${RELEASE_BASE_URL}/v2.1.3`,
     title: "ScaffBench 2 agent benchmark, hardened templates, and reliable payments",
     summary:
