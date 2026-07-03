@@ -69,7 +69,6 @@ jobs:
           fi
 
       - name: Setup Bun
-        if: steps.check-version.outputs.exists == 'false'
         uses: oven-sh/setup-bun@v2
         with:
           # Keep the release toolchain deterministic. Floating to `latest`
@@ -77,14 +76,12 @@ jobs:
           bun-version: 1.3.12
 
       - name: Setup Node for npm publish
-        if: steps.check-version.outputs.exists == 'false'
         uses: actions/setup-node@v4
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
 
       - name: Cache Dependencies
-        if: steps.check-version.outputs.exists == 'false'
         uses: actions/cache@v4
         with:
           path: |
@@ -95,7 +92,6 @@ jobs:
             release-${{ runner.os }}-bun-
 
       - name: Install Dependencies
-        if: steps.check-version.outputs.exists == 'false'
         run: bun install --frozen-lockfile
 
       - name: Run Release Verification
@@ -190,18 +186,30 @@ jobs:
           CONVEX_INGEST_URL: ${{ secrets.CONVEX_INGEST_URL }}
 
       - name: Setup pnpm for published package smoke
-        if: steps.check-version.outputs.exists == 'false'
         run: corepack enable && corepack prepare pnpm@latest --activate
 
       - name: Smoke published release packages
-        if: steps.check-version.outputs.exists == 'false'
-        run: bun run test:published-package --specifier ${{ steps.version.outputs.version }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          for attempt in 1 2 3 4 5; do
+            if bun run test:published-package --specifier "$VERSION"; then
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 5 ]; then
+              echo "Published package smoke failed after $attempt attempts."
+              exit 1
+            fi
+
+            delay=$((attempt * 30))
+            echo "Published package smoke failed on attempt $attempt; waiting ${delay}s for npm registry propagation..."
+            sleep "$delay"
+          done
         env:
           BTS_TELEMETRY: 1
           CONVEX_INGEST_URL: ${{ secrets.CONVEX_INGEST_URL }}
 
       - name: Publish packages to GitHub Packages
-        if: steps.check-version.outputs.exists == 'false'
         run: |
           echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
           echo "@better-fullstack:registry=https://npm.pkg.github.com" >> ~/.npmrc
@@ -215,7 +223,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Release Summary
-        if: steps.check-version.outputs.exists == 'false'
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           echo "## Release v$VERSION Complete!" >> $GITHUB_STEP_SUMMARY
