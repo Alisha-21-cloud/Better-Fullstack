@@ -153,6 +153,32 @@ describe("Virtual Generator Regressions", () => {
     expect(rootPackageJson?.scripts?.["ai:completions"]).toBe("ai completions");
   });
 
+  it("declares TanStack Start query devtools even when OpenAPI skips query client deps", async () => {
+    const result = await createVirtual({
+      projectName: "tanstack-start-openapi-kysely",
+      frontend: ["tanstack-start"],
+      backend: "hono",
+      runtime: "bun",
+      api: "openapi",
+      database: "sqlite",
+      orm: "kysely",
+      auth: "none",
+      cssFramework: "tailwind",
+      packageManager: "bun",
+      addons: [],
+      examples: [],
+    });
+
+    expect(result.success).toBe(true);
+
+    const webPackageJson = result.tree
+      ? readJsonFromTree(result.tree, "apps/web/package.json")
+      : undefined;
+
+    expect(packageHasDependency(webPackageJson, "@tanstack/react-query")).toBe(true);
+    expect(packageHasDependency(webPackageJson, "@tanstack/react-query-devtools")).toBe(true);
+  });
+
   it("wires the benchmark AI search workbench stack with the intended libraries", async () => {
     const result = await createVirtual({
       projectName: "ai-search-workbench",
