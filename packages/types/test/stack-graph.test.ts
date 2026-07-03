@@ -79,7 +79,10 @@ import {
   JAVA_WEB_FRAMEWORK_VALUES,
   JOB_QUEUE_VALUES,
   LOGGING_VALUES,
+  MOBILE_DEEP_LINKING_VALUES,
   MOBILE_NAVIGATION_VALUES,
+  MOBILE_OTA_VALUES,
+  MOBILE_PUSH_VALUES,
   MOBILE_STORAGE_VALUES,
   MOBILE_TESTING_VALUES,
   MOBILE_UI_VALUES,
@@ -1319,6 +1322,18 @@ describe("stack graph structural round-trip (phase 0)", () => {
         values: MOBILE_TESTING_VALUES,
         frontendForValue: () => "native-bare",
       },
+      mobilePush: {
+        values: MOBILE_PUSH_VALUES,
+        frontendForValue: () => "native-bare",
+      },
+      mobileOTA: {
+        values: MOBILE_OTA_VALUES,
+        frontendForValue: () => "native-bare",
+      },
+      mobileDeepLinking: {
+        values: MOBILE_DEEP_LINKING_VALUES,
+        frontendForValue: () => "native-bare",
+      },
     } as const;
 
     for (const [field, { values, frontendForValue }] of Object.entries(mobileConfigByValue)) {
@@ -1604,27 +1619,44 @@ describe("stack graph structural round-trip (phase 0)", () => {
     expect(reimported.map(structuralTuple).sort()).toEqual(parts.map(structuralTuple).sort());
   });
 
-  it("imports Python GraphQL selections into the api role when the api slot is open", () => {
+  it("imports Python GraphQL selections into the graphql role", () => {
     const pythonParts = legacyProjectConfigToStackParts({
       ecosystem: "python",
       pythonWebFramework: "django",
       pythonGraphql: "strawberry",
     });
-    const apiParts = pythonParts.filter((part) => part.role === "api");
-    expect(apiParts).toHaveLength(1);
-    expect(apiParts[0]?.toolId).toBe("strawberry");
+    const graphqlParts = pythonParts.filter((part) => part.role === "graphql");
+    expect(graphqlParts).toHaveLength(1);
+    expect(graphqlParts[0]?.toolId).toBe("strawberry");
   });
 
-  it("keeps Python GraphQL flat when a Python API part already owns the api role", () => {
+  it("round-trips Python API and GraphQL as separate backend-owned graph roles", () => {
     const pythonParts = legacyProjectConfigToStackParts({
       ecosystem: "python",
       pythonWebFramework: "django",
       pythonApi: "django-ninja",
       pythonGraphql: "strawberry",
     });
+    const backend = pythonParts.find((part) => part.role === "backend");
     const apiParts = pythonParts.filter((part) => part.role === "api");
+    const graphqlParts = pythonParts.filter((part) => part.role === "graphql");
+
     expect(apiParts).toHaveLength(1);
     expect(apiParts[0]?.toolId).toBe("django-ninja");
+    expect(apiParts[0]?.ownerPartId).toBe(backend?.id);
+    expect(graphqlParts).toHaveLength(1);
+    expect(graphqlParts[0]?.toolId).toBe("strawberry");
+    expect(graphqlParts[0]?.ownerPartId).toBe(backend?.id);
+    expect(validateStackParts(pythonParts).issues).toEqual([]);
+
+    const lowered = stackPartsToLegacyProjectConfigPartial(pythonParts);
+    expect(lowered.pythonApi).toBe("django-ninja");
+    expect(lowered.pythonGraphql).toBe("strawberry");
+
+    const reimported = legacyProjectConfigToStackParts(lowered);
+    expect(reimported.map(structuralTuple).sort()).toEqual(
+      pythonParts.map(structuralTuple).sort(),
+    );
   });
 
   it("imports Elixir realtime selections under the realtime role", () => {

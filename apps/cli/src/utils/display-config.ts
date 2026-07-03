@@ -12,7 +12,8 @@ function getSelectedGraphPart(
     (part) =>
       part.role === role &&
       part.ownerPartId === ownerPartId &&
-      part.source !== "provided",
+      part.source !== "provided" &&
+      part.toolId !== "none",
   );
 }
 
@@ -344,7 +345,7 @@ export function displayConfig(config: Partial<ProjectConfig>) {
 
   if (config.stackParts?.length) {
     const stackParts = config.stackParts
-      .filter((part) => part.source !== "provided")
+      .filter((part) => part.source !== "provided" && part.toolId !== "none")
       .map((part) => formatStackPartSpec(part, config.stackParts ?? []));
     if (stackParts.length > 0) {
       configDisplay.push(`${pc.blue("Stack Parts:")} ${stackParts.join(", ")}`);

@@ -71,6 +71,11 @@ type EcosystemBaseTemplateProcessor = (
   targetPath?: string,
 ) => Promise<void>;
 
+type ProjectConfigWithCiWorkingDirectory = ProjectConfig & {
+  ciWorkingDirectory?: string;
+  ciHasTestScript?: boolean;
+};
+
 const ECOSYSTEM_BASE_TEMPLATE_PROCESSORS = {
   rust: processRustBaseTemplate,
   python: processPythonBaseTemplate,
@@ -79,6 +84,23 @@ const ECOSYSTEM_BASE_TEMPLATE_PROCESSORS = {
   dotnet: processDotnetBaseTemplate,
   elixir: processElixirBaseTemplate,
 } satisfies Record<NonTypeScriptTemplateEcosystem, EcosystemBaseTemplateProcessor>;
+
+function hasGeneratedJavascriptTestScript(config: ProjectConfig): boolean {
+  return (
+    config.testing === "vitest" ||
+    config.testing === "jest" ||
+    config.testing === "vitest-playwright" ||
+    config.mobileTesting === "react-native-testing-library" ||
+    config.mobileTesting === "maestro-react-native-testing-library"
+  );
+}
+
+function withCiTemplateFlags(config: ProjectConfig): ProjectConfigWithCiWorkingDirectory {
+  return {
+    ...config,
+    ciHasTestScript: hasGeneratedJavascriptTestScript(config),
+  };
+}
 
 function isPrimaryPart(part: StackPart, role: StackPart["role"]) {
   return part.role === role && !part.ownerPartId && part.source !== "provided";
@@ -116,7 +138,7 @@ async function processGraphTemplates(
     await processAuthTemplates(vfs, templates, tsConfig);
     await processPaymentsTemplates(vfs, templates, tsConfig);
     await processEmailTemplates(vfs, templates, tsConfig);
-    await processAddonTemplates(vfs, templates, tsConfig);
+    await processAddonTemplates(vfs, templates, withCiTemplateFlags(tsConfig));
     await processExampleTemplates(vfs, templates, tsConfig);
     await processExtrasTemplates(vfs, templates, tsConfig);
     await processDeployTemplates(vfs, templates, tsConfig);
@@ -189,6 +211,25 @@ async function processGraphTemplates(
     );
   }
 
+  if (
+    tsConfig.frontend.length === 0 &&
+    tsConfig.backend === "none" &&
+    nonTypeScriptBackends.length > 0
+  ) {
+    const backendPart = nonTypeScriptBackends[0];
+    if (backendPart) {
+      const targetPath = backendPart.targetPath ?? getRoleTargetPath("backend") ?? "apps/server";
+      const addonConfig = stackGraphToLegacyProjectConfigForEcosystem(
+        config,
+        backendPart.ecosystem as NonTypeScriptTemplateEcosystem,
+      ) as ProjectConfigWithCiWorkingDirectory;
+      if (addonConfig.addons.some((addon) => addon !== "none")) {
+        addonConfig.ciWorkingDirectory = targetPath;
+        await processAddonTemplates(vfs, templates, addonConfig);
+      }
+    }
+  }
+
   processPackageConfigs(vfs, config);
   processDependencies(vfs, config);
   processCatalogs(vfs, config);
@@ -227,7 +268,7 @@ export async function generateVirtualProject(options: GeneratorOptions): Promise
       await processAuthTemplates(vfs, templates, config);
       await processPaymentsTemplates(vfs, templates, config);
       await processEmailTemplates(vfs, templates, config);
-      await processAddonTemplates(vfs, templates, config);
+      await processAddonTemplates(vfs, templates, withCiTemplateFlags(config));
       await processExampleTemplates(vfs, templates, config);
       await processExtrasTemplates(vfs, templates, config);
       await processDeployTemplates(vfs, templates, config);

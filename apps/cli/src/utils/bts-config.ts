@@ -27,6 +27,32 @@ const MOBILE_CONFIG_FIELDS = [
   "mobileDeepLinking",
 ] as const satisfies readonly (keyof ProjectConfig)[];
 
+const MOBILE_CONFIG_FIELD_ROLES = {
+  mobileNavigation: "navigation",
+  mobileUI: "ui",
+  mobileStorage: "storage",
+  mobileTesting: "testing",
+  mobilePush: "push",
+  mobileOTA: "ota",
+  mobileDeepLinking: "deepLinking",
+} as const satisfies Record<(typeof MOBILE_CONFIG_FIELDS)[number], StackPart["role"]>;
+
+function hasExplicitMobileGraphField(
+  stackParts: readonly StackPart[],
+  field: (typeof MOBILE_CONFIG_FIELDS)[number],
+) {
+  const role = MOBILE_CONFIG_FIELD_ROLES[field];
+  return stackParts.some((part) => {
+    if (part.source === "provided" || part.role !== role || part.ecosystem !== "react-native") {
+      return false;
+    }
+    const owner = part.ownerPartId
+      ? stackParts.find((candidate) => candidate.id === part.ownerPartId)
+      : undefined;
+    return owner?.role === "mobile";
+  });
+}
+
 function normalizeGraphConfigForPersistence(projectConfig: ProjectConfig, stackParts: ProjectConfig["stackParts"]) {
   if (!stackParts) return projectConfig;
 
@@ -160,7 +186,12 @@ function normalizeGraphConfigForPersistence(projectConfig: ProjectConfig, stackP
     for (const field of MOBILE_CONFIG_FIELDS) {
       const projectValue = projectConfig[field];
       const legacyValue = legacyConfig[field];
-      if (projectValue !== undefined && projectValue !== "none" && legacyValue === "none") {
+      if (
+        projectValue !== undefined &&
+        projectValue !== "none" &&
+        legacyValue === "none" &&
+        !hasExplicitMobileGraphField(stackParts, field)
+      ) {
         (normalized as Record<string, unknown>)[field] = projectValue;
       }
     }

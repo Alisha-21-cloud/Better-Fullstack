@@ -248,6 +248,122 @@ function mergeStackPartSpecs(currentConfig: ProjectConfig, specs: string[]): Par
   };
 }
 
+type StackPart = NonNullable<ProjectConfig["stackParts"]>[number];
+
+const GRAPH_CACHE_CONFIG_KEYS = new Set<string>([
+  "stackParts",
+  "graphSummary",
+  "effectiveStack",
+]);
+
+function stableJson(value: unknown): string {
+  return JSON.stringify(value);
+}
+
+function getChangedConfigKeys(
+  currentConfig: ProjectConfig,
+  proposedConfig: ProjectConfig,
+): Set<keyof ProjectConfig> {
+  const keys = new Set<keyof ProjectConfig>([
+    ...(Object.keys(currentConfig) as Array<keyof ProjectConfig>),
+    ...(Object.keys(proposedConfig) as Array<keyof ProjectConfig>),
+  ]);
+  const changed = new Set<keyof ProjectConfig>();
+  for (const key of keys) {
+    if (GRAPH_CACHE_CONFIG_KEYS.has(key)) continue;
+    if (stableJson(currentConfig[key]) !== stableJson(proposedConfig[key])) {
+      changed.add(key);
+    }
+  }
+  return changed;
+}
+
+function getProjectedConfigKeys(part: StackPart, parts: readonly StackPart[]): Set<keyof ProjectConfig> {
+  const owner = part.ownerPartId
+    ? parts.find((candidate) => candidate.id === part.ownerPartId)
+    : undefined;
+  const partProjection = stackPartsToLegacyProjectConfigPartial(owner ? [owner, part] : [part]);
+  const keys = new Set<keyof ProjectConfig>();
+  for (const key of Object.keys(partProjection) as Array<keyof ProjectConfig>) {
+    if (GRAPH_CACHE_CONFIG_KEYS.has(key)) continue;
+    const value = partProjection[key];
+    if (
+      value === part.toolId ||
+      (Array.isArray(value) && (value as unknown[]).includes(part.toolId))
+    ) {
+      keys.add(key);
+    }
+  }
+  return keys;
+}
+
+function getUpdatedSpecForChangedPart(
+  part: StackPart,
+  parts: readonly StackPart[],
+  proposedConfig: ProjectConfig,
+  changedKeys: Set<keyof ProjectConfig>,
+): string | undefined {
+  const projectedKeys = getProjectedConfigKeys(part, parts);
+  for (const key of projectedKeys) {
+    if (!changedKeys.has(key)) continue;
+    const value = proposedConfig[key];
+    if (typeof value !== "string" || value === "none") continue;
+    return formatStackPartSpec({ ...part, toolId: value }, parts);
+  }
+  return undefined;
+}
+
+function mergeDerivedStackPartsWithExistingGraph(
+  currentConfig: ProjectConfig,
+  proposedConfig: ProjectConfig,
+): StackPart[] {
+  const currentStackParts = currentConfig.stackParts?.length
+    ? currentConfig.stackParts
+    : legacyProjectConfigToStackParts(currentConfig);
+  const derivedStackParts = legacyProjectConfigToStackParts(proposedConfig);
+  if (currentStackParts.length === 0) return derivedStackParts;
+
+  const changedKeys = getChangedConfigKeys(currentConfig, proposedConfig);
+  const preservedParts = currentStackParts.filter((part) => {
+    if (part.source === "provided") return false;
+    if (part.toolId === "none") return false;
+    const projectedKeys = getProjectedConfigKeys(part, currentStackParts);
+    if (projectedKeys.size === 0) return true;
+    return [...projectedKeys].every((key) => !changedKeys.has(key));
+  });
+  const updatedSpecs = currentStackParts
+    .filter((part) => part.source !== "provided" && part.toolId !== "none")
+    .flatMap((part) => {
+      const spec = getUpdatedSpecForChangedPart(part, currentStackParts, proposedConfig, changedKeys);
+      return spec ? [spec] : [];
+    });
+  const preservedSpecs = new Set(preservedParts.map((part) => formatStackPartSpec(part, currentStackParts)));
+  const coveredParts = parseStackPartSpecs(
+    [...new Set([...preservedSpecs, ...updatedSpecs])],
+    "selected",
+  );
+  const preservedProjectedKeys = new Set<keyof ProjectConfig>();
+  for (const part of coveredParts) {
+    for (const key of getProjectedConfigKeys(part, coveredParts)) {
+      preservedProjectedKeys.add(key);
+    }
+  }
+
+  const nextSpecs = [...new Set([...preservedSpecs, ...updatedSpecs])];
+  for (const part of derivedStackParts) {
+    if (part.source === "provided") continue;
+    const spec = formatStackPartSpec(part, derivedStackParts);
+    if (nextSpecs.includes(spec)) continue;
+    const projectedKeys = getProjectedConfigKeys(part, derivedStackParts);
+    const alreadyCovered = [...projectedKeys].some((key) => preservedProjectedKeys.has(key));
+    if (!alreadyCovered) {
+      nextSpecs.push(spec);
+    }
+  }
+
+  return parseStackPartSpecs([...new Set(nextSpecs)], "selected");
+}
+
 function asString(value: unknown, fallback = "none"): string {
   return typeof value === "string" ? value : fallback;
 }
@@ -1016,7 +1132,7 @@ function getGraphPreview(config: BetterTStackConfig) {
   const graphSummary = stackParts.length > 0 ? getGraphSummary({ stackParts }) : undefined;
   const effectiveStack = stackParts.length > 0 ? getEffectiveStack({ stackParts }) : undefined;
   const stackPartSpecs = stackParts
-    .filter((part) => part.source !== "provided")
+    .filter((part) => part.source !== "provided" && part.toolId !== "none")
     .map((part) => formatStackPartSpec(part, stackParts));
 
   return {
@@ -1068,7 +1184,7 @@ export async function planStackUpdate(
       compatibilityChangesToProjectConfig(compatibilityResult.adjustedStack, proposedConfig),
     );
   }
-  proposedConfig.stackParts = legacyProjectConfigToStackParts(proposedConfig);
+  proposedConfig.stackParts = mergeDerivedStackPartsWithExistingGraph(currentConfig, proposedConfig);
   Object.assign(proposedConfig, mergeStackPartSpecs(proposedConfig, stackPartSpecs));
   try {
     validateConfigForProgrammaticUse(proposedConfig);

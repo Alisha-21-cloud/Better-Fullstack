@@ -457,7 +457,7 @@ export async function gatherMultiEcosystemConfig(
     if (pythonOrm !== "none") stackPartSpecs.push(`backend.orm:python:${pythonOrm}`);
     if (pythonAuth !== "none") stackPartSpecs.push(`backend.auth:python:${pythonAuth}`);
     if (pythonTaskQueue !== "none") stackPartSpecs.push(`backend.jobQueue:python:${pythonTaskQueue}`);
-    if (pythonGraphql !== "none") stackPartSpecs.push(`backend.api:python:${pythonGraphql}`);
+    if (pythonGraphql !== "none") stackPartSpecs.push(`backend.graphql:python:${pythonGraphql}`);
     for (const testing of pythonTesting) {
       if (testing !== "none") stackPartSpecs.push(`backend.testing:python:${testing}`);
     }

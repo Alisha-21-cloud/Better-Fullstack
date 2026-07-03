@@ -562,6 +562,79 @@ describe("generateReproducibleCommand", () => {
     expect(command).not.toContain("--backend");
   });
 
+  it("uses graph parts instead of stale flat cache fields for reproducible commands", () => {
+    const stackParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "frontend.css:typescript:none",
+      "frontend.ui:typescript:none",
+      "backend:typescript:hono",
+      "backend.runtime:typescript:bun",
+      "database:universal:sqlite",
+      "backend.orm:typescript:drizzle",
+    ]);
+    const command = generateReproducibleCommand(
+      makeConfig({
+        stackParts,
+        frontend: ["svelte"],
+        backend: "elysia",
+        runtime: "node",
+        database: "postgres",
+        orm: "prisma",
+        cssFramework: "scss",
+        uiLibrary: "shadcn-ui",
+        shadcnStyle: "luma",
+      }),
+    );
+
+    expect(command).toContain("--part frontend:typescript:next");
+    expect(command).toContain("--part backend:typescript:hono");
+    expect(command).toContain("--part backend.runtime:typescript:bun");
+    expect(command).toContain("--part database:universal:sqlite");
+    expect(command).toContain("--part backend.orm:typescript:drizzle");
+    expect(command).toContain("--css-framework none");
+    expect(command).toContain("--ui-library none");
+    expect(command).not.toContain("--part frontend.css:typescript:none");
+    expect(command).not.toContain("--part frontend.ui:typescript:none");
+    expect(command).not.toContain("--frontend svelte");
+    expect(command).not.toContain("--backend elysia");
+    expect(command).not.toContain("--runtime node");
+    expect(command).not.toContain("--database postgres");
+    expect(command).not.toContain("--orm prisma");
+    expect(command).not.toContain("--css-framework scss");
+    expect(command).not.toContain("--ui-library shadcn-ui");
+    expect(command).not.toContain("--shadcn-style luma");
+  });
+
+  it("uses graph array parts instead of stale flat cache arrays", () => {
+    const stackParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "backend:rust:axum",
+      "backend.libraries:rust:serde",
+      "workspaceTooling:universal:turborepo",
+      "examples:universal:ai",
+    ]);
+    const command = generateReproducibleCommand(
+      makeConfig({
+        ecosystem: "rust",
+        stackParts,
+        frontend: ["next"],
+        rustWebFramework: "axum",
+        rustLibraries: ["tokio"],
+        addons: ["biome"],
+        examples: ["chat-sdk"],
+      }),
+    );
+
+    expect(command).toContain("--part frontend:typescript:next");
+    expect(command).toContain("--part backend:rust:axum");
+    expect(command).toContain("--part backend.libraries:rust:serde");
+    expect(command).toContain("--part workspaceTooling:universal:turborepo");
+    expect(command).toContain("--part examples:universal:ai");
+    expect(command).not.toContain("--rust-libraries tokio");
+    expect(command).not.toContain("--addons biome");
+    expect(command).not.toContain("--examples chat-sdk");
+  });
+
   it("reproduces graph-owned TypeScript backend singles as --part flags", () => {
     const stackParts = parseStackPartSpecs([
       "frontend:typescript:next",
@@ -721,6 +794,9 @@ describe("generateReproducibleCommand", () => {
       "mobile.ui:react-native:gluestack-ui",
       "mobile.storage:react-native:mmkv",
       "mobile.testing:react-native:maestro",
+      "mobile.push:react-native:expo-notifications",
+      "mobile.ota:react-native:expo-updates",
+      "mobile.deepLinking:react-native:expo-linking",
       "backend:rust:axum",
       "backend.cli:rust:clap",
       "backend.libraries:rust:serde",
@@ -738,6 +814,9 @@ describe("generateReproducibleCommand", () => {
         mobileUI: "gluestack-ui",
         mobileStorage: "mmkv",
         mobileTesting: "maestro",
+        mobilePush: "expo-notifications",
+        mobileOTA: "expo-updates",
+        mobileDeepLinking: "expo-linking",
         rustWebFramework: "axum",
         rustCli: "clap",
         rustLibraries: ["serde", "uuid"],
@@ -751,6 +830,12 @@ describe("generateReproducibleCommand", () => {
     expect(command).toContain("--part mobile.ui:react-native:gluestack-ui");
     expect(command).toContain("--part mobile.storage:react-native:mmkv");
     expect(command).toContain("--part mobile.testing:react-native:maestro");
+    expect(command).toContain("--part mobile.push:react-native:expo-notifications");
+    expect(command).toContain("--part mobile.ota:react-native:expo-updates");
+    expect(command).toContain("--part mobile.deepLinking:react-native:expo-linking");
+    expect(command).not.toContain("--mobile-push expo-notifications");
+    expect(command).not.toContain("--mobile-ota expo-updates");
+    expect(command).not.toContain("--mobile-deep-linking expo-linking");
     expect(command).toContain("--part backend.cli:rust:clap");
     expect(command).toContain("--part backend.libraries:rust:serde");
     expect(command).toContain("--part backend.libraries:rust:uuid");

@@ -63,7 +63,9 @@ const TOOL_LABELS: Record<string, string> = {
 };
 
 function getSelectedGraphParts(config: Pick<ProjectConfig, "stackParts">): StackPart[] {
-  return (config.stackParts ?? []).filter((part) => part.source !== "provided");
+  return (config.stackParts ?? []).filter(
+    (part) => part.source !== "provided" && part.toolId !== "none",
+  );
 }
 
 export function getGraphPart(

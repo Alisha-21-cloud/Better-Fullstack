@@ -127,6 +127,76 @@
 > `dotnetWebFramework=aspnet-blazor` emits Razor component files and Blazor routing,
 > `dotnetAuth=duende-identityserver` wires Duende IdentityServer, and
 > `dotnetAuth=auth0-aspnet` wires Auth0 ASP.NET Core authentication.
+> Phase 4 graph-authority guard coverage now reaches the stack-update planner/apply
+> boundary: if top-level `bts.jsonc` cache fields drift from `stackParts`,
+> `bfs_plan_stack_update` still plans from the graph-derived stack, and
+> `bfs_apply_stack_update` writes refreshed frontend/backend/cache metadata back
+> to `bts.jsonc`. The planner/apply path also preserves existing scoped graph
+> ownership for unchanged parts during unrelated flat-field updates, so a
+> backend-scoped TypeScript database part does not degrade into an ownerless
+> universal database part when adding another capability such as Resend email,
+> and direct flat updates to that value keep the existing scoped graph shape.
+> MCP graph preview coverage now asserts the same authority rule for stale flat
+> cache fields and scoped stack specs. Disabled `none` graph parts from older
+> or stale configs no longer appear in human/agent preview metadata such as
+> `effectiveStack` and `stackPartSpecs`. URL/import graph state now ignores
+> stale flat URL fields when `part` specs are present and treats explicit
+> `*:none` graph specs as disabled cache values instead of invalid graph tools.
+> Reproducible command generation now follows the same rule: graph-owned
+> selections are emitted from `stackParts`, disabled `*:none` specs are not
+> emitted as `--part` values, and stale top-level scalar or array cache fields
+> do not leak back into generated commands for graph-owned categories.
+> CLI config summaries now also filter disabled `*:none` graph specs when
+> rendering the human-facing stack part list.
+> Phase 3 compatibility consolidation also now routes addon/example disabled
+> reasons through graph candidates for PWA/Tauri-style app platforms,
+> data-fetching addons such as TanStack Query, workspace tooling such as
+> Docker Compose/Backend Utils, and generated examples such as AI and Chat
+> SDK, shrinking duplicated flat-only branches.
+> Promoted frontend library Fresh/Preact incompatibilities for forms, state
+> management, and animation are likewise covered by graph owner-tool checks
+> instead of duplicated flat branches.
+> TypeScript web/server deploy disabled reasons now route through graph
+> deploy candidates as well, so unsupported frontend deploy targets and
+> Hono/runtime server deploy constraints share the graph compatibility source.
+> Database setup disabled reasons now route through graph-owned database
+> candidates too, covering provider/database pairings plus D1/Docker runtime
+> constraints without another flat compatibility copy.
+> Graph-complete disabled-reason bindings now report whether the graph actually
+> evaluated a candidate. For authoritative categories such as CSS, i18n, deploy,
+> database setup, and promoted mobile-owned categories, a clean graph result now
+> stops older flat fallback branches from second-guessing the graph source.
+> Phase 3 compatibility consolidation is now complete for the promoted graph-owned
+> role surface: frontend UI checks include Astro integration settings when
+> available, addon/example graph checks cover TanStack/Astro and Nx/Turborepo
+> conflicts, backend-service owner checks cover TypeScript email/rate-limit
+> constraints, Java/.NET/Elixir ecosystem bindings are authoritative, and
+> graph-complete categories no longer fall through to duplicated flat library
+> branches. Global backend locks and explicit setting-shaped checks remain flat
+> by design until their graph-settings shape is settled.
+> The remaining mobile-owned single categories, mobile push, OTA, and deep
+> linking, are now graph roles too. React Native graph projection round-trips
+> them as owner-scoped mobile parts while preserving the existing flat cache
+> fields for generator/template compatibility.
+> Stack selection and reproducible command generation now emit those mobile
+> push/OTA/deep-linking selections as `mobile.*` graph parts when a mobile
+> graph owner exists, so stale flat `--mobile-*` cache flags no longer leak
+> back into graph-authored commands.
+> URL/import graph state, MCP graph preview, and the stack-update planner/apply
+> boundary now assert the same rule for those mobile graph roles: stale top-level
+> `mobile*` cache fields are ignored when `stackParts` contains owner-scoped
+> mobile push, OTA, and deep linking selections, and `bfs_apply_stack_update`
+> rewrites the derived cache back to the graph-selected values.
+> `bts.jsonc` read/write normalization now applies that rule directly too:
+> explicit owner-scoped mobile `none` graph parts prevent older non-`none`
+> flat mobile cache values from being preserved during graph persistence, while
+> older native configs without those graph roles can still migrate their flat
+> mobile feature fields.
+> External config replays now share the same normalization path: `create
+> --config` file/directory sources and full `--from-history` config snapshots
+> are projected through the graph-derived cache before becoming create flags,
+> so stale flat mobile cache fields cannot override owner-scoped graph parts
+> during project replay.
 
 ## Goal
 

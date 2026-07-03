@@ -2739,6 +2739,7 @@ describe("Rust Ecosystem", () => {
 
       const errorContent = getFileContent(root, "crates/server/src/error.rs");
       expect(errorContent).toContain("thiserror::Error");
+      expect(errorContent).toContain("#[allow(dead_code)]");
       expect(errorContent).toContain("AppError");
     });
 

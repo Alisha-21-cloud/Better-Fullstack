@@ -263,6 +263,23 @@ describe("Cross-ecosystem graph generation", () => {
     expect(output).toContain("elixir:phx-gen-auth");
   });
 
+  it("omits disabled graph parts from the CLI config summary", () => {
+    const output = displayConfig({
+      backend: "none",
+      uiLibrary: "none",
+      stackParts: graphParts([
+        "frontend:typescript:next",
+        "frontend.ui:typescript:none",
+        "backend:go:gin",
+      ]),
+    });
+
+    expect(output).toContain("Stack Parts:");
+    expect(output).toContain("frontend:typescript:next");
+    expect(output).toContain("backend:go:gin");
+    expect(output).not.toContain("frontend.ui:typescript:none");
+  });
+
   it("adds graph backend status UI to Angular, Qwik, and Redwood", async () => {
     const cases = [
       {

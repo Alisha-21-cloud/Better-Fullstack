@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { parseStackPartSpecs } from "@better-fullstack/types";
 
 import { createVirtual } from "../src/index";
 import { validateConfigForProgrammaticUse } from "../src/utils/config-validation";
@@ -12,6 +13,11 @@ type PackageJsonShape = {
   scripts?: Record<string, string>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
+  overrides?: Record<string, string>;
+  resolutions?: Record<string, string>;
+  pnpm?: {
+    overrides?: Record<string, string>;
+  };
 };
 
 function readJsonFromTree(
@@ -50,6 +56,36 @@ describe("Virtual Generator Regressions", () => {
       expect(rootPackageJson?.packageManager).toMatch(
         new RegExp(`^${packageManager}@\\d+\\.\\d+\\.\\d+(?:-.+)?$`),
       );
+    });
+
+    it(`pins Kysely below 0.29 for Better Auth with ${packageManager}`, async () => {
+      const result = await createVirtual({
+        projectName: `better-auth-kysely-${packageManager}`,
+        packageManager,
+        frontend: ["next"],
+        backend: "self",
+        runtime: "none",
+        api: "trpc",
+        database: "postgres",
+        orm: "drizzle",
+        auth: "better-auth",
+        addons: ["turborepo"],
+      });
+
+      expect(result.success).toBe(true);
+
+      const rootPackageJson = result.tree
+        ? readJsonFromTree(result.tree, "package.json")
+        : undefined;
+      const expectedVersion = "0.28.17";
+
+      if (packageManager === "pnpm") {
+        expect(rootPackageJson?.pnpm?.overrides?.kysely).toBe(expectedVersion);
+      } else if (packageManager === "yarn") {
+        expect(rootPackageJson?.resolutions?.kysely).toBe(expectedVersion);
+      } else {
+        expect(rootPackageJson?.overrides?.kysely).toBe(expectedVersion);
+      }
     });
   }
 
@@ -234,6 +270,219 @@ describe("Virtual Generator Regressions", () => {
     );
     expect(readTextFromTree(tree, "apps/server/src/lib/inngest.ts")).toContain("inngest");
   });
+
+  it("generates Python GitHub Actions with dev test dependencies and pytest", async () => {
+    const result = await createVirtual({
+      projectName: "python-ci",
+      ecosystem: "python",
+      pythonWebFramework: "fastapi",
+      pythonOrm: "none",
+      pythonValidation: "pydantic",
+      pythonAi: [],
+      pythonTaskQueue: "none",
+      pythonQuality: "none",
+      addons: ["github-actions"],
+      install: false,
+      git: false,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.tree).toBeDefined();
+
+    const workflow = readTextFromTree(result.tree!, ".github/workflows/ci.yml");
+
+    expect(workflow).toContain('pip install -e ".[dev]"');
+    expect(workflow).toContain("python -m compileall -q .");
+    expect(workflow).toContain("run: pytest");
+  });
+
+  it("generates TypeScript GitHub Actions with selected unit tests", async () => {
+    const result = await createVirtual({
+      projectName: "typescript-ci-tests",
+      frontend: ["react-vite"],
+      backend: "hono",
+      runtime: "bun",
+      api: "orpc",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "none",
+      testing: "vitest",
+      addons: ["github-actions"],
+      packageManager: "bun",
+      install: false,
+      git: false,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.tree).toBeDefined();
+
+    const workflow = readTextFromTree(result.tree!, ".github/workflows/ci.yml");
+    const rootPackageJson = readJsonFromTree(result.tree!, "package.json");
+    const webPackageJson = readJsonFromTree(result.tree!, "apps/web/package.json");
+    const serverPackageJson = readJsonFromTree(result.tree!, "apps/server/package.json");
+    const apiPackageJson = readJsonFromTree(result.tree!, "packages/api/package.json");
+
+    expect(workflow).toContain("run: bun run check-types");
+    expect(workflow).toContain("run: bun run build");
+    expect(workflow).toContain("run: bun run test");
+    expect(rootPackageJson?.scripts?.test).toBe(
+      "bun run --filter web test && bun run --filter server test && bun run --filter @typescript-ci-tests/api test",
+    );
+    expect(webPackageJson?.scripts?.test).toBe("vitest run --passWithNoTests");
+    expect(serverPackageJson?.scripts?.test).toBe("vitest run --passWithNoTests");
+    expect(apiPackageJson?.scripts?.test).toBe("vitest run --passWithNoTests");
+  });
+
+  it("generates React Native GitHub Actions with mobile test scripts when selected", async () => {
+    const result = await createVirtual({
+      projectName: "native-ci-tests",
+      ecosystem: "react-native",
+      frontend: ["native-bare"],
+      mobileTesting: "react-native-testing-library",
+      addons: ["github-actions"],
+      packageManager: "bun",
+      install: false,
+      git: false,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.tree).toBeDefined();
+
+    const workflow = readTextFromTree(result.tree!, ".github/workflows/ci.yml");
+    const rootPackageJson = readJsonFromTree(result.tree!, "package.json");
+    const nativePackageJson = readJsonFromTree(result.tree!, "apps/native/package.json");
+
+    expect(workflow).toContain("run: bun run check-types");
+    expect(workflow).toContain("run: bun run build");
+    expect(workflow).toContain("run: bun run test");
+    expect(rootPackageJson?.scripts?.test).toBe("bun run --filter native test");
+    expect(nativePackageJson?.scripts?.test).toBe("jest");
+    expect(readTextFromTree(result.tree!, "apps/native/__tests__/mobile-ui-provider.test.tsx"))
+      .toContain("renders children inside the mobile provider");
+  });
+
+  const graphOnlyBackendCiCases = [
+    {
+      name: "Rust",
+      projectName: "rust-graph-ci",
+      specs: ["backend:rust:axum"],
+      workflowIncludes: [
+        "uses: dtolnay/rust-toolchain@stable",
+        "run: cargo fmt --all -- --check",
+        "run: cargo clippy --all-targets --all-features -- -D warnings",
+        "run: cargo build --verbose",
+        "run: cargo test --verbose",
+      ],
+      scripts: { "test:server": "cd apps/server && cargo test" },
+    },
+    {
+      name: "Go",
+      projectName: "go-graph-ci",
+      specs: ["backend:go:gin"],
+      workflowIncludes: [
+        "uses: actions/setup-go@v5",
+        "run: go mod download",
+        "run: go vet ./...",
+        "run: go build ./...",
+        "run: go test ./...",
+      ],
+      scripts: { "test:server": "cd apps/server && go mod tidy && go test ./..." },
+    },
+    {
+      name: "Python",
+      projectName: "python-graph-ci",
+      specs: ["backend:python:fastapi"],
+      workflowIncludes: [
+        "uses: actions/setup-python@v5",
+        'pip install -e ".[dev]"',
+        "run: python -m compileall -q .",
+        "run: pytest",
+      ],
+      scripts: { "test:server": "cd apps/server && uv run --extra dev pytest" },
+    },
+    {
+      name: "Java",
+      projectName: "java-graph-ci",
+      specs: ["backend:java:spring-boot"],
+      workflowIncludes: [
+        "uses: actions/setup-java@v4",
+        "cache: maven",
+        "run: ./mvnw --batch-mode verify",
+      ],
+      scripts: { "test:server": "cd apps/server && ./mvnw test" },
+    },
+    {
+      name: "Elixir",
+      projectName: "elixir-graph-ci",
+      specs: ["backend:elixir:phoenix"],
+      workflowIncludes: [
+        "uses: erlef/setup-beam@v1",
+        "run: mix deps.get",
+        "run: mix format --check-formatted",
+        "run: mix compile --warnings-as-errors",
+        "run: mix test",
+      ],
+      scripts: { "test:server": "cd apps/server && mix test" },
+    },
+    {
+      name: ".NET without tests",
+      projectName: "dotnet-graph-ci",
+      specs: ["backend:dotnet:aspnet-minimal"],
+      workflowIncludes: [
+        "uses: actions/setup-dotnet@v4",
+        "run: dotnet restore",
+        "run: dotnet build --no-restore --configuration Release",
+      ],
+      workflowExcludes: ["run: dotnet test --no-build --configuration Release"],
+      absentScripts: ["test:server"],
+    },
+    {
+      name: ".NET with tests",
+      projectName: "dotnet-tests-graph-ci",
+      specs: ["backend:dotnet:aspnet-minimal", "backend.testing:dotnet:xunit"],
+      workflowIncludes: [
+        "uses: actions/setup-dotnet@v4",
+        "run: dotnet restore",
+        "run: dotnet build --no-restore --configuration Release",
+        "run: dotnet test --no-build --configuration Release",
+      ],
+      scripts: { "test:server": "cd apps/server && dotnet test" },
+    },
+  ] as const;
+
+  for (const testCase of graphOnlyBackendCiCases) {
+    it(`generates GitHub Actions for graph-only ${testCase.name} backends in the backend workspace`, async () => {
+      const result = await createVirtual({
+        projectName: testCase.projectName,
+        stackParts: parseStackPartSpecs([
+          ...testCase.specs,
+          "workspaceTooling:universal:github-actions",
+        ]),
+        install: false,
+        git: false,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.tree).toBeDefined();
+
+      const workflow = readTextFromTree(result.tree!, ".github/workflows/ci.yml");
+      const rootPackageJson = readJsonFromTree(result.tree!, "package.json");
+
+      expect(workflow).toContain('working-directory: "apps/server"');
+      for (const expected of testCase.workflowIncludes) {
+        expect(workflow).toContain(expected);
+      }
+      for (const unexpected of testCase.workflowExcludes ?? []) {
+        expect(workflow).not.toContain(unexpected);
+      }
+      for (const [scriptName, scriptValue] of Object.entries(testCase.scripts ?? {})) {
+        expect(rootPackageJson?.scripts?.[scriptName]).toBe(scriptValue);
+      }
+      for (const scriptName of testCase.absentScripts ?? []) {
+        expect(rootPackageJson?.scripts?.[scriptName]).toBeUndefined();
+      }
+    });
+  }
 
   it("uses path-safe chunk names for generated Qwik builds", async () => {
     const result = await createVirtual({

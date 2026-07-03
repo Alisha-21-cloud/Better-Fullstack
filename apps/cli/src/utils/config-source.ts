@@ -1,8 +1,8 @@
-import type { BetterTStackConfig, CreateInput } from "../types";
+import type { BetterTStackConfig, CreateInput, ProjectConfig } from "../types";
 import type { ProjectHistoryEntry } from "./project-history";
 
 import { CreateInputSchema } from "../types";
-import { readBtsConfigFromFile } from "./bts-config";
+import { buildBtsConfigForPersistence, readBtsConfigFromFile } from "./bts-config";
 import { exitWithError } from "./errors";
 import { getHistoryCount, getHistoryEntry } from "./project-history";
 
@@ -22,7 +22,11 @@ const COPYABLE_CREATE_INPUT_KEYS = (
 export function betterTStackConfigToCreateInput(
   config: BetterTStackConfig,
 ): Partial<CreateInput> {
-  const source = config as unknown as Record<string, unknown>;
+  const normalizedConfig = buildBtsConfigForPersistence(config as unknown as ProjectConfig, {
+    version: config.version,
+    createdAt: config.createdAt,
+  });
+  const source = normalizedConfig as unknown as Record<string, unknown>;
   const result: Record<string, unknown> = {};
 
   for (const key of COPYABLE_CREATE_INPUT_KEYS) {

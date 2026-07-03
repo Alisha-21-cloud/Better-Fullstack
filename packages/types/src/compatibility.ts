@@ -23,17 +23,14 @@ import {
 } from "./option-metadata";
 import {
   getUnsupportedWebDeployFrontend,
-  hasDockerComposeCompatibleFrontend,
   hasPWACompatibleFrontend,
   hasTanStackAICompatibleFrontend,
   hasTauriCompatibleFrontend,
-  isBackendUtilsCompatibleBackend,
-  isExampleAIAllowed,
-  isExampleChatSdkAllowed,
   requiresChatSdkVercelAIForExamples,
   UI_LIBRARY_COMPATIBILITY,
 } from "./stack-compatibility-rules";
 import {
+  getAddonStackPartBinding,
   getStackPartCompatibilityIssueForPart,
   legacyProjectConfigToStackParts,
 } from "./stack-graph";
@@ -1678,8 +1675,11 @@ export const getDisabledReason = (
   }
 
   const graphDisabledReason = getGraphDisabledReason(currentStack, category, optionId);
-  if (graphDisabledReason) {
-    return graphDisabledReason;
+  if (graphDisabledReason.reason) {
+    return graphDisabledReason.reason;
+  }
+  if (graphDisabledReason.handled && graphDisabledReason.authoritative) {
+    return null;
   }
 
   // ============================================
@@ -2167,63 +2167,6 @@ export const getDisabledReason = (
   // APP PLATFORMS CONSTRAINTS
   // ============================================
   if (category === "appPlatforms") {
-    if (optionId === "pwa" && !hasPWACompatibleFrontend(currentStack.webFrontend)) {
-      return "PWA requires TanStack Router, React Router, Solid, Next.js, Vinext, or Astro";
-    }
-    if (optionId === "tauri" && !hasTauriCompatibleFrontend(currentStack.webFrontend)) {
-      return "Tauri requires TanStack Router, React Router, Nuxt, Svelte, Solid, Next.js, or Astro";
-    }
-    if (optionId === "docker-compose" || optionId === "devcontainer") {
-      const title = optionId === "devcontainer" ? "DevContainer" : "Docker Compose";
-
-      if (currentStack.backend === "convex") {
-        return `${title} is not compatible with Convex backend (managed service)`;
-      }
-      if (currentStack.runtime === "workers") {
-        return `${title} is not compatible with Cloudflare Workers runtime`;
-      }
-      if (!["typescript", "python", "go", "rust", "java"].includes(currentStack.ecosystem)) {
-        return `${title} currently supports TypeScript, Python, Go, Rust, or Java projects`;
-      }
-      if (
-        currentStack.ecosystem === "typescript" &&
-        !hasDockerComposeCompatibleFrontend(currentStack.webFrontend)
-      ) {
-        return `${title} currently supports Next.js, TanStack Router, React Router, React Vite, Solid, or Astro`;
-      }
-      if (
-        currentStack.ecosystem === "typescript" &&
-        currentStack.backend === "self" &&
-        !currentStack.webFrontend.includes("next")
-      ) {
-        return `${title} self-backend support currently requires Next.js`;
-      }
-      if (currentStack.ecosystem === "rust" && currentStack.rustFrontend !== "none") {
-        return `${title} for Rust currently supports server-only projects`;
-      }
-      if (currentStack.ecosystem === "java" && currentStack.javaWebFramework !== "spring-boot") {
-        return `${title} for Java currently requires Spring Boot`;
-      }
-      if (
-        currentStack.ecosystem === "python" &&
-        currentStack.database !== "none" &&
-        currentStack.database !== "sqlite" &&
-        currentStack.database !== "postgres"
-      ) {
-        return `${title} for Python ORM projects currently supports SQLite defaults or Postgres`;
-      }
-    }
-    if (optionId === "backend-utils") {
-      if (currentStack.ecosystem !== "typescript") {
-        return "Backend Utils requires a TypeScript server stack";
-      }
-      if (!isBackendUtilsCompatibleBackend(currentStack.backend)) {
-        return "Backend Utils requires a Hono, Express, Fastify, Elysia, feTS, or NestJS backend";
-      }
-    }
-    if (optionId === "tanstack-query" && currentStack.api !== "none") {
-      return "TanStack Query is already included via your API layer";
-    }
     // TanStack addons with Astro require a UI framework integration
     const tanstackAddons = [
       "tanstack-query",
@@ -2240,99 +2183,6 @@ export const getDisabledReason = (
     ) {
       return "TanStack libraries with Astro require a UI framework integration (React, Vue, Svelte, or Solid)";
     }
-  }
-
-  // ============================================
-  // EXAMPLES CONSTRAINTS
-  // ============================================
-  if (category === "examples") {
-    if (optionId === "ai") {
-      if (
-        currentStack.webFrontend.includes("solid") ||
-        currentStack.webFrontend.includes("solid-start")
-      ) {
-        return "AI example not compatible with Solid frontend";
-      }
-      if (currentStack.backend === "convex") {
-        const hasIncompatibleFrontend = currentStack.webFrontend.some((f) =>
-          ["svelte", "nuxt"].includes(f),
-        );
-        if (hasIncompatibleFrontend) {
-          const frontendName = currentStack.webFrontend.find((f) => ["svelte", "nuxt"].includes(f));
-          return `Convex AI example only supports React-based frontends including React + Vite (not ${frontendName})`;
-        }
-      }
-    }
-
-    if (optionId === "chat-sdk") {
-      if (currentStack.webFrontend.includes("react-vite")) {
-        return "Chat SDK example is not yet supported for React + Vite projects";
-      }
-      if (currentStack.ecosystem !== "typescript") {
-        return "Chat SDK example is currently available only for TypeScript stacks";
-      }
-      if (currentStack.backend === "convex") {
-        return "Chat SDK example is not supported with Convex backend in v1";
-      }
-      if (
-        currentStack.backend === "self-astro" ||
-        currentStack.backend === "self-svelte" ||
-        currentStack.backend === "self-solid-start"
-      ) {
-        return "Chat SDK self backend profile supports Next.js, TanStack Start, or Nuxt in v1";
-      }
-      if (
-        currentStack.backend === "self-next" ||
-        currentStack.backend === "self-vinext" ||
-        currentStack.backend === "self-tanstack-start"
-      ) {
-        return null;
-      }
-      if (currentStack.backend === "self-nuxt") {
-        return null;
-      }
-      if (currentStack.backend === "hono") {
-        if (currentStack.runtime !== "node") {
-          return "Chat SDK Hono profile requires Node runtime in v1";
-        }
-        return null;
-      }
-      if (currentStack.backend.startsWith("self-")) {
-        return "Chat SDK self backend profile supports Next.js, TanStack Start, or Nuxt in v1";
-      }
-      if (currentStack.backend !== "none") {
-        return "Chat SDK example is only supported for self (Next/TanStack Start/Nuxt) or Hono+Node in v1";
-      }
-    }
-  }
-
-  // ============================================
-  // FRESH FRONTEND CONSTRAINTS
-  // Fresh is Preact-based and incompatible with React-specific packages
-  // ============================================
-  const isFresh = currentStack.webFrontend.includes("fresh");
-
-  // Forms: TanStack Form has no Preact adapter
-  if (category === "forms" && optionId === "tanstack-form" && isFresh) {
-    return "TanStack Form has no Preact adapter (Fresh uses Preact)";
-  }
-
-  // State Management: These all require React bindings
-  if (category === "stateManagement" && isFresh) {
-    if (optionId === "nanostores") {
-      return "Nanostores requires @nanostores/react (no Preact support)";
-    }
-    if (optionId === "xstate") {
-      return "XState requires @xstate/react (no Preact support)";
-    }
-    if (optionId === "tanstack-store") {
-      return "TanStack Store requires @tanstack/react-store (no Preact support)";
-    }
-  }
-
-  // Animation: Lottie uses lottie-react which requires React
-  if (category === "animation" && optionId === "lottie" && isFresh) {
-    return "Lottie uses lottie-react which requires React (not Preact)";
   }
 
   // ============================================
@@ -2753,13 +2603,20 @@ type GraphDisabledReasonOwnerRole = "frontend" | "backend" | "mobile" | "databas
 type GraphDisabledReasonBinding = {
   role: StackPartRole;
   ecosystem: StackPartEcosystem;
-  ownerRole: GraphDisabledReasonOwnerRole;
+  ownerRole?: GraphDisabledReasonOwnerRole;
   ownerEcosystem?: StackPartEcosystem;
   currentEcosystem?: StackPartEcosystem;
   allowNoneCandidate?: boolean;
   allowOwnerlessCandidate?: boolean;
+  authoritative?: boolean;
   candidateIdPrefix?: string;
   missingOwnerReason?: string;
+};
+
+type GraphDisabledReasonResult = {
+  handled: boolean;
+  authoritative: boolean;
+  reason: string | null;
 };
 
 const SHARED_BACKEND_SERVICE_CATEGORIES = new Set<CompatibilityCategory>([
@@ -2769,6 +2626,13 @@ const SHARED_BACKEND_SERVICE_CATEGORIES = new Set<CompatibilityCategory>([
   "rateLimit",
   "search",
 ]);
+
+const SHARED_BACKEND_SERVICE_MISSING_OWNER_REASONS: Partial<
+  Record<CompatibilityCategory, string>
+> = {
+  email: "Email integration requires a backend",
+  rateLimit: "Rate limiting requires a backend",
+};
 
 function getSharedBackendServiceGraphBinding(
   currentStack: CompatibilityInput,
@@ -2782,6 +2646,8 @@ function getSharedBackendServiceGraphBinding(
     ecosystem: currentStack.ecosystem,
     ownerRole: "backend",
     ownerEcosystem: currentStack.ecosystem,
+    authoritative: true,
+    missingOwnerReason: SHARED_BACKEND_SERVICE_MISSING_OWNER_REASONS[category],
   };
 }
 
@@ -2815,7 +2681,38 @@ function getElixirGraphBinding(
     ownerEcosystem: "elixir",
     currentEcosystem: "elixir",
     allowOwnerlessCandidate: true,
+    authoritative: true,
     candidateIdPrefix: "candidate:native",
+  };
+}
+
+function getAddonOrExampleGraphBinding(
+  category: CompatibilityCategory,
+  optionId: string,
+): GraphDisabledReasonBinding | undefined {
+  if (category === "examples") {
+    return {
+      role: "examples",
+      ecosystem: "universal",
+      allowOwnerlessCandidate: true,
+      authoritative: true,
+    };
+  }
+
+  if (category !== "appPlatforms") return undefined;
+
+  const binding = getAddonStackPartBinding(optionId);
+  if (!binding) return undefined;
+
+  return {
+    role: binding.role,
+    ecosystem: binding.ecosystem,
+    ownerRole: binding.ownerRole,
+    ownerEcosystem: binding.ownerRole ? binding.ecosystem : undefined,
+    allowOwnerlessCandidate: binding.ownerRole === undefined,
+    authoritative: true,
+    missingOwnerReason:
+      binding.ownerRole === "frontend" ? `${optionId} requires a web frontend` : undefined,
   };
 }
 
@@ -2827,6 +2724,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "frontend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "CSS framework requires a web frontend",
   },
   uiLibrary: {
@@ -2834,6 +2732,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "frontend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "UI library requires a web frontend",
   },
   forms: {
@@ -2841,6 +2740,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "frontend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "Forms requires a web frontend",
   },
   stateManagement: {
@@ -2848,6 +2748,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "frontend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "State management requires a web frontend",
   },
   animation: {
@@ -2855,6 +2756,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "frontend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "Animation requires a web frontend",
   },
   fileUpload: {
@@ -2862,6 +2764,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "frontend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "File upload requires a web frontend",
   },
   i18n: {
@@ -2869,6 +2772,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "frontend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "i18n requires a web frontend",
   },
   analytics: {
@@ -2876,13 +2780,23 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "frontend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "Analytics requires a web frontend",
+  },
+  webDeploy: {
+    role: "deploy",
+    ecosystem: "typescript",
+    ownerRole: "frontend",
+    ownerEcosystem: "typescript",
+    authoritative: true,
+    missingOwnerReason: "Web deployment requires a web frontend",
   },
   payments: {
     role: "payments",
     ecosystem: "typescript",
     ownerRole: "backend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "Payments requires a backend",
   },
   cms: {
@@ -2890,6 +2804,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "backend",
     ownerEcosystem: "typescript",
+    authoritative: true,
     missingOwnerReason: "CMS requires a backend",
   },
   ai: {
@@ -2897,12 +2812,45 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "typescript",
     ownerRole: "backend",
     ownerEcosystem: "typescript",
+    authoritative: true,
+  },
+  vectorDb: {
+    role: "vectorDb",
+    ecosystem: "typescript",
+    ownerRole: "backend",
+    ownerEcosystem: "typescript",
+    currentEcosystem: "typescript",
+    authoritative: true,
+  },
+  fileStorage: {
+    role: "fileStorage",
+    ecosystem: "typescript",
+    ownerRole: "backend",
+    ownerEcosystem: "typescript",
+    currentEcosystem: "typescript",
+    authoritative: true,
+  },
+  serverDeploy: {
+    role: "deploy",
+    ecosystem: "typescript",
+    ownerRole: "backend",
+    ownerEcosystem: "typescript",
+    authoritative: true,
+  },
+  dbSetup: {
+    role: "dbSetup",
+    ecosystem: "universal",
+    ownerRole: "database",
+    ownerEcosystem: "universal",
+    authoritative: true,
+    missingOwnerReason: "Select a database first",
   },
   mobileNavigation: {
     role: "navigation",
     ecosystem: "react-native",
     ownerRole: "mobile",
     ownerEcosystem: "react-native",
+    authoritative: true,
     missingOwnerReason: "Mobile navigation requires a native Expo frontend",
   },
   mobileUI: {
@@ -2910,6 +2858,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "react-native",
     ownerRole: "mobile",
     ownerEcosystem: "react-native",
+    authoritative: true,
     missingOwnerReason: "Mobile UI requires a native Expo frontend",
   },
   mobileStorage: {
@@ -2917,6 +2866,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "react-native",
     ownerRole: "mobile",
     ownerEcosystem: "react-native",
+    authoritative: true,
     missingOwnerReason: "Mobile storage requires a native Expo frontend",
   },
   mobileTesting: {
@@ -2924,7 +2874,32 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ecosystem: "react-native",
     ownerRole: "mobile",
     ownerEcosystem: "react-native",
+    authoritative: true,
     missingOwnerReason: "Mobile testing requires a native Expo frontend",
+  },
+  mobilePush: {
+    role: "push",
+    ecosystem: "react-native",
+    ownerRole: "mobile",
+    ownerEcosystem: "react-native",
+    authoritative: true,
+    missingOwnerReason: "Mobile push requires a native Expo frontend",
+  },
+  mobileOTA: {
+    role: "ota",
+    ecosystem: "react-native",
+    ownerRole: "mobile",
+    ownerEcosystem: "react-native",
+    authoritative: true,
+    missingOwnerReason: "Mobile OTA requires a native Expo frontend",
+  },
+  mobileDeepLinking: {
+    role: "deepLinking",
+    ecosystem: "react-native",
+    ownerRole: "mobile",
+    ownerEcosystem: "react-native",
+    authoritative: true,
+    missingOwnerReason: "Mobile deep linking requires a native Expo frontend",
   },
   javaBuildTool: {
     role: "buildTool",
@@ -2933,6 +2908,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerEcosystem: "java",
     currentEcosystem: "java",
     allowNoneCandidate: true,
+    authoritative: true,
   },
   javaOrm: {
     role: "orm",
@@ -2940,6 +2916,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "java",
     currentEcosystem: "java",
+    authoritative: true,
     missingOwnerReason: "Java ORM support currently requires Spring Boot",
   },
   javaAuth: {
@@ -2948,6 +2925,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "java",
     currentEcosystem: "java",
+    authoritative: true,
     missingOwnerReason: "Java auth support currently requires Spring Boot",
   },
   javaLibraries: {
@@ -2956,6 +2934,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "java",
     currentEcosystem: "java",
+    authoritative: true,
     missingOwnerReason: "Spring libraries currently require Spring Boot in the Java scaffold",
   },
   javaTestingLibraries: {
@@ -2964,6 +2943,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "java",
     currentEcosystem: "java",
+    authoritative: true,
   },
   rustRealtime: {
     role: "realtime",
@@ -2971,6 +2951,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "rust",
     currentEcosystem: "rust",
+    authoritative: true,
   },
   rustMessageQueue: {
     role: "jobQueue",
@@ -2978,6 +2959,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "rust",
     currentEcosystem: "rust",
+    authoritative: true,
   },
   rustObservability: {
     role: "observability",
@@ -2985,6 +2967,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "rust",
     currentEcosystem: "rust",
+    authoritative: true,
     candidateIdPrefix: "candidate:native",
   },
   rustTemplating: {
@@ -2993,6 +2976,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "rust",
     currentEcosystem: "rust",
+    authoritative: true,
   },
   pythonTesting: {
     role: "testing",
@@ -3000,6 +2984,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "python",
     currentEcosystem: "python",
+    authoritative: true,
   },
   pythonCaching: {
     role: "caching",
@@ -3007,6 +2992,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "python",
     currentEcosystem: "python",
+    authoritative: true,
     candidateIdPrefix: "candidate:native",
   },
   pythonRealtime: {
@@ -3015,6 +3001,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "python",
     currentEcosystem: "python",
+    authoritative: true,
   },
   pythonObservability: {
     role: "observability",
@@ -3022,6 +3009,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "python",
     currentEcosystem: "python",
+    authoritative: true,
     candidateIdPrefix: "candidate:native",
   },
   pythonCli: {
@@ -3030,6 +3018,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "python",
     currentEcosystem: "python",
+    authoritative: true,
   },
   goTesting: {
     role: "testing",
@@ -3037,6 +3026,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "go",
     currentEcosystem: "go",
+    authoritative: true,
   },
   goRealtime: {
     role: "realtime",
@@ -3044,6 +3034,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "go",
     currentEcosystem: "go",
+    authoritative: true,
   },
   goMessageQueue: {
     role: "jobQueue",
@@ -3051,6 +3042,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "go",
     currentEcosystem: "go",
+    authoritative: true,
   },
   goCaching: {
     role: "caching",
@@ -3058,6 +3050,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "go",
     currentEcosystem: "go",
+    authoritative: true,
     candidateIdPrefix: "candidate:native",
   },
   goConfig: {
@@ -3066,6 +3059,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "go",
     currentEcosystem: "go",
+    authoritative: true,
   },
   goObservability: {
     role: "observability",
@@ -3073,6 +3067,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "go",
     currentEcosystem: "go",
+    authoritative: true,
     candidateIdPrefix: "candidate:native",
   },
   dotnetOrm: {
@@ -3081,6 +3076,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "dotnet",
     currentEcosystem: "dotnet",
+    authoritative: true,
     missingOwnerReason: ".NET data access requires an ASP.NET backend",
   },
   dotnetAuth: {
@@ -3089,6 +3085,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "dotnet",
     currentEcosystem: "dotnet",
+    authoritative: true,
     missingOwnerReason: ".NET auth requires an ASP.NET backend",
   },
   dotnetApi: {
@@ -3097,6 +3094,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "dotnet",
     currentEcosystem: "dotnet",
+    authoritative: true,
   },
   dotnetTesting: {
     role: "testing",
@@ -3104,6 +3102,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "dotnet",
     currentEcosystem: "dotnet",
+    authoritative: true,
   },
   dotnetJobQueue: {
     role: "jobQueue",
@@ -3111,6 +3110,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "dotnet",
     currentEcosystem: "dotnet",
+    authoritative: true,
   },
   dotnetRealtime: {
     role: "realtime",
@@ -3118,6 +3118,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "dotnet",
     currentEcosystem: "dotnet",
+    authoritative: true,
   },
   dotnetObservability: {
     role: "observability",
@@ -3125,6 +3126,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "dotnet",
     currentEcosystem: "dotnet",
+    authoritative: true,
     candidateIdPrefix: "candidate:native",
   },
   dotnetCaching: {
@@ -3133,6 +3135,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "dotnet",
     currentEcosystem: "dotnet",
+    authoritative: true,
     candidateIdPrefix: "candidate:native",
   },
   dotnetDeploy: {
@@ -3141,6 +3144,7 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     ownerRole: "backend",
     ownerEcosystem: "dotnet",
     currentEcosystem: "dotnet",
+    authoritative: true,
   },
 };
 
@@ -3168,34 +3172,47 @@ function getGraphDisabledReason(
   currentStack: CompatibilityInput,
   category: CompatibilityCategory,
   optionId: string,
-): string | null {
-  if (optionId === "false") return null;
+): GraphDisabledReasonResult {
+  const unhandled = { handled: false, authoritative: false, reason: null };
+
+  if (optionId === "false") return unhandled;
 
   const binding =
+    getAddonOrExampleGraphBinding(category, optionId) ??
     getSharedBackendServiceGraphBinding(currentStack, category) ??
     getElixirGraphBinding(currentStack, category) ??
     GRAPH_DISABLED_REASON_BINDINGS[category];
-  if (!binding) return null;
-  if (binding.currentEcosystem && currentStack.ecosystem !== binding.currentEcosystem) return null;
+  if (!binding) return unhandled;
+  if (binding.currentEcosystem && currentStack.ecosystem !== binding.currentEcosystem) {
+    return unhandled;
+  }
   if (optionId === "none" && category !== "cssFramework" && !binding.allowNoneCandidate) {
-    return null;
+    return unhandled;
   }
 
   let parts;
   try {
     parts = legacyProjectConfigToStackParts(compatibilityInputToGraphProjectConfig(currentStack));
   } catch {
-    return null;
+    return unhandled;
   }
 
-  const owner = parts.find(
-    (part) =>
-      part.role === binding.ownerRole &&
-      !part.ownerPartId &&
-      (!binding.ownerEcosystem || part.ecosystem === binding.ownerEcosystem),
-  );
-  if (!owner && optionId === "none") return null;
-  if (!owner && !binding.allowOwnerlessCandidate) return binding.missingOwnerReason ?? null;
+  const owner = binding.ownerRole
+    ? parts.find(
+        (part) =>
+          part.role === binding.ownerRole &&
+          !part.ownerPartId &&
+          (!binding.ownerEcosystem || part.ecosystem === binding.ownerEcosystem),
+      )
+    : undefined;
+  if (!owner && optionId === "none") return unhandled;
+  if (!owner && !binding.allowOwnerlessCandidate) {
+    return {
+      handled: true,
+      authoritative: binding.authoritative === true,
+      reason: binding.missingOwnerReason ?? null,
+    };
+  }
 
   const issue = getStackPartCompatibilityIssueForPart(
     {
@@ -3204,11 +3221,18 @@ function getGraphDisabledReason(
       toolId: optionId,
       ecosystem: binding.ecosystem,
       ownerPartId: owner?.id,
+      settings: {
+        astroIntegration: currentStack.astroIntegration,
+      },
     },
     parts,
   );
 
-  return issue?.message ?? (!owner ? (binding.missingOwnerReason ?? null) : null);
+  return {
+    handled: true,
+    authoritative: binding.authoritative === true,
+    reason: issue?.message ?? (!owner ? (binding.missingOwnerReason ?? null) : null),
+  };
 }
 
 const WEB_FRAMEWORKS: readonly Frontend[] = [

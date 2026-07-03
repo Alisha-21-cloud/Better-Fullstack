@@ -2,10 +2,7 @@
 
 Synthesis of internal readiness (codebase, plan docs, GitHub issues) and external evidence
 (competitive landscape as of June 12, 2026 — see `docs/plans/planned/competitive-landscape-2026-06-12.md`).
-Updated 2026-06-30 after the June parity batches shipped vector DB, Apollo Server, OpenAPI,
-Paraglide, OpenSearch, Keystatic, Cloudinary, SWR, shadcn-svelte, DevContainers, GitHub Actions,
-mobile feature categories, generic MCP stack updates, and broad Go/Python/Rust/Java/Elixir/.NET
-template coverage.
+Updated 2026-06-30 to focus on the highest-leverage remaining product opportunities.
 
 ## Framing
 
@@ -42,11 +39,15 @@ expansion and hardening track.
 
 ### 3. Public verified-combinations guarantee
 
-We run thousands of scaffold/type-check tests (3,067 CLI tests, smoke scaffolds per commit, the combo ledger in `testing/`) but none of it is visible. Turn it into a public "every published combination compiles/type-checks in CI" badge plus a per-combo status page.
+We run scaffold/type-check tests, smoke scaffolds, ScaffBench, and release guards. The generated
+status artifact now lives at `docs/verified-combinations.md`, with a public docs page at
+`/docs/reference/verified-combinations` and a Shields-compatible endpoint at
+`/api/verified-combinations`; each surface links to source artifacts, rerun commands, and owner areas
+for failure triage.
 
 - Directly answers the trust pain point that drives users away from AI builders (variable output quality) and stale starters (t3's years of version-bump issues). No competitor markets this today.
-- Near-zero build cost relative to value — the data already exists.
-- **Prerequisite**: fix the failure classes our own LLM benchmarks exposed first (heavy-TS runs had 8/9 build failures from Storybook dependency issues) so the claim holds.
+- Keep the claim scoped to rows with current Pass evidence; matrix-only/configured rows should stay visible but not count as green.
+- Add public links to owning template areas and failure artifacts so failures are actionable.
 
 ---
 
@@ -78,9 +79,9 @@ shadcn's 2026 "GitHub registries" model (any repo with `registry.json` distribut
 ## Tier 3 — Nearer-term concrete items
 
 - **Payments and SaaS billing depth** — Creem, Autumn, Commet, Better Auth payment plugin wiring, and an opinionated organizations + billing + entitlement preset.
-- **Non-monorepo mode** — Docker/Compose/DevContainer shipped; the remaining workspace request is a single-app mode.
-- **Stack graph Phase 3 completion** (compatibility consolidation, ~60% done per `docs/plans/planned/single-source-of-truth-stack-graph.md`) — enabling work for Tier 1 items 1 and 2.
-- **Generated-project CI quality** — GitHub Actions addon exists; next step is making generated CI workflows run meaningful install/typecheck/build/test checks per ecosystem.
+- **Non-monorepo mode** — the remaining workspace request is a single-app mode.
+- **Stack graph Phase 4 storage/settings cleanup** — compatibility consolidation has shipped for promoted graph-owned roles; remaining graph work is retiring flat-authoritative storage/settings paths as new categories move into graph ownership.
+- **More evidence surfaces** — published-package smoke now covers Bun, npm, and pnpm package installs; next verification depth should target additional package specs and richer generated-project checks.
 - **AI chat example modernization** — migrate the TypeScript AI example surface to AI SDK 7 response helpers, shared chat UI components where available, and generated-project checks for the main web/backend/native presets.
 - **Integration backlog** — InstantDB, Intlayer, Plasmo, Effect HTTP, raw SQL/no-ORM, Supabase Storage, HeroUI naming/compatibility, and deeper template-quality passes for already-added libraries.
 
@@ -92,7 +93,7 @@ One coherent arc on the same foundation, with two parallel low-coupling tracks:
 
 ```
 Stack graph cleanup ──► Harden stack updates (#2) ──► Upgrade engine (#1)  [main arc]
-Generated CI + ScaffBench roll-up ──► Verified-combos trust page (#3)       [parallel]
+Verified-combinations page/badge ──► More evidence surfaces (#3)          [parallel]
 Per-stack skills + generators (#4)                                          [parallel]
 ```
 
