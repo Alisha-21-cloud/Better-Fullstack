@@ -38,13 +38,13 @@ description: 使用 prompts、defaults 或显式 flags scaffold 一个新的 Bet
 | `--ecosystem` | `typescript` `react-native` `rust` `python` `go` `java` `elixir`。默认 `typescript`。 |
 | `--template` | `t3` `mern` `pern` `uniwind` `none`。 |
 | `--part` | 添加 multi-ecosystem stack part，例如 `frontend:typescript:next` 或 `backend.orm:go:gorm`。每个 part 重复一次。 |
-| `--addons` | `pwa` `tauri` `starlight` `biome` `lefthook` `husky` `ruler` `mcp` `skills` `turborepo` `fumadocs` `ultracite` `oxlint` `opentui` `wxt` `msw` `storybook` `swr` `tanstack-query` `tanstack-table` `tanstack-virtual` `tanstack-db` `tanstack-pacer` `backend-utils` `docker-compose` `none`。 |
+| `--addons` | `pwa` `tauri` `starlight` `biome` `lefthook` `husky` `ruler` `mcp` `skills` `turborepo` `nx` `fumadocs` `ultracite` `oxlint` `opentui` `wxt` `msw` `storybook` `swr` `tanstack-query` `tanstack-table` `tanstack-virtual` `tanstack-db` `tanstack-pacer` `backend-utils` `devcontainer` `docker-compose` `github-actions` `none`。 |
 | `--examples` | `ai` `chat-sdk` `tanstack-showcase` `none`。 |
 | `--ai-docs` | `claude-md` `agents-md` `cursorrules` `none`。 |
 | `--package-manager` | `npm` `pnpm` `bun` `yarn`。 |
 | `--version-channel` | `stable` `latest` `beta`。 |
 | `--web-deploy` | `cloudflare` `fly` `railway` `render` `netlify` `docker` `sst` `vercel` `none`。 |
-| `--server-deploy` | `cloudflare` `fly` `railway` `render` `docker` `sst` `vercel` `none`。 |
+| `--server-deploy` | `cloudflare` `fly` `railway` `render` `netlify` `docker` `sst` `vercel` `none`。 |
 | `--directory-conflict` | 目标目录已存在时的处理策略。 |
 | `--dry-run` | 预览生成文件，不写入。 |
 | `--verify` | 在支持时运行 scaffold 后的生成 checks。 |
@@ -62,14 +62,14 @@ description: 使用 prompts、defaults 或显式 flags scaffold 一个新的 Bet
 | Flag | 值 |
 | --- | --- |
 | `--frontend` | `tanstack-router` `react-router` `react-vite` `tanstack-start` `next` `vinext` `nuxt` `svelte` `solid` `solid-start` `astro` `qwik` `angular` `redwood` `fresh` `none`。 |
-| `--backend` | `hono` `express` `fastify` `elysia` `fets` `nestjs` `adonisjs` `nitro` `encore` `convex` `self` `none`。 |
+| `--backend` | `hono` `express` `fastify` `elysia` `fets` `effect` `nestjs` `adonisjs` `nitro` `encore` `convex` `self` `none`。 |
 | `--runtime` | `bun` `node` `workers` `none`。 |
 | `--database` | `sqlite` `postgres` `mysql` `mongodb` `edgedb` `redis` `none`。 |
 | `--orm` | `drizzle` `prisma` `mongoose` `typeorm` `kysely` `mikroorm` `sequelize` `none`。 |
 | `--db-setup` | `turso` `neon` `prisma-postgres` `planetscale` `mongodb-atlas` `supabase` `upstash` `d1` `docker` `none`。 |
 | `--manual-db` | 适用时跳过 provider-specific database setup prompts。 |
-| `--auth` | `better-auth` `go-better-auth` `clerk` `nextauth` `stack-auth` `supabase-auth` `auth0` `none`。 |
-| `--api` | `trpc` `orpc` `ts-rest` `garph` `graphql-yoga` `none`。 |
+| `--auth` | `better-auth` `better-auth-organizations` `go-better-auth` `clerk` `nextauth` `stack-auth` `supabase-auth` `auth0` `workos` `kinde` `none`。 |
+| `--api` | `trpc` `orpc` `ts-rest` `garph` `graphql-yoga` `apollo-server` `openapi` `none`。 |
 | `--astro-integration` | `react` `vue` `svelte` `solid` `none`。 |
 
 ### 服务
@@ -81,9 +81,9 @@ description: 使用 prompts、defaults 或显式 flags scaffold 一个新的 Bet
 | `--email` | `react-email` `resend` `nodemailer` `postmark` `sendgrid` `aws-ses` `mailgun` `plunk` `none`。 |
 | `--realtime` | `socket-io` `partykit` `ably` `pusher` `liveblocks` `yjs` `none`。 |
 | `--job-queue` | `bullmq` `trigger-dev` `inngest` `temporal` `none`。 |
-| `--cms` | `payload` `sanity` `strapi` `tinacms` `directus` `none`。 |
+| `--cms` | `payload` `sanity` `strapi` `tinacms` `directus` `keystatic` `none`。 |
 | `--caching` | `upstash-redis` `none`。 |
-| `--search` | `meilisearch` `typesense` `elasticsearch` `algolia` `none`。 |
+| `--search` | `meilisearch` `typesense` `elasticsearch` `opensearch` `algolia` `none`。 |
 | `--file-storage` | `s3` `r2` `cloudinary` `none`。 |
 | `--file-upload` | `uploadthing` `filepond` `uppy` `none`。 |
 | `--analytics` | `plausible` `umami` `none`。 |
@@ -100,7 +100,7 @@ description: 使用 prompts、defaults 或显式 flags scaffold 一个新的 Bet
 | `--validation` | `zod` `valibot` `arktype` `typebox` `typia` `runtypes` `effect-schema` `none`。 |
 | `--testing` | `vitest` `playwright` `vitest-playwright` `jest` `cypress` `none`。 |
 | `--logging` | `pino` `winston` `evlog` `none`。 |
-| `--observability` | `opentelemetry` `sentry` `grafana` `none`。 |
+| `--observability` | `opentelemetry` `sentry` `grafana` `datadog` `axiom` `betterstack` `none`。 |
 | `--animation` | `framer-motion` `gsap` `react-spring` `auto-animate` `lottie` `none`。 |
 | `--i18n` | `paraglide` `i18next` `next-intl` `none`。 |
 | `--effect` | `effect` `effect-full` `none`。 |
