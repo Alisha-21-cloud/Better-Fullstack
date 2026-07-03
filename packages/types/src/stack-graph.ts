@@ -8,18 +8,6 @@ import type {
 } from "./types";
 
 import {
-  getUnsupportedWebDeployFrontend,
-  hasDockerComposeCompatibleFrontend,
-  hasPWACompatibleFrontend,
-  hasTanStackAICompatibleFrontend,
-  hasTauriCompatibleFrontend,
-  isBackendUtilsCompatibleBackend,
-  isExampleAIAllowed,
-  isExampleChatSdkAllowed,
-  requiresChatSdkVercelAIForExamples,
-  UI_LIBRARY_COMPATIBILITY,
-} from "./stack-compatibility-rules";
-import {
   ADDONS_VALUES,
   API_VALUES,
   AUTH_VALUES,
@@ -139,13 +127,28 @@ import {
   VALIDATION_VALUES,
   WEB_DEPLOY_VALUES,
 } from "./schemas";
+import {
+  getUnsupportedWebDeployFrontend,
+  hasDockerComposeCompatibleFrontend,
+  hasPWACompatibleFrontend,
+  hasTanStackAICompatibleFrontend,
+  hasTauriCompatibleFrontend,
+  isBackendUtilsCompatibleBackend,
+  isExampleAIAllowed,
+  isExampleChatSdkAllowed,
+  requiresChatSdkVercelAIForExamples,
+  UI_LIBRARY_COMPATIBILITY,
+} from "./stack-compatibility-rules";
 
 export type StackPrimaryRole = Extract<
   StackPartRole,
   "frontend" | "backend" | "mobile" | "database"
 >;
 type LegacyBackendEcosystem = Exclude<Ecosystem, "typescript" | "react-native">;
-type LegacyCapabilityRole = Extract<StackPartRole, "orm" | "api" | "auth" | "email" | "observability">;
+type LegacyCapabilityRole = Extract<
+  StackPartRole,
+  "orm" | "api" | "auth" | "email" | "observability"
+>;
 
 export type ProvidedCapabilityDefinition = {
   role: StackPartRole;
@@ -219,12 +222,7 @@ const PARAGLIDE_COMPATIBLE_FRONTENDS = new Set([
   "solid-start",
   "astro",
 ]);
-const TYPESCRIPT_TRPC_INCOMPATIBLE_FRONTENDS = new Set([
-  "nuxt",
-  "svelte",
-  "solid",
-  "solid-start",
-]);
+const TYPESCRIPT_TRPC_INCOMPATIBLE_FRONTENDS = new Set(["nuxt", "svelte", "solid", "solid-start"]);
 const TYPESCRIPT_APOLLO_SERVER_COMPATIBLE_FRONTENDS = new Set([
   "tanstack-router",
   "react-router",
@@ -384,6 +382,13 @@ const WORKSPACE_TOOLING_ADDONS = new Set([
   "mcp",
   "skills",
   "backend-utils",
+]);
+const DOCKER_COMPOSE_COMPATIBLE_ECOSYSTEMS = new Set<StackPartEcosystem>([
+  "typescript",
+  "python",
+  "go",
+  "rust",
+  "java",
 ]);
 const LEGACY_ADDON_GRAPH_ROLES = new Set<StackPartRole>([
   "appPlatform",
@@ -773,12 +778,7 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(MOBILE_TESTING_VALUES, "testing", "react-native", "mobileTesting"),
   ...defineTools(MOBILE_PUSH_VALUES, "push", "react-native", "mobilePush"),
   ...defineTools(MOBILE_OTA_VALUES, "ota", "react-native", "mobileOTA"),
-  ...defineTools(
-    MOBILE_DEEP_LINKING_VALUES,
-    "deepLinking",
-    "react-native",
-    "mobileDeepLinking",
-  ),
+  ...defineTools(MOBILE_DEEP_LINKING_VALUES, "deepLinking", "react-native", "mobileDeepLinking"),
   ...defineTools(RUST_WEB_FRAMEWORK_VALUES, "backend", "rust", "rustWebFramework"),
   ...defineTools(RUST_FRONTEND_VALUES, "frontend", "rust", "rustFrontend"),
   ...defineTools(RUST_ORM_VALUES, "orm", "rust", "rustOrm"),
@@ -950,11 +950,7 @@ function allowsCrossEcosystemOwner(
   context: StackPartOptionContext,
 ) {
   if (part.ecosystem === "universal") return true;
-  if (
-    part.role === "auth" &&
-    context.ownerRole === "mobile" &&
-    part.ecosystem === "react-native"
-  ) {
+  if (part.role === "auth" && context.ownerRole === "mobile" && part.ecosystem === "react-native") {
     return true;
   }
   return false;
@@ -1059,10 +1055,7 @@ function createTypeScriptFrontendCompatibilityIssue(
       });
     }
 
-    if (
-      context.ownerToolId === "astro" &&
-      context.settings?.astroIntegration !== undefined
-    ) {
+    if (context.ownerToolId === "astro" && context.settings?.astroIntegration !== undefined) {
       const astroIntegration = context.settings.astroIntegration;
       const reactOnlyLibraries = new Set([
         "shadcn-ui",
@@ -1284,7 +1277,8 @@ function createTypeScriptBackendCompatibilityIssue(
         partId: part.id,
         role: part.role,
         toolId: part.toolId,
-        message: "TanStack AI requires React or Solid frontend (no Vue/Svelte/Angular adapter yet).",
+        message:
+          "TanStack AI requires React or Solid frontend (no Vue/Svelte/Angular adapter yet).",
       });
     }
   }
@@ -1562,9 +1556,7 @@ function createInfrastructureCompatibilityIssue(
     }
 
     if (
-      (part.toolId === "neon" ||
-        part.toolId === "supabase" ||
-        part.toolId === "prisma-postgres") &&
+      (part.toolId === "neon" || part.toolId === "supabase" || part.toolId === "prisma-postgres") &&
       databaseTool !== "postgres"
     ) {
       return createStackGraphIssue({
@@ -1586,11 +1578,7 @@ function createInfrastructureCompatibilityIssue(
       });
     }
 
-    if (
-      part.toolId === "planetscale" &&
-      databaseTool !== "postgres" &&
-      databaseTool !== "mysql"
-    ) {
+    if (part.toolId === "planetscale" && databaseTool !== "postgres" && databaseTool !== "mysql") {
       return createStackGraphIssue({
         code: "INCOMPATIBLE_OWNER_TOOL",
         partId: part.id,
@@ -1715,6 +1703,8 @@ function createAddonCompatibilityIssue(
 
     if (part.toolId === "docker-compose" || part.toolId === "devcontainer") {
       const title = part.toolId === "devcontainer" ? "DevContainer" : "Docker Compose";
+      const databaseTool = context.primaryToolIdsByRole?.database;
+      const primaryEcosystem = backendEcosystem ?? frontendEcosystem ?? context.settings?.ecosystem;
 
       if (backendTool === "convex") {
         return createStackGraphIssue({
@@ -1734,17 +1724,25 @@ function createAddonCompatibilityIssue(
           message: `${title} is not compatible with Cloudflare Workers runtime.`,
         });
       }
+      if (!primaryEcosystem || !DOCKER_COMPOSE_COMPATIBLE_ECOSYSTEMS.has(primaryEcosystem)) {
+        return createStackGraphIssue({
+          code: "INCOMPATIBLE_GRAPH_SELECTION",
+          partId: part.id,
+          role: part.role,
+          toolId: part.toolId,
+          message: `${title} currently supports TypeScript, Python, Go, Rust, or Java projects.`,
+        });
+      }
       if (
-        frontendEcosystem === "typescript" &&
-        frontendTool &&
-        !hasDockerComposeCompatibleFrontend(frontendTools)
+        (frontendEcosystem === "typescript" || backendEcosystem === "typescript") &&
+        (!frontendTool || !hasDockerComposeCompatibleFrontend(frontendTools))
       ) {
         return createStackGraphIssue({
           code: "INCOMPATIBLE_GRAPH_SELECTION",
           partId: part.id,
           role: part.role,
           toolId: part.toolId,
-          message: `${title} is not wired for the selected web frontend.`,
+          message: `${title} currently supports Next.js, TanStack Router, React Router, React Vite, Solid, or Astro.`,
         });
       }
       if (backendEcosystem === "typescript" && backendTool === "self" && frontendTool !== "next") {
@@ -1756,13 +1754,43 @@ function createAddonCompatibilityIssue(
           message: `${title} self-backend support currently requires Next.js.`,
         });
       }
+      if (frontendEcosystem === "rust" && frontendTool && frontendTool !== "none") {
+        return createStackGraphIssue({
+          code: "INCOMPATIBLE_GRAPH_SELECTION",
+          partId: part.id,
+          role: part.role,
+          toolId: part.toolId,
+          message: `${title} for Rust currently supports server-only projects.`,
+        });
+      }
+      if (primaryEcosystem === "java" && backendTool !== "spring-boot") {
+        return createStackGraphIssue({
+          code: "INCOMPATIBLE_GRAPH_SELECTION",
+          partId: part.id,
+          role: part.role,
+          toolId: part.toolId,
+          message: `${title} for Java currently requires Spring Boot.`,
+        });
+      }
+      if (
+        primaryEcosystem === "python" &&
+        databaseTool &&
+        databaseTool !== "none" &&
+        databaseTool !== "sqlite" &&
+        databaseTool !== "postgres"
+      ) {
+        return createStackGraphIssue({
+          code: "INCOMPATIBLE_GRAPH_SELECTION",
+          partId: part.id,
+          role: part.role,
+          toolId: part.toolId,
+          message: `${title} for Python ORM projects currently supports SQLite defaults or Postgres.`,
+        });
+      }
     }
 
     if (part.toolId === "backend-utils") {
-      if (
-        backendEcosystem !== "typescript" ||
-        !isBackendUtilsCompatibleBackend(backendTool)
-      ) {
+      if (backendEcosystem !== "typescript" || !isBackendUtilsCompatibleBackend(backendTool)) {
         return createStackGraphIssue({
           code: "INCOMPATIBLE_GRAPH_SELECTION",
           partId: part.id,
@@ -2001,11 +2029,7 @@ function getStackPartCompatibilityIssue(
     part.ecosystem === "typescript" || part.role === "dbSetup"
       ? OWNER_ROLES_BY_SCOPED_ROLE[part.role]
       : undefined;
-  if (
-    expectedOwnerRoles &&
-    context.ownerRole &&
-    !expectedOwnerRoles.includes(context.ownerRole)
-  ) {
+  if (expectedOwnerRoles && context.ownerRole && !expectedOwnerRoles.includes(context.ownerRole)) {
     return createStackGraphIssue({
       code: "INCOMPATIBLE_OWNER_ROLE",
       partId: part.id,
@@ -2080,11 +2104,7 @@ function getStackPartCompatibilityIssue(
     }
   }
 
-  if (
-    part.ecosystem === "typescript" &&
-    part.role === "api" &&
-    part.toolId === "apollo-server"
-  ) {
+  if (part.ecosystem === "typescript" && part.role === "api" && part.toolId === "apollo-server") {
     const frontendTool = context.primaryToolIdsByRole?.frontend;
     if (frontendTool && !TYPESCRIPT_APOLLO_SERVER_COMPATIBLE_FRONTENDS.has(frontendTool)) {
       return createStackGraphIssue({
@@ -2209,8 +2229,7 @@ function getStackPartCompatibilityIssue(
   if (
     part.ecosystem === "elixir" &&
     part.toolId === "wallaby" &&
-    (!context.ownerRole ||
-      (context.ownerRole === "backend" && context.ownerToolId === "none"))
+    (!context.ownerRole || (context.ownerRole === "backend" && context.ownerToolId === "none"))
   ) {
     return createStackGraphIssue({
       code: "INCOMPATIBLE_OWNER_TOOL",
@@ -2342,8 +2361,7 @@ export function parseStackPartSpecs(
   );
   const scopedParts = unresolved
     .filter(
-      (part): part is typeof part & { ownerRole: StackPrimaryRole } =>
-        part.ownerRole !== undefined,
+      (part): part is typeof part & { ownerRole: StackPrimaryRole } => part.ownerRole !== undefined,
     )
     .map((part) =>
       createStackPart({
@@ -2608,9 +2626,9 @@ export function legacyProjectConfigToStackParts(
       capabilityOwner,
     );
 
-      if (frontendPart?.ecosystem === "typescript") {
-        for (const [role, category] of Object.entries(
-          LEGACY_TYPESCRIPT_FRONTEND_SINGLE_CATEGORIES,
+    if (frontendPart?.ecosystem === "typescript") {
+      for (const [role, category] of Object.entries(
+        LEGACY_TYPESCRIPT_FRONTEND_SINGLE_CATEGORIES,
       ) as Array<[StackPartRole, keyof ProjectConfig]>) {
         addLegacyPart(
           parts,
@@ -2620,27 +2638,27 @@ export function legacyProjectConfigToStackParts(
           source,
           frontendPart.id,
         );
-        }
       }
+    }
 
-      if (mobilePart?.ecosystem === "react-native") {
-        for (const [role, category] of Object.entries(LEGACY_MOBILE_SINGLE_CATEGORIES) as Array<
-          [StackPartRole, keyof ProjectConfig]
-        >) {
-          addLegacyPart(
-            parts,
-            role,
-            "react-native",
-            config[category] as string | undefined,
-            source,
-            mobilePart.id,
-          );
-        }
+    if (mobilePart?.ecosystem === "react-native") {
+      for (const [role, category] of Object.entries(LEGACY_MOBILE_SINGLE_CATEGORIES) as Array<
+        [StackPartRole, keyof ProjectConfig]
+      >) {
+        addLegacyPart(
+          parts,
+          role,
+          "react-native",
+          config[category] as string | undefined,
+          source,
+          mobilePart.id,
+        );
       }
+    }
 
-      if (backendPart?.ecosystem === "typescript") {
-        for (const [role, category] of Object.entries(
-          LEGACY_TYPESCRIPT_BACKEND_INFRA_CATEGORIES,
+    if (backendPart?.ecosystem === "typescript") {
+      for (const [role, category] of Object.entries(
+        LEGACY_TYPESCRIPT_BACKEND_INFRA_CATEGORIES,
       ) as Array<[StackPartRole, keyof ProjectConfig]>) {
         addLegacyPart(
           parts,
@@ -2825,7 +2843,6 @@ export function stackPartsToLegacyProjectConfigPartial(
       (config as Record<string, unknown>)[legacyCategory] = part.toolId;
       continue;
     }
-
   }
 
   return config;
@@ -2865,9 +2882,10 @@ function getLegacyCategoryForPart(
   ) {
     if (part.role === "auth") return "auth";
 
-    const legacyCategory = LEGACY_TYPESCRIPT_FRONTEND_SINGLE_CATEGORIES[
-      part.role as keyof typeof LEGACY_TYPESCRIPT_FRONTEND_SINGLE_CATEGORIES
-    ];
+    const legacyCategory =
+      LEGACY_TYPESCRIPT_FRONTEND_SINGLE_CATEGORIES[
+        part.role as keyof typeof LEGACY_TYPESCRIPT_FRONTEND_SINGLE_CATEGORIES
+      ];
     if (legacyCategory) return legacyCategory;
   }
 
@@ -2895,9 +2913,10 @@ function getLegacyCategoryForPart(
   }
 
   if (owner?.role === "database" && part.ecosystem === "universal") {
-    const legacyCategory = LEGACY_DATABASE_SINGLE_CATEGORIES[
-      part.role as keyof typeof LEGACY_DATABASE_SINGLE_CATEGORIES
-    ];
+    const legacyCategory =
+      LEGACY_DATABASE_SINGLE_CATEGORIES[
+        part.role as keyof typeof LEGACY_DATABASE_SINGLE_CATEGORIES
+      ];
     if (legacyCategory) return legacyCategory;
   }
 
@@ -3068,11 +3087,7 @@ export function validateStackParts(parts: readonly StackPart[]): StackGraphValid
       });
     }
 
-    if (
-      !PRIMARY_ROLES.has(part.role) &&
-      !part.ownerPartId &&
-      !isOwnerlessDefinition(definition)
-    ) {
+    if (!PRIMARY_ROLES.has(part.role) && !part.ownerPartId && !isOwnerlessDefinition(definition)) {
       issues.push({
         code: "MISSING_OWNER_PART",
         partId: part.id,
@@ -3093,7 +3108,10 @@ export function validateStackParts(parts: readonly StackPart[]): StackGraphValid
     }
 
     const owner = part.ownerPartId ? partsById.get(part.ownerPartId) : undefined;
-    if (definition && (PRIMARY_ROLES.has(part.role) || owner || isOwnerlessDefinition(definition))) {
+    if (
+      definition &&
+      (PRIMARY_ROLES.has(part.role) || owner || isOwnerlessDefinition(definition))
+    ) {
       const compatibilityIssue = getStackPartCompatibilityIssueForPart(part, parts);
 
       if (compatibilityIssue) {

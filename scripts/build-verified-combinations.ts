@@ -149,6 +149,18 @@ async function readJson<T>(filePath: string): Promise<T | null> {
   }
 }
 
+async function runText(command: string): Promise<string | undefined> {
+  const proc = Bun.spawn(["/bin/sh", "-c", command], {
+    stdout: "pipe",
+    stderr: "ignore",
+  });
+  const output = await new Response(proc.stdout).text();
+  const exitCode = await proc.exited;
+
+  if (exitCode !== 0) return undefined;
+  return output.trim() || undefined;
+}
+
 function isMissingFileError(error: unknown): boolean {
   return (
     typeof error === "object" &&
@@ -225,6 +237,19 @@ function repoUrl(filePath: string): string {
   return `${REPOSITORY_BLOB_BASE}/${filePath}`;
 }
 
+function isLocalEvidencePath(filePath: string): boolean {
+  return filePath.startsWith("testing/.");
+}
+
+function repoActionLink(label: string, filePath: string): ActionLink | null {
+  if (isLocalEvidencePath(filePath)) return null;
+  return { label, href: repoUrl(filePath) };
+}
+
+function compactActionLinks(links: Array<ActionLink | null>): ActionLink[] {
+  return links.filter((link): link is ActionLink => Boolean(link));
+}
+
 function markdownLink(label: string, href: string): string {
   return `[${label}](${href})`;
 }
@@ -256,6 +281,13 @@ function releaseGuardStatusLabel(status: ReleaseGuardStep["status"]): string {
   }[status];
 }
 
+function isFreshGitHead(
+  recordedHead: string | undefined,
+  currentHead: string | undefined,
+): boolean {
+  return !recordedHead || !currentHead || recordedHead === currentHead;
+}
+
 function ownerAreaForEcosystem(ecosystem: string): string {
   const ownerAreas: Record<string, string> = {
     dotnet: "packages/template-generator/templates/dotnet-base",
@@ -280,7 +312,11 @@ function formatSmokeSteps(steps: SmokeStep[]): string {
       }
 
       const outcome = step.success ? "pass" : "fail";
-      const suffix = step.classification ? ` (${step.classification})` : step.advisory ? " (advisory)" : "";
+      const suffix = step.classification
+        ? ` (${step.classification})`
+        : step.advisory
+          ? " (advisory)"
+          : "";
       return `${step.step}: ${outcome}${suffix}`;
     })
     .join("<br>");
@@ -436,7 +472,10 @@ function releaseGuardOwner(command: string): string {
     return "Web stack builder";
   }
 
-  if (command.includes("generate-reproducible-command") || command.includes("add-history-commands")) {
+  if (
+    command.includes("generate-reproducible-command") ||
+    command.includes("add-history-commands")
+  ) {
     return "CLI reproducible commands";
   }
 
@@ -499,7 +538,10 @@ function releaseGuardSteps(script: string): string[] {
     .filter(Boolean);
 }
 
-function renderCommandDetails(title: string, commands: Array<{ label: string; command: string }>): string {
+function renderCommandDetails(
+  title: string,
+  commands: Array<{ label: string; command: string }>,
+): string {
   if (commands.length === 0) {
     return "";
   }
@@ -536,7 +578,10 @@ async function renderSmokeSection(): Promise<string> {
     const resultByName = new Map(results.map((result) => [result.comboName, result]));
     const rows =
       expectedCombos.length > 0
-        ? expectedCombos.map((combo) => ({ comboName: combo.name, result: resultByName.get(combo.name) }))
+        ? expectedCombos.map((combo) => ({
+            comboName: combo.name,
+            result: resultByName.get(combo.name),
+          }))
         : results.map((result) => ({ comboName: result.comboName, result }));
     const passed = results.filter((result) => result.overallSuccess).length;
     sections.push(`### ${input.label}`);
@@ -547,54 +592,55 @@ async function renderSmokeSection(): Promise<string> {
       [
         "| Status | Combination | Ecosystem | Owner area | Validation steps | Action links |",
         "| --- | --- | --- | --- | --- | --- |",
-        ...rows.map(({ comboName, result }) => {
-          const command = commandMap.get(comboName);
-          if (command) {
-            commandDetails.push({ label: comboName, command });
-          }
+        ...rows
+          .map(({ comboName, result }) => {
+            const command = commandMap.get(comboName);
+            if (command) {
+              commandDetails.push({ label: comboName, command });
+            }
 
-          if (!result) {
+            if (!result) {
+              return [
+                statusLabel("missing"),
+                code(comboName),
+                "n/a",
+                code("n/a"),
+                "no smoke result in listed sources",
+                actionLinksCell(
+                  compactActionLinks([
+                    { label: "preset", href: repoUrl("testing/lib/presets.ts") },
+                    { label: "smoke harness", href: repoUrl("testing/smoke-test.ts") },
+                  ]),
+                  "bun run test:smoke:pr-core",
+                ),
+              ]
+                .map(escapeTableCell)
+                .join(" | ");
+            }
+
+            const status = smokeStatus(result);
+            const ownerArea = ownerAreaForEcosystem(result.ecosystem);
             return [
-              statusLabel("missing"),
-              code(comboName),
-              "n/a",
-              code("n/a"),
-              "no smoke result in listed sources",
+              statusLabel(status),
+              code(result.comboName),
+              result.ecosystem,
+              code(ownerArea),
+              formatSmokeSteps(result.steps),
               actionLinksCell(
-                [
+                compactActionLinks([
+                  { label: "owner", href: repoUrl(ownerArea) },
                   { label: "preset", href: repoUrl("testing/lib/presets.ts") },
-                  { label: "smoke harness", href: repoUrl("testing/smoke-test.ts") },
-                ],
+                  ...sources.map((source, index) =>
+                    repoActionLink(sources.length === 1 ? "source" : `source ${index + 1}`, source),
+                  ),
+                ]),
                 "bun run test:smoke:pr-core",
               ),
             ]
               .map(escapeTableCell)
               .join(" | ");
-          }
-
-          const status = smokeStatus(result);
-          const ownerArea = ownerAreaForEcosystem(result.ecosystem);
-          return [
-            statusLabel(status),
-            code(result.comboName),
-            result.ecosystem,
-            code(ownerArea),
-            formatSmokeSteps(result.steps),
-            actionLinksCell(
-              [
-                { label: "owner", href: repoUrl(ownerArea) },
-                { label: "preset", href: repoUrl("testing/lib/presets.ts") },
-                ...sources.map((source, index) => ({
-                  label: sources.length === 1 ? "source" : `source ${index + 1}`,
-                  href: repoUrl(source),
-                })),
-              ],
-              "bun run test:smoke:pr-core",
-            ),
-          ]
-            .map(escapeTableCell)
-            .join(" | ");
-        }).map((row) => `| ${row} |`),
+          })
+          .map((row) => `| ${row} |`),
       ].join("\n"),
     );
   }
@@ -637,36 +683,38 @@ async function renderScaffbenchSection(): Promise<string> {
         [
           "| Status | Spec | Path | Trial | Owner area | Stack score | Validation steps | Failure tags | Action links |",
           "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
-          ...(summary.results ?? []).map((result) => {
-            const spec = summary.specs?.find((candidate) => candidate.id === result.specId);
-            const family = spec?.family ?? "multi-ecosystem";
-            const ownerArea = ownerAreaForEcosystem(family);
-            const status = scaffbenchResultStatus(result);
-            const stackScore = result.stackScore
-              ? `${result.stackScore.matched}/${result.stackScore.total} (${result.stackScore.percent}%)`
-              : "n/a";
+          ...(summary.results ?? [])
+            .map((result) => {
+              const spec = summary.specs?.find((candidate) => candidate.id === result.specId);
+              const family = spec?.family ?? "multi-ecosystem";
+              const ownerArea = ownerAreaForEcosystem(family);
+              const status = scaffbenchResultStatus(result);
+              const stackScore = result.stackScore
+                ? `${result.stackScore.matched}/${result.stackScore.total} (${result.stackScore.percent}%)`
+                : "n/a";
 
-            return [
-              statusLabel(status),
-              code(result.specId),
-              result.path ?? "n/a",
-              result.trial ?? "n/a",
-              code(ownerArea),
-              stackScore,
-              formatScaffbenchSteps(result),
-              result.failureTags?.join(", ") || "none",
-              actionLinksCell(
-                [
-                  { label: "source", href: repoUrl(input.path) },
-                  { label: "owner", href: repoUrl(ownerArea) },
-                  { label: "runner", href: repoUrl("scripts/scaffbench-v2.ts") },
-                ],
-                "bun run scaffbench:2:canonical",
-              ),
-            ]
-              .map(escapeTableCell)
-              .join(" | ");
-          }).map((row) => `| ${row} |`),
+              return [
+                statusLabel(status),
+                code(result.specId),
+                result.path ?? "n/a",
+                result.trial ?? "n/a",
+                code(ownerArea),
+                stackScore,
+                formatScaffbenchSteps(result),
+                result.failureTags?.join(", ") || "none",
+                actionLinksCell(
+                  compactActionLinks([
+                    repoActionLink("source", input.path),
+                    { label: "owner", href: repoUrl(ownerArea) },
+                    { label: "runner", href: repoUrl("scripts/scaffbench-v2.ts") },
+                  ]),
+                  "bun run scaffbench:2:canonical",
+                ),
+              ]
+                .map(escapeTableCell)
+                .join(" | ");
+            })
+            .map((row) => `| ${row} |`),
         ].join("\n"),
       );
     }
@@ -683,19 +731,21 @@ async function renderScaffbenchSection(): Promise<string> {
         [
           "| Status | Spec | Family | Owner area | Command |",
           "| --- | --- | --- | --- | --- |",
-          ...matrixSpecs.map((spec) => {
-            const status = runCount === 0 ? "matrix-only" : "configured";
-            const family = spec.family ?? "multi-ecosystem";
-            return [
-              statusLabel(status),
-              code(spec.id),
-              family,
-              code(ownerAreaForEcosystem(family)),
-              code(commandFromScaffbenchSpec(spec)),
-            ]
-              .map(escapeTableCell)
-              .join(" | ");
-          }).map((row) => `| ${row} |`),
+          ...matrixSpecs
+            .map((spec) => {
+              const status = runCount === 0 ? "matrix-only" : "configured";
+              const family = spec.family ?? "multi-ecosystem";
+              return [
+                statusLabel(status),
+                code(spec.id),
+                family,
+                code(ownerAreaForEcosystem(family)),
+                code(commandFromScaffbenchSpec(spec)),
+              ]
+                .map(escapeTableCell)
+                .join(" | ");
+            })
+            .map((row) => `| ${row} |`),
         ].join("\n"),
       );
     }
@@ -704,7 +754,7 @@ async function renderScaffbenchSection(): Promise<string> {
   return sections.join("\n\n");
 }
 
-async function renderReleaseGuardSection(): Promise<string> {
+async function renderReleaseGuardSection(currentGitHead?: string): Promise<string> {
   const packageJson = await readJson<{ scripts?: Record<string, string> }>("package.json");
   const releaseScript = packageJson?.scripts?.["test:release"];
   const releaseSummary = await readJson<ReleaseGuardSummary>(RELEASE_GUARD_INPUT);
@@ -715,7 +765,20 @@ async function renderReleaseGuardSection(): Promise<string> {
     return sections.join("\n\n");
   }
 
-  if (releaseSummary) {
+  if (releaseSummary && !isFreshGitHead(releaseSummary.gitHead, currentGitHead)) {
+    sections.push(
+      [
+        `Stale release guard evidence found at ${code(RELEASE_GUARD_INPUT)}.`,
+        releaseSummary.gitHead
+          ? `Recorded git head: ${code(releaseSummary.gitHead.slice(0, 12))}.`
+          : "",
+        currentGitHead ? `Current git head: ${code(currentGitHead.slice(0, 12))}.` : "",
+        `Run ${code("bun run test:release:record")} to refresh pass/fail evidence for this section.`,
+      ]
+        .filter(Boolean)
+        .join(" "),
+    );
+  } else if (releaseSummary) {
     const passed = releaseSummary.steps.filter((step) => step.status === "pass").length;
     const sourceSummary = [
       `Source: ${code(RELEASE_GUARD_INPUT)}.`,
@@ -732,25 +795,27 @@ async function renderReleaseGuardSection(): Promise<string> {
       [
         "| Status | Gate | Owner area | Duration | Action links |",
         "| --- | --- | --- | --- | --- |",
-        ...releaseSummary.steps.map((step) => {
-          const ownerPath = releaseGuardOwnerPath(step.command);
-          return [
-            releaseGuardStatusLabel(step.status),
-            code(step.command),
-            releaseGuardOwner(step.command),
-            typeof step.durationMs === "number" ? `${step.durationMs}ms` : "n/a",
-            actionLinksCell(
-              [
-                { label: "source", href: repoUrl(RELEASE_GUARD_INPUT) },
-                ...(ownerPath ? [{ label: "owner", href: repoUrl(ownerPath) }] : []),
-                { label: "recorder", href: repoUrl("scripts/record-release-guard.ts") },
-              ],
-              "bun run test:release:record",
-            ),
-          ]
-            .map(escapeTableCell)
-            .join(" | ");
-        }).map((row) => `| ${row} |`),
+        ...releaseSummary.steps
+          .map((step) => {
+            const ownerPath = releaseGuardOwnerPath(step.command);
+            return [
+              releaseGuardStatusLabel(step.status),
+              code(step.command),
+              releaseGuardOwner(step.command),
+              typeof step.durationMs === "number" ? `${step.durationMs}ms` : "n/a",
+              actionLinksCell(
+                compactActionLinks([
+                  repoActionLink("source", RELEASE_GUARD_INPUT),
+                  ...(ownerPath ? [{ label: "owner", href: repoUrl(ownerPath) }] : []),
+                  { label: "recorder", href: repoUrl("scripts/record-release-guard.ts") },
+                ]),
+                "bun run test:release:record",
+              ),
+            ]
+              .map(escapeTableCell)
+              .join(" | ");
+          })
+          .map((row) => `| ${row} |`),
       ].join("\n"),
     );
 
@@ -765,16 +830,21 @@ async function renderReleaseGuardSection(): Promise<string> {
     [
       "| Status | Gate | Owner area | Action links |",
       "| --- | --- | --- | --- |",
-      ...steps.map((step) =>
-        [
-          statusLabel("configured"),
-          code(step),
-          releaseGuardOwner(step),
-          actionLinksCell([{ label: "package script", href: repoUrl("package.json") }], "bun run test:release:record"),
-        ]
-          .map(escapeTableCell)
-          .join(" | "),
-      ).map((row) => `| ${row} |`),
+      ...steps
+        .map((step) =>
+          [
+            statusLabel("configured"),
+            code(step),
+            releaseGuardOwner(step),
+            actionLinksCell(
+              [{ label: "package script", href: repoUrl("package.json") }],
+              "bun run test:release:record",
+            ),
+          ]
+            .map(escapeTableCell)
+            .join(" | "),
+        )
+        .map((row) => `| ${row} |`),
     ].join("\n"),
   );
 
@@ -794,22 +864,24 @@ async function renderPublishedPackageSection(): Promise<string> {
       [
         "| Status | Package manager | Package spec | Action links |",
         "| --- | --- | --- | --- |",
-        ...(["bun", "npm", "pnpm"] as const).map((manager) =>
-          [
-            statusLabel("missing"),
-            code(manager),
-            code("n/a"),
-            actionLinksCell(
-              [
-                { label: "runner", href: repoUrl("scripts/published-package-smoke.ts") },
-                { label: "package script", href: repoUrl("package.json") },
-              ],
-              rerunCommand,
-            ),
-          ]
-            .map(escapeTableCell)
-            .join(" | "),
-        ).map((row) => `| ${row} |`),
+        ...(["bun", "npm", "pnpm"] as const)
+          .map((manager) =>
+            [
+              statusLabel("missing"),
+              code(manager),
+              code("n/a"),
+              actionLinksCell(
+                [
+                  { label: "runner", href: repoUrl("scripts/published-package-smoke.ts") },
+                  { label: "package script", href: repoUrl("package.json") },
+                ],
+                rerunCommand,
+              ),
+            ]
+              .map(escapeTableCell)
+              .join(" | "),
+          )
+          .map((row) => `| ${row} |`),
       ].join("\n"),
     );
     return sections.join("\n\n");
@@ -830,36 +902,41 @@ async function renderPublishedPackageSection(): Promise<string> {
     [
       "| Status | Package manager | Command | Duration | Expected files | Missing files | Action links |",
       "| --- | --- | --- | --- | --- | --- | --- |",
-      ...summary.results.map((result) =>
-        [
-          statusLabel(result.status),
-          code(result.manager),
-          code(result.command.join(" ")),
-          typeof result.durationMs === "number" ? `${result.durationMs}ms` : "n/a",
-          result.expectedPaths?.map(code).join("<br>") || "n/a",
-          result.missingPaths && result.missingPaths.length > 0
-            ? result.missingPaths.map(code).join("<br>")
-            : "none",
-          actionLinksCell(
-            [
-              { label: "source", href: repoUrl(PUBLISHED_PACKAGE_INPUT) },
-              { label: "runner", href: repoUrl("scripts/published-package-smoke.ts") },
-              { label: "package script", href: repoUrl("package.json") },
-              { label: "cli package", href: repoUrl("apps/cli/package.json") },
-            ],
-            rerunCommand,
-          ),
-        ]
-        .map(escapeTableCell)
-        .join(" | "),
-      ).map((row) => `| ${row} |`),
+      ...summary.results
+        .map((result) =>
+          [
+            statusLabel(result.status),
+            code(result.manager),
+            code(result.command.join(" ")),
+            typeof result.durationMs === "number" ? `${result.durationMs}ms` : "n/a",
+            result.expectedPaths?.map(code).join("<br>") || "n/a",
+            result.missingPaths && result.missingPaths.length > 0
+              ? result.missingPaths.map(code).join("<br>")
+              : "none",
+            actionLinksCell(
+              compactActionLinks([
+                repoActionLink("source", PUBLISHED_PACKAGE_INPUT),
+                { label: "runner", href: repoUrl("scripts/published-package-smoke.ts") },
+                { label: "package script", href: repoUrl("package.json") },
+                { label: "cli package", href: repoUrl("apps/cli/package.json") },
+              ]),
+              rerunCommand,
+            ),
+          ]
+            .map(escapeTableCell)
+            .join(" | "),
+        )
+        .map((row) => `| ${row} |`),
     ].join("\n"),
   );
 
   return sections.join("\n\n");
 }
 
-async function buildVerifiedClaimSummary(generatedAt: string): Promise<VerifiedClaimSummary> {
+async function buildVerifiedClaimSummary(
+  generatedAt: string,
+  currentGitHead?: string,
+): Promise<VerifiedClaimSummary> {
   const smoke: VerifiedClaimSummary["smoke"] = [];
   const scaffbench: VerifiedClaimSummary["scaffbench"] = [];
 
@@ -872,12 +949,13 @@ async function buildVerifiedClaimSummary(generatedAt: string): Promise<VerifiedC
         pass: 0,
         total: input.preset ? getPresetCombos(input.preset).length : 0,
         ownerArea: "testing",
-        actionLinks: [
+        actionLinks: compactActionLinks([
           { label: "preset", href: repoUrl("testing/lib/presets.ts") },
           { label: "smoke harness", href: repoUrl("testing/smoke-test.ts") },
-        ],
+        ]),
         rerunCommand: "bun run test:smoke:pr-core",
-        failureHint: "Run the smoke preset and inspect the generated smoke-results.json source files.",
+        failureHint:
+          "Run the smoke preset and inspect the generated smoke-results.json source files.",
       });
       continue;
     }
@@ -890,13 +968,14 @@ async function buildVerifiedClaimSummary(generatedAt: string): Promise<VerifiedC
       pass: evidence.results.filter((result) => smokeStatus(result) === "pass").length,
       total,
       ownerArea,
-      actionLinks: [
-        { label: "source", href: repoUrl(evidence.sources[0] ?? input.path) },
+      actionLinks: compactActionLinks([
+        repoActionLink("source", evidence.sources[0] ?? input.path),
         { label: "owner", href: repoUrl(ownerArea) },
         { label: "preset", href: repoUrl("testing/lib/presets.ts") },
-      ],
+      ]),
       rerunCommand: "bun run test:smoke:pr-core",
-      failureHint: "Open the smoke source artifact, find the failing combination row, then inspect the listed owner area.",
+      failureHint:
+        "Open the smoke source artifact, find the failing combination row, then inspect the listed owner area.",
     });
   }
 
@@ -911,41 +990,45 @@ async function buildVerifiedClaimSummary(generatedAt: string): Promise<VerifiedC
       total: results.length,
       environmentQualified: summary?.metadata?.environmentQualified,
       ownerArea,
-      actionLinks: [
-        { label: "source", href: repoUrl(input.path) },
+      actionLinks: compactActionLinks([
+        repoActionLink("source", input.path),
         { label: "runner", href: repoUrl("scripts/scaffbench-v2.ts") },
         { label: "owner", href: repoUrl(ownerArea) },
-      ],
+      ]),
       rerunCommand: "bun run scaffbench:2:canonical",
-      failureHint: "Inspect failureTags and validation steps in the ScaffBench summary, then follow the owner area for the stack family.",
+      failureHint:
+        "Inspect failureTags and validation steps in the ScaffBench summary, then follow the owner area for the stack family.",
     });
   }
 
   const releaseSummary = await readJson<ReleaseGuardSummary>(RELEASE_GUARD_INPUT);
-  const publishedPackageSummary = await readJson<PublishedPackageSmokeSummary>(PUBLISHED_PACKAGE_INPUT);
+  const publishedPackageSummary =
+    await readJson<PublishedPackageSmokeSummary>(PUBLISHED_PACKAGE_INPUT);
   return {
     generatedAt,
     smoke,
     scaffbench,
-    releaseGuard: releaseSummary
-      ? {
-          source: RELEASE_GUARD_INPUT,
-          pass: releaseSummary.steps.filter((step) => step.status === "pass").length,
-          total: releaseSummary.steps.length,
-          overallSuccess: releaseSummary.overallSuccess,
-          generatedAt: releaseSummary.generatedAt,
-          gitBranch: releaseSummary.gitBranch,
-          gitHead: releaseSummary.gitHead,
-          ownerArea: "release guard",
-          actionLinks: [
-            { label: "source", href: repoUrl(RELEASE_GUARD_INPUT) },
-            { label: "recorder", href: repoUrl("scripts/record-release-guard.ts") },
-            { label: "package script", href: repoUrl("package.json") },
-          ],
-          rerunCommand: "bun run test:release:record",
-          failureHint: "Inspect the failing gate in the release summary, rerun the recorder, then follow the gate's owner area.",
-        }
-      : null,
+    releaseGuard:
+      releaseSummary && isFreshGitHead(releaseSummary.gitHead, currentGitHead)
+        ? {
+            source: RELEASE_GUARD_INPUT,
+            pass: releaseSummary.steps.filter((step) => step.status === "pass").length,
+            total: releaseSummary.steps.length,
+            overallSuccess: releaseSummary.overallSuccess,
+            generatedAt: releaseSummary.generatedAt,
+            gitBranch: releaseSummary.gitBranch,
+            gitHead: releaseSummary.gitHead,
+            ownerArea: "release guard",
+            actionLinks: compactActionLinks([
+              repoActionLink("source", RELEASE_GUARD_INPUT),
+              { label: "recorder", href: repoUrl("scripts/record-release-guard.ts") },
+              { label: "package script", href: repoUrl("package.json") },
+            ]),
+            rerunCommand: "bun run test:release:record",
+            failureHint:
+              "Inspect the failing gate in the release summary, rerun the recorder, then follow the gate's owner area.",
+          }
+        : null,
     publishedPackage: publishedPackageSummary
       ? {
           source: PUBLISHED_PACKAGE_INPUT,
@@ -955,14 +1038,15 @@ async function buildVerifiedClaimSummary(generatedAt: string): Promise<VerifiedC
           total: publishedPackageSummary.results.length,
           overallSuccess: publishedPackageSummary.overallSuccess,
           ownerArea: "published package",
-          actionLinks: [
-            { label: "source", href: repoUrl(PUBLISHED_PACKAGE_INPUT) },
+          actionLinks: compactActionLinks([
+            repoActionLink("source", PUBLISHED_PACKAGE_INPUT),
             { label: "runner", href: repoUrl("scripts/published-package-smoke.ts") },
             { label: "package script", href: repoUrl("package.json") },
             { label: "cli package", href: repoUrl("apps/cli/package.json") },
-          ],
+          ]),
           rerunCommand: "bun run test:published-package",
-          failureHint: "Inspect the package-manager row, confirm the preview/canary package is visible, then rerun the published-package smoke lane.",
+          failureHint:
+            "Inspect the package-manager row, confirm the preview/canary package is visible, then rerun the published-package smoke lane.",
         }
       : null,
   };
@@ -972,7 +1056,9 @@ function renderCurrentClaim(summary: VerifiedClaimSummary): string {
   const summaryLines: string[] = [];
 
   for (const smoke of summary.smoke) {
-    summaryLines.push(`- ${smoke.label}: ${smoke.pass}/${smoke.total} combinations have Pass evidence.`);
+    summaryLines.push(
+      `- ${smoke.label}: ${smoke.pass}/${smoke.total} combinations have Pass evidence.`,
+    );
   }
 
   for (const scaffbench of summary.scaffbench) {
@@ -994,7 +1080,9 @@ function renderCurrentClaim(summary: VerifiedClaimSummary): string {
       `- Published package smoke: ${summary.publishedPackage.pass}/${summary.publishedPackage.total} package-manager installs have Pass evidence.`,
     );
   } else {
-    summaryLines.push(`- Published package smoke: missing evidence at ${code(PUBLISHED_PACKAGE_INPUT)}.`);
+    summaryLines.push(
+      `- Published package smoke: missing evidence at ${code(PUBLISHED_PACKAGE_INPUT)}.`,
+    );
   }
 
   return [
@@ -1062,7 +1150,7 @@ export type VerifiedCombinationSummary = {
   } | null;
 };
 
-export const verifiedCombinationsSummary = ${JSON.stringify(summary, null, 2)} satisfies VerifiedCombinationSummary;
+export const verifiedCombinationsSummary: VerifiedCombinationSummary = ${JSON.stringify(summary, null, 2)};
 `;
   await mkdir(path.dirname(WEB_DATA_OUTPUT_PATH), { recursive: true });
   await writeFile(WEB_DATA_OUTPUT_PATH, output, "utf8");
@@ -1070,7 +1158,8 @@ export const verifiedCombinationsSummary = ${JSON.stringify(summary, null, 2)} s
 
 async function main(): Promise<void> {
   const generatedAt = new Date().toISOString();
-  const claimSummary = await buildVerifiedClaimSummary(generatedAt);
+  const currentGitHead = await runText("git rev-parse HEAD");
+  const claimSummary = await buildVerifiedClaimSummary(generatedAt, currentGitHead);
   const sections = [
     "# Verified Combinations",
     [
@@ -1081,7 +1170,7 @@ async function main(): Promise<void> {
     renderCurrentClaim(claimSummary),
     await renderSmokeSection(),
     await renderScaffbenchSection(),
-    await renderReleaseGuardSection(),
+    await renderReleaseGuardSection(currentGitHead),
     await renderPublishedPackageSection(),
   ];
 

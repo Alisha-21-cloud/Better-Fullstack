@@ -55,115 +55,81 @@ export type VerifiedCombinationSummary = {
   } | null;
 };
 
-export const verifiedCombinationsSummary = {
-  "generatedAt": "2026-07-02T12:08:56.773Z",
-  "smoke": [
+export const verifiedCombinationsSummary: VerifiedCombinationSummary = {
+  generatedAt: "2026-07-03T10:00:51.704Z",
+  smoke: [
     {
-      "label": "PR core smoke",
-      "sources": [
+      label: "PR core smoke",
+      sources: [
         "testing/.smoke-output/core/smoke-results.json",
-        "testing/.smoke-output/p0-pr-core-no-dev/smoke-results.json"
+        "testing/.smoke-output/p0-pr-core-no-dev/smoke-results.json",
       ],
-      "pass": 12,
-      "total": 12,
-      "ownerArea": "packages/template-generator/templates",
-      "actionLinks": [
+      pass: 12,
+      total: 12,
+      ownerArea: "packages/template-generator/templates",
+      actionLinks: [
         {
-          "label": "source",
-          "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/testing/.smoke-output/core/smoke-results.json"
+          label: "owner",
+          href: "https://github.com/Marve10s/Better-Fullstack/blob/main/packages/template-generator/templates",
         },
         {
-          "label": "owner",
-          "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/packages/template-generator/templates"
+          label: "preset",
+          href: "https://github.com/Marve10s/Better-Fullstack/blob/main/testing/lib/presets.ts",
         },
-        {
-          "label": "preset",
-          "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/testing/lib/presets.ts"
-        }
       ],
-      "rerunCommand": "bun run test:smoke:pr-core",
-      "failureHint": "Open the smoke source artifact, find the failing combination row, then inspect the listed owner area."
-    }
+      rerunCommand: "bun run test:smoke:pr-core",
+      failureHint:
+        "Open the smoke source artifact, find the failing combination row, then inspect the listed owner area.",
+    },
   ],
-  "scaffbench": [
+  scaffbench: [
     {
-      "label": "ScaffBench 2",
-      "source": "testing/.tmp-scaffbench-2/summary.json",
-      "pass": 1,
-      "total": 1,
-      "environmentQualified": true,
-      "ownerArea": "packages/template-generator/templates",
-      "actionLinks": [
+      label: "ScaffBench 2",
+      source: "testing/.tmp-scaffbench-2/summary.json",
+      pass: 1,
+      total: 1,
+      environmentQualified: true,
+      ownerArea: "packages/template-generator/templates",
+      actionLinks: [
         {
-          "label": "source",
-          "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/testing/.tmp-scaffbench-2/summary.json"
+          label: "runner",
+          href: "https://github.com/Marve10s/Better-Fullstack/blob/main/scripts/scaffbench-v2.ts",
         },
         {
-          "label": "runner",
-          "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/scripts/scaffbench-v2.ts"
+          label: "owner",
+          href: "https://github.com/Marve10s/Better-Fullstack/blob/main/packages/template-generator/templates",
         },
-        {
-          "label": "owner",
-          "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/packages/template-generator/templates"
-        }
       ],
-      "rerunCommand": "bun run scaffbench:2:canonical",
-      "failureHint": "Inspect failureTags and validation steps in the ScaffBench summary, then follow the owner area for the stack family."
-    }
+      rerunCommand: "bun run scaffbench:2:canonical",
+      failureHint:
+        "Inspect failureTags and validation steps in the ScaffBench summary, then follow the owner area for the stack family.",
+    },
   ],
-  "releaseGuard": {
-    "source": "testing/.release-guard/summary.json",
-    "pass": 12,
-    "total": 12,
-    "overallSuccess": true,
-    "generatedAt": "2026-07-02T11:41:32.600Z",
-    "gitBranch": "feat/supabase-auth-tanstack-start",
-    "gitHead": "b3eae195fb07a870cbc9fabd5b4366991ce30dcc",
-    "ownerArea": "release guard",
-    "actionLinks": [
+  releaseGuard: null,
+  publishedPackage: {
+    source: "testing/.published-package/summary.json",
+    packageSpec: "create-better-fullstack@latest",
+    generatedAt: "2026-07-02T12:06:55.312Z",
+    pass: 3,
+    total: 3,
+    overallSuccess: true,
+    ownerArea: "published package",
+    actionLinks: [
       {
-        "label": "source",
-        "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/testing/.release-guard/summary.json"
+        label: "runner",
+        href: "https://github.com/Marve10s/Better-Fullstack/blob/main/scripts/published-package-smoke.ts",
       },
       {
-        "label": "recorder",
-        "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/scripts/record-release-guard.ts"
+        label: "package script",
+        href: "https://github.com/Marve10s/Better-Fullstack/blob/main/package.json",
       },
       {
-        "label": "package script",
-        "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/package.json"
-      }
+        label: "cli package",
+        href: "https://github.com/Marve10s/Better-Fullstack/blob/main/apps/cli/package.json",
+      },
     ],
-    "rerunCommand": "bun run test:release:record",
-    "failureHint": "Inspect the failing gate in the release summary, rerun the recorder, then follow the gate's owner area."
+    rerunCommand: "bun run test:published-package",
+    failureHint:
+      "Inspect the package-manager row, confirm the preview/canary package is visible, then rerun the published-package smoke lane.",
   },
-  "publishedPackage": {
-    "source": "testing/.published-package/summary.json",
-    "packageSpec": "create-better-fullstack@latest",
-    "generatedAt": "2026-07-02T12:06:55.312Z",
-    "pass": 3,
-    "total": 3,
-    "overallSuccess": true,
-    "ownerArea": "published package",
-    "actionLinks": [
-      {
-        "label": "source",
-        "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/testing/.published-package/summary.json"
-      },
-      {
-        "label": "runner",
-        "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/scripts/published-package-smoke.ts"
-      },
-      {
-        "label": "package script",
-        "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/package.json"
-      },
-      {
-        "label": "cli package",
-        "href": "https://github.com/Marve10s/Better-Fullstack/blob/main/apps/cli/package.json"
-      }
-    ],
-    "rerunCommand": "bun run test:published-package",
-    "failureHint": "Inspect the package-manager row, confirm the preview/canary package is visible, then rerun the published-package smoke lane."
-  }
-} satisfies VerifiedCombinationSummary;
+};

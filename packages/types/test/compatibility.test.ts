@@ -265,7 +265,9 @@ describe("compatibility issue helpers", () => {
     expect(
       getDisabledReason({ ...baseStack, webFrontend: ["tanstack-router"] }, "i18n", "paraglide"),
     ).toBeNull();
-    expect(getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "paraglide")).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "paraglide"),
+    ).toBeNull();
     expect(getDisabledReason({ ...baseStack, webFrontend: ["angular"] }, "i18n", "paraglide")).toBe(
       "Paraglide is not yet wired for the 'angular' frontend",
     );
@@ -319,18 +321,18 @@ describe("compatibility issue helpers", () => {
       runtime: "bun",
     };
 
-    expect(
-      getDisabledReason({ ...baseStack, database: "none" }, "dbSetup", "turso"),
-    ).toBe("Select a database first");
-    expect(
-      getDisabledReason({ ...baseStack, database: "postgres" }, "dbSetup", "turso"),
-    ).toBe("Turso database setup requires SQLite.");
-    expect(
-      getDisabledReason({ ...baseStack, database: "sqlite" }, "dbSetup", "d1"),
-    ).toBe("D1 database setup requires Workers runtime.");
-    expect(
-      getDisabledReason({ ...baseStack, database: "sqlite" }, "dbSetup", "docker"),
-    ).toBe("SQLite does not need Docker database setup.");
+    expect(getDisabledReason({ ...baseStack, database: "none" }, "dbSetup", "turso")).toBe(
+      "Select a database first",
+    );
+    expect(getDisabledReason({ ...baseStack, database: "postgres" }, "dbSetup", "turso")).toBe(
+      "Turso database setup requires SQLite.",
+    );
+    expect(getDisabledReason({ ...baseStack, database: "sqlite" }, "dbSetup", "d1")).toBe(
+      "D1 database setup requires Workers runtime.",
+    );
+    expect(getDisabledReason({ ...baseStack, database: "sqlite" }, "dbSetup", "docker")).toBe(
+      "SQLite does not need Docker database setup.",
+    );
   });
 
   it("routes promoted frontend library disabled reasons through graph checks", () => {
@@ -552,6 +554,85 @@ describe("compatibility issue helpers", () => {
         "docker-compose",
       ),
     ).toBe("Docker Compose is not compatible with Cloudflare Workers runtime.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "elixir",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          elixirWebFramework: "phoenix",
+        },
+        "appPlatforms",
+        "docker-compose",
+      ),
+    ).toBe("Docker Compose currently supports TypeScript, Python, Go, Rust, or Java projects.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "dotnet",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          dotnetWebFramework: "aspnet-minimal",
+        },
+        "appPlatforms",
+        "devcontainer",
+      ),
+    ).toBe("DevContainer currently supports TypeScript, Python, Go, Rust, or Java projects.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "rust",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          rustFrontend: "leptos",
+        },
+        "appPlatforms",
+        "docker-compose",
+      ),
+    ).toBe("Docker Compose for Rust currently supports server-only projects.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "java",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          javaWebFramework: "none",
+        },
+        "appPlatforms",
+        "docker-compose",
+      ),
+    ).toBe("Docker Compose for Java currently requires Spring Boot.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "python",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          pythonWebFramework: "fastapi",
+          pythonOrm: "sqlalchemy",
+          database: "mongodb",
+        },
+        "appPlatforms",
+        "docker-compose",
+      ),
+    ).toBe(
+      "Docker Compose for Python ORM projects currently supports SQLite defaults or Postgres.",
+    );
 
     expect(
       getDisabledReason(

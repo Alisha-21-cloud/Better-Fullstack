@@ -16,11 +16,7 @@ import type {
 } from "./types";
 
 import { getCapabilityDisabledReason, normalizeCapabilitySelection } from "./capabilities";
-import {
-  CATEGORY_ORDER,
-  getCategoryDisplayName,
-  type OptionCategory,
-} from "./option-metadata";
+import { CATEGORY_ORDER, getCategoryDisplayName, type OptionCategory } from "./option-metadata";
 import {
   getUnsupportedWebDeployFrontend,
   hasPWACompatibleFrontend,
@@ -1077,7 +1073,9 @@ export const analyzeStackCompatibility = (
   }
 
   // UI libraries requiring Tailwind - auto-adjust CSS framework or clear UI library
-  const requiresTailwind = ["shadcn-ui", "shadcn-svelte", "daisyui", "nextui"].includes(nextStack.uiLibrary);
+  const requiresTailwind = ["shadcn-ui", "shadcn-svelte", "daisyui", "nextui"].includes(
+    nextStack.uiLibrary,
+  );
   if (requiresTailwind && nextStack.cssFramework !== "tailwind") {
     // Auto-set Tailwind when selecting a Tailwind-dependent UI library
     nextStack.cssFramework = "tailwind";
@@ -1123,7 +1121,8 @@ export const analyzeStackCompatibility = (
       changed = true;
       changes.push({
         category: "uiLibrary",
-        message: "UI library changed to 'daisyUI' (shadcn-svelte requires SvelteKit or Astro + Svelte)",
+        message:
+          "UI library changed to 'daisyUI' (shadcn-svelte requires SvelteKit or Astro + Svelte)",
       });
     }
   }
@@ -1977,11 +1976,19 @@ export const getDisabledReason = (
     }
   }
 
-  if (category === "appPlatforms" && optionId === "nx" && currentStack.appPlatforms.includes("turborepo")) {
+  if (
+    category === "appPlatforms" &&
+    optionId === "nx" &&
+    currentStack.appPlatforms.includes("turborepo")
+  ) {
     return "Choose either Nx or Turborepo, not both";
   }
 
-  if (category === "appPlatforms" && optionId === "turborepo" && currentStack.appPlatforms.includes("nx")) {
+  if (
+    category === "appPlatforms" &&
+    optionId === "turborepo" &&
+    currentStack.appPlatforms.includes("nx")
+  ) {
     return "Choose either Turborepo or Nx, not both";
   }
 
@@ -2196,7 +2203,9 @@ export const getDisabledReason = (
       }
     }
     // Some UI libraries require Tailwind
-    const requiresTailwind = ["shadcn-ui", "shadcn-svelte", "daisyui", "nextui"].includes(currentStack.uiLibrary);
+    const requiresTailwind = ["shadcn-ui", "shadcn-svelte", "daisyui", "nextui"].includes(
+      currentStack.uiLibrary,
+    );
     if (requiresTailwind && optionId !== "tailwind") {
       const libraryName =
         currentStack.uiLibrary === "shadcn-ui"
@@ -2300,8 +2309,7 @@ export const getDisabledReason = (
     if (optionId === "shadcn-svelte") {
       const hasSvelteFrontend = currentStack.webFrontend.includes("svelte");
       const hasAstroSvelte =
-        currentStack.webFrontend.includes("astro") &&
-        currentStack.astroIntegration === "svelte";
+        currentStack.webFrontend.includes("astro") && currentStack.astroIntegration === "svelte";
       if (!hasSvelteFrontend && !hasAstroSvelte) {
         return "shadcn-svelte requires SvelteKit or Astro with Svelte integration";
       }
@@ -2627,12 +2635,11 @@ const SHARED_BACKEND_SERVICE_CATEGORIES = new Set<CompatibilityCategory>([
   "search",
 ]);
 
-const SHARED_BACKEND_SERVICE_MISSING_OWNER_REASONS: Partial<
-  Record<CompatibilityCategory, string>
-> = {
-  email: "Email integration requires a backend",
-  rateLimit: "Rate limiting requires a backend",
-};
+const SHARED_BACKEND_SERVICE_MISSING_OWNER_REASONS: Partial<Record<CompatibilityCategory, string>> =
+  {
+    email: "Email integration requires a backend",
+    rateLimit: "Rate limiting requires a backend",
+  };
 
 function getSharedBackendServiceGraphBinding(
   currentStack: CompatibilityInput,
@@ -3223,6 +3230,7 @@ function getGraphDisabledReason(
       ownerPartId: owner?.id,
       settings: {
         astroIntegration: currentStack.astroIntegration,
+        ecosystem: currentStack.ecosystem,
       },
     },
     parts,
@@ -3298,7 +3306,16 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
   wxt: [],
   msw: [],
   storybook: ["tanstack-router", "react-router", "react-vite", "next", "nuxt", "svelte", "solid"],
-  swr: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro", "redwood"],
+  swr: [
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "vinext",
+    "astro",
+    "redwood",
+  ],
   "tanstack-query": [
     "tanstack-router",
     "react-router",

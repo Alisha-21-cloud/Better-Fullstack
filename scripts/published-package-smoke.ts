@@ -67,19 +67,24 @@ function readListArg(name: string, fallback: PackageManager[]): PackageManager[]
 const packageName = readArg("--package", "create-better-fullstack") ?? "create-better-fullstack";
 const specifier = readArg("--specifier", process.env.BFS_PACKAGE_SPECIFIER ?? "latest") ?? "latest";
 const managers = readListArg("--managers", ["bun", "npm", "pnpm"]);
-const registry = readArg("--registry", "https://registry.npmjs.org") ?? "https://registry.npmjs.org";
+const registry =
+  readArg("--registry", "https://registry.npmjs.org") ?? "https://registry.npmjs.org";
 const outputPath = readArg("--output", DEFAULT_OUTPUT_PATH) ?? DEFAULT_OUTPUT_PATH;
 const skipWait = hasFlag("--skip-wait");
 const keepOutput = hasFlag("--keep-output") || process.env.KEEP_PUBLISHED_SMOKE_OUTPUT === "1";
 const packageSpec = packageSpecFor(packageName, specifier);
 
-function packageSpecFor(name: string, requestedSpecifier: string): string {
+export function packageSpecFor(name: string, requestedSpecifier: string): string {
+  if (requestedSpecifier.startsWith("file://")) {
+    return requestedSpecifier;
+  }
+  if (requestedSpecifier.startsWith("file:")) {
+    const filePath = requestedSpecifier.slice("file:".length);
+    if (!filePath) return requestedSpecifier;
+    return `file:${isAbsolute(filePath) ? filePath : resolve(filePath)}`;
+  }
   if (isLocalSpecifier(requestedSpecifier)) {
-    return requestedSpecifier.startsWith("file:")
-      ? requestedSpecifier
-      : isAbsolute(requestedSpecifier)
-        ? requestedSpecifier
-        : resolve(requestedSpecifier);
+    return isAbsolute(requestedSpecifier) ? requestedSpecifier : resolve(requestedSpecifier);
   }
 
   return `${name}@${requestedSpecifier}`;
@@ -251,7 +256,10 @@ function commandFor(manager: PackageManager, projectName: string): string[] {
   return ["pnpm", "dlx", packageSpec, "create", ...createArgs];
 }
 
-async function smoke(manager: PackageManager, rootDir: string): Promise<PublishedPackageSmokeResult> {
+async function smoke(
+  manager: PackageManager,
+  rootDir: string,
+): Promise<PublishedPackageSmokeResult> {
   const projectName = `published-smoke-${manager}`;
   const command = commandFor(manager, projectName);
   const startedAt = Date.now();
@@ -303,41 +311,48 @@ async function writeSummary(summary: PublishedPackageSmokeSummary): Promise<void
   console.log(`Wrote ${outputPath}`);
 }
 
-validateManagers(managers);
-await waitForPackage();
+async function main(): Promise<void> {
+  validateManagers(managers);
+  await waitForPackage();
 
-const rootDir = await mkdtemp(join(tmpdir(), "bfs-published-smoke-"));
-const results: PublishedPackageSmokeResult[] = [];
+  const rootDir = await mkdtemp(join(tmpdir(), "bfs-published-smoke-"));
+  const results: PublishedPackageSmokeResult[] = [];
 
-try {
-  for (const manager of managers) {
-    // oxlint-disable-next-line no-await-in-loop -- keep package-manager output isolated and ordered.
-    results.push(await smoke(manager, rootDir));
+  try {
+    for (const manager of managers) {
+      // oxlint-disable-next-line no-await-in-loop -- keep package-manager output isolated and ordered.
+      results.push(await smoke(manager, rootDir));
+    }
+  } finally {
+    const summary: PublishedPackageSmokeSummary = {
+      generatedAt: new Date().toISOString(),
+      packageName,
+      specifier,
+      packageSpec,
+      registry,
+      rootDir,
+      keptOutput: keepOutput,
+      overallSuccess:
+        results.every((result) => result.status === "pass") && results.length === managers.length,
+      managers,
+      results,
+    };
+    await writeSummary(summary);
+
+    if (!keepOutput) {
+      await rm(rootDir, { recursive: true, force: true });
+    } else {
+      console.log(`Keeping smoke output at ${rootDir}`);
+    }
+
+    if (!summary.overallSuccess) {
+      process.exitCode = 1;
+    } else {
+      console.log(`Published package smoke passed for ${packageSpec}`);
+    }
   }
-} finally {
-  const summary: PublishedPackageSmokeSummary = {
-    generatedAt: new Date().toISOString(),
-    packageName,
-    specifier,
-    packageSpec,
-    registry,
-    rootDir,
-    keptOutput: keepOutput,
-    overallSuccess: results.every((result) => result.status === "pass") && results.length === managers.length,
-    managers,
-    results,
-  };
-  await writeSummary(summary);
+}
 
-  if (!keepOutput) {
-    await rm(rootDir, { recursive: true, force: true });
-  } else {
-    console.log(`Keeping smoke output at ${rootDir}`);
-  }
-
-  if (!summary.overallSuccess) {
-    process.exitCode = 1;
-  } else {
-    console.log(`Published package smoke passed for ${packageSpec}`);
-  }
+if (import.meta.main) {
+  await main();
 }
