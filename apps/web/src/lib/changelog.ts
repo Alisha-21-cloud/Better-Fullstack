@@ -19,32 +19,10 @@ const RELEASE_BASE_URL = "https://github.com/Marve10s/Better-Fullstack/releases/
 
 export const changelogReleases: ChangelogRelease[] = [
   {
-    version: "v2.1.5",
-    publishedAt: "2026-07-03T13:38:36Z",
-    displayDate: "July 3, 2026",
-    isLatest: true,
-    href: `${RELEASE_BASE_URL}/v2.1.5`,
-    title: "Patch release for Astro TinaCMS and Elysia AI smoke fixes",
-    summary:
-      "This patch repairs the generated stack found by the post-merge smoke run: Astro TinaCMS configs now load safely under Tina's Node build process, Elysia AI routes narrow JSON request bodies before reading messages, and the release workflow is more resilient when published package smoke runs before npm propagation finishes.",
-    highlights: [
-      "Fixed Astro + TinaCMS generated projects by reading `PUBLIC_TINA_CLIENT_ID` from `process.env`, matching how Tina evaluates config during build.",
-      "Fixed Elysia + AI example type-checking by narrowing `context.request.json()` to optional `UIMessage[]` messages before streaming chat responses.",
-      "Added regression coverage for both generated outputs and validated the failing smoke combination through install, build, and type-check.",
-      "Hardened release recovery so reruns can still verify already-published npm versions and retry published-package smoke while npm metadata propagates.",
-    ],
-    image: {
-      src: "https://images.unsplash.com/photo-1777711391050-7e0cefd4b33b?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      alt: "Abstract colorful gradient artwork",
-      credit: "Unsplash",
-      creditHref:
-        "https://images.unsplash.com/photo-1777711391050-7e0cefd4b33b?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-  },
-  {
     version: "v2.1.4",
     publishedAt: "2026-07-03T12:40:54Z",
     displayDate: "July 3, 2026",
+    isLatest: true,
     href: `${RELEASE_BASE_URL}/v2.1.4`,
     title: "Verified stack updates, Supabase Auth for TanStack Start, and release hardening",
     summary:

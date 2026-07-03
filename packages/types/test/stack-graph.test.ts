@@ -1672,7 +1672,9 @@ describe("stack graph structural round-trip (phase 0)", () => {
     expect(lowered.pythonGraphql).toBe("strawberry");
 
     const reimported = legacyProjectConfigToStackParts(lowered);
-    expect(reimported.map(structuralTuple).sort()).toEqual(pythonParts.map(structuralTuple).sort());
+    expect(reimported.map(structuralTuple).sort()).toEqual(
+      pythonParts.map(structuralTuple).sort(),
+    );
   });
 
   it("imports Elixir realtime selections under the realtime role", () => {
