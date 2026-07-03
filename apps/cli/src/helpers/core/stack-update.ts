@@ -912,6 +912,21 @@ function applyKnownDependencyExpansions(
     }
   }
 
+  if (next.backend === "effect") {
+    if (next.effect !== "effect-full" && !requestedKeys.has("effect")) {
+      next.effect = "effect-full";
+      adjustments.push(
+        "effect: Effect services set to 'effect-full' (Effect backend requires Effect Platform + SQL)",
+      );
+    }
+    if (next.validation !== "effect-schema" && !requestedKeys.has("validation")) {
+      next.validation = "effect-schema";
+      adjustments.push(
+        "validation: Validation set to 'effect-schema' (Effect backend requires Effect Schema)",
+      );
+    }
+  }
+
   return { config: next, adjustments };
 }
 

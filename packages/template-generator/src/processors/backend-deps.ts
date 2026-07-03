@@ -25,9 +25,14 @@ export function processBackendDeps(vfs: VirtualFileSystem, config: ProjectConfig
   const deps: AvailableDependencies[] = [];
   const devDeps: AvailableDependencies[] = [];
 
-  if (backend === "hono") {
+  if (backend === "hono" || backend === "effect") {
     deps.push("hono");
     if (runtime === "node" && serverDeploy !== "netlify") deps.push("@hono/node-server");
+    if (backend === "effect") {
+      deps.push("effect", "@effect/platform");
+      if (runtime === "bun") deps.push("@effect/platform-bun");
+      else if (runtime === "node") deps.push("@effect/platform-node");
+    }
   } else if (backend === "elysia") {
     deps.push("elysia", "@elysiajs/cors");
     if (runtime === "node") deps.push("@elysiajs/node");
@@ -59,13 +64,15 @@ export function processBackendDeps(vfs: VirtualFileSystem, config: ProjectConfig
 
   if (api === "trpc") {
     deps.push("@trpc/server");
-    if (backend === "hono") deps.push("@hono/trpc-server");
+    if (backend === "hono" || backend === "effect") deps.push("@hono/trpc-server");
     else if (backend === "elysia") deps.push("@elysiajs/trpc");
   } else if (api === "orpc") {
     deps.push("@orpc/server", "@orpc/openapi", "@orpc/zod");
   } else if (api === "openapi") {
-    if (backend === "hono") deps.push("@hono/zod-openapi", "@scalar/hono-api-reference");
-    else if (backend === "express") deps.push("@asteasolutions/zod-to-openapi", "@scalar/express-api-reference");
+    if (backend === "hono" || backend === "effect")
+      deps.push("@hono/zod-openapi", "@scalar/hono-api-reference");
+    else if (backend === "express")
+      deps.push("@asteasolutions/zod-to-openapi", "@scalar/express-api-reference");
     else if (backend === "fastify")
       deps.push("@fastify/swagger", "fastify-type-provider-zod", "@scalar/fastify-api-reference");
     else if (backend === "elysia") deps.push("@elysiajs/openapi");

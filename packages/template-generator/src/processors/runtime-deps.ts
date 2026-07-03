@@ -49,7 +49,7 @@ export function processRuntimeDeps(vfs: VirtualFileSystem, config: ProjectConfig
       devDependencies: ["tsx", "@types/node"],
     });
 
-    if (backend === "hono" && serverDeploy !== "netlify") {
+    if ((backend === "hono" || backend === "effect") && serverDeploy !== "netlify") {
       addPackageDependency({
         vfs,
         packagePath: serverPath,

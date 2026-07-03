@@ -291,7 +291,6 @@ export const TYPESCRIPT_CATEGORY_ORDER = [
   "shadcnFont",
   "shadcnRadius",
   "backend",
-  "backendLibraries",
   "runtime",
   "api",
   "database",
@@ -311,6 +310,7 @@ export const TYPESCRIPT_CATEGORY_ORDER = [
   "stateManagement",
   "forms",
   "validation",
+  "backendLibraries",
   "testing",
   "realtime",
   "jobQueue",
@@ -523,6 +523,7 @@ export function getCategoryDisplayName(categoryKey: string): string {
     mobilePush: "Mobile Push",
     mobileOTA: "Mobile OTA",
     mobileDeepLinking: "Mobile Deep Linking",
+    backendLibraries: "Effect Services",
     rustWebFramework: "Rust Web Framework",
     rustFrontend: "Rust Frontend (WASM)",
     rustOrm: "Rust ORM / Database",
@@ -651,6 +652,7 @@ const BACKEND_BUILDER_VALUES = [
   "fastify",
   "elysia",
   "fets",
+  "effect",
   "nestjs",
   "adonisjs",
   "nitro",
@@ -884,6 +886,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   },
   runtime: { node: "Node.js", workers: "Cloudflare Workers" },
   backend: {
+    effect: "Effect",
     fets: "feTS",
     nestjs: "NestJS",
     encore: "Encore.ts",
@@ -959,8 +962,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     "upstash-ratelimit": "Upstash Ratelimit",
   },
   backendLibraries: {
-    effect: "Effect (Core)",
-    "effect-full": "Effect Full",
+    effect: "Effect Core",
+    "effect-full": "Effect Platform + SQL",
   },
   stateManagement: {
     "redux-toolkit": "Redux Toolkit",
@@ -1126,8 +1129,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   git: { true: "Git", false: "No Git" },
   install: { true: "Install Dependencies", false: "Skip Install" },
   effect: {
-    effect: "Effect (Core)",
-    "effect-full": "Effect Full",
+    effect: "Effect Core",
+    "effect-full": "Effect Platform + SQL",
   },
   shadcnBase: {
     radix: "Radix UI",

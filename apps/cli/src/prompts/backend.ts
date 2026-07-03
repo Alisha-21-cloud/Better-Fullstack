@@ -1,8 +1,8 @@
 import type { Backend, Frontend } from "../types";
+import type { PromptOption, PromptSingleResolution } from "./prompt-contract";
 
 import { DEFAULT_CONFIG } from "../constants";
 import { exitCancelled } from "../utils/errors";
-import type { PromptOption, PromptSingleResolution } from "./prompt-contract";
 import { isCancel, navigableSelect } from "./navigable";
 
 // Frontends with built-in server capabilities for backend="self"
@@ -46,6 +46,11 @@ const BACKEND_PROMPT_OPTIONS: PromptOption<Backend>[] = [
     value: "fets",
     label: "feTS",
     hint: "TypeScript HTTP Framework with e2e type-safety",
+  },
+  {
+    value: "effect",
+    label: "Effect",
+    hint: "Effect-first service backend with layers and schema",
   },
   {
     value: "nestjs",
@@ -100,6 +105,7 @@ export function resolveBackendPrompt(
     "fastify",
     "elysia",
     "fets",
+    "effect",
     "nestjs",
     "adonisjs",
     "nitro",

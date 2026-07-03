@@ -692,6 +692,24 @@ describe("stack selection translation", () => {
     expect(config.dbSetup).toBe("none");
   });
 
+  it("applies Effect backend defaults in ProjectConfig and generated commands", () => {
+    const selection = {
+      ...DEFAULT_SELECTION,
+      backend: "effect",
+      backendLibraries: "none",
+      validation: "zod",
+    } satisfies StackSelectionInput;
+    const config = toProjectConfig(selection);
+    const command = generateStackSelectionCommand(selection);
+
+    expect(config.backend).toBe("effect");
+    expect(config.effect).toBe("effect-full");
+    expect(config.validation).toBe("effect-schema");
+    expect(command).toContain("--backend effect");
+    expect(command).toContain("--effect effect-full");
+    expect(command).toContain("--validation effect-schema");
+  });
+
   it("preserves command special cases", () => {
     const withoutAstro = generateStackSelectionCommand({
       ...DEFAULT_SELECTION,

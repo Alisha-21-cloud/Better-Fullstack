@@ -950,4 +950,45 @@ describe("compatibility issue helpers", () => {
       elixirObservability: "none",
     });
   });
+
+  it("locks Effect backend services and validation without blocking compatible tools", () => {
+    const result = analyzeStackCompatibility({
+      ...DEFAULT_STACK_SELECTION,
+      backend: "effect",
+      backendLibraries: "none",
+      validation: "zod",
+      forms: "tanstack-form",
+    });
+
+    expect(result.adjustedStack).toMatchObject({
+      backend: "effect",
+      backendLibraries: "effect-full",
+      validation: "effect-schema",
+      forms: "tanstack-form",
+    });
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "effect",
+          backendLibraries: "effect-full",
+          validation: "effect-schema",
+        },
+        "backendLibraries",
+        "effect",
+      ),
+    ).toBe("Effect backend requires Effect Platform + SQL services");
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "effect",
+          backendLibraries: "effect-full",
+          validation: "effect-schema",
+        },
+        "forms",
+        "tanstack-form",
+      ),
+    ).toBeNull();
+  });
 });

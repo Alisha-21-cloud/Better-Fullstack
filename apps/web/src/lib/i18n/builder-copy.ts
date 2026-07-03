@@ -39,7 +39,7 @@ const CATEGORY_NAMES: Record<string, LocalizedMap> = {
   rateLimit: { es: "Límites de tasa", zh: "速率限制" },
   featureFlags: { es: "Feature flags", zh: "功能开关" },
   analytics: { es: "Analítica", zh: "分析" },
-  backendLibraries: { es: "Librerías backend", zh: "后端库" },
+  backendLibraries: { es: "Servicios Effect", zh: "Effect 服务" },
   stateManagement: { es: "Estado", zh: "状态管理" },
   forms: { es: "Formularios", zh: "表单" },
   validation: { es: "Validación", zh: "校验" },

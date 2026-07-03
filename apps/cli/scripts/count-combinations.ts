@@ -16,6 +16,7 @@ const options = {
     "express",
     "fastify",
     "elysia",
+    "effect",
     "fets",
     "nestjs",
     "adonisjs",

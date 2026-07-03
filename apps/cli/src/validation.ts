@@ -3,7 +3,12 @@ import path from "node:path";
 import type { CLIInput, ProjectConfig } from "./types";
 
 import { ProjectNameSchema } from "./types";
-import { getProvidedFlags, processFlags, validateArrayOptions } from "./utils/config-processing";
+import {
+  applyEffectBackendDefaults,
+  getProvidedFlags,
+  processFlags,
+  validateArrayOptions,
+} from "./utils/config-processing";
 import { validateConfigForProgrammaticUse, validateFullConfig } from "./utils/config-validation";
 import { exitWithError } from "./utils/errors";
 
@@ -82,6 +87,7 @@ export function processAndValidateFlags(
 ) {
   if (options.yolo) {
     const cfg = processFlags(options, projectName);
+    applyEffectBackendDefaults(cfg, getProvidedFlags(options));
     const validatedProjectName = extractAndValidateProjectName(
       projectName,
       options.projectDirectory,
@@ -102,6 +108,7 @@ export function processAndValidateFlags(
   }
 
   const config = processFlags(options, projectName);
+  applyEffectBackendDefaults(config, providedFlags);
 
   const validatedProjectName = extractAndValidateProjectName(
     projectName,
@@ -129,7 +136,9 @@ export function processProvidedFlagsWithoutValidation(options: CLIInput, project
     }
   }
 
+  const providedFlags = getProvidedFlags(options);
   const config = processFlags(options, projectName);
+  applyEffectBackendDefaults(config, providedFlags);
 
   const validatedProjectName = extractAndValidateProjectName(
     projectName,

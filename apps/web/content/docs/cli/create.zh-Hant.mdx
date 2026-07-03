@@ -38,13 +38,13 @@ description: 使用 prompts、defaults 或明確 flags scaffold 一個新的 Bet
 | `--ecosystem` | `typescript` `react-native` `rust` `python` `go` `java` `elixir`。預設 `typescript`。 |
 | `--template` | `t3` `mern` `pern` `uniwind` `none`。 |
 | `--part` | 新增 multi-ecosystem stack part，例如 `frontend:typescript:next` 或 `backend.orm:go:gorm`。每個 part 重複一次。 |
-| `--addons` | `pwa` `tauri` `starlight` `biome` `lefthook` `husky` `ruler` `mcp` `skills` `turborepo` `mcp` `skills` `turborepo` __11010 __FS `oxlint` `opentui` `wxt` `msw` `storybook` `swr` `tanstack-query` `tanstack-table` __BFS__BFS_20__ 12120 20__FS `backend-utils` `docker-compose` `none`。 |
+| `--addons` | `pwa` `tauri` `starlight` `biome` `lefthook` `husky` `ruler` `mcp` `skills` `turborepo` `nx` `fumadocs` `ultracite` `oxlint` `opentui` `wxt` `msw` `storybook` `swr` `tanstack-query` `tanstack-table` `tanstack-virtual` `tanstack-db` `tanstack-pacer` `backend-utils` `devcontainer` `docker-compose` `github-actions` `none`。 |
 | `--examples` | `ai` `chat-sdk` `tanstack-showcase` `none`。 |
 | `--ai-docs` | `claude-md` `agents-md` `cursorrules` `none`。 |
 | `--package-manager` | `npm` `pnpm` `bun` `yarn`。 |
 | `--version-channel` | `stable` `latest` `beta`。 |
 | `--web-deploy` | `cloudflare` `fly` `railway` `render` `netlify` `docker` `sst` `vercel` `none`。 |
-| `--server-deploy` | `cloudflare` `fly` `railway` `render` `docker` `sst` `vercel` `none`。 |
+| `--server-deploy` | `cloudflare` `fly` `railway` `render` `netlify` `docker` `sst` `vercel` `none`。 |
 | `--directory-conflict` | 目標目錄已存在時的處理策略。 |
 | `--dry-run` | 預覽生成文件，不寫入。 |
 | `--verify` | 在支援時運行 scaffold 後的生成 checks。 |
@@ -61,29 +61,29 @@ description: 使用 prompts、defaults 或明確 flags scaffold 一個新的 Bet
 
 | Flag | 值 |
 | --- | --- |
-| `--frontend` | `tanstack-router` `react-router` `react-vite` `tanstack-start` `next` `vinext` `nuxt` `svelte` `solid` `solid-start` `svelte` `solid` `solid-start` __11010 __FS `angular` `redwood` `fresh` `none`。 |
-| `--backend` | `hono` `express` `fastify` `elysia` `fets` `nestjs` `adonisjs` `nitro` `encore` `convex` `nitro` `encore` `convex` __BFS__B 10__ __BFS__B 10__ __BFS。 |
+| `--frontend` | `tanstack-router` `react-router` `react-vite` `tanstack-start` `next` `vinext` `nuxt` `svelte` `solid` `solid-start` `astro` `qwik` `angular` `redwood` `fresh` `none`。 |
+| `--backend` | `hono` `express` `fastify` `elysia` `fets` `effect` `nestjs` `adonisjs` `nitro` `encore` `convex` `self` `none`。 |
 | `--runtime` | `bun` `node` `workers` `none`。 |
 | `--database` | `sqlite` `postgres` `mysql` `mongodb` `edgedb` `redis` `none`。 |
 | `--orm` | `drizzle` `prisma` `mongoose` `typeorm` `kysely` `mikroorm` `sequelize` `none`。 |
 | `--db-setup` | `turso` `neon` `prisma-postgres` `planetscale` `mongodb-atlas` `supabase` `upstash` `d1` `docker` `none`。 |
 | `--manual-db` | 適用時跳過 provider-specific database setup prompts。 |
-| `--auth` | `better-auth` `go-better-auth` `clerk` `nextauth` `stack-auth` `supabase-auth` `auth0` `none`。 |
-| `--api` | `trpc` `orpc` `ts-rest` `garph` `graphql-yoga` `none`。 |
+| `--auth` | `better-auth` `better-auth-organizations` `go-better-auth` `clerk` `nextauth` `stack-auth` `supabase-auth` `auth0` `workos` `kinde` `none`。 |
+| `--api` | `trpc` `orpc` `ts-rest` `garph` `graphql-yoga` `apollo-server` `openapi` `none`。 |
 | `--astro-integration` | `react` `vue` `svelte` `solid` `none`。 |
 
 ### 服務
 
 | Flag | 值 |
 | --- | --- |
-| `--ai` | `vercel-ai` `mastra` `voltagent` `langgraph` `openai-agents` `google-adk` `modelfusion` `langchain` `llamaindex` `tanstack-ai` `langchain` `llamaindex` `tanstack-ai` __BFS__B 10__ __BFS__B 10__ __BFS。 |
+| `--ai` | `vercel-ai` `mastra` `voltagent` `langgraph` `openai-agents` `google-adk` `modelfusion` `langchain` `llamaindex` `tanstack-ai` `ai-cli` `none`。 |
 | `--payments` | `polar` `stripe` `lemon-squeezy` `paddle` `dodo` `none`。 |
 | `--email` | `react-email` `resend` `nodemailer` `postmark` `sendgrid` `aws-ses` `mailgun` `plunk` `none`。 |
 | `--realtime` | `socket-io` `partykit` `ably` `pusher` `liveblocks` `yjs` `none`。 |
 | `--job-queue` | `bullmq` `trigger-dev` `inngest` `temporal` `none`。 |
-| `--cms` | `payload` `sanity` `strapi` `tinacms` `directus` `none`。 |
+| `--cms` | `payload` `sanity` `strapi` `tinacms` `directus` `keystatic` `none`。 |
 | `--caching` | `upstash-redis` `none`。 |
-| `--search` | `meilisearch` `typesense` `elasticsearch` `algolia` `none`。 |
+| `--search` | `meilisearch` `typesense` `elasticsearch` `opensearch` `algolia` `none`。 |
 | `--file-storage` | `s3` `r2` `cloudinary` `none`。 |
 | `--file-upload` | `uploadthing` `filepond` `uppy` `none`。 |
 | `--analytics` | `plausible` `umami` `none`。 |
@@ -94,13 +94,13 @@ description: 使用 prompts、defaults 或明確 flags scaffold 一個新的 Bet
 | Flag | 值 |
 | --- | --- |
 | `--css-framework` | `tailwind` `scss` `less` `postcss-only` `none`。 |
-| `--ui-library` | `shadcn-ui` `shadcn-svelte` `daisyui` `radix-ui` `headless-ui` `park-ui` `chakra-ui` `nextui` `mantine` `mui` `nextui` `mantine` `mui` __11010 __FS `ark-ui` `react-aria` `none`。 |
+| `--ui-library` | `shadcn-ui` `shadcn-svelte` `daisyui` `radix-ui` `headless-ui` `park-ui` `chakra-ui` `nextui` `mantine` `mui` `antd` `base-ui` `ark-ui` `react-aria` `none`。 |
 | `--state-management` | `zustand` `jotai` `nanostores` `redux-toolkit` `mobx` `xstate` `valtio` `tanstack-store` `legend-state` `none`。 |
 | `--forms` | `tanstack-form` `react-hook-form` `formik` `final-form` `conform` `modular-forms` `none`。 |
 | `--validation` | `zod` `valibot` `arktype` `typebox` `typia` `runtypes` `effect-schema` `none`。 |
 | `--testing` | `vitest` `playwright` `vitest-playwright` `jest` `cypress` `none`。 |
 | `--logging` | `pino` `winston` `evlog` `none`。 |
-| `--observability` | `opentelemetry` `sentry` `grafana` `none`。 |
+| `--observability` | `opentelemetry` `sentry` `grafana` `datadog` `axiom` `betterstack` `none`。 |
 | `--animation` | `framer-motion` `gsap` `react-spring` `auto-animate` `lottie` `none`。 |
 | `--i18n` | `paraglide` `i18next` `next-intl` `none`。 |
 | `--effect` | `effect` `effect-full` `none`。 |
@@ -112,9 +112,9 @@ description: 使用 prompts、defaults 或明確 flags scaffold 一個新的 Bet
 | `--shadcn-base` | `radix` `base`。 |
 | `--shadcn-style` | `vega` `nova` `maia` `lyra` `mira`。 |
 | `--shadcn-icon-library` | `lucide` `tabler` `hugeicons` `phosphor` `remixicon`。 |
-| `--shadcn-color-theme` | `neutral` `stone` `zinc` `gray` `amber` `blue` `cyan` `emerald` `fuchsia` `green` `emerald` `fuchsia` `green` __11010 __FS `orange` `pink` `purple` `red` `rose` `sky` `teal` `violet` __BFS_PH_20。 |
+| `--shadcn-color-theme` | `neutral` `stone` `zinc` `gray` `amber` `blue` `cyan` `emerald` `fuchsia` `green` `indigo` `lime` `orange` `pink` `purple` `red` `rose` `sky` `teal` `violet` `yellow`。 |
 | `--shadcn-base-color` | `neutral` `stone` `zinc` `gray`。 |
-| `--shadcn-font` | `inter` `geist` `noto-sans` `nunito-sans` `figtree` `roboto` `raleway` `dm-sans` `public-sans` `outfit` `dm-sans` `public-sans` `outfit` __BFS__B 10__ __BFS__B 10__ __BFS。 |
+| `--shadcn-font` | `inter` `geist` `noto-sans` `nunito-sans` `figtree` `roboto` `raleway` `dm-sans` `public-sans` `outfit` `jetbrains-mono` `geist-mono`。 |
 | `--shadcn-radius` | `default` `none` `small` `medium` `large`。 |
 
 ## React Native flags
@@ -143,7 +143,7 @@ description: 使用 prompts、defaults 或明確 flags scaffold 一個新的 Bet
 | `--rust-orm` | `sea-orm` `sqlx` `diesel` `none`。 |
 | `--rust-api` | `tonic` `async-graphql` `none`。 |
 | `--rust-cli` | `clap` `ratatui` `none`。 |
-| `--rust-libraries` | `serde` `uuid` `chrono` `reqwest` `config` `dashmap` `parking-lot` `secrecy` `tokio-util` `utoipa` `secrecy` `tokio-util` `utoipa` __11010 __FS `argon2` `tokio-test` `mockall` `proptest` `insta` `none`。 |
+| `--rust-libraries` | `serde` `uuid` `chrono` `reqwest` `config` `dashmap` `parking-lot` `secrecy` `tokio-util` `utoipa` `validator` `jsonwebtoken` `argon2` `tokio-test` `mockall` `proptest` `insta` `none`。 |
 | `--rust-logging` | `tracing` `env-logger` `none`。 |
 | `--rust-error-handling` | `anyhow-thiserror` `eyre` `none`。 |
 | `--rust-caching` | `moka` `redis` `none`。 |
@@ -156,7 +156,7 @@ description: 使用 prompts、defaults 或明確 flags scaffold 一個新的 Bet
 | `--python-web-framework` | `fastapi` `django` `flask` `litestar` `none`。 |
 | `--python-orm` | `sqlalchemy` `sqlmodel` `tortoise-orm` `none`。 |
 | `--python-validation` | `pydantic` `none`。 |
-| `--python-ai` | `langchain` `llamaindex` `openai-sdk` `anthropic-sdk` `langgraph` `crewai` `haystack` `none`。 |
+| `--python-ai` | `langchain` `llamaindex` `openai-sdk` `anthropic-sdk` `langgraph` `crewai` `haystack` `pydantic-ai` `google-adk` `smolagents` `none`。 |
 | `--python-auth` | `authlib` `jwt` `none`。 |
 | `--python-api` | `django-rest-framework` `django-ninja` `none`。 |
 | `--python-task-queue` | `celery` `rq` `dramatiq` `huey` `none`。 |
@@ -184,7 +184,7 @@ GoBetterAuth 透過全域 `--auth go-better-auth` 值選擇。 Go-native helpers
 | `--java-build-tool` | `maven` `gradle` `none`。 |
 | `--java-orm` | `spring-data-jpa` `none`。 |
 | `--java-auth` | `spring-security` `none`。 |
-| `--java-libraries` | `spring-actuator` `spring-validation` `flyway` `liquibase` `springdoc-openapi` `lombok` `mapstruct` `caffeine` `resilience4j` `spring-webflux` `caffeine` `resilience4j` `spring-webflux` __11010 __FS `spring-mail` `spring-devtools` `micrometer-prometheus` `thymeleaf` `none`。 |
+| `--java-libraries` | `spring-actuator` `spring-validation` `flyway` `liquibase` `springdoc-openapi` `lombok` `mapstruct` `caffeine` `resilience4j` `spring-webflux` `spring-batch` `spring-kafka` `spring-mail` `spring-devtools` `micrometer-prometheus` `thymeleaf` `spring-amqp` `opentelemetry-java` `none`。 |
 | `--java-testing-libraries` | `junit5` `mockito` `testcontainers` `assertj` `rest-assured` `wiremock` `awaitility` `archunit` `jqwik` `none`。 |
 
 ### Elixir

@@ -54,7 +54,7 @@ Roles marked **NEW** do not exist in `StackPartRoleSchema` (`packages/types/src/
 | `cms` | 5 | `cms` | backend (payload needs `next` frontend → cross-owner rule) | single | `:1901-1905` |
 | `featureFlags` | 5 | `featureFlags` | backend | single | none found |
 | `ai` | 11 | `ai` | backend | single | chat-sdk coupling `:1992`; tanstack-ai × frontend `:1997-2013` |
-| `effect` | 2 | **`effect`** | backend | single | none found |
+| `effect` | 2 | `effect` | backend | single | Effect backend defaults/locks this to `effect-full` and locks `validation` to `effect-schema`; other Effect-compatible tools remain selectable |
 | `webDeploy` | 6 | `deploy` | frontend | single | `:2346-2358` |
 | `serverDeploy` | 6 | `deploy` | backend | single | `:2358-2400`; many per-backend rules `:1504-1672` |
 | `dbSetup` | 9 | **`dbSetup`** (or `settings.provider` on database part) | database | single | `:1780-1821` (db × provider matrix) |
@@ -97,7 +97,7 @@ Stays flat (not stack parts): `packageManager`, `versionChannel`, `git`, `instal
 | `javaBuildTool` | **`buildTool`** | backend | referenced by java email/search/caching rules `:1914-1982` — cross-category context needed |
 | `elixirHttp`, `elixirJson` | **`httpClient`** / settings | backend | jason is single-option → setting |
 
-New roles required (recommendation): `realtime`, `animation`, `fileUpload`, `effect`, `dbSetup`, `dataFetching`, `examples`, `navigation`, `storage`, `buildTool`, `cli`, `errorHandling`, `httpClient`, `libraries`. (`push`/`ota`/`deepLinking` deferred as settings.)
+New roles required (recommendation): `dataFetching`, `examples`, `buildTool`, `cli`, `errorHandling`, `httpClient`, `libraries`. Previously planned roles such as `realtime`, `animation`, `fileUpload`, `effect`, `dbSetup`, `navigation`, and `storage` now exist in `StackPartRoleSchema`; keep their registrations and translations covered as graph ownership expands. (`push`/`ota`/`deepLinking` deferred as settings.)
 
 **Scale:** promoting everything above adds ~250 tool registrations (TS ~168, mobile 13, rust 23, python 10, go 7, java 27, elixir 6).
 
@@ -105,7 +105,7 @@ New roles required (recommendation): `realtime`, `animation`, `fileUpload`, `eff
 
 1. **Workspace-level tools don't fit the owner model.** `validateStackParts` requires every non-primary part to have an owner (`MISSING_OWNER_PART`, `stack-graph.ts:936-944`), but turborepo/biome/husky/starlight configure the repo, not a part. **Recommend:** allow ownerless parts for a whitelisted set of workspace roles (`codeQuality`, `documentation`, plus workspace tooling) rather than inventing a synthetic root part.
 2. **Multi-select scopes.** `DUPLICATE_ROLE_SCOPE` forbids two selected parts per `(owner, role)`, but `addons`, `examples`, `rustLibraries`, `javaLibraries`, `javaTestingLibraries`, `pythonAi`, `aiDocs` are arrays. **Recommend:** per-role `allowMultiple` flag in the registry, enforced in `validateStackParts`.
-3. **Shared-owner libraries** (`validation`, `testing`, `effect` span web+server in TS). **Recommend:** owner = backend when present, else frontend (deterministic solo collapse); multi mode may add one part per owner later without schema change.
+3. **Shared-owner libraries** (`validation`, `testing`, `effect` span web+server in TS). **Recommend:** owner = backend when present, else frontend (deterministic solo collapse); multi mode may add one part per owner later without schema change. Effect backend is the special case: selecting `backend=effect` must default/lock the backend-owned Effect services to `effect-full` and validation to `effect-schema`, while still allowing compatible choices such as TanStack Form or frontend libraries.
 4. **GraphQL role collision** (§1). **Settled:** `pythonGraphql` now imports/exports as backend-owned `graphql`, so Python API and GraphQL selections can coexist without a duplicate `api` role.
 5. **`dbSetup`:** owned part (role `dbSetup`, owner database) rather than a setting — it has 9 options and its own compatibility matrix.
 6. **Cross-owner compatibility context.** Library rules need richer context than `getStackPartCompatibilityIssue` currently passes: cms→frontend toolId, addons→frontend+backend+runtime, email/search/caching→`javaBuildTool` sibling, cssFramework→`ui` sibling. `primaryToolIdsByRole` + `siblingToolIdsByRole` (`stack-graph.ts:76-84`) already cover most; java rules additionally need sibling lookup by the new `buildTool` role — no new mechanism, just registration order.

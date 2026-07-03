@@ -527,6 +527,25 @@ export const analyzeStackCompatibility = (
     }
   }
 
+  if (nextStack.backend === "effect") {
+    if (nextStack.backendLibraries !== "effect-full") {
+      nextStack.backendLibraries = "effect-full";
+      changed = true;
+      changes.push({
+        category: "backendLibraries",
+        message: "Effect services set to 'Effect Platform + SQL' (required for Effect backend)",
+      });
+    }
+    if (nextStack.validation !== "effect-schema") {
+      nextStack.validation = "effect-schema";
+      changed = true;
+      changes.push({
+        category: "validation",
+        message: "Validation set to 'Effect Schema' (required for Effect backend)",
+      });
+    }
+  }
+
   // ============================================
   // RUNTIME CONSTRAINTS
   // ============================================
@@ -1673,6 +1692,15 @@ export const getDisabledReason = (
     }
   }
 
+  if (currentStack.backend === "effect") {
+    if (category === "backendLibraries" && optionId !== "effect-full") {
+      return "Effect backend requires Effect Platform + SQL services";
+    }
+    if (category === "validation" && optionId !== "effect-schema") {
+      return "Effect backend requires Effect Schema validation";
+    }
+  }
+
   const graphDisabledReason = getGraphDisabledReason(currentStack, category, optionId);
   if (graphDisabledReason.reason) {
     return graphDisabledReason.reason;
@@ -1947,8 +1975,8 @@ export const getDisabledReason = (
     if (currentStack.nativeFrontend.length > 0) {
       return "OpenAPI is currently available for web frontends, not React Native";
     }
-    if (!["hono", "express", "fastify", "elysia"].includes(currentStack.backend)) {
-      return "OpenAPI currently supports Hono, Express, Fastify, and Elysia backends";
+    if (!["hono", "effect", "express", "fastify", "elysia"].includes(currentStack.backend)) {
+      return "OpenAPI currently supports Hono, Effect, Express, Fastify, and Elysia backends";
     }
   }
 
@@ -1971,8 +1999,8 @@ export const getDisabledReason = (
     if (currentStack.nativeFrontend.length > 0) {
       return "Apollo Server is currently available for web frontends, not React Native";
     }
-    if (!["hono", "express", "fastify", "elysia"].includes(currentStack.backend)) {
-      return "Apollo Server currently supports Hono, Express, Fastify, and Elysia backends";
+    if (!["hono", "effect", "express", "fastify", "elysia"].includes(currentStack.backend)) {
+      return "Apollo Server currently supports Hono, Effect, Express, Fastify, and Elysia backends";
     }
   }
 

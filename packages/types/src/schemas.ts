@@ -100,6 +100,7 @@ export const BackendSchema = z
     "fastify",
     "elysia",
     "fets",
+    "effect",
     "nestjs",
     "adonisjs",
     "nitro",
@@ -255,7 +256,7 @@ export const AISchema = z
 export const EffectSchema = z
   .enum(["effect", "effect-full", "none"])
   .describe(
-    "Effect ecosystem (effect-full includes effect/Schema, @effect/platform, @effect/sql)",
+    "Effect services/layers for TypeScript (effect-full includes effect/Schema, @effect/platform, @effect/sql)",
   );
 
 export const StateManagementSchema = z

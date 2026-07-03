@@ -153,12 +153,13 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import z from "zod";
 
+import { applyStackUpdate, planStackUpdate } from "./helpers/core/stack-update";
 import { previewBtsConfigUpdate, readBtsConfig, writeBtsConfig } from "./utils/bts-config";
+import { applyEffectBackendDefaults } from "./utils/config-processing";
 import { generateReproducibleCommand } from "./utils/generate-reproducible-command";
 import { getLatestCLIVersion } from "./utils/get-latest-cli-version";
 import { getEffectiveStack, getGraphSummary } from "./utils/graph-summary";
 import { getTemplateConfig, getTemplateDescription } from "./utils/templates";
-import { applyStackUpdate, planStackUpdate } from "./helpers/core/stack-update";
 
 const OPTION_ENTRY_COUNT = Object.values(OPTION_CATEGORY_METADATA).reduce(
   (sum, metadata) => sum + metadata.options.length,
@@ -659,10 +660,8 @@ function buildProjectConfig(
       (hasMobileProject ? "expo-linking" : "none"),
     shadcnBase: (input.shadcnBase as ProjectConfig["shadcnBase"]) ?? "radix",
     shadcnStyle: (input.shadcnStyle as ProjectConfig["shadcnStyle"]) ?? "nova",
-    shadcnIconLibrary:
-      (input.shadcnIconLibrary as ProjectConfig["shadcnIconLibrary"]) ?? "lucide",
-    shadcnColorTheme:
-      (input.shadcnColorTheme as ProjectConfig["shadcnColorTheme"]) ?? "neutral",
+    shadcnIconLibrary: (input.shadcnIconLibrary as ProjectConfig["shadcnIconLibrary"]) ?? "lucide",
+    shadcnColorTheme: (input.shadcnColorTheme as ProjectConfig["shadcnColorTheme"]) ?? "neutral",
     shadcnBaseColor: (input.shadcnBaseColor as ProjectConfig["shadcnBaseColor"]) ?? "neutral",
     shadcnFont: (input.shadcnFont as ProjectConfig["shadcnFont"]) ?? "inter",
     shadcnRadius: (input.shadcnRadius as ProjectConfig["shadcnRadius"]) ?? "default",
@@ -678,6 +677,8 @@ function buildProjectConfig(
     );
     Object.assign(config, stackPartsToLegacyProjectConfigPartial(stackParts), { stackParts });
   }
+
+  applyEffectBackendDefaults(config, new Set(Object.keys(input)));
 
   return config;
 }
@@ -709,7 +710,7 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
     (a) => ![...codeQuality, ...documentation, "none"].includes(a),
   );
 
-  return {
+  const result: CompatibilityInput = {
     ecosystem,
     projectName: (input.projectName as string) ?? null,
     webFrontend,
@@ -724,6 +725,17 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
     appPlatforms,
     aiSdk: (input.ai as string) ?? defaults.aiSdk,
   };
+
+  if (result.backend === "effect") {
+    if (input.effect === undefined) {
+      result.backendLibraries = "effect-full";
+    }
+    if (input.validation === undefined) {
+      result.validation = "effect-schema";
+    }
+  }
+
+  return result;
 }
 
 function summarizeTree(tree: {
@@ -774,6 +786,7 @@ const COMPATIBILITY_RULES_MD = `# Better-Fullstack Compatibility Rules
 
 ## Backend Constraints
 - **Convex**: Forces runtime=none, database=none, orm=none, api=none, dbSetup=none, serverDeploy=none. Removes incompatible frontends (Solid, SolidStart, Astro).
+- **Effect backend**: Requires effect=effect-full and validation=effect-schema. Other compatible frontend/backend-adjacent tools can still be selected.
 - **No backend (none)**: Clears auth, payments, database, orm, api, serverDeploy, search, fileStorage.
 - **Fullstack (backend='self')**: Sets runtime=none, serverDeploy=none. Only works with: next, vinext, tanstack-start, astro, nuxt, svelte, solid-start.
 
@@ -1414,7 +1427,7 @@ export const MCP_PLAN_CREATE_SCHEMA = {
   ...mobileInputSchema,
   fileUpload: FileUploadSchema.optional().describe("File upload"),
   ...deploymentInputSchema,
-  effect: EffectSchema.optional().describe("Effect ecosystem (effect, effect-full)"),
+  effect: EffectSchema.optional().describe("Effect services (effect, effect-full)"),
   analytics: AnalyticsSchema.optional().describe("Privacy-focused analytics provider"),
   astroIntegration: AstroIntegrationSchema.optional().describe(
     "Astro UI framework integration (react, vue, svelte, solid)",

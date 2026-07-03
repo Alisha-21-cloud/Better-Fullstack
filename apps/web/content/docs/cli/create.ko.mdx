@@ -38,13 +38,13 @@ npm의 경우 Better Fullstack 플래그는 `--` 뒤에 옵니다. 생성된 npm
 | `--ecosystem` | `typescript` `react-native` `rust` `python` `go` `java` `elixir`. 기본값은 `typescript`입니다. |
 | `--template` | `t3` `mern` `pern` `uniwind` `none`. |
 | `--part` | `frontend:typescript:next` 또는 `backend.orm:go:gorm`과 같은 다중 생태계 스택 부분을 추가합니다. 각 부분에 대해 반복합니다. |
-| `--addons` | `pwa` `tauri` `starlight` `biome` `lefthook` `husky` `ruler` `mcp` `skills` `turborepo` `fumadocs` `ultracite` `oxlint` `opentui` `wxt` `msw` `storybook` `swr` `tanstack-query` `tanstack-table` `tanstack-virtual` `tanstack-db` `tanstack-pacer` `backend-utils` `docker-compose` `none`. |
+| `--addons` | `pwa` `tauri` `starlight` `biome` `lefthook` `husky` `ruler` `mcp` `skills` `turborepo` `nx` `fumadocs` `ultracite` `oxlint` `opentui` `wxt` `msw` `storybook` `swr` `tanstack-query` `tanstack-table` `tanstack-virtual` `tanstack-db` `tanstack-pacer` `backend-utils` `devcontainer` `docker-compose` `github-actions` `none`. |
 | `--examples` | `ai` `chat-sdk` `tanstack-showcase` `none`. |
 | `--ai-docs` | `claude-md` `agents-md` `cursorrules` `none`. |
 | `--package-manager` | `npm` `pnpm` `bun` `yarn`. |
 | `--version-channel` | `stable` `latest` `beta`. |
 | `--web-deploy` | `cloudflare` `fly` `railway` `render` `netlify` `docker` `sst` `vercel` `none`. |
-| `--server-deploy` | `cloudflare` `fly` `railway` `render` `docker` `sst` `vercel` `none`. |
+| `--server-deploy` | `cloudflare` `fly` `railway` `render` `netlify` `docker` `sst` `vercel` `none`. |
 | `--directory-conflict` | 기존 대상 디렉터리에 대한 전략입니다. |
 | `--dry-run` | 생성된 파일을 쓰지 않고 미리 볼 수 있습니다. |
 | `--verify` | 지원되는 경우 스캐폴딩 후 생성된 검사를 실행합니다. |
@@ -62,14 +62,14 @@ npm의 경우 Better Fullstack 플래그는 `--` 뒤에 옵니다. 생성된 npm
 | 깃발 | 가치 |
 | --- | --- |
 | `--frontend` | `tanstack-router` `react-router` `react-vite` `tanstack-start` `next` `vinext` `nuxt` `svelte` `solid` `solid-start` `astro` `qwik` `angular` `redwood` `fresh` `none`. |
-| `--backend` | `hono` `express` `fastify` `elysia` `fets` `nestjs` `adonisjs` `nitro` `encore` `convex` `self` `none`. |
+| `--backend` | `hono` `express` `fastify` `elysia` `fets` `effect` `nestjs` `adonisjs` `nitro` `encore` `convex` `self` `none`. |
 | `--runtime` | `bun` `node` `workers` `none`. |
 | `--database` | `sqlite` `postgres` `mysql` `mongodb` `edgedb` `redis` `none`. |
 | `--orm` | `drizzle` `prisma` `mongoose` `typeorm` `kysely` `mikroorm` `sequelize` `none`. |
 | `--db-setup` | `turso` `neon` `prisma-postgres` `planetscale` `mongodb-atlas` `supabase` `upstash` `d1` `docker` `none`. |
 | `--manual-db` | 해당하는 경우 공급자별 데이터베이스 설정 프롬프트를 건너뜁니다. |
-| `--auth` | `better-auth` `go-better-auth` `clerk` `nextauth` `stack-auth` `supabase-auth` `auth0` `none`. |
-| `--api` | `trpc` `orpc` `ts-rest` `garph` `graphql-yoga` `none`. |
+| `--auth` | `better-auth` `better-auth-organizations` `go-better-auth` `clerk` `nextauth` `stack-auth` `supabase-auth` `auth0` `workos` `kinde` `none`. |
+| `--api` | `trpc` `orpc` `ts-rest` `garph` `graphql-yoga` `apollo-server` `openapi` `none`. |
 | `--astro-integration` | `react` `vue` `svelte` `solid` `none`. |
 
 ### 서비스
@@ -81,9 +81,9 @@ npm의 경우 Better Fullstack 플래그는 `--` 뒤에 옵니다. 생성된 npm
 | `--email` | `react-email` `resend` `nodemailer` `postmark` `sendgrid` `aws-ses` `mailgun` `plunk` `none`. |
 | `--realtime` | `socket-io` `partykit` `ably` `pusher` `liveblocks` `yjs` `none`. |
 | `--job-queue` | `bullmq` `trigger-dev` `inngest` `temporal` `none`. |
-| `--cms` | `payload` `sanity` `strapi` `tinacms` `directus` `none`. |
+| `--cms` | `payload` `sanity` `strapi` `tinacms` `directus` `keystatic` `none`. |
 | `--caching` | `upstash-redis` `none`. |
-| `--search` | `meilisearch` `typesense` `elasticsearch` `algolia` `none`. |
+| `--search` | `meilisearch` `typesense` `elasticsearch` `opensearch` `algolia` `none`. |
 | `--file-storage` | `s3` `r2` `cloudinary` `none`. |
 | `--file-upload` | `uploadthing` `filepond` `uppy` `none`. |
 | `--analytics` | `plausible` `umami` `none`. |
@@ -100,7 +100,7 @@ npm의 경우 Better Fullstack 플래그는 `--` 뒤에 옵니다. 생성된 npm
 | `--validation` | `zod` `valibot` `arktype` `typebox` `typia` `runtypes` `effect-schema` `none`. |
 | `--testing` | `vitest` `playwright` `vitest-playwright` `jest` `cypress` `none`. |
 | `--logging` | `pino` `winston` `evlog` `none`. |
-| `--observability` | `opentelemetry` `sentry` `grafana` `none`. |
+| `--observability` | `opentelemetry` `sentry` `grafana` `datadog` `axiom` `betterstack` `none`. |
 | `--animation` | `framer-motion` `gsap` `react-spring` `auto-animate` `lottie` `none`. |
 | `--i18n` | `paraglide` `i18next` `next-intl` `none`. |
 | `--effect` | `effect` `effect-full` `none`. |
@@ -156,7 +156,7 @@ npm의 경우 Better Fullstack 플래그는 `--` 뒤에 옵니다. 생성된 npm
 | `--python-web-framework` | `fastapi` `django` `flask` `litestar` `none`. |
 | `--python-orm` | `sqlalchemy` `sqlmodel` `tortoise-orm` `none`. |
 | `--python-validation` | `pydantic` `none`. |
-| `--python-ai` | `langchain` `llamaindex` `openai-sdk` `anthropic-sdk` `langgraph` `crewai` `haystack` `none`. |
+| `--python-ai` | `langchain` `llamaindex` `openai-sdk` `anthropic-sdk` `langgraph` `crewai` `haystack` `pydantic-ai` `google-adk` `smolagents` `none`. |
 | `--python-auth` | `authlib` `jwt` `none`. |
 | `--python-api` | `django-rest-framework` `django-ninja` `none`. |
 | `--python-task-queue` | `celery` `rq` `dramatiq` `huey` `none`. |
