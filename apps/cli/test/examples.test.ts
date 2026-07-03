@@ -176,6 +176,35 @@ describe("Example Configurations", () => {
       expectModernAIChatOutput([aiRoute, server]);
     });
 
+    it("should type the Elysia AI request body", async () => {
+      const result = await runTRPCTest({
+        projectName: "ai-elysia",
+        examples: ["ai"],
+        backend: "elysia",
+        runtime: "node",
+        database: "sqlite",
+        orm: "drizzle",
+        auth: "none",
+        api: "none",
+        frontend: ["astro"],
+        astroIntegration: "vue",
+        addons: ["none"],
+        dbSetup: "none",
+        webDeploy: "none",
+        serverDeploy: "none",
+        install: false,
+      });
+
+      expectSuccess(result);
+      expect(result.projectDir).toBeDefined();
+
+      const server = await Bun.file(join(result.projectDir!, "apps/server/src/index.ts")).text();
+      expect(server).toContain("type UIMessage");
+      expect(server).toContain("as { messages?: UIMessage[] }");
+      expect(server).toContain("body.messages ?? []");
+      expectModernAIChatOutput([server]);
+    });
+
     it("should work with AI example + Convex + React frontend", async () => {
       const result = await runTRPCTest({
         projectName: "ai-convex-react",
