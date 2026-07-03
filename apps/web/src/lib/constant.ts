@@ -562,6 +562,14 @@ export const TECH_OPTIONS: Record<
       color: "from-blue-600 to-cyan-700",
     },
     {
+      id: "effect",
+      name: "Effect",
+      description: "Effect-first service backend with layers and schema",
+      icon: "/icon/effect.svg",
+      color: "from-indigo-500 to-sky-700",
+      className: "invert-0 dark:invert",
+    },
+    {
       id: "convex",
       name: "Convex",
       description: "Reactive backend-as-a-service",
@@ -1303,8 +1311,8 @@ export const TECH_OPTIONS: Record<
   backendLibraries: [
     {
       id: "effect",
-      name: "Effect (Core)",
-      description: "Powerful effect system for TypeScript",
+      name: "Effect Core",
+      description: "Add Effect services and layers to the selected stack",
       icon: "/icon/effect.svg",
       color: "from-indigo-400 to-indigo-600",
       default: false,
@@ -1312,8 +1320,8 @@ export const TECH_OPTIONS: Record<
     },
     {
       id: "effect-full",
-      name: "Effect Full",
-      description: "Full ecosystem with Schema, Platform, and SQL",
+      name: "Effect Platform + SQL",
+      description: "Core plus Platform, browser/server adapters, SQL, and Vitest",
       icon: "/icon/effect.svg",
       color: "from-purple-400 to-purple-600",
       className: "invert-0 dark:invert",
@@ -1322,7 +1330,7 @@ export const TECH_OPTIONS: Record<
     {
       id: "none",
       name: "None",
-      description: "No additional backend libraries",
+      description: "No additional Effect services",
       icon: "",
       color: "from-gray-400 to-gray-600",
       default: true,
@@ -2634,8 +2642,8 @@ export const TECH_OPTIONS: Record<
   effect: [
     {
       id: "effect",
-      name: "Effect (Core)",
-      description: "Powerful effect system for TypeScript",
+      name: "Effect Core",
+      description: "Add Effect services and layers to the selected stack",
       icon: "/icon/effect.svg",
       color: "from-indigo-400 to-indigo-600",
       default: false,
@@ -2643,8 +2651,8 @@ export const TECH_OPTIONS: Record<
     },
     {
       id: "effect-full",
-      name: "Effect Full",
-      description: "Full ecosystem with Schema, Platform, and SQL",
+      name: "Effect Platform + SQL",
+      description: "Core plus Platform, browser/server adapters, SQL, and Vitest",
       icon: "/icon/effect.svg",
       color: "from-purple-400 to-purple-600",
       className: "invert-0 dark:invert",
@@ -2653,7 +2661,7 @@ export const TECH_OPTIONS: Record<
     {
       id: "none",
       name: "None",
-      description: "No Effect library",
+      description: "No additional Effect services",
       icon: "",
       color: "from-gray-400 to-gray-600",
       default: true,

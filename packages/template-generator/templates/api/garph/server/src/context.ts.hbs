@@ -1,4 +1,4 @@
-{{#if (eq backend "hono")}}
+{{#if (or (eq backend "hono") (eq backend "effect"))}}
 import type { Context as HonoContext } from "hono";
 {{#if (isBetterAuth auth)}}
 import type { Session, User } from "better-auth";

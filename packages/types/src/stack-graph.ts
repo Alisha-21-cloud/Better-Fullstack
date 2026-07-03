@@ -1203,6 +1203,28 @@ function createTypeScriptBackendCompatibilityIssue(
 ): StackGraphIssue | undefined {
   if (part.ecosystem !== "typescript" || context.ownerRole !== "backend") return undefined;
 
+  if (context.ownerToolId === "effect") {
+    if (part.role === "effect" && part.toolId !== "effect-full") {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_OWNER_TOOL",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Effect backend requires Effect Platform + SQL services.",
+      });
+    }
+
+    if (part.role === "validation" && part.toolId !== "effect-schema") {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_OWNER_TOOL",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Effect backend requires Effect Schema validation.",
+      });
+    }
+  }
+
   if (part.role === "payments" && part.toolId === "polar") {
     const authTool = context.siblingToolIdsByRole?.auth;
     if (authTool !== "better-auth" && authTool !== "better-auth-organizations") {
@@ -1740,6 +1762,10 @@ function createAddonCompatibilityIssue(
       const title = part.toolId === "devcontainer" ? "DevContainer" : "Docker Compose";
       const databaseTool = context.primaryToolIdsByRole?.database;
       const primaryEcosystem = backendEcosystem ?? frontendEcosystem ?? context.settings?.ecosystem;
+      const selectedEcosystems = [backendEcosystem, frontendEcosystem, context.settings?.ecosystem];
+      const hasCompatibleEcosystem = selectedEcosystems.some(
+        (ecosystem) => ecosystem && DOCKER_COMPOSE_COMPATIBLE_ECOSYSTEMS.has(ecosystem),
+      );
 
       if (backendTool === "convex") {
         return createStackGraphIssue({
@@ -1759,7 +1785,7 @@ function createAddonCompatibilityIssue(
           message: `${title} is not compatible with Cloudflare Workers runtime.`,
         });
       }
-      if (!primaryEcosystem || !DOCKER_COMPOSE_COMPATIBLE_ECOSYSTEMS.has(primaryEcosystem)) {
+      if (!hasCompatibleEcosystem) {
         return createStackGraphIssue({
           code: "INCOMPATIBLE_GRAPH_SELECTION",
           partId: part.id,
@@ -2896,6 +2922,11 @@ export function stackPartsToLegacyProjectConfigPartial(
       (config as Record<string, unknown>)[legacyCategory] = part.toolId;
       continue;
     }
+  }
+
+  if (config.backend === "effect") {
+    config.effect = "effect-full";
+    config.validation = "effect-schema";
   }
 
   return config;

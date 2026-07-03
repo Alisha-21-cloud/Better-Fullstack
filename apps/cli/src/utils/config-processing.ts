@@ -1,8 +1,7 @@
+import { cliInputToProjectConfigPartial } from "@better-fullstack/types/stack-translation";
 import path from "node:path";
 
-import { cliInputToProjectConfigPartial } from "@better-fullstack/types/stack-translation";
-
-import type { CLIInput } from "../types";
+import type { CLIInput, ProjectConfig } from "../types";
 
 function deriveProjectName(projectName?: string, projectDirectory?: string) {
   if (projectName) {
@@ -19,16 +18,29 @@ export function processFlags(options: CLIInput, projectName?: string) {
   return cliInputToProjectConfigPartial(options, projectName || derivedName);
 }
 
+export function applyEffectBackendDefaults<T extends Partial<ProjectConfig>>(
+  config: T,
+  providedFlags: Set<string> = new Set(),
+): T {
+  if (config.backend !== "effect") return config;
+
+  if (!providedFlags.has("effect")) {
+    config.effect = "effect-full";
+  }
+  if (!providedFlags.has("validation")) {
+    config.validation = "effect-schema";
+  }
+
+  return config;
+}
+
 export function getProvidedFlags(options: CLIInput) {
   return new Set(
     Object.keys(options).filter((key) => options[key as keyof CLIInput] !== undefined),
   );
 }
 
-function validateNoneExclusivity<T>(
-  options: (T | "none")[] | undefined,
-  optionName: string,
-) {
+function validateNoneExclusivity<T>(options: (T | "none")[] | undefined, optionName: string) {
   if (!options || options.length === 0) return;
 
   if (options.includes("none" as T | "none") && options.length > 1) {

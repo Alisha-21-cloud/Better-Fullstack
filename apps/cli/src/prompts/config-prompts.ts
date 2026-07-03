@@ -528,6 +528,9 @@ export async function gatherConfig(
       },
       effect: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as Effect);
+        if (results.backend === "effect" && flags.effect === undefined) {
+          return Promise.resolve("effect-full" as Effect);
+        }
         return getEffectChoice(flags.effect);
       },
         addons: ({ results }) => {
@@ -599,6 +602,9 @@ export async function gatherConfig(
       },
       validation: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as Validation);
+        if (results.backend === "effect" && flags.validation === undefined) {
+          return Promise.resolve("effect-schema" as Validation);
+        }
         return getValidationChoice(flags.validation);
       },
       forms: ({ results }) => {

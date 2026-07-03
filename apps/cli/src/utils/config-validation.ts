@@ -381,10 +381,7 @@ export function validateEcosystemAuthCompatibility(
   }
 }
 
-function validateConvexConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateConvexConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const { backend } = config;
 
   if (backend !== "convex") {
@@ -526,10 +523,7 @@ function validateSelfBackendConstraints(
   }
 }
 
-function validateEncoreConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateEncoreConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const { backend } = config;
 
   if (backend !== "encore") {
@@ -575,10 +569,7 @@ function validateEncoreConstraints(
   }
 }
 
-function validateAdonisJSConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateAdonisJSConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const { backend } = config;
 
   if (backend !== "adonisjs") {
@@ -628,10 +619,7 @@ function validateBackendConstraints(
   }
 }
 
-function validateFrontendConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateFrontendConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const { frontend } = config;
 
   if (frontend && frontend.length > 0) {
@@ -678,17 +666,38 @@ function validateApiConstraints(config: Partial<ProjectConfig>, _options: CLIInp
     });
   }
 
-  const supportedBackends = ["hono", "express", "fastify", "elysia"];
+  const supportedBackends = ["hono", "effect", "express", "fastify", "elysia"];
   if (!config.backend || !supportedBackends.includes(config.backend)) {
     incompatibilityError({
-      message: `${apiDisplayName} currently supports Hono, Express, Fastify, and Elysia backends.`,
+      message: `${apiDisplayName} currently supports Hono, Effect, Express, Fastify, and Elysia backends.`,
       provided: { api: config.api, backend: config.backend ?? "none" },
       suggestions: [
         "Use --backend hono",
+        "Use --backend effect",
         "Use --backend express",
         "Use --backend fastify",
         "Use --backend elysia",
       ],
+    });
+  }
+}
+
+function validateEffectBackendConstraints(config: Partial<ProjectConfig>) {
+  if (config.backend !== "effect") return;
+
+  if (config.effect !== "effect-full") {
+    missingRequirementError({
+      message: "Effect backend requires Effect Platform + SQL services.",
+      provided: { backend: "effect", effect: config.effect ?? "none" },
+      suggestions: ["Use --effect effect-full"],
+    });
+  }
+
+  if (config.validation !== "effect-schema") {
+    missingRequirementError({
+      message: "Effect backend requires Effect Schema validation.",
+      provided: { backend: "effect", validation: config.validation ?? "none" },
+      suggestions: ["Use --validation effect-schema"],
     });
   }
 }
@@ -978,10 +987,7 @@ function validateSearchConstraints(config: Partial<ProjectConfig>) {
   }
 }
 
-function validateShadcnConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateShadcnConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const shadcnFlagMap: Record<string, string> = {
     shadcnBase: "--shadcn-base",
     shadcnStyle: "--shadcn-style",
@@ -1057,6 +1063,7 @@ export function validateFullConfig(
   validateEncoreConstraints(config, providedFlags);
   validateAdonisJSConstraints(config, providedFlags);
   validateBackendConstraints(config, providedFlags, options);
+  validateEffectBackendConstraints(config);
 
   validateFrontendConstraints(config, providedFlags);
 
@@ -1205,6 +1212,7 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
 
     validateEcosystemAuthCompatibility(config);
     validateDatabaseOrmAuth(config);
+    validateEffectBackendConstraints(config);
 
     if (config.frontend && config.frontend.length > 0) {
       ensureSingleWebAndNative(config.frontend);

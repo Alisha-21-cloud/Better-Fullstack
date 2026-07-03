@@ -150,7 +150,7 @@ function addApiPackageDeps(
   // Add backend types to api package (context.ts imports from these)
   if (backend === "elysia") {
     addPackageDependency({ vfs, packagePath: pkgPath, dependencies: ["elysia"] });
-  } else if (backend === "hono") {
+  } else if (backend === "hono" || backend === "effect") {
     addPackageDependency({ vfs, packagePath: pkgPath, dependencies: ["hono"] });
   }
 }
@@ -193,7 +193,7 @@ function addServerDeps(vfs: VirtualFileSystem, api: API, backend: Backend): void
     });
   } else if (api === "openapi") {
     const dependencies: AvailableDependencies[] = [];
-    if (backend === "hono") {
+    if (backend === "hono" || backend === "effect") {
       dependencies.push("@hono/zod-openapi", "@scalar/hono-api-reference");
     } else if (backend === "express") {
       dependencies.push("@asteasolutions/zod-to-openapi", "@scalar/express-api-reference");

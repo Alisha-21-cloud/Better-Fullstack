@@ -1,16 +1,7 @@
 import { describe, expect, it } from "bun:test";
 
-import {
-  ELIXIR_UNSUPPORTED_GRAPH_TOOLS,
-  getAddonStackPartBinding,
-  getStackPartCompatibilityIssueForPart,
-  getStackPartOptions,
-  legacyProjectConfigToStackParts,
-  parseStackPartSpecs,
-  stackGraphToLegacyProjectConfigForEcosystem,
-  stackPartsToLegacyProjectConfigPartial,
-  validateStackParts,
-} from "../src/stack-graph";
+import type { ProjectConfig } from "../src/types";
+
 import { createCliDefaultProjectConfigBase } from "../src/defaults";
 import {
   AI_VALUES,
@@ -129,7 +120,17 @@ import {
   VALIDATION_VALUES,
   WEB_DEPLOY_VALUES,
 } from "../src/schemas";
-import type { ProjectConfig } from "../src/types";
+import {
+  ELIXIR_UNSUPPORTED_GRAPH_TOOLS,
+  getAddonStackPartBinding,
+  getStackPartCompatibilityIssueForPart,
+  getStackPartOptions,
+  legacyProjectConfigToStackParts,
+  parseStackPartSpecs,
+  stackGraphToLegacyProjectConfigForEcosystem,
+  stackPartsToLegacyProjectConfigPartial,
+  validateStackParts,
+} from "../src/stack-graph";
 
 function compareLegacyConfigToStackParts(
   config: Partial<ProjectConfig>,
@@ -680,9 +681,9 @@ describe("stack graph", () => {
     expect(validateStackParts(d1WithoutWorkersParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_GRAPH_SELECTION",
     );
-    expect(validateStackParts(unsupportedWebDeployParts).issues.map((issue) => issue.code)).toContain(
-      "INCOMPATIBLE_OWNER_TOOL",
-    );
+    expect(
+      validateStackParts(unsupportedWebDeployParts).issues.map((issue) => issue.code),
+    ).toContain("INCOMPATIBLE_OWNER_TOOL");
   });
 
   it("rejects incompatible addon and example graph selections", () => {
@@ -1268,9 +1269,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
         examples: [example],
       };
       const parts = legacyProjectConfigToStackParts(config);
-      const graphPart = parts.find(
-        (part) => part.role === "examples" && part.toolId === example,
-      );
+      const graphPart = parts.find((part) => part.role === "examples" && part.toolId === example);
       const derived = expectNoDrift(config);
 
       if (example === "none") {
@@ -1619,6 +1618,25 @@ describe("stack graph structural round-trip (phase 0)", () => {
     expect(reimported.map(structuralTuple).sort()).toEqual(parts.map(structuralTuple).sort());
   });
 
+  it("defaults and validates Effect backend graph-owned services", () => {
+    const parts = parseStackPartSpecs(["backend:typescript:effect"]);
+    const lowered = stackPartsToLegacyProjectConfigPartial(parts);
+    const invalidParts = parseStackPartSpecs([
+      "backend:typescript:effect",
+      "backend.effect:typescript:effect",
+      "backend.validation:typescript:zod",
+    ]);
+
+    expect(lowered.backend).toBe("effect");
+    expect(lowered.effect).toBe("effect-full");
+    expect(lowered.validation).toBe("effect-schema");
+    expect(validateStackParts(parts).issues).toEqual([]);
+    expect(validateStackParts(invalidParts).issues.map((issue) => issue.message)).toEqual([
+      "Effect backend requires Effect Platform + SQL services.",
+      "Effect backend requires Effect Schema validation.",
+    ]);
+  });
+
   it("imports Python GraphQL selections into the graphql role", () => {
     const pythonParts = legacyProjectConfigToStackParts({
       ecosystem: "python",
@@ -1654,9 +1672,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
     expect(lowered.pythonGraphql).toBe("strawberry");
 
     const reimported = legacyProjectConfigToStackParts(lowered);
-    expect(reimported.map(structuralTuple).sort()).toEqual(
-      pythonParts.map(structuralTuple).sort(),
-    );
+    expect(reimported.map(structuralTuple).sort()).toEqual(pythonParts.map(structuralTuple).sort());
   });
 
   it("imports Elixir realtime selections under the realtime role", () => {

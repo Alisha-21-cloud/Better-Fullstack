@@ -1798,6 +1798,7 @@ function buildProjectConfigBase(
 ): CliDefaultProjectConfigBase {
   const stack = getAdjustedSelection(selection);
   const graphStack = isGraphStackSelection(selection) ? selection : stack;
+  const usesEffectBackend = stack.backend === "effect";
   const frontend = [
     ...toUniqueNonNoneArray(stack.webFrontend),
     ...toUniqueNonNoneArray(stack.nativeFrontend),
@@ -1821,7 +1822,7 @@ function buildProjectConfigBase(
     payments: stack.payments as ProjectConfig["payments"],
     email: stack.email as ProjectConfig["email"],
     fileUpload: stack.fileUpload as ProjectConfig["fileUpload"],
-    effect: stack.backendLibraries as ProjectConfig["effect"],
+    effect: (usesEffectBackend ? "effect-full" : stack.backendLibraries) as ProjectConfig["effect"],
     ai: stack.aiSdk as ProjectConfig["ai"],
     stateManagement: stack.stateManagement as ProjectConfig["stateManagement"],
     forms: stack.forms as ProjectConfig["forms"],
@@ -1844,7 +1845,9 @@ function buildProjectConfigBase(
     shadcnBaseColor: stack.shadcnBaseColor as ProjectConfig["shadcnBaseColor"],
     shadcnFont: stack.shadcnFont as ProjectConfig["shadcnFont"],
     shadcnRadius: stack.shadcnRadius as ProjectConfig["shadcnRadius"],
-    validation: stack.validation as ProjectConfig["validation"],
+    validation: (usesEffectBackend
+      ? "effect-schema"
+      : stack.validation) as ProjectConfig["validation"],
     realtime: stack.realtime as ProjectConfig["realtime"],
     jobQueue: stack.jobQueue as ProjectConfig["jobQueue"],
     animation: stack.animation as ProjectConfig["animation"],
@@ -1956,10 +1959,14 @@ function buildProjectConfigBase(
 
   const stackParts = getGraphStackParts(graphStack);
   const loweredGraphConfig = stackPartsToLegacyProjectConfigPartial(stackParts);
+  const graphBackend = loweredGraphConfig.backend === "effect" || baseConfig.backend === "effect";
 
   return {
     ...baseConfig,
     ...loweredGraphConfig,
+    ...(graphBackend
+      ? { effect: "effect-full" as const, validation: "effect-schema" as const }
+      : {}),
     projectName,
     relativePath,
     git: stack.git === "true",
@@ -2112,6 +2119,10 @@ function generateTypeScriptCommand(selection: StackSelectionInput, projectName: 
   }
 
   const cliBackend = mapBackendToCli(selection.backend);
+  const effectSelection =
+    selection.backend === "effect" ? "effect-full" : selection.backendLibraries;
+  const validationSelection =
+    selection.backend === "effect" ? "effect-schema" : selection.validation;
   const flags = [
     "--ecosystem typescript",
     `--frontend ${
@@ -2158,11 +2169,11 @@ function generateTypeScriptCommand(selection: StackSelectionInput, projectName: 
     `--vector-db ${selection.vectorDb}`,
     `--file-storage ${selection.fileStorage}`,
     `--cms ${selection.cms}`,
-    `--effect ${selection.backendLibraries}`,
+    `--effect ${effectSelection}`,
     `--ai ${selection.aiSdk}`,
     `--state-management ${selection.stateManagement}`,
     `--forms ${selection.forms}`,
-    `--validation ${selection.validation}`,
+    `--validation ${validationSelection}`,
     `--testing ${selection.testing}`,
     `--animation ${selection.animation}`,
     `--database ${selection.database}`,
