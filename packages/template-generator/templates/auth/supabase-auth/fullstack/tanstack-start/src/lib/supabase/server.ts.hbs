@@ -18,9 +18,11 @@ export function createClient() {
         cookiesToSet.forEach(({ name, value, options }) => {
           setCookie(name, value, options);
         });
-        Object.entries(headers).forEach(([name, value]) => {
-          setResponseHeader(name, value);
-        });
+        if (headers) {
+          Object.entries(headers).forEach(([name, value]) => {
+            setResponseHeader(name, value);
+          });
+        }
       },
     },
   });

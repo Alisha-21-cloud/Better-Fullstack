@@ -219,10 +219,13 @@ async function processGraphTemplates(
     const backendPart = nonTypeScriptBackends[0];
     if (backendPart) {
       const targetPath = backendPart.targetPath ?? getRoleTargetPath("backend") ?? "apps/server";
-      const addonConfig = stackGraphToLegacyProjectConfigForEcosystem(
-        config,
-        backendPart.ecosystem as NonTypeScriptTemplateEcosystem,
-      ) as ProjectConfigWithCiWorkingDirectory;
+      const addonConfig = {
+        ...stackGraphToLegacyProjectConfigForEcosystem(
+          config,
+          backendPart.ecosystem as NonTypeScriptTemplateEcosystem,
+        ),
+        addons: config.addons,
+      } as ProjectConfigWithCiWorkingDirectory;
       if (addonConfig.addons.some((addon) => addon !== "none")) {
         addonConfig.ciWorkingDirectory = targetPath;
         await processAddonTemplates(vfs, templates, addonConfig);
@@ -295,7 +298,11 @@ export async function generateVirtualProject(options: GeneratorOptions): Promise
       processCatalogs(vfs, config);
     }
 
-    if (config.ecosystem !== "typescript" && config.ecosystem !== "react-native") {
+    if (
+      !config.stackParts?.length &&
+      config.ecosystem !== "typescript" &&
+      config.ecosystem !== "react-native"
+    ) {
       await processAddonTemplates(vfs, templates, config);
       processEnvVariables(vfs, config);
     }

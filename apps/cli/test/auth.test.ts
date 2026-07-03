@@ -839,6 +839,12 @@ describe("Authentication Configurations", () => {
 
       expectSuccess(result);
       expect(result.result?.projectConfig.auth).toBe("supabase-auth");
+
+      const serverClient = await readFile(
+        join(result.projectDir!, "apps/web/src/lib/supabase/server.ts"),
+        "utf-8",
+      );
+      expect(serverClient).toContain("if (headers)");
     });
 
     it("should normalize supabase-auth + tanstack-router frontend to no auth", async () => {
