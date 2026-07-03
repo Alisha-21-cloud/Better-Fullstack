@@ -3,14 +3,16 @@ title: CLI Reference
 description: Commands for creating projects, updating generated apps, opening resources, and running AI-agent workflows.
 ---
 
-Better Fullstack has a small command surface. Most users only need `create`, `add`, and `history`; AI-agent workflows use `mcp`.
+Better Fullstack has a small command surface. Most users only need `create`, `add`, `check`, and `history`; AI-agent workflows use `mcp`.
 
 ## Commands
 
 | Command | Purpose |
 | --- | --- |
 | `create` | Scaffold a new project from a stack configuration. This is the default command. |
-| `add` | Add supported addons or deployment settings to an existing Better Fullstack project. |
+| `add` | Add supported addons, deployment settings, or stack capabilities to an existing Better Fullstack project. |
+| `check` | Diagnose an existing project for config, dependency, env, and generated check issues. |
+| `doctor` | Compatibility alias for `check`. |
 | `history` | Show, export, or clear local scaffold history and reproducible commands. |
 | `mcp` | Start the Better Fullstack MCP server over stdio for AI coding agents. |
 
@@ -59,5 +61,6 @@ Show sponsors:
 
 - [Create command](/docs/cli/create/) covers all scaffold flags.
 - [Add command](/docs/cli/add/) covers existing-project updates.
+- [Check command](/docs/cli/check/) covers project diagnostics.
 - [History command](/docs/cli/history/) covers reproducible command history.
 - [MCP command](/docs/cli/mcp/) covers stdio MCP startup.

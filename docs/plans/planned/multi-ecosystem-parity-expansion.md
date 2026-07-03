@@ -3,10 +3,7 @@
 **Status: In progress — started 2026-06-10 on `feat/stack-graph-phase0-batch0` (PR #220).**
 
 Master plan for closing the category-asymmetry gap between ecosystems (Tier 1) and deepening
-existing categories (Tier 2), plus the next new language (Kotlin). Supersedes the per-category
-checklists in `go-ecosystem-expansion.md`, `python-ecosystem-expansion.md`,
-`rust-ecosystem-expansion.md`, `java-ecosystem-follow-ups.md`, and the open items in
-`elixir-ecosystem.md` / `../completed/dotnet-ecosystem-2026-06-10.md` — those stay as background; ticking happens here.
+existing categories (Tier 2), plus the next new language (Kotlin). The remaining checklist is the deferred edge-case work.
 
 Context: TypeScript has ~40 categories / 200+ options. Elixir is the strongest non-TS ecosystem
 (15 categories / 45 options); Go is the weakest (6 categories / 18 options). Every category below
@@ -56,59 +53,19 @@ Every library/category must land across ALL of these layers (the .NET foundation
 
 ---
 
-## Batch 1 — Go parity (Tier 1, biggest gap)
+## Batch 1 — Go parity
 
-New categories:
-
-- [x] `goTesting` (multi-select): `testify`, `gomock` ✅ 2026-06-11
-- [x] `goRealtime`: `gorilla-websocket`, `centrifuge` ✅ 2026-06-11
-- [x] `goMessageQueue` (jobQueue role): `nats`, `watermill` ✅ 2026-06-11
-- [x] `goCaching`: `redis` (go-redis), `ristretto` ✅ 2026-06-11
-- [x] `goConfig`: `viper`, `koanf` (new `config` graph role) ✅ 2026-06-11
-- [x] `goObservability`: `opentelemetry` ✅ 2026-06-11
-
-Existing-category depth:
-
-- [x] `goApi` += `gqlgen` (schema-first codegen; ent-style `go generate ./graph` flow) ✅ 2026-06-11
-- [x] `goAuth` += `goth` (OAuth social login, 30+ providers) ✅ 2026-06-11
 - [ ] `goWebFramework` += `stdlib` — DEFERRED: requires a full new branch in the ~2,200-line
       per-framework `handlers.go.hbs` (chi handlers use `chi.URLParam`; stdlib needs
       `r.PathValue` + Go 1.22 mux patterns)
 - [ ] `goOrm` += `bun` (uptrace/bun) — DEFERRED: requires new ORM branches in
       `database.go.hbs` + every framework section of `handlers.go.hbs`
 
-## Batch 2 — Python parity (Tier 1 + Tier 2)
+## Batch 3 — Rust parity
 
-New categories:
-
-- [x] `pythonTesting` (multi-select): `pytest`, `hypothesis` ✅ 2026-06-11
-- [x] `pythonCaching`: `redis` (redis-py), `aiocache` ✅ 2026-06-11
-- [x] `pythonRealtime`: `python-socketio`, `websockets` ✅ 2026-06-11
-- [x] `pythonObservability`: `opentelemetry` ✅ 2026-06-11
-- [x] `pythonCli` (multi-select): `typer`, `click`, `rich` ✅ 2026-06-11
-
-Existing-category depth:
-
-- [x] `pythonWebFramework` += `starlette` ✅ 2026-06-11
-- [x] `pythonOrm` += `peewee` ✅ 2026-06-11
-- [x] `pythonAuth` += `fastapi-users` (FastAPI routers auto-wired) ✅ 2026-06-11
-- [x] `pythonAi` += `pydantic-ai`, `google-adk`, `smolagents` ✅ 2026-06-11
-- [x] `pythonTaskQueue` += `taskiq` ✅ 2026-06-11
-
-## Batch 3 — Rust parity (Tier 1 + Tier 2)
-
-New categories:
-
-- [x] `rustRealtime`: `tokio-tungstenite` ✅ 2026-06-11
-- [x] `rustMessageQueue` (jobQueue role): `lapin` (RabbitMQ) ✅ 2026-06-11 —
-      `rdkafka` DEFERRED: requires a native librdkafka/cmake toolchain in every smoke lane
+- [ ] `rustMessageQueue` += `rdkafka` — DEFERRED: requires a native librdkafka/cmake toolchain in every smoke lane
       (compiles C via cmake-build); revisit when the lanes install cmake
-- [x] `rustObservability`: `opentelemetry` ✅ 2026-06-11
-- [x] `rustTemplating`: `askama` (compile-time), `tera` (runtime; new `templating` graph role) ✅ 2026-06-11
 
-Existing-category depth:
-
-- [x] `rustAuth` += `torii` (passwords/sessions via SQLite storage) ✅ 2026-06-11
 - [ ] `rustWebFramework` += `loco`, `poem` — DEFERRED: every framework value needs a full branch
       in the 1,100-line `main.rs.hbs` plus async-graphql/auth/email/ORM-CRUD integrations
       (loco additionally imposes its own Rails-style project layout)
@@ -116,31 +73,10 @@ Existing-category depth:
 Note: Rust testing is already covered as `rustLibraries` entries (tokio-test, mockall, proptest,
 insta) — no new category; do not duplicate.
 
-## Batch 4 — Java parity (Tier 1 + Tier 2)
+## Batch 4 — Java parity
 
-New categories:
-
-- [x] `javaApi`: `spring-graphql` ✅ 2026-06-11 — `grpc-java` DEFERRED: protoc build-plugin
-      codegen must be configured and kept green in BOTH Maven and Gradle smoke builds
-- [x] `javaLogging`: `logback` (explicit logback-spring.xml) ✅ 2026-06-11 — `log4j2` DEFERRED:
-      requires logging-starter exclusions on all 16 starter declarations across both build files
-
-Existing-category depth:
-
-- [x] `javaOrm` += `jooq` (DSLContext + H2), `mybatis` (annotated mappers + H2) ✅ 2026-06-11
-- [x] `javaAuth` += `keycloak` (OAuth2 resource server, lazy issuer fetch) ✅ 2026-06-11
-- [x] `javaLibraries` += `spring-amqp`, `opentelemetry-java` (plain SDK + OTLP; the Spring Boot
-      starter does not support Boot 4 yet) ✅ 2026-06-11
 - [ ] `javaWebFramework` += `micronaut` — DEFERRED: a second full framework with its own build
       plugins and source layout (same class as quarkus, which has its own branch today)
-
-## Batch 5 — Elixir + .NET follow-ups (Tier 2)
-
-- [x] `elixirApi` += `grpc` (grpc-elixir endpoint; ent-style protoc codegen flow) ✅ 2026-06-11
-- [x] `elixirLibraries` (new multi-select): `broadway` (DummyProducer pipeline), `nx` (Numerics
-      module) ✅ 2026-06-11
-- [x] `dotnetValidation` (new): `fluentvalidation` (validator class), `data-annotations`
-      (attribute-validated model) ✅ 2026-06-11
 
 ## Batch 6 — Kotlin (new language)
 
@@ -174,7 +110,7 @@ Zig stays on the watch list (web ecosystem still premature).
 ## Out of scope (tracked elsewhere)
 
 - Multi-ecosystem (`--part`) smoke presets — pre-existing gap for ALL ecosystems, tracked in
-  completed CI/quality notes and current ScaffBench/verification work.
+  current ScaffBench/verification work.
 - TypeScript-exclusive service categories (payments, CMS, file storage, feature flags, i18n) for
   non-TS ecosystems — Tier 3, needs per-provider SDK evaluation first.
 - "else frontend" ownership of validation/effect — see `single-source-of-truth-stack-graph.md`.

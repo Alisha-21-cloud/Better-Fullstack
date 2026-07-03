@@ -25,3 +25,4 @@ Open this file when working on template generation, generated project output, re
 - Better Auth generated workspaces pin Kysely through package-manager overrides in `packages/template-generator/src/post-process/package-configs.ts`; revisit the `tanstack-fullstack` and `t3` smoke presets before changing that override.
 - `bun run test:release` should stay self-sufficient from a clean checkout. If it starts depending on prebuilt `packages/types` or `packages/template-generator` artifacts again, release confidence drifts silently.
 - Root `.gitignore` should use `/test/`, not `test/`, for the Claude scratch folder. The bare pattern also ignores new files under nested tracked dirs like `apps/cli/test/`.
+- Existing-project stack updates must compare against the formatted scaffold baseline produced by `create` (`formatProject` / `formatCode`). Keep raw-template baselines accepted in focused generator fixtures so stack-update tests do not become formatter-only churn.

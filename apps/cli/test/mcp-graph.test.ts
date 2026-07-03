@@ -72,4 +72,101 @@ describe("MCP graph preview", () => {
     );
     expect(preview.stackPartSpecs.every((spec) => !spec.includes(":provided"))).toBe(true);
   });
+
+  it("uses stackParts instead of stale flat cache fields for MCP previews", () => {
+    const stackParts = parseStackPartSpecs([
+      "backend:typescript:hono",
+      "backend.database:typescript:sqlite",
+      "backend.orm:typescript:drizzle",
+      "backend.runtime:typescript:bun",
+    ]);
+    const preview = getMcpGraphPreview(
+      makeProjectConfig({
+        stackParts,
+        backend: "elysia",
+        database: "postgres",
+        orm: "prisma",
+        runtime: "node",
+      }),
+    );
+
+    expect(preview.effectiveStack).toMatchObject({
+      backend: "typescript:hono",
+      "backend.database": "typescript:sqlite",
+      "backend.orm": "typescript:drizzle",
+      "backend.runtime": "typescript:bun",
+    });
+    expect(preview.stackPartSpecs).toEqual(
+      expect.arrayContaining([
+        "backend:typescript:hono",
+        "backend.database:typescript:sqlite",
+        "backend.orm:typescript:drizzle",
+        "backend.runtime:typescript:bun",
+      ]),
+    );
+    expect(preview.stackPartSpecs).not.toContain("backend:typescript:elysia");
+    expect(preview.stackPartSpecs).not.toContain("database:universal:postgres");
+  });
+
+  it("uses mobile stackParts instead of stale flat cache fields for MCP previews", () => {
+    const stackParts = parseStackPartSpecs([
+      "mobile:react-native:native-bare",
+      "mobile.push:react-native:expo-notifications",
+      "mobile.ota:react-native:expo-updates",
+      "mobile.deepLinking:react-native:expo-linking",
+    ]);
+    const preview = getMcpGraphPreview(
+      makeProjectConfig({
+        stackParts,
+        frontend: ["native-uniwind"],
+        mobilePush: "none",
+        mobileOTA: "none",
+        mobileDeepLinking: "none",
+      }),
+    );
+
+    expect(preview.effectiveStack).toMatchObject({
+      mobile: "react-native:native-bare",
+      "mobile.push": "react-native:expo-notifications",
+      "mobile.ota": "react-native:expo-updates",
+      "mobile.deepLinking": "react-native:expo-linking",
+    });
+    expect(preview.stackPartSpecs).toEqual(
+      expect.arrayContaining([
+        "mobile:react-native:native-bare",
+        "mobile.push:react-native:expo-notifications",
+        "mobile.ota:react-native:expo-updates",
+        "mobile.deepLinking:react-native:expo-linking",
+      ]),
+    );
+    expect(preview.stackPartSpecs).not.toContain("mobile:react-native:native-uniwind");
+    expect(preview.stackPartSpecs).not.toContain("mobile.push:react-native:none");
+    expect(preview.stackPartSpecs).not.toContain("mobile.ota:react-native:none");
+    expect(preview.stackPartSpecs).not.toContain("mobile.deepLinking:react-native:none");
+  });
+
+  it("omits disabled none graph parts from MCP preview metadata", () => {
+    const stackParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "frontend.css:typescript:scss",
+      "frontend.ui:typescript:none",
+      "backend:typescript:hono",
+    ]);
+    const preview = getMcpGraphPreview(makeProjectConfig({ stackParts }));
+
+    expect(preview.effectiveStack).toMatchObject({
+      frontend: "typescript:next",
+      "frontend.css": "typescript:scss",
+      backend: "typescript:hono",
+    });
+    expect(preview.effectiveStack).not.toHaveProperty("frontend.ui");
+    expect(preview.stackPartSpecs).toEqual(
+      expect.arrayContaining([
+        "frontend:typescript:next",
+        "frontend.css:typescript:scss",
+        "backend:typescript:hono",
+      ]),
+    );
+    expect(preview.stackPartSpecs).not.toContain("frontend.ui:typescript:none");
+  });
 });

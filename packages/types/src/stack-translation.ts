@@ -1008,11 +1008,7 @@ const GRAPH_SHADCN_FLAG_KEYS = [
   ["shadcnRadius", "shadcn-radius"],
 ] as const satisfies readonly [StackSelectionStringKey, string][];
 
-const GRAPH_MOBILE_FLAG_KEYS = [
-  ["mobilePush", "mobile-push"],
-  ["mobileOTA", "mobile-ota"],
-  ["mobileDeepLinking", "mobile-deep-linking"],
-] as const satisfies readonly [StackSelectionStringKey, string][];
+const GRAPH_MOBILE_FLAG_KEYS = [] as const satisfies readonly [StackSelectionStringKey, string][];
 
 const GRAPH_TYPESCRIPT_BACKEND_FLAG_KEYS = [
   ["backendLibraries", "effect"],
@@ -1132,12 +1128,17 @@ const GRAPH_MOBILE_PART_SELECTION_KEYS = [
   ["mobileUI", "ui"],
   ["mobileStorage", "storage"],
   ["mobileTesting", "testing"],
+  ["mobilePush", "push"],
+  ["mobileOTA", "ota"],
+  ["mobileDeepLinking", "deepLinking"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
 const GRAPH_RUST_BACKEND_PART_SELECTION_KEYS = [
   ["rustCli", "cli"],
   ["rustLogging", "logging"],
   ["rustErrorHandling", "errorHandling"],
+  ["caching", "caching"],
+  ["search", "search"],
   ["rustCaching", "caching"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
@@ -1148,8 +1149,10 @@ const GRAPH_RUST_BACKEND_ARRAY_PART_SELECTION_KEYS = [
 const GRAPH_PYTHON_BACKEND_PART_SELECTION_KEYS = [
   ["pythonValidation", "validation"],
   ["pythonTaskQueue", "jobQueue"],
-  ["pythonGraphql", "api"],
+  ["pythonGraphql", "graphql"],
   ["pythonQuality", "codeQuality"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
 const GRAPH_PYTHON_BACKEND_ARRAY_PART_SELECTION_KEYS = [
@@ -1159,10 +1162,14 @@ const GRAPH_PYTHON_BACKEND_ARRAY_PART_SELECTION_KEYS = [
 const GRAPH_GO_BACKEND_PART_SELECTION_KEYS = [
   ["goCli", "cli"],
   ["goLogging", "logging"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_PART_SELECTION_KEYS = [
   ["javaBuildTool", "buildTool"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_ARRAY_PART_SELECTION_KEYS = [
@@ -1238,12 +1245,17 @@ const GRAPH_MOBILE_PART_CLI_KEYS = [
   ["mobileUI", "ui"],
   ["mobileStorage", "storage"],
   ["mobileTesting", "testing"],
+  ["mobilePush", "push"],
+  ["mobileOTA", "ota"],
+  ["mobileDeepLinking", "deepLinking"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
 const GRAPH_RUST_BACKEND_PART_CLI_KEYS = [
   ["rustCli", "cli"],
   ["rustLogging", "logging"],
   ["rustErrorHandling", "errorHandling"],
+  ["caching", "caching"],
+  ["search", "search"],
   ["rustCaching", "caching"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
@@ -1254,8 +1266,10 @@ const GRAPH_RUST_BACKEND_ARRAY_PART_CLI_KEYS = [
 const GRAPH_PYTHON_BACKEND_PART_CLI_KEYS = [
   ["pythonValidation", "validation"],
   ["pythonTaskQueue", "jobQueue"],
-  ["pythonGraphql", "api"],
+  ["pythonGraphql", "graphql"],
   ["pythonQuality", "codeQuality"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
 const GRAPH_PYTHON_BACKEND_ARRAY_PART_CLI_KEYS = [
@@ -1265,10 +1279,14 @@ const GRAPH_PYTHON_BACKEND_ARRAY_PART_CLI_KEYS = [
 const GRAPH_GO_BACKEND_PART_CLI_KEYS = [
   ["goCli", "cli"],
   ["goLogging", "logging"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_PART_CLI_KEYS = [
   ["javaBuildTool", "buildTool"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_ARRAY_PART_CLI_KEYS = [
@@ -1589,12 +1607,16 @@ function mapBackendToCli(backend: string) {
   return SELF_BACKENDS.has(backend) ? "self" : backend;
 }
 
+function getSelectableStackPartSpecs(specs: readonly string[]): string[] {
+  return specs.filter((spec) => spec.split(":")[2] !== "none");
+}
+
 export function isGraphStackSelection(
   selection: Pick<StackSelectionInput, "stackMode" | "stackPartSpecs">,
 ): boolean {
   return (
     (selection.stackMode === "multi" || String(selection.stackMode) === "graph") &&
-    selection.stackPartSpecs.length > 0
+    getSelectableStackPartSpecs(selection.stackPartSpecs).length > 0
   );
 }
 
@@ -1604,7 +1626,8 @@ function getGraphStackParts(selection: StackSelectionInput) {
     getSelectionScopedPartFields(selection),
   );
   const stackParts = parseStackPartSpecs(stackPartSpecs, "selected");
-  const validation = validateStackParts(stackParts);
+  const selectableStackParts = parseStackPartSpecs(getSelectableStackPartSpecs(stackPartSpecs), "selected");
+  const validation = validateStackParts(selectableStackParts);
   if (validation.issues.length > 0) {
     throw new Error(validation.issues.map((issue) => issue.message).join("\n"));
   }
@@ -1747,7 +1770,7 @@ function getCliGraphStackParts(input: CLIInput): StackPart[] {
   addScopedBackendPart("rust", "auth", input.rustAuth);
   addScopedBackendPart("python", "orm", input.pythonOrm);
   addScopedBackendPart("python", "api", input.pythonApi);
-  addScopedBackendPart("python", "api", input.pythonGraphql);
+  addScopedBackendPart("python", "graphql", input.pythonGraphql);
   addScopedBackendPart("python", "auth", input.pythonAuth);
   addScopedBackendPart("go", "orm", input.goOrm);
   addScopedBackendPart("go", "api", input.goApi);
@@ -1774,6 +1797,7 @@ function buildProjectConfigBase(
   install: boolean,
 ): CliDefaultProjectConfigBase {
   const stack = getAdjustedSelection(selection);
+  const graphStack = isGraphStackSelection(selection) ? selection : stack;
   const frontend = [
     ...toUniqueNonNoneArray(stack.webFrontend),
     ...toUniqueNonNoneArray(stack.nativeFrontend),
@@ -1926,11 +1950,11 @@ function buildProjectConfigBase(
     aiDocs: toUniqueNonNoneArray(stack.aiDocs) as ProjectConfig["aiDocs"],
   };
 
-  if (!isGraphStackSelection(stack)) {
+  if (!isGraphStackSelection(graphStack)) {
     return baseConfig;
   }
 
-  const stackParts = getGraphStackParts(stack);
+  const stackParts = getGraphStackParts(graphStack);
   const loweredGraphConfig = stackPartsToLegacyProjectConfigPartial(stackParts);
 
   return {
@@ -2041,7 +2065,7 @@ function generateGraphCommand(selection: StackSelectionInput, projectName: strin
   const hasMobile = hasGraphPrimaryPart(stackParts, "mobile");
   const flags = [
     ...stackParts
-      .filter((part) => part.source !== "provided")
+      .filter((part) => part.source !== "provided" && part.toolId !== "none")
       .map((part) => `--part ${formatStackPartSpec(part, stackParts)}`),
     ...(hasTypeScriptFrontend
       ? formatChangedStringFlags(selection, GRAPH_TYPESCRIPT_FRONTEND_FLAG_KEYS)

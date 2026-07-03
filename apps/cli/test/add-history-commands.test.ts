@@ -181,6 +181,56 @@ describe("CLI add command", () => {
     expect(secondAddResult.exitCode).toBe(0);
     expect(cliOutput(secondAddResult)).toContain("No new addons selected.");
   }, CLI_COMMAND_TEST_TIMEOUT_MS);
+
+  it("plans and applies stack capability flags", async () => {
+    const root = await makeTempRoot("bfs-add-stack-test-");
+    const projectName = "app";
+    const projectDir = join(root, projectName);
+
+    const createResult = await runCli(
+      ["create", projectName, "--yes", "--no-install", "--no-git", "--disable-analytics"],
+      { cwd: root },
+    );
+
+    expect(createResult.exitCode).toBe(0);
+
+    const dryRunResult = await runCli(
+      ["add", "--project-dir", projectDir, "--email", "resend", "--dry-run"],
+      { cwd: root },
+    );
+
+    expect(
+      dryRunResult.exitCode,
+      `add --dry-run failed\nstdout:\n${dryRunResult.stdout}\nstderr:\n${dryRunResult.stderr}`,
+    ).toBe(0);
+    expect(cliOutput(dryRunResult)).toContain("Stack update plan:");
+    expect(cliOutput(dryRunResult)).toContain("Dry run complete. No files were written.");
+
+    const dryRunConfig = (await readJsoncFile(join(projectDir, "bts.jsonc"))) as {
+      email?: string;
+    };
+    expect(dryRunConfig.email).not.toBe("resend");
+    expect(existsSync(join(projectDir, "apps/server/src/lib/email.ts"))).toBe(false);
+
+    const addResult = await runCli(["add", "--project-dir", projectDir, "--email", "resend"], {
+      cwd: root,
+    });
+
+    expect(
+      addResult.exitCode,
+      `add failed\nstdout:\n${addResult.stdout}\nstderr:\n${addResult.stderr}`,
+    ).toBe(0);
+    expect(cliOutput(addResult)).toContain("Stack update applied.");
+
+    const config = (await readJsoncFile(join(projectDir, "bts.jsonc"))) as {
+      email?: string;
+      stackParts?: Array<{ role?: string; toolId?: string }>;
+    };
+
+    expect(config.email).toBe("resend");
+    expect(config.stackParts).toContainEqual(expect.objectContaining({ role: "email", toolId: "resend" }));
+    expect(existsSync(join(projectDir, "apps/server/src/lib/email.ts"))).toBe(true);
+  }, CLI_COMMAND_TEST_TIMEOUT_MS * 2);
 });
 
 describe("CLI history command", () => {

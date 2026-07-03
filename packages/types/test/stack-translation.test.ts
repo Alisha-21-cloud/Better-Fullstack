@@ -325,6 +325,8 @@ describe("stack selection translation", () => {
       mobileStorage: "mmkv",
       mobileTesting: "maestro",
       mobilePush: "expo-notifications",
+      mobileOTA: "expo-updates",
+      mobileDeepLinking: "expo-linking",
     });
 
     expect(command).toContain("--part mobile:react-native:native-bare");
@@ -332,11 +334,16 @@ describe("stack selection translation", () => {
     expect(command).toContain("--part mobile.ui:react-native:gluestack-ui");
     expect(command).toContain("--part mobile.storage:react-native:mmkv");
     expect(command).toContain("--part mobile.testing:react-native:maestro");
+    expect(command).toContain("--part mobile.push:react-native:expo-notifications");
+    expect(command).toContain("--part mobile.ota:react-native:expo-updates");
+    expect(command).toContain("--part mobile.deepLinking:react-native:expo-linking");
     expect(command).not.toContain("--mobile-navigation react-navigation");
     expect(command).not.toContain("--mobile-ui gluestack-ui");
     expect(command).not.toContain("--mobile-storage mmkv");
     expect(command).not.toContain("--mobile-testing maestro");
-    expect(command).toContain("--mobile-push expo-notifications");
+    expect(command).not.toContain("--mobile-push expo-notifications");
+    expect(command).not.toContain("--mobile-ota expo-updates");
+    expect(command).not.toContain("--mobile-deep-linking expo-linking");
   });
 
   it("emits remaining ecosystem graph fields as scoped graph parts", () => {
@@ -371,7 +378,7 @@ describe("stack selection translation", () => {
     });
     expect(pythonCommand).toContain("--part backend.ai:python:langchain");
     expect(pythonCommand).toContain("--part backend.ai:python:openai-sdk");
-    expect(pythonCommand).toContain("--part backend.api:python:strawberry");
+    expect(pythonCommand).toContain("--part backend.graphql:python:strawberry");
     expect(pythonCommand).toContain("--part backend.codeQuality:python:ruff");
     expect(pythonCommand).not.toContain("--python-ai");
     expect(pythonCommand).not.toContain("--python-graphql strawberry");
@@ -537,6 +544,71 @@ describe("stack selection translation", () => {
     expect(config.goWebFramework).toBe("gin");
     expect(config.goOrm).toBe("gorm");
     expect(config.database).toBe("postgres");
+  });
+
+  it("lets graph URL parts override stale flat URL fields and ignore disabled none specs", () => {
+    const selection = parseStackSelectionFromUrlRecord({
+      mode: "multi",
+      part: [
+        "frontend:typescript:next",
+        "frontend.ui:typescript:none",
+        "mobile:react-native:native-bare",
+        "mobile.push:react-native:expo-notifications",
+        "mobile.ota:react-native:expo-updates",
+        "mobile.deepLinking:react-native:expo-linking",
+        "backend:typescript:hono",
+        "backend.database:typescript:sqlite",
+        "backend.orm:typescript:drizzle",
+      ].join(","),
+      "fe-w": "svelte",
+      "fe-n": "native-uniwind",
+      be: "elysia",
+      db: "postgres",
+      orm: "prisma",
+      ui: "shadcn-ui",
+      mpu: "none",
+      mota: "none",
+      mdl: "none",
+      rt: "node",
+      name: "url-graph-app",
+    });
+    const config = toProjectConfig(selection);
+    const specs = config.stackParts?.map((part) => {
+      const owner = config.stackParts?.find((candidate) => candidate.id === part.ownerPartId);
+      return owner
+        ? `${owner.role}.${part.role}:${part.ecosystem}:${part.toolId}`
+        : `${part.role}:${part.ecosystem}:${part.toolId}`;
+    });
+    const command = generateStackSelectionCommand(selection);
+
+    expect(config.frontend).toEqual(["next", "native-bare"]);
+    expect(config.backend).toBe("hono");
+    expect(config.database).toBe("sqlite");
+    expect(config.orm).toBe("drizzle");
+    expect(config.uiLibrary).toBe("none");
+    expect(config.mobilePush).toBe("expo-notifications");
+    expect(config.mobileOTA).toBe("expo-updates");
+    expect(config.mobileDeepLinking).toBe("expo-linking");
+    expect(config.runtime).toBe("node");
+    expect(specs).toContain("frontend.ui:typescript:none");
+    expect(specs).toContain("mobile.push:react-native:expo-notifications");
+    expect(specs).toContain("mobile.ota:react-native:expo-updates");
+    expect(specs).toContain("mobile.deepLinking:react-native:expo-linking");
+    expect(specs).not.toContain("frontend.ui:typescript:shadcn-ui");
+    expect(specs).not.toContain("mobile:react-native:native-uniwind");
+    expect(specs).not.toContain("mobile.push:react-native:none");
+    expect(command).toContain("--part frontend:typescript:next");
+    expect(command).toContain("--part mobile:react-native:native-bare");
+    expect(command).toContain("--part mobile.push:react-native:expo-notifications");
+    expect(command).toContain("--part mobile.ota:react-native:expo-updates");
+    expect(command).toContain("--part mobile.deepLinking:react-native:expo-linking");
+    expect(command).toContain("--part backend.database:typescript:sqlite");
+    expect(command).toContain("--part backend.orm:typescript:drizzle");
+    expect(command).not.toContain("--part frontend.ui:typescript:none");
+    expect(command).not.toContain("--part frontend.ui:typescript:shadcn-ui");
+    expect(command).not.toContain("--part mobile:react-native:native-uniwind");
+    expect(command).not.toContain("--mobile-push");
+    expect(command).not.toContain("--backend elysia");
   });
 
   it("maps builder aliases into ProjectConfig fields", () => {

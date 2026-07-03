@@ -243,10 +243,10 @@ describe("compatibility issue helpers", () => {
     ];
 
     expect(getDisabledReason(unsupportedStack, "webDeploy", "render")).toBe(
-      "Render deployment is not yet wired up for the 'astro' frontend",
+      "'render' web deployment is not wired for the 'astro' frontend.",
     );
     expect(getDisabledReason(unsupportedStack, "webDeploy", "netlify")).toBe(
-      "Netlify deployment is not yet wired up for the 'astro' frontend",
+      "'netlify' web deployment is not wired for the 'astro' frontend.",
     );
     expect(getDisabledReason(supportedStack, "webDeploy", "render")).toBeNull();
     expect(getDisabledReason(supportedStack, "webDeploy", "netlify")).toBeNull();
@@ -265,7 +265,9 @@ describe("compatibility issue helpers", () => {
     expect(
       getDisabledReason({ ...baseStack, webFrontend: ["tanstack-router"] }, "i18n", "paraglide"),
     ).toBeNull();
-    expect(getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "paraglide")).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "paraglide"),
+    ).toBeNull();
     expect(getDisabledReason({ ...baseStack, webFrontend: ["angular"] }, "i18n", "paraglide")).toBe(
       "Paraglide is not yet wired for the 'angular' frontend",
     );
@@ -299,7 +301,7 @@ describe("compatibility issue helpers", () => {
         "serverDeploy",
         "netlify",
       ),
-    ).toBe("Netlify Functions server deploy is currently supported only with Hono");
+    ).toBe("Netlify Functions server deploy is currently supported only with Hono.");
     expect(
       getDisabledReason(
         {
@@ -309,7 +311,28 @@ describe("compatibility issue helpers", () => {
         "serverDeploy",
         "netlify",
       ),
-    ).toBe("Netlify Functions server deploy requires Node.js runtime");
+    ).toBe("Netlify Functions server deploy requires Node.js runtime.");
+  });
+
+  it("routes database setup disabled reasons through graph checks", () => {
+    const baseStack = {
+      ...DEFAULT_STACK_SELECTION,
+      backend: "hono",
+      runtime: "bun",
+    };
+
+    expect(getDisabledReason({ ...baseStack, database: "none" }, "dbSetup", "turso")).toBe(
+      "Select a database first",
+    );
+    expect(getDisabledReason({ ...baseStack, database: "postgres" }, "dbSetup", "turso")).toBe(
+      "Turso database setup requires SQLite.",
+    );
+    expect(getDisabledReason({ ...baseStack, database: "sqlite" }, "dbSetup", "d1")).toBe(
+      "D1 database setup requires Workers runtime.",
+    );
+    expect(getDisabledReason({ ...baseStack, database: "sqlite" }, "dbSetup", "docker")).toBe(
+      "SQLite does not need Docker database setup.",
+    );
   });
 
   it("routes promoted frontend library disabled reasons through graph checks", () => {
@@ -324,6 +347,28 @@ describe("compatibility issue helpers", () => {
         "tanstack-form",
       ),
     ).toBe("'tanstack-form' has no Preact adapter for the Fresh frontend.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["fresh"],
+        },
+        "stateManagement",
+        "tanstack-store",
+      ),
+    ).toBe("'tanstack-store' requires React bindings and is not compatible with Fresh.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["fresh"],
+        },
+        "animation",
+        "lottie",
+      ),
+    ).toBe("'lottie' uses lottie-react and is not compatible with Fresh.");
 
     expect(
       getDisabledReason(
@@ -346,6 +391,31 @@ describe("compatibility issue helpers", () => {
         "shadcn-ui",
       ),
     ).toBe("'shadcn-ui' is not compatible with the 'svelte' frontend.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["astro"],
+          astroIntegration: "svelte",
+        },
+        "uiLibrary",
+        "shadcn-ui",
+      ),
+    ).toBe("shadcn/ui requires a React-based frontend");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["astro"],
+          astroIntegration: "svelte",
+          cssFramework: "tailwind",
+        },
+        "uiLibrary",
+        "shadcn-svelte",
+      ),
+    ).toBeNull();
   });
 
   it("routes promoted mobile library disabled reasons through graph checks", () => {
@@ -361,6 +431,32 @@ describe("compatibility issue helpers", () => {
         "uniwind",
       ),
     ).toBe("Uniwind mobile UI requires the Expo + Uniwind frontend.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "react-native",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+        },
+        "mobilePush",
+        "expo-notifications",
+      ),
+    ).toBe("Mobile push requires a native Expo frontend");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "react-native",
+          webFrontend: ["none"],
+          nativeFrontend: ["native-bare"],
+        },
+        "mobileDeepLinking",
+        "expo-linking",
+      ),
+    ).toBeNull();
   });
 
   it("routes promoted backend library disabled reasons through graph checks", () => {
@@ -434,6 +530,171 @@ describe("compatibility issue helpers", () => {
         "tanstack-ai",
       ),
     ).toBe("TanStack AI requires React or Solid frontend (no Vue/Svelte/Angular adapter yet).");
+  });
+
+  it("routes addon and example disabled reasons through graph checks", () => {
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["svelte"],
+        },
+        "appPlatforms",
+        "pwa",
+      ),
+    ).toBe("PWA requires a compatible web frontend.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          runtime: "workers",
+        },
+        "appPlatforms",
+        "docker-compose",
+      ),
+    ).toBe("Docker Compose is not compatible with Cloudflare Workers runtime.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "elixir",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          elixirWebFramework: "phoenix",
+        },
+        "appPlatforms",
+        "docker-compose",
+      ),
+    ).toBe("Docker Compose currently supports TypeScript, Python, Go, Rust, or Java projects.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "dotnet",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          dotnetWebFramework: "aspnet-minimal",
+        },
+        "appPlatforms",
+        "devcontainer",
+      ),
+    ).toBe("DevContainer currently supports TypeScript, Python, Go, Rust, or Java projects.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "rust",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          rustFrontend: "leptos",
+        },
+        "appPlatforms",
+        "docker-compose",
+      ),
+    ).toBe("Docker Compose for Rust currently supports server-only projects.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "java",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          javaWebFramework: "none",
+        },
+        "appPlatforms",
+        "docker-compose",
+      ),
+    ).toBe("Docker Compose for Java currently requires Spring Boot.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "python",
+          webFrontend: ["none"],
+          nativeFrontend: [],
+          backend: "none",
+          pythonWebFramework: "fastapi",
+          pythonOrm: "sqlalchemy",
+          database: "mongodb",
+        },
+        "appPlatforms",
+        "docker-compose",
+      ),
+    ).toBe(
+      "Docker Compose for Python ORM projects currently supports SQLite defaults or Postgres.",
+    );
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          ecosystem: "go",
+          backend: "none",
+          goWebFramework: "gin",
+        },
+        "appPlatforms",
+        "backend-utils",
+      ),
+    ).toBe("Backend Utils requires a compatible TypeScript server stack.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          api: "trpc",
+        },
+        "appPlatforms",
+        "tanstack-query",
+      ),
+    ).toBe("TanStack Query is already included via the selected API layer.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          webFrontend: ["astro"],
+          astroIntegration: "none",
+          api: "none",
+        },
+        "appPlatforms",
+        "tanstack-table",
+      ),
+    ).toBe(
+      "TanStack libraries with Astro require a UI framework integration (React, Vue, Svelte, or Solid)",
+    );
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          appPlatforms: ["turborepo"],
+        },
+        "appPlatforms",
+        "nx",
+      ),
+    ).toBe("Choose either Nx or Turborepo, not both");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "hono",
+          runtime: "bun",
+        },
+        "examples",
+        "chat-sdk",
+      ),
+    ).toBe("Chat SDK example is not compatible with the selected graph stack.");
   });
 
   it("routes promoted Java ecosystem disabled reasons through graph checks", () => {
@@ -534,6 +795,41 @@ describe("compatibility issue helpers", () => {
       "Only Resend email is available for non-TypeScript ecosystems",
     );
     expect(getDisabledReason(elixirBase, "elixirEmail", "swoosh")).toBeNull();
+  });
+
+  it("routes TypeScript backend service owner disabled reasons through graph checks", () => {
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "none",
+        },
+        "email",
+        "resend",
+      ),
+    ).toBe("Email integration requires a backend");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "convex",
+        },
+        "email",
+        "resend",
+      ),
+    ).toBe("Email integration is not available with Convex backend");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "convex",
+        },
+        "rateLimit",
+        "upstash",
+      ),
+    ).toBe("Rate limiting requires a standalone backend");
   });
 
   it("routes unsupported Elixir generated-tool disabled reasons through graph checks", () => {

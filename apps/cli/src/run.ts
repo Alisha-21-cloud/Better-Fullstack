@@ -6,7 +6,7 @@ import z from "zod";
 
 import { historyHandler } from "./commands/history";
 import { telemetryHandler } from "./commands/telemetry";
-import { CreateCommandInputSchema } from "./create-command-input";
+import { CreateCommandInputSchema, CreateCommandOptionsSchema } from "./create-command-input";
 import type { AddResult } from "./helpers/core/add-handler";
 import { createProjectHandler } from "./helpers/core/command-handlers";
 import {
@@ -181,6 +181,35 @@ const OPTION_ENTRY_COUNT = Object.values(OPTION_CATEGORY_METADATA).reduce(
   0,
 );
 
+const AddCommandInputSchema = CreateCommandOptionsSchema.omit({
+  template: true,
+  fromHistory: true,
+  config: true,
+  yes: true,
+  yolo: true,
+  verbose: true,
+  verify: true,
+  git: true,
+  directoryConflict: true,
+  renderTitle: true,
+  disableAnalytics: true,
+  manualDb: true,
+}).extend({
+  projectDir: z.string().optional().describe("Project directory (defaults to current)"),
+});
+
+const ProjectCheckInputSchema = z.tuple([
+  z.string().optional().describe("Project directory to diagnose (defaults to current directory)"),
+  z.object({
+    skipChecks: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe("Skip the ecosystem build/type checks (config + deps + env only)"),
+    json: z.boolean().optional().default(false).describe("Output the diagnosis as JSON"),
+  }),
+]);
+
 export const router = os.router({
   create: os
     .meta({
@@ -234,22 +263,9 @@ export const router = os.router({
   add: os
     .meta({
       description:
-        "Add addons or deployment targets to an existing Better Fullstack project using its bts.jsonc config",
+        "Add addons, deploy targets, or stack capabilities to an existing Better Fullstack project using its bts.jsonc config",
     })
-    .input(
-      z.object({
-        addons: z.array(AddonsSchema).optional().describe("Addons to add"),
-        webDeploy: WebDeploySchema.optional().describe("Web deployment option to set"),
-        serverDeploy: ServerDeploySchema.optional().describe("Server deployment option to set"),
-        install: z
-          .boolean()
-          .optional()
-          .default(false)
-          .describe("Install dependencies after adding"),
-        packageManager: PackageManagerSchema.optional().describe("Package manager to use"),
-        projectDir: z.string().optional().describe("Project directory (defaults to current)"),
-      }),
-    )
+    .input(AddCommandInputSchema)
     .handler(async ({ input }) => {
       const { addHandler } = await import("./helpers/core/add-handler.js");
       await addHandler(input as AddInput);
@@ -328,22 +344,18 @@ export const router = os.router({
       description:
         "Diagnose a scaffolded Better Fullstack project: verify its bts.jsonc, installed dependencies, required env vars, and run ecosystem build/type checks",
     })
-    .input(
-      z.tuple([
-        z
-          .string()
-          .optional()
-          .describe("Project directory to diagnose (defaults to current directory)"),
-        z.object({
-          skipChecks: z
-            .boolean()
-            .optional()
-            .default(false)
-            .describe("Skip the ecosystem build/type checks (config + deps + env only)"),
-          json: z.boolean().optional().default(false).describe("Output the diagnosis as JSON"),
-        }),
-      ]),
-    )
+    .input(ProjectCheckInputSchema)
+    .handler(async ({ input }) => {
+      const [projectDir, options] = input;
+      const { doctorCommand } = await import("./commands/doctor.js");
+      await doctorCommand({ projectDir, ...options });
+    }),
+  check: os
+    .meta({
+      description:
+        "Check a scaffolded Better Fullstack project for config, dependency, env, and generated build/type drift",
+    })
+    .input(ProjectCheckInputSchema)
     .handler(async ({ input }) => {
       const [projectDir, options] = input;
       const { doctorCommand } = await import("./commands/doctor.js");
@@ -448,6 +460,16 @@ export async function doctor(
   options?: { skipChecks?: boolean; json?: boolean },
 ) {
   return caller.doctor([
+    projectDir,
+    { skipChecks: options?.skipChecks ?? false, json: options?.json ?? false },
+  ]);
+}
+
+export async function check(
+  projectDir?: string,
+  options?: { skipChecks?: boolean; json?: boolean },
+) {
+  return caller.check([
     projectDir,
     { skipChecks: options?.skipChecks ?? false, json: options?.json ?? false },
   ]);
