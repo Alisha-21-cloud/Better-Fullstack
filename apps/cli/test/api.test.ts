@@ -126,7 +126,7 @@ describe("API Configurations", () => {
       expectError(result, "tRPC API requires React-based frontends");
     });
 
-    const backends = ["hono", "express", "fastify", "elysia"];
+    const backends = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of backends) {
       it(`should work with tRPC + ${backend}`, async () => {
@@ -138,6 +138,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
@@ -304,7 +306,7 @@ describe("API Configurations", () => {
       expectError(result, "ts-rest API requires React-based frontends");
     });
 
-    const backends = ["hono", "express", "fastify", "elysia"];
+    const backends = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of backends) {
       it(`should work with ts-rest + ${backend}`, async () => {
@@ -316,6 +318,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
@@ -503,7 +507,7 @@ describe("API Configurations", () => {
       expectError(result, "garph API requires React-based frontends");
     });
 
-    const backends = ["hono", "express", "fastify", "elysia"];
+    const backends = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of backends) {
       it(`should work with Garph + ${backend}`, async () => {
@@ -515,6 +519,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
@@ -647,7 +653,7 @@ describe("API Configurations", () => {
       });
     }
 
-    const backends = ["hono", "express", "fastify", "elysia"];
+    const backends = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of backends) {
       it(`should work with oRPC + ${backend}`, async () => {
@@ -659,6 +665,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
