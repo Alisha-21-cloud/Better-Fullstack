@@ -1137,6 +1137,8 @@ const GRAPH_RUST_BACKEND_PART_SELECTION_KEYS = [
   ["rustCli", "cli"],
   ["rustLogging", "logging"],
   ["rustErrorHandling", "errorHandling"],
+  ["caching", "caching"],
+  ["search", "search"],
   ["rustCaching", "caching"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
@@ -1149,6 +1151,8 @@ const GRAPH_PYTHON_BACKEND_PART_SELECTION_KEYS = [
   ["pythonTaskQueue", "jobQueue"],
   ["pythonGraphql", "graphql"],
   ["pythonQuality", "codeQuality"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
 const GRAPH_PYTHON_BACKEND_ARRAY_PART_SELECTION_KEYS = [
@@ -1158,10 +1162,14 @@ const GRAPH_PYTHON_BACKEND_ARRAY_PART_SELECTION_KEYS = [
 const GRAPH_GO_BACKEND_PART_SELECTION_KEYS = [
   ["goCli", "cli"],
   ["goLogging", "logging"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_PART_SELECTION_KEYS = [
   ["javaBuildTool", "buildTool"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_ARRAY_PART_SELECTION_KEYS = [
@@ -1246,6 +1254,8 @@ const GRAPH_RUST_BACKEND_PART_CLI_KEYS = [
   ["rustCli", "cli"],
   ["rustLogging", "logging"],
   ["rustErrorHandling", "errorHandling"],
+  ["caching", "caching"],
+  ["search", "search"],
   ["rustCaching", "caching"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
@@ -1258,6 +1268,8 @@ const GRAPH_PYTHON_BACKEND_PART_CLI_KEYS = [
   ["pythonTaskQueue", "jobQueue"],
   ["pythonGraphql", "graphql"],
   ["pythonQuality", "codeQuality"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
 const GRAPH_PYTHON_BACKEND_ARRAY_PART_CLI_KEYS = [
@@ -1267,10 +1279,14 @@ const GRAPH_PYTHON_BACKEND_ARRAY_PART_CLI_KEYS = [
 const GRAPH_GO_BACKEND_PART_CLI_KEYS = [
   ["goCli", "cli"],
   ["goLogging", "logging"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_PART_CLI_KEYS = [
   ["javaBuildTool", "buildTool"],
+  ["caching", "caching"],
+  ["search", "search"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_ARRAY_PART_CLI_KEYS = [

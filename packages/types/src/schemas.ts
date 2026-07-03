@@ -1019,13 +1019,20 @@ export const CreateInputSchema = z.object({
   part: z.array(z.string()).optional(),
 });
 
-export const AddInputSchema = z.object({
-  addons: z.array(AddonsSchema).optional(),
-  webDeploy: WebDeploySchema.optional(),
-  serverDeploy: ServerDeploySchema.optional(),
+export const AddInputSchema = CreateInputSchema.omit({
+  projectName: true,
+  template: true,
+  yes: true,
+  yolo: true,
+  verbose: true,
+  verify: true,
+  git: true,
+  directoryConflict: true,
+  renderTitle: true,
+  disableAnalytics: true,
+  manualDb: true,
+}).extend({
   projectDir: z.string().optional(),
-  install: z.boolean().optional(),
-  packageManager: PackageManagerSchema.optional(),
 });
 
 export const CLIInputSchema = CreateInputSchema.extend({

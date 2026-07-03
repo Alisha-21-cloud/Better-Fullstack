@@ -29,6 +29,8 @@ Additional focused release-facing checks:
 
 - `bun run test:plugin-bundle` validates the local installable agent plugin manifest, marketplace entry, MCP command, icon paths, and bundled skills.
 - `bun run test:ai-examples` runs the CLI AI/chat example suite from the `apps/cli` package context so workspace package resolution matches local package scripts.
+- `bun test apps/cli/test/add-history-commands.test.ts` covers the user-facing `add` command, including stack-update dry-runs and apply flows.
+- `bun test apps/cli/test/stack-update.test.ts` covers the lower-level planner/apply conflict model and create-time stack-field coverage.
 - `bun run test:published-package -- --specifier <npm-tag-or-version>` validates the already-published npm package through Bun, npm, and pnpm scaffold runs. Use this only after a package has been published to npm.
 
 ## Important package-specific notes

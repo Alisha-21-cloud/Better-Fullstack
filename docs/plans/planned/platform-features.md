@@ -13,7 +13,7 @@ against an existing `bts.jsonc` stack, with reviewable file changes and CI drift
 - [ ] Record enough scaffold metadata to know the generator/template version used
 - [ ] Compare current generated output against the latest template output without overwriting user code
 - [ ] Produce a reviewable patch or update plan
-- [ ] Add a CI-friendly `bfs check` mode that reports template drift
+- [ ] Extend the existing `check` command with a CI-friendly template-drift mode
 - [ ] Share conflict detection with MCP stack-update apply logic
 
 ---
@@ -23,10 +23,10 @@ against an existing `bts.jsonc` stack, with reviewable file changes and CI drift
 Turn the existing verification and ScaffBench learnings into a local command users can run inside a
 generated project.
 
-- [ ] Add `bfs doctor` or `create-better-fullstack doctor --project-dir`
-- [ ] Validate `bts.jsonc`, dependency/package-manager consistency, required env vars, and generated scripts
-- [ ] Run the narrowest generated-project checks available for the selected ecosystem
-- [ ] Return structured JSON for agents and CI
+- [x] Add `create-better-fullstack doctor` and the user-facing `create-better-fullstack check` alias
+- [x] Validate `bts.jsonc`, dependency/package-manager consistency, required env vars, and generated scripts
+- [x] Run the narrowest generated-project checks available for the selected ecosystem
+- [x] Return structured JSON for agents and CI
 
 ---
 
@@ -46,5 +46,5 @@ public docs page at `/docs/reference/verified-combinations`, a Shields-compatibl
 ## Priority Order (remaining)
 
 1. **Post-scaffold upgrade engine** — next major moat feature
-2. **Doctor / health command** — agent-friendly generated-project diagnostics
-3. **Prompt-to-stack builder assistant** — natural language to validated stack
+2. **Prompt-to-stack builder assistant** — natural language to validated stack
+3. **Upgrade/check polish** — template-drift mode and richer generated-project diagnostics

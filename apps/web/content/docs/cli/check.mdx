@@ -1,0 +1,34 @@
+---
+title: Check Projects
+description: Diagnose existing Better Fullstack projects from the CLI.
+---
+
+The `check` command validates a scaffolded Better Fullstack project. It is the user-facing alias for the existing `doctor` command.
+
+```npm
+npm create better-fullstack@latest check -- --skip-checks
+```
+
+## What check does
+
+- Reads and validates `bts.jsonc`.
+- Checks whether dependencies are installed for the detected package manager or ecosystem.
+- Reports missing required environment variables from `.env.example` files.
+- Runs available generated-project type or build checks unless `--skip-checks` is passed.
+- Supports `--json` for agents and CI scripts.
+
+## Flags
+
+| Flag | Behavior |
+| --- | --- |
+| positional project directory | Project directory to diagnose. Defaults to the current directory. |
+| `--skip-checks` | Skip generated type/build checks and only inspect config, dependencies, and env files. |
+| `--json` | Print structured JSON. The command exits non-zero when failures are present. |
+
+## Doctor Alias
+
+`doctor` remains available for compatibility:
+
+```npm
+npm create better-fullstack@latest doctor -- --skip-checks
+```

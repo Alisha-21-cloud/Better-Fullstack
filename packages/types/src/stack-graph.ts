@@ -636,6 +636,30 @@ const LEGACY_EXTRA_CATEGORIES_BY_ECOSYSTEM = {
   Partial<Record<StackPartRole, keyof ProjectConfig>>
 >;
 
+const LEGACY_SHARED_BACKEND_SINGLE_CATEGORIES_BY_ECOSYSTEM = {
+  rust: {
+    caching: "caching",
+    search: "search",
+  },
+  python: {
+    caching: "caching",
+    search: "search",
+  },
+  go: {
+    caching: "caching",
+    search: "search",
+  },
+  java: {
+    caching: "caching",
+    search: "search",
+  },
+  dotnet: {},
+  elixir: {},
+} as const satisfies Record<
+  LegacyBackendEcosystem,
+  Partial<Record<StackPartRole, keyof ProjectConfig>>
+>;
+
 const GRAPH_PROJECTION_DEFAULT_LEGACY_CATEGORIES = [
   "backend",
   "database",
@@ -653,6 +677,9 @@ const GRAPH_PROJECTION_DEFAULT_LEGACY_CATEGORIES = [
   ...Object.values(LEGACY_DATABASE_SINGLE_CATEGORIES),
   ...Object.values(LEGACY_MOBILE_SINGLE_CATEGORIES),
   ...Object.values(LEGACY_EXTRA_CATEGORIES_BY_ECOSYSTEM).flatMap((categories) =>
+    Object.values(categories),
+  ),
+  ...Object.values(LEGACY_SHARED_BACKEND_SINGLE_CATEGORIES_BY_ECOSYSTEM).flatMap((categories) =>
     Object.values(categories),
   ),
 ] as Array<keyof ProjectConfig>;
@@ -788,6 +815,8 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(["sentry"], "observability", "rust", "observability"),
   ...defineTools(RUST_REALTIME_VALUES, "realtime", "rust", "rustRealtime"),
   ...defineTools(RUST_MESSAGE_QUEUE_VALUES, "jobQueue", "rust", "rustMessageQueue"),
+  ...defineTools(["upstash-redis"], "caching", "rust", "caching"),
+  ...defineTools(["meilisearch"], "search", "rust", "search"),
   ...defineTools(RUST_OBSERVABILITY_VALUES, "observability", "rust", "rustObservability"),
   ...defineTools(RUST_TEMPLATING_VALUES, "templating", "rust", "rustTemplating"),
   ...defineTools(RUST_CLI_VALUES, "cli", "rust", "rustCli"),
@@ -812,6 +841,8 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     allowMultiple: true,
   }),
   ...defineTools(PYTHON_CACHING_VALUES, "caching", "python", "pythonCaching"),
+  ...defineTools(["upstash-redis"], "caching", "python", "caching"),
+  ...defineTools(["meilisearch"], "search", "python", "search"),
   ...defineTools(PYTHON_REALTIME_VALUES, "realtime", "python", "pythonRealtime"),
   ...defineTools(PYTHON_OBSERVABILITY_VALUES, "observability", "python", "pythonObservability"),
   ...defineTools(PYTHON_CLI_VALUES, "cli", "python", "pythonCli", {
@@ -831,6 +862,8 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(GO_REALTIME_VALUES, "realtime", "go", "goRealtime"),
   ...defineTools(GO_MESSAGE_QUEUE_VALUES, "jobQueue", "go", "goMessageQueue"),
   ...defineTools(GO_CACHING_VALUES, "caching", "go", "goCaching"),
+  ...defineTools(["upstash-redis"], "caching", "go", "caching"),
+  ...defineTools(["meilisearch"], "search", "go", "search"),
   ...defineTools(GO_CONFIG_VALUES, "config", "go", "goConfig"),
   ...defineTools(GO_OBSERVABILITY_VALUES, "observability", "go", "goObservability"),
   ...defineTools(JAVA_WEB_FRAMEWORK_VALUES, "backend", "java", "javaWebFramework"),
@@ -840,6 +873,8 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(JAVA_API_VALUES, "api", "java", "javaApi"),
   ...defineTools(["resend"], "email", "java", "email"),
   ...defineTools(["sentry"], "observability", "java", "observability"),
+  ...defineTools(["upstash-redis"], "caching", "java", "caching"),
+  ...defineTools(["meilisearch"], "search", "java", "search"),
   ...defineTools(JAVA_LOGGING_VALUES, "logging", "java", "javaLogging"),
   ...defineTools(JAVA_LIBRARIES_VALUES, "libraries", "java", "javaLibraries", {
     allowMultiple: true,
@@ -2702,6 +2737,24 @@ export function legacyProjectConfigToStackParts(
     // cannot generate stay flat-only so importing a valid legacy config never
     // produces a graph that validateStackParts rejects.
     if (backendPart) {
+      for (const [role, category] of Object.entries(
+        LEGACY_SHARED_BACKEND_SINGLE_CATEGORIES_BY_ECOSYSTEM[config.ecosystem],
+      ) as Array<[StackPartRole, keyof ProjectConfig]>) {
+        const toolId = config[category] as string | undefined;
+        if (
+          parts.some(
+            (part) =>
+              part.ownerPartId === backendPart.id &&
+              part.role === role &&
+              part.ecosystem === config.ecosystem &&
+              part.source !== "provided",
+          )
+        ) {
+          continue;
+        }
+        addLegacyPart(parts, role, config.ecosystem, toolId, source, backendPart.id);
+      }
+
       for (const [role, category] of Object.entries(
         LEGACY_EXTRA_CATEGORIES_BY_ECOSYSTEM[config.ecosystem],
       ) as Array<[StackPartRole, keyof ProjectConfig]>) {

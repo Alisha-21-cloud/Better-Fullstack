@@ -5,7 +5,13 @@
 > project virtually, merge package/env changes where safe, add new generated files, replace
 > unedited generated files, and refuse user-edited overwrite cases. The legacy
 > `bfs_plan_addition` / `bfs_add_feature` addon path remains for compatibility. Regression
-> coverage now includes renamed project folders, placeholder-free array additions
+> coverage now includes the first user-facing CLI slice: explicit `add` stack flags such as
+> `--email resend` route through the same planner/apply machinery, `--dry-run` previews without
+> mutating `bts.jsonc`, and addon-only `add --addons ...` keeps its idempotent user-facing
+> messages while using the safer update path. Planner comparisons now account for the formatted
+> scaffold output produced by `create` while still accepting raw generated-template baselines in
+> focused fixtures.
+> Existing regression coverage includes renamed project folders, placeholder-free array additions
 > (`frontend`, `addons`, `examples`, `aiDocs`), broad TypeScript service categories,
 > Resend/Sentry cross-ecosystem candidates, broad generated Python/Go/Rust/Java/.NET/Elixir
 > category updates, shared non-TypeScript caching/search services, and a flat-field

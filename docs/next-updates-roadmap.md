@@ -59,15 +59,19 @@ source checkout at `testing/.published-package/summary.json`.
 
 ## Recommended Next Update
 
-### 1. Harden MCP Stack Updates, Then Promote Them To User-Facing Add
+### 1. Expand User-Facing Stack Updates
 
 Generic MCP stack updates should become a supported product path, not just an agent interface.
 
 - Keep `bfs_plan_stack_update` / `bfs_apply_stack_update` preview-first semantics.
-- Add CLI affordances once the overwrite/conflict model is stable.
-- Prioritize additive service updates first: email, observability, search, vector DB, file storage,
-  rate limiting, mobile features, and generated CI.
+- First CLI slice is in place: explicit `create-better-fullstack add` stack flags now use the
+  stack-update planner/apply path, with `--dry-run` for preview and manual-review blockers for
+  edited generated files.
+- Continue broadening additive service examples and docs: email, observability, search, vector DB,
+  file storage, rate limiting, mobile features, and generated CI.
 - Keep risky architecture swaps behind explicit review: database, ORM, auth, API, payment provider.
+- Keep the planner comparing against the formatted scaffold baseline produced by `create`, while
+  still accepting raw-template baselines in focused generator tests and older fixtures.
 
 ### 2. Agent Plugin Distribution
 
@@ -103,7 +107,8 @@ This is the next major-version moat after stack updates are stable.
   channel.
 - Re-render the intended current template output and diff it against the user's project.
 - Produce a reviewable plan instead of overwriting files.
-- Add `bfs check` for CI drift detection and `bfs update` for guided patch application.
+- Build on the existing `doctor` / `check` diagnostics command, then add true template-drift
+  detection and `bfs update` guided patch application.
 
 ---
 

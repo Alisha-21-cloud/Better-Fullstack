@@ -2082,7 +2082,7 @@ describe("stack update planner", () => {
       expect(result.success).toBe(true);
       await expectFileContains(join(projectDir, testCase.manifestPath), testCase.manifestNeedle);
       await expectFileContains(join(projectDir, testCase.servicePath), testCase.serviceNeedle);
-      await expectFileContains(join(projectDir, ".env.example"), "RESEND_API_KEY=");
+      await expectFileContains(join(projectDir, "apps/server/.env.example"), "RESEND_API_KEY=");
     }
   });
 
@@ -2151,7 +2151,7 @@ describe("stack update planner", () => {
       expect(result.success).toBe(true);
       await expectFileContains(join(projectDir, testCase.manifestPath), testCase.manifestNeedle);
       await expectFileContains(join(projectDir, testCase.servicePath), testCase.serviceNeedle);
-      await expectFileContains(join(projectDir, ".env.example"), "SENTRY_DSN=");
+      await expectFileContains(join(projectDir, "apps/server/.env.example"), "SENTRY_DSN=");
     }
   });
 
@@ -3305,13 +3305,17 @@ describe("stack update planner", () => {
   });
 
   it("applies shared backend services across non-TypeScript ecosystems", async () => {
-    const baseConfigs: Array<{ name: string; config: Partial<ProjectConfig> }> = [
-      { name: "python", config: PYTHON_BASE_CONFIG },
-      { name: "go", config: GO_BASE_CONFIG },
-      { name: "rust", config: RUST_BASE_CONFIG },
-      { name: "java", config: JAVA_BASE_CONFIG },
-      { name: "dotnet", config: DOTNET_BASE_CONFIG },
-      { name: "elixir", config: ELIXIR_BASE_CONFIG },
+    const baseConfigs: Array<{
+      name: string;
+      config: Partial<ProjectConfig>;
+      expectGeneratedFiles: boolean;
+    }> = [
+      { name: "python", config: PYTHON_BASE_CONFIG, expectGeneratedFiles: true },
+      { name: "go", config: GO_BASE_CONFIG, expectGeneratedFiles: true },
+      { name: "rust", config: RUST_BASE_CONFIG, expectGeneratedFiles: true },
+      { name: "java", config: JAVA_BASE_CONFIG, expectGeneratedFiles: true },
+      { name: "dotnet", config: DOTNET_BASE_CONFIG, expectGeneratedFiles: false },
+      { name: "elixir", config: ELIXIR_BASE_CONFIG, expectGeneratedFiles: false },
     ];
     const serviceUpdates: Array<{ field: keyof ProjectConfig; value: string }> = [
       { field: "caching", value: "upstash-redis" },
@@ -3335,7 +3339,14 @@ describe("stack update planner", () => {
 
         expect(plan.proposedConfig[serviceUpdate.field]).toBe(serviceUpdate.value);
         expect(plan.manualReviewBlockers).toEqual([]);
-        expect(plan.filesToAdd.length + plan.filesToPatch.length).toBeGreaterThan(0);
+        if (baseConfig.expectGeneratedFiles) {
+          expect(plan.filesToAdd.length + plan.filesToPatch.length).toBeGreaterThan(0);
+          expect(plan.stackPartSpecs).toContain(
+            `backend.${String(serviceUpdate.field)}:${baseConfig.name}:${serviceUpdate.value}`,
+          );
+        } else {
+          expect(plan.filesToAdd.length + plan.filesToPatch.length).toBe(0);
+        }
 
         const result = await applyStackUpdate(projectDir, update);
         expect(result.success).toBe(true);

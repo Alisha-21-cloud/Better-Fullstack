@@ -8,6 +8,7 @@ Use this guide when the task involves non-interactive project generation, matrix
 - Pass `--ai-docs none` if the run must avoid AI-doc prompts completely.
 - When using `--ui-library shadcn-ui`, also pass explicit shadcn sub-options. At minimum include `--shadcn-base`, and ideally provide the full `--shadcn-*` set used by the test.
 - Scripted scaffolds, smoke tests, and `create()` silent mode must not fall through to Clack prompts. Addon-specific setup paths should use deterministic defaults when prompt interactivity is disabled.
+- For existing-project updates, prefer explicit stack flags with `add --project-dir <dir> --dry-run` first, then re-run without `--dry-run` after inspecting the plan. Passing no stack flags keeps the interactive addon-selection path.
 
 ## Validation expectations
 
@@ -34,4 +35,5 @@ Use this guide when the task involves non-interactive project generation, matrix
 
 - Use Bun-based invocation from the workspace.
 - Prefer explicit flags over relying on defaults when the result must be deterministic.
+- For `add`, keep dependency installation separate unless the test specifically covers `--install`; assert both console output and `bts.jsonc`/file mutations.
 - Capture generated output in a temp directory and inspect both console output and files on disk.
