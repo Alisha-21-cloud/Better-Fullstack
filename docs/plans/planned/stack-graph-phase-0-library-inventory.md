@@ -1,7 +1,7 @@
 # Stack-Graph Phase 0 — Library Inventory & Phase 2 Work Plan
 
 > Deliverable of Phase 0 from [single-source-of-truth-stack-graph.md](./single-source-of-truth-stack-graph.md).
-> Status: **Inventory complete (2026-06-09)**. Companion deliverable: structural round-trip tests in `packages/types/test/stack-graph.test.ts`.
+> Status: **Reference inventory with remaining Phase 3/4 follow-up**. Companion deliverable: structural round-trip tests in `packages/types/test/stack-graph.test.ts`.
 
 This catalogs every flat `ProjectConfig` field, its target graph role, owner part, supported ecosystems, selection mode, and where its compatibility rules live today — so Phase 2 (promote libraries to owned parts) can be executed in planned batches instead of discovered incrementally.
 
@@ -16,13 +16,13 @@ All line references are as of commit `7a1580b2`.
 | Already registered | Roles | Ecosystems |
 |---|---|---|
 | Web/native frontends, backends, databases | `frontend`, `mobile`, `backend`, `database` | typescript, react-native, rust (frontend), all legacy backends |
-| Capabilities | `orm`, `api`, `auth` | typescript, react-native, rust, python, go, java, elixir |
-| Ecosystem extras (partial) | `caching` (rust), `validation`/`jobQueue`/`api` (python), `api`/`jobQueue`/`validation`/`email`/`caching`/`observability`/`testing`/`deploy` (elixir) | rust, python, elixir |
+| Capabilities | `orm`, `api`, `auth`, `graphql` | typescript, react-native, rust, python, go, java, elixir |
+| Ecosystem extras (partial) | `caching` (rust), `validation`/`jobQueue`/`graphql` (python), `realtime`/`jobQueue`/`validation`/`email`/`caching`/`observability`/`testing`/`deploy` (elixir) | rust, python, elixir |
 | Convex | `backend` + provided `database`/`api` | typescript |
 
-**Importer/exporter asymmetry (existing bug surface):** `legacyProjectConfigToStackParts` (`stack-graph.ts:624-710`) only emits frontend/mobile/backend/database/orm/api/auth. The following categories are **registered in the tool registry but never imported from flat config**: `rustCaching`, `pythonValidation`, `pythonTaskQueue`, `pythonGraphql`, `elixirRealtime`, `elixirJobs`, `elixirValidation`, `elixirEmail`, `elixirCaching`, `elixirObservability`, `elixirTesting`, `elixirDeploy`. The exporter *can* lower them via `legacyCategory`, so graph→flat works but flat→graph silently drops them. Phase 2 must close this gap first — it is the cheapest correctness win and exercises the exact code paths library promotion needs.
+**Importer/exporter asymmetry (closed for promoted categories):** `legacyProjectConfigToStackParts` now imports the promoted ecosystem extras as backend-owned parts and `stackPartsToLegacyProjectConfigPartial` lowers them back through their `legacyCategory`. Keep new promotions covered with flat→graph→flat tests so the graph stays authoritative instead of drifting back to flat-only fields.
 
-**Role collisions to fix:** `pythonGraphql` and `pythonApi` both register under role `api`; `elixirRealtime` and `elixirApi` both register under role `api`. Two selected parts with the same `(owner, role)` trip `DUPLICATE_ROLE_SCOPE` (`stack-graph.ts:987-998`), so e.g. Django REST Framework + Strawberry, or Absinthe + Channels, cannot coexist in the graph even though the flat config allows both. Fix: add a `realtime` role (exists as a flat category, missing from `StackPartRoleSchema`) and decide whether GraphQL servers get their own role or `api` allows designated multi-selection (see §5).
+**Role collisions fixed:** `pythonGraphql` uses `graphql`, and Elixir realtime selections use `realtime`, so REST/API and realtime/GraphQL-style capabilities no longer fight over the backend `api` scope.
 
 ---
 
@@ -106,23 +106,17 @@ New roles required (recommendation): `realtime`, `animation`, `fileUpload`, `eff
 1. **Workspace-level tools don't fit the owner model.** `validateStackParts` requires every non-primary part to have an owner (`MISSING_OWNER_PART`, `stack-graph.ts:936-944`), but turborepo/biome/husky/starlight configure the repo, not a part. **Recommend:** allow ownerless parts for a whitelisted set of workspace roles (`codeQuality`, `documentation`, plus workspace tooling) rather than inventing a synthetic root part.
 2. **Multi-select scopes.** `DUPLICATE_ROLE_SCOPE` forbids two selected parts per `(owner, role)`, but `addons`, `examples`, `rustLibraries`, `javaLibraries`, `javaTestingLibraries`, `pythonAi`, `aiDocs` are arrays. **Recommend:** per-role `allowMultiple` flag in the registry, enforced in `validateStackParts`.
 3. **Shared-owner libraries** (`validation`, `testing`, `effect` span web+server in TS). **Recommend:** owner = backend when present, else frontend (deterministic solo collapse); multi mode may add one part per owner later without schema change.
-4. **GraphQL role collision** (§1). **Recommend:** add `realtime` role now; keep `pythonGraphql` under `api` and accept mutual exclusion with `pythonApi` in the graph (flat config already treats them as alternatives in practice), revisit if a real stack needs both.
+4. **GraphQL role collision** (§1). **Settled:** `pythonGraphql` now imports/exports as backend-owned `graphql`, so Python API and GraphQL selections can coexist without a duplicate `api` role.
 5. **`dbSetup`:** owned part (role `dbSetup`, owner database) rather than a setting — it has 9 options and its own compatibility matrix.
 6. **Cross-owner compatibility context.** Library rules need richer context than `getStackPartCompatibilityIssue` currently passes: cms→frontend toolId, addons→frontend+backend+runtime, email/search/caching→`javaBuildTool` sibling, cssFramework→`ui` sibling. `primaryToolIdsByRole` + `siblingToolIdsByRole` (`stack-graph.ts:76-84`) already cover most; java rules additionally need sibling lookup by the new `buildTool` role — no new mechanism, just registration order.
 
-## 6. Phase 2 execution plan (batched)
+## 6. Remaining Phase 4 / Settings Follow-Up
 
-Each batch = registry entries + importer/exporter round-trip + CLI `--part` emission + round-trip tests; UIs read options through `getStackPartOptions` so they pick up new roles with minimal change.
+Keep this file as the library-role reference while finishing the graph authority cleanup.
 
-1. ~~**Batch 0 — close the existing asymmetry**~~ ✅ Shipped 2026-06-09: `LEGACY_EXTRA_CATEGORIES_BY_ECOSYSTEM` imports the 10 safe categories as backend-owned parts; elixir tools in `ELIXIR_UNSUPPORTED_GRAPH_TOOLS` stay flat-only so imported configs never fail `validateStackParts` (all three fatal validation sites traced: `config-validation.ts:1035,1169`, `stack-translation.ts:990`). Original caveats, all honored:
-   - Defer `pythonGraphql` and `elixirRealtime` to Batch 1 — both collide with the `api` role (§1) and need the `realtime`/graphql decision first. Batch 0 imports the other 10 categories.
-   - `ELIXIR_UNSUPPORTED_GRAPH_TOOLS` (`stack-graph.ts:120-133`) rejects `fly`/`gigalixir` deploys and `ueberauth`/`guardian`/`nimble-options`/`nebulex`/`opentelemetry`/`prom_ex`/`mox`/`bypass`/`wallaby` — all valid flat solo selections today. Importing them would make `validateStackParts` flag previously-valid solo configs. Trace every `validateStackParts` caller (bts-config migration, web builder, MCP) before importing elixir extras, or scope the unsupported-tool check to graph-authored parts (`source !== "legacy"`).
-   - Do **not** add the extras categories to `GRAPH_PROJECTION_DEFAULT_LEGACY_CATEGORIES` in this batch: in multi mode the CLI passes libraries as plain flags (not `--part`), so resetting those fields in `stackGraphToLegacyProjectConfigForEcosystem` would drop selections that exist only as flat flags. That move belongs to the batch that makes the CLI emit library `--part` specs.
-2. ~~**Batch 1 — backend-owned singles (TS)**~~ ✅ Shipped 2026-06-10 (`ddff72bc`): logging, email, search, caching, observability, jobQueue, rateLimit, fileStorage, featureFlags, payments, realtime (new role), ai, cms registered in `STACK_TOOL_DEFINITIONS` via `LEGACY_TYPESCRIPT_BACKEND_SINGLE_CATEGORIES`. The shared web+server categories `validation` and `effect` (new role) joined the same map on 2026-06-10 — backend-owned when a TypeScript backend exists, flat-only otherwise (§5 decision 3); multi-mode commands still pass them as flags, not `--part` specs.
-3. ~~**Batch 2 — frontend-owned singles (TS)**~~ ✅ Shipped 2026-06-10 (`1e7b2975`): css, ui, forms, stateManagement, animation (new), fileUpload (new), i18n, analytics via `LEGACY_TYPESCRIPT_FRONTEND_SINGLE_CATEGORIES`; shadcn settings stay flat flags.
-4. ~~**Batch 3 — deploy/runtime/dbSetup**~~ ✅ Shipped 2026-06-10 (`ed54632d`): webDeploy/serverDeploy as `deploy` parts under frontend/backend owners, runtime under backend, dbSetup (new role) under database.
-5. ~~**Batch 4 — multi-select**~~ ✅ Shipped 2026-06-10 (`bee6642f`): addons split into codeQuality/documentation/appPlatform/dataFetching/testing/workspaceTooling roles; examples as ownerless multi parts. aiDocs stays flat (settings-shaped).
-6. ~~**Batch 5 — mobile + remaining ecosystem categories**~~ ✅ Shipped 2026-06-10 (`87329360`): mobile navigation/ui/storage/testing under the mobile owner; Rust/Python/Go/Java/.NET/Elixir category registrations per §4.
-7. **Batch 6 (Phase 3/4 entry) —** partially shipped on PR #220: `compareLegacyConfigToStackParts` is test-only, shared graph compatibility helper data now lives outside `compatibility.ts`, and `getDisabledReason` routes promoted frontend/mobile library branches plus backend Payments/CMS/AI, Java build-tool/library, shared non-TypeScript email/search/caching/observability, unsupported Elixir generated-tool disables, and Phoenix/Ecto/Oban/LiveView Elixir context disables through graph candidate checks. Phase 4 storage shape is selected as `stackParts` + derived flat-field cache; add/deploy updates refresh that cache from the graph, external readers get a graph-normalized config view, and MCP plan/create/addition responses expose graph metadata. Remaining work is keeping the `elixirJson` setting flat until the final settings/graph shape is settled.
+- [ ] Keep `elixirJson` flat until the final settings/graph shape is settled.
+- [x] Phase 3 compatibility consolidation is complete for promoted graph-owned roles: disabled reasons for promoted library, ecosystem, addon/example, deploy, database setup, mobile, Java/.NET/Elixir, and shared backend-service categories route through graph candidate checks and graph-complete bindings are authoritative.
+- [ ] Continue treating global backend locks and settings-shaped constraints as flat until their final graph-settings shape is settled.
+- [ ] Keep graph-derived cache behavior covered for CLI config writes, add/deploy updates, MCP responses, reproducible command generation, URL/import paths, config-file replay, and history replay as more categories move into graph ownership.
 
 Files touched per batch: `packages/types/src/stack-graph.ts` (registry + translation), `schemas.ts` (roles), `compatibility.ts` (rule consolidation, Phase 3), `apps/cli/src/utils/generate-reproducible-command.ts` (emit `--part` instead of flag, lines 99+/217+), `apps/cli/src/utils/bts-config.ts` (migration), `apps/web/src/components/stack-builder/stack-builder.tsx:521-600`, `packages/template-generator/src/generator.ts` (projection must stay byte-identical — guarded by scaffold snapshot tests).

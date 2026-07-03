@@ -1,7 +1,11 @@
 import { afterAll, describe, expect, it } from "bun:test";
 import { generateVirtualProject, EMBEDDED_TEMPLATES } from "@better-fullstack/template-generator";
 import { writeTreeToFilesystem } from "@better-fullstack/template-generator/fs-writer";
-import { createCliDefaultProjectConfigBase, type ProjectConfig } from "@better-fullstack/types";
+import {
+  createCliDefaultProjectConfigBase,
+  parseStackPartSpecs,
+  type ProjectConfig,
+} from "@better-fullstack/types";
 import * as JSONC from "jsonc-parser";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -570,6 +574,231 @@ describe("stack update planner", () => {
 
     const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
     expect(btsConfig.astroIntegration).toBe("vue");
+  });
+
+  it("plans and applies stack updates from graph-authoritative bts config instead of stale cache fields", async () => {
+    const root = await makeTempRoot("bfs-stack-update-graph-authority-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(
+      makeConfig(projectDir, {
+        stackParts: parseStackPartSpecs([
+          "frontend:typescript:next",
+          "frontend.css:typescript:scss",
+          "frontend.ui:typescript:none",
+          "mobile:react-native:native-bare",
+          "mobile.push:react-native:expo-notifications",
+          "mobile.ota:react-native:expo-updates",
+          "mobile.deepLinking:react-native:expo-linking",
+          "backend:typescript:hono",
+          "backend.runtime:typescript:bun",
+        ]),
+        frontend: ["svelte"],
+        cssFramework: "tailwind",
+        uiLibrary: "shadcn-svelte",
+        backend: "elysia",
+        runtime: "node",
+      }),
+    );
+
+    const configPath = join(projectDir, "bts.jsonc");
+    let staleContent = await readFile(configPath, "utf-8");
+    for (const [key, value] of Object.entries({
+      frontend: ["svelte"],
+      cssFramework: "tailwind",
+      uiLibrary: "shadcn-svelte",
+      mobilePush: "none",
+      mobileOTA: "none",
+      mobileDeepLinking: "none",
+      backend: "elysia",
+      runtime: "node",
+      graphSummary: "stale graph summary",
+      effectiveStack: { frontend: "typescript:svelte", backend: "typescript:elysia" },
+    })) {
+      staleContent = JSONC.applyEdits(
+        staleContent,
+        JSONC.modify(staleContent, [key], value, {
+          formattingOptions: {
+            tabSize: 2,
+            insertSpaces: true,
+            eol: "\n",
+          },
+        }),
+      );
+    }
+    await writeFile(configPath, staleContent, "utf-8");
+
+    const plan = await planStackUpdate(projectDir, { webDeploy: "vercel" });
+    expect(plan.success).toBe(true);
+    if (!plan.success) return;
+
+    expect(plan.proposedConfig.frontend).toEqual(["next", "native-bare"]);
+    expect(plan.proposedConfig.cssFramework).toBe("scss");
+    expect(plan.proposedConfig.uiLibrary).toBe("none");
+    expect(plan.proposedConfig.mobilePush).toBe("expo-notifications");
+    expect(plan.proposedConfig.mobileOTA).toBe("expo-updates");
+    expect(plan.proposedConfig.mobileDeepLinking).toBe("expo-linking");
+    expect(plan.proposedConfig.backend).toBe("hono");
+    expect(plan.proposedConfig.runtime).toBe("bun");
+    expect(plan.proposedConfig.webDeploy).toBe("vercel");
+    expect(plan.effectiveStack).toMatchObject({
+      frontend: "typescript:next",
+      "frontend.css": "typescript:scss",
+      mobile: "react-native:native-bare",
+      "mobile.push": "react-native:expo-notifications",
+      "mobile.ota": "react-native:expo-updates",
+      "mobile.deepLinking": "react-native:expo-linking",
+      backend: "typescript:hono",
+      "backend.runtime": "typescript:bun",
+      "frontend.deploy": "typescript:vercel",
+    });
+    expect(plan.effectiveStack).not.toHaveProperty("frontend.ui");
+
+    const result = await applyStackUpdate(projectDir, { webDeploy: "vercel" });
+    expect(result.success).toBe(true);
+
+    const btsConfig = await readJsonc(configPath);
+    expect(btsConfig.frontend).toEqual(["next", "native-bare"]);
+    expect(btsConfig.cssFramework).toBe("scss");
+    expect(btsConfig.uiLibrary).toBe("none");
+    expect(btsConfig.mobilePush).toBe("expo-notifications");
+    expect(btsConfig.mobileOTA).toBe("expo-updates");
+    expect(btsConfig.mobileDeepLinking).toBe("expo-linking");
+    expect(btsConfig.backend).toBe("hono");
+    expect(btsConfig.runtime).toBe("bun");
+    expect(btsConfig.webDeploy).toBe("vercel");
+    expect(btsConfig.effectiveStack).toMatchObject({
+      frontend: "typescript:next",
+      "frontend.css": "typescript:scss",
+      mobile: "react-native:native-bare",
+      "mobile.push": "react-native:expo-notifications",
+      "mobile.ota": "react-native:expo-updates",
+      "mobile.deepLinking": "react-native:expo-linking",
+      backend: "typescript:hono",
+      "backend.runtime": "typescript:bun",
+      "frontend.deploy": "typescript:vercel",
+    });
+    expect(btsConfig.effectiveStack).not.toHaveProperty("frontend.ui");
+  });
+
+  it("preserves existing scoped graph parts when applying unrelated flat-field updates", async () => {
+    const root = await makeTempRoot("bfs-stack-update-scoped-graph-preserve-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(
+      makeConfig(projectDir, {
+        stackParts: parseStackPartSpecs([
+          "backend:typescript:hono",
+          "backend.database:typescript:sqlite",
+          "backend.orm:typescript:drizzle",
+          "backend.runtime:typescript:bun",
+        ]),
+        backend: "hono",
+        database: "sqlite",
+        orm: "drizzle",
+        runtime: "bun",
+      }),
+    );
+
+    const plan = await planStackUpdate(projectDir, { email: "resend" });
+    expect(plan.success).toBe(true);
+    if (!plan.success) return;
+
+    expect(plan.proposedConfig.email).toBe("resend");
+    expect(plan.stackPartSpecs).toContain("backend.database:typescript:sqlite");
+    expect(plan.stackPartSpecs).not.toContain("database:universal:sqlite");
+    expect(plan.stackPartSpecs).toContain("backend.email:typescript:resend");
+
+    const result = await applyStackUpdate(projectDir, { email: "resend" });
+    expect(result.success).toBe(true);
+
+    const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
+    const persistedStackSpecs = (btsConfig.stackParts as Array<{
+      role: string;
+      ecosystem: string;
+      toolId: string;
+      ownerPartId?: string;
+    }>).map((part) => ({
+      role: part.role,
+      ecosystem: part.ecosystem,
+      toolId: part.toolId,
+      ownerPartId: part.ownerPartId,
+    }));
+    expect(persistedStackSpecs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: "database",
+          ecosystem: "typescript",
+          toolId: "sqlite",
+          ownerPartId: "backend:typescript:hono",
+        }),
+        expect.objectContaining({
+          role: "email",
+          ecosystem: "typescript",
+          toolId: "resend",
+          ownerPartId: "backend:typescript:hono",
+        }),
+      ]),
+    );
+    expect(persistedStackSpecs).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: "database",
+          ecosystem: "universal",
+          toolId: "sqlite",
+        }),
+      ]),
+    );
+  });
+
+  it("keeps scoped graph ownership when updating an existing scoped flat value", async () => {
+    const root = await makeTempRoot("bfs-stack-update-scoped-graph-change-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(
+      makeConfig(projectDir, {
+        stackParts: parseStackPartSpecs([
+          "backend:typescript:hono",
+          "backend.database:typescript:sqlite",
+          "backend.orm:typescript:drizzle",
+          "backend.runtime:typescript:bun",
+        ]),
+        backend: "hono",
+        database: "sqlite",
+        orm: "drizzle",
+        runtime: "bun",
+      }),
+    );
+
+    const plan = await planStackUpdate(projectDir, { database: "postgres" });
+    expect(plan.success).toBe(true);
+    if (!plan.success) return;
+
+    expect(plan.proposedConfig.database).toBe("postgres");
+    expect(plan.stackPartSpecs).toContain("backend.database:typescript:postgres");
+    expect(plan.stackPartSpecs).not.toContain("database:universal:postgres");
+
+    const result = await applyStackUpdate(projectDir, { database: "postgres" });
+    expect(result.success).toBe(true);
+
+    const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
+    expect(btsConfig.database).toBe("postgres");
+    expect(btsConfig.stackParts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: "database",
+          ecosystem: "typescript",
+          toolId: "postgres",
+          ownerPartId: "backend:typescript:hono",
+        }),
+      ]),
+    );
+    expect(btsConfig.stackParts).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: "database",
+          ecosystem: "universal",
+          toolId: "postgres",
+        }),
+      ]),
+    );
   });
 
   it("does not block updates on untouched generated binary assets", async () => {

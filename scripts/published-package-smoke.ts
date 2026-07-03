@@ -1,18 +1,58 @@
 #!/usr/bin/env bun
 
 import { existsSync } from "node:fs";
-import { mkdtemp, rm } from "node:fs/promises";
-import { join } from "node:path";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import { dirname, isAbsolute, join, resolve } from "node:path";
 
 type PackageManager = "bun" | "npm" | "pnpm";
+type SmokeStatus = "pass" | "fail";
+
+type PublishedPackageSmokeResult = {
+  manager: PackageManager;
+  status: SmokeStatus;
+  command: string[];
+  projectName: string;
+  projectDir: string;
+  durationMs: number;
+  exitCode: number | null;
+  expectedPaths: string[];
+  missingPaths: string[];
+  stdoutTail: string;
+  stderrTail: string;
+  failureMessage?: string;
+};
+
+type PublishedPackageSmokeSummary = {
+  generatedAt: string;
+  packageName: string;
+  specifier: string;
+  packageSpec: string;
+  registry: string;
+  rootDir: string;
+  keptOutput: boolean;
+  overallSuccess: boolean;
+  managers: PackageManager[];
+  results: PublishedPackageSmokeResult[];
+};
 
 const args = process.argv.slice(2);
+const DEFAULT_OUTPUT_PATH = "testing/.published-package/summary.json";
+const EXPECTED_PATHS = [
+  "bts.jsonc",
+  "package.json",
+  "apps/web/package.json",
+  "apps/server/package.json",
+];
 
 function readArg(name: string, fallback?: string): string | undefined {
   const index = args.indexOf(name);
   if (index === -1) return fallback;
   return args[index + 1] ?? fallback;
+}
+
+function hasFlag(name: string): boolean {
+  return args.includes(name);
 }
 
 function readListArg(name: string, fallback: PackageManager[]): PackageManager[] {
@@ -28,8 +68,36 @@ const packageName = readArg("--package", "create-better-fullstack") ?? "create-b
 const specifier = readArg("--specifier", process.env.BFS_PACKAGE_SPECIFIER ?? "latest") ?? "latest";
 const managers = readListArg("--managers", ["bun", "npm", "pnpm"]);
 const registry = readArg("--registry", "https://registry.npmjs.org") ?? "https://registry.npmjs.org";
+const outputPath = readArg("--output", DEFAULT_OUTPUT_PATH) ?? DEFAULT_OUTPUT_PATH;
+const skipWait = hasFlag("--skip-wait");
+const keepOutput = hasFlag("--keep-output") || process.env.KEEP_PUBLISHED_SMOKE_OUTPUT === "1";
+const packageSpec = packageSpecFor(packageName, specifier);
 
-const packageSpec = `${packageName}@${specifier}`;
+function packageSpecFor(name: string, requestedSpecifier: string): string {
+  if (isLocalSpecifier(requestedSpecifier)) {
+    return requestedSpecifier.startsWith("file:")
+      ? requestedSpecifier
+      : isAbsolute(requestedSpecifier)
+        ? requestedSpecifier
+        : resolve(requestedSpecifier);
+  }
+
+  return `${name}@${requestedSpecifier}`;
+}
+
+function isLocalSpecifier(value: string): boolean {
+  return (
+    value.startsWith("file:") ||
+    value.startsWith("/") ||
+    value.startsWith("./") ||
+    value.startsWith("../") ||
+    value.endsWith(".tgz")
+  );
+}
+
+function tail(value: string, maxLength = 8000): string {
+  return value.length > maxLength ? value.slice(-maxLength) : value;
+}
 
 async function runCommand(
   command: string[],
@@ -56,6 +124,10 @@ async function runCommand(
 }
 
 async function waitForPackage() {
+  if (skipWait || isLocalSpecifier(specifier)) {
+    return;
+  }
+
   const attempts = Number(readArg("--wait-attempts", "12"));
   const delayMs = Number(readArg("--wait-ms", "10000"));
 
@@ -179,47 +251,93 @@ function commandFor(manager: PackageManager, projectName: string): string[] {
   return ["pnpm", "dlx", packageSpec, "create", ...createArgs];
 }
 
-async function smoke(manager: PackageManager, rootDir: string) {
+async function smoke(manager: PackageManager, rootDir: string): Promise<PublishedPackageSmokeResult> {
   const projectName = `published-smoke-${manager}`;
   const command = commandFor(manager, projectName);
+  const startedAt = Date.now();
   console.log(`\nRunning ${manager} smoke: ${command.join(" ")}`);
   const result = await runCommand(command, { cwd: rootDir });
-
-  if (result.exitCode !== 0) {
-    throw new Error(
-      `${manager} smoke failed with exit ${result.exitCode}\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
-    );
-  }
-
   const projectDir = join(rootDir, projectName);
-  const requiredPaths = ["bts.jsonc", "package.json", "apps/web/package.json", "apps/server/package.json"];
-  const missing = requiredPaths.filter((path) => !existsSync(join(projectDir, path)));
-  if (missing.length > 0) {
-    throw new Error(
-      `${manager} smoke did not generate expected files: ${missing.join(", ")}\nSTDOUT:\n${result.stdout}\nSTDERR:\n${result.stderr}`,
-    );
+  const missingPaths = EXPECTED_PATHS.filter((path) => !existsSync(join(projectDir, path)));
+  const status = result.exitCode === 0 && missingPaths.length === 0 ? "pass" : "fail";
+  const failureMessage =
+    status === "pass"
+      ? undefined
+      : result.exitCode !== 0
+        ? `${manager} smoke failed with exit ${result.exitCode}`
+        : `${manager} smoke did not generate expected files: ${missingPaths.join(", ")}`;
+
+  if (status === "pass") {
+    console.log(`${manager} smoke passed`);
+  } else {
+    console.error(failureMessage);
   }
 
-  console.log(`${manager} smoke passed`);
+  return {
+    manager,
+    status,
+    command,
+    projectName,
+    projectDir,
+    durationMs: Date.now() - startedAt,
+    exitCode: result.exitCode,
+    expectedPaths: EXPECTED_PATHS,
+    missingPaths,
+    stdoutTail: tail(result.stdout),
+    stderrTail: tail(result.stderr),
+    failureMessage,
+  };
 }
 
-await waitForPackage();
-
-const rootDir = await mkdtemp(join(tmpdir(), "bfs-published-smoke-"));
-try {
-  for (const manager of managers) {
+function validateManagers(values: PackageManager[]): void {
+  for (const manager of values) {
     if (!["bun", "npm", "pnpm"].includes(manager)) {
       throw new Error(`Unsupported package manager: ${manager}`);
     }
+  }
+}
+
+async function writeSummary(summary: PublishedPackageSmokeSummary): Promise<void> {
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+  console.log(`Wrote ${outputPath}`);
+}
+
+validateManagers(managers);
+await waitForPackage();
+
+const rootDir = await mkdtemp(join(tmpdir(), "bfs-published-smoke-"));
+const results: PublishedPackageSmokeResult[] = [];
+
+try {
+  for (const manager of managers) {
     // oxlint-disable-next-line no-await-in-loop -- keep package-manager output isolated and ordered.
-    await smoke(manager, rootDir);
+    results.push(await smoke(manager, rootDir));
   }
 } finally {
-  if (process.env.KEEP_PUBLISHED_SMOKE_OUTPUT !== "1") {
+  const summary: PublishedPackageSmokeSummary = {
+    generatedAt: new Date().toISOString(),
+    packageName,
+    specifier,
+    packageSpec,
+    registry,
+    rootDir,
+    keptOutput: keepOutput,
+    overallSuccess: results.every((result) => result.status === "pass") && results.length === managers.length,
+    managers,
+    results,
+  };
+  await writeSummary(summary);
+
+  if (!keepOutput) {
     await rm(rootDir, { recursive: true, force: true });
   } else {
     console.log(`Keeping smoke output at ${rootDir}`);
   }
-}
 
-console.log(`Published package smoke passed for ${packageSpec}`);
+  if (!summary.overallSuccess) {
+    process.exitCode = 1;
+  } else {
+    console.log(`Published package smoke passed for ${packageSpec}`);
+  }
+}

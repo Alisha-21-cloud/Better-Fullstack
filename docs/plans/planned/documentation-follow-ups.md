@@ -1,28 +1,17 @@
 # Documentation Follow-Ups
 
-The first public `/docs` experience shipped in `v1.6.2`. This file tracks the remaining docs work after the initial site launch.
+This file tracks the remaining docs work after the initial public `/docs` launch.
 
 Canonical user-facing docs live in `apps/web/content/docs`. Planning docs under `docs/plans` should describe roadmap and implementation intent, not duplicate public docs content.
 
 ---
 
-## Roadmap
-
-- [x] Add a public roadmap page to `/docs`
-  - Source from a curated subset of `docs/plans/planned`
-  - Link each roadmap item to the relevant plan, issue, or discussion
-  - Keep completed roadmap entries linked to `docs/plans/completed`
-
 ## Compatibility Reference
 
-- [x] Add compatibility docs generated from shared compatibility metadata
-- [x] Explain common disabled-option reasons and auto-resolution behavior
 - [ ] Link compatibility examples from ecosystem option reference pages
 
 ## CLI Reference
 
-- [x] Add full CLI command reference
-- [x] Include `create`, `add`, `history`, `mcp`, and builder-related command flows
 - [ ] Generate flag/default data from CLI definitions or shared schemas where possible
 
 ## Stack Guides
@@ -34,19 +23,11 @@ Canonical user-facing docs live in `apps/web/content/docs`. Planning docs under 
 
 ## Section Guides
 
-- [x] Fold deployment guidance into public `/docs/sections/deployment` instead of a top-level Deployment sidebar group
-- [x] Add section explainers for frontend/apps, backend/API, data/storage, auth/payments, UI/experience, AI/services, quality/tooling, and deployment
 - [ ] Add environment-variable setup per provider
 - [ ] Add database provisioning guides for Turso, Neon, Supabase, PlanetScale, and other supported providers
 
-## AI / MCP
-
-- [x] Add MCP tools reference from `apps/cli/src/mcp.ts`
-- [x] Add agent setup examples for Claude Code, Cursor, VS Code, Zed, and related tools ✅
-- [x] Explain skills addon and MCP addon output in generated projects ✅
-
 ## Next Documentation Updates
 
-- [ ] Add generated-project CI and verified-combinations documentation once that product surface lands
+- [x] Publish generated-project CI and verified-combinations coverage in the public docs/site, sourcing from `docs/verified-combinations.md`
 - [ ] Add stack-update / upgrade-engine docs when the CLI-facing flow is promoted beyond MCP tools
 - [ ] Keep localized option tables synced with generated schema output; several translated pages have historically drifted faster than the canonical English docs

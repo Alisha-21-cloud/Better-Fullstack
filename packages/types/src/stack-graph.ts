@@ -87,6 +87,9 @@ import {
   JOB_QUEUE_VALUES,
   LOGGING_VALUES,
   MOBILE_NAVIGATION_VALUES,
+  MOBILE_DEEP_LINKING_VALUES,
+  MOBILE_OTA_VALUES,
+  MOBILE_PUSH_VALUES,
   MOBILE_STORAGE_VALUES,
   MOBILE_TESTING_VALUES,
   MOBILE_UI_VALUES,
@@ -169,6 +172,7 @@ export type StackPartOptionContext = {
   ownerRole?: StackPrimaryRole;
   ownerToolId?: string;
   ownerEcosystem?: StackPartEcosystem;
+  settings?: Partial<ProjectConfig>;
   siblingToolIdsByRole?: Partial<Record<StackPartRole, string | undefined>>;
   siblingToolIdsByRoleList?: Partial<Record<StackPartRole, readonly string[] | undefined>>;
   selectedToolIdsByRole?: Partial<Record<StackPartRole, string | undefined>>;
@@ -341,6 +345,9 @@ const LEGACY_MOBILE_SINGLE_CATEGORIES = {
   ui: "mobileUI",
   storage: "mobileStorage",
   testing: "mobileTesting",
+  push: "mobilePush",
+  ota: "mobileOTA",
+  deepLinking: "mobileDeepLinking",
 } as const satisfies Partial<Record<StackPartRole, keyof ProjectConfig>>;
 
 const LEGACY_BACKEND_ARRAY_CATEGORIES_BY_ECOSYSTEM = {
@@ -445,6 +452,7 @@ const OWNER_ROLES_BY_SCOPED_ROLE = {
   deploy: ["frontend", "backend"],
   dbSetup: ["database"],
   ui: ["frontend", "mobile"],
+  graphql: ["backend"],
   appPlatform: ["frontend"],
   dataFetching: ["frontend"],
   testing: ["frontend", "mobile", "backend"],
@@ -569,8 +577,6 @@ function isNativeEcosystemBackendServiceTool(
 
 // Phase 2 Batch 0/1 (docs/plans/planned/stack-graph-phase-0-library-inventory.md):
 // registered backend-owned singles/extras that round-trip through the graph.
-// pythonGraphql still stays flat-only in the legacy importer until the
-// API/GraphQL role split is settled.
 const LEGACY_EXTRA_CATEGORIES_BY_ECOSYSTEM = {
   rust: {
     caching: "rustCaching",
@@ -585,7 +591,7 @@ const LEGACY_EXTRA_CATEGORIES_BY_ECOSYSTEM = {
   python: {
     validation: "pythonValidation",
     jobQueue: "pythonTaskQueue",
-    api: "pythonGraphql",
+    graphql: "pythonGraphql",
     codeQuality: "pythonQuality",
     caching: "pythonCaching",
     realtime: "pythonRealtime",
@@ -765,6 +771,14 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(MOBILE_UI_VALUES, "ui", "react-native", "mobileUI"),
   ...defineTools(MOBILE_STORAGE_VALUES, "storage", "react-native", "mobileStorage"),
   ...defineTools(MOBILE_TESTING_VALUES, "testing", "react-native", "mobileTesting"),
+  ...defineTools(MOBILE_PUSH_VALUES, "push", "react-native", "mobilePush"),
+  ...defineTools(MOBILE_OTA_VALUES, "ota", "react-native", "mobileOTA"),
+  ...defineTools(
+    MOBILE_DEEP_LINKING_VALUES,
+    "deepLinking",
+    "react-native",
+    "mobileDeepLinking",
+  ),
   ...defineTools(RUST_WEB_FRAMEWORK_VALUES, "backend", "rust", "rustWebFramework"),
   ...defineTools(RUST_FRONTEND_VALUES, "frontend", "rust", "rustFrontend"),
   ...defineTools(RUST_ORM_VALUES, "orm", "rust", "rustOrm"),
@@ -792,7 +806,7 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(["resend"], "email", "python", "email"),
   ...defineTools(["sentry"], "observability", "python", "observability"),
   ...defineTools(PYTHON_TASK_QUEUE_VALUES, "jobQueue", "python", "pythonTaskQueue"),
-  ...defineTools(PYTHON_GRAPHQL_VALUES, "api", "python", "pythonGraphql"),
+  ...defineTools(PYTHON_GRAPHQL_VALUES, "graphql", "python", "pythonGraphql"),
   ...defineTools(PYTHON_QUALITY_VALUES, "codeQuality", "python", "pythonQuality"),
   ...defineTools(PYTHON_TESTING_VALUES, "testing", "python", "pythonTesting", {
     allowMultiple: true,
@@ -1045,6 +1059,82 @@ function createTypeScriptFrontendCompatibilityIssue(
       });
     }
 
+    if (
+      context.ownerToolId === "astro" &&
+      context.settings?.astroIntegration !== undefined
+    ) {
+      const astroIntegration = context.settings.astroIntegration;
+      const reactOnlyLibraries = new Set([
+        "shadcn-ui",
+        "radix-ui",
+        "chakra-ui",
+        "nextui",
+        "mui",
+        "antd",
+      ]);
+
+      if (reactOnlyLibraries.has(part.toolId) && astroIntegration !== "react") {
+        const libraryName =
+          part.toolId === "shadcn-ui"
+            ? "shadcn/ui"
+            : part.toolId === "radix-ui"
+              ? "Radix UI"
+              : part.toolId === "chakra-ui"
+                ? "Chakra UI"
+                : part.toolId === "mui"
+                  ? "MUI"
+                  : part.toolId === "antd"
+                    ? "Ant Design"
+                    : "NextUI";
+        return createStackGraphIssue({
+          code: "INCOMPATIBLE_OWNER_TOOL",
+          partId: part.id,
+          role: part.role,
+          toolId: part.toolId,
+          message: `${libraryName} requires a React-based frontend`,
+        });
+      }
+
+      if (part.toolId === "shadcn-svelte" && astroIntegration !== "svelte") {
+        return createStackGraphIssue({
+          code: "INCOMPATIBLE_OWNER_TOOL",
+          partId: part.id,
+          role: part.role,
+          toolId: part.toolId,
+          message: "shadcn-svelte requires SvelteKit or Astro with Svelte integration",
+        });
+      }
+
+      if (
+        part.toolId === "headless-ui" &&
+        astroIntegration !== "react" &&
+        astroIntegration !== "vue"
+      ) {
+        return createStackGraphIssue({
+          code: "INCOMPATIBLE_OWNER_TOOL",
+          partId: part.id,
+          role: part.role,
+          toolId: part.toolId,
+          message: "Headless UI requires React or Vue frontend",
+        });
+      }
+
+      if (
+        part.toolId === "park-ui" &&
+        astroIntegration !== "react" &&
+        astroIntegration !== "vue" &&
+        astroIntegration !== "solid"
+      ) {
+        return createStackGraphIssue({
+          code: "INCOMPATIBLE_OWNER_TOOL",
+          partId: part.id,
+          role: part.role,
+          toolId: part.toolId,
+          message: "Park UI requires React, Vue, or Solid frontend",
+        });
+      }
+    }
+
     const cssTool = context.siblingToolIdsByRole?.css ?? "tailwind";
     if (compatibility && !(compatibility.cssFrameworks as readonly string[]).includes(cssTool)) {
       return createStackGraphIssue({
@@ -1120,6 +1210,26 @@ function createTypeScriptBackendCompatibilityIssue(
         message: "Dodo Payments are not yet supported for React + Vite projects.",
       });
     }
+  }
+
+  if (part.role === "email" && part.toolId !== "none" && context.ownerToolId === "convex") {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_OWNER_TOOL",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message: "Email integration is not available with Convex backend",
+    });
+  }
+
+  if (part.role === "rateLimit" && part.toolId !== "none" && context.ownerToolId === "convex") {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_OWNER_TOOL",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message: "Rate limiting helpers are not generated with Convex backend",
+    });
   }
 
   if (part.role === "cms" && part.toolId === "payload") {
@@ -1558,9 +1668,51 @@ function createAddonCompatibilityIssue(
         message: "TanStack Query is already included via the selected API layer.",
       });
     }
+
+    if (
+      [
+        "tanstack-query",
+        "tanstack-table",
+        "tanstack-virtual",
+        "tanstack-db",
+        "tanstack-pacer",
+      ].includes(part.toolId) &&
+      frontendTool === "astro" &&
+      context.settings?.astroIntegration === "none"
+    ) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message:
+          "TanStack libraries with Astro require a UI framework integration (React, Vue, Svelte, or Solid)",
+      });
+    }
   }
 
   if (part.role === "workspaceTooling") {
+    const workspaceTooling = context.selectedToolIdsByRoleList?.workspaceTooling ?? [];
+    if (part.toolId === "nx" && workspaceTooling.includes("turborepo")) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Choose either Nx or Turborepo, not both",
+      });
+    }
+
+    if (part.toolId === "turborepo" && workspaceTooling.includes("nx")) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Choose either Turborepo or Nx, not both",
+      });
+    }
+
     if (part.toolId === "docker-compose" || part.toolId === "devcontainer") {
       const title = part.toolId === "devcontainer" ? "DevContainer" : "Docker Compose";
 
@@ -2057,8 +2209,8 @@ function getStackPartCompatibilityIssue(
   if (
     part.ecosystem === "elixir" &&
     part.toolId === "wallaby" &&
-    context.ownerRole === "backend" &&
-    context.ownerToolId === "none"
+    (!context.ownerRole ||
+      (context.ownerRole === "backend" && context.ownerToolId === "none"))
   ) {
     return createStackGraphIssue({
       code: "INCOMPATIBLE_OWNER_TOOL",
@@ -2085,7 +2237,7 @@ function getStackPartCompatibilityIssue(
 }
 
 export function getStackPartCompatibilityIssueForPart(
-  part: Pick<StackPart, "id" | "role" | "toolId" | "ecosystem" | "ownerPartId">,
+  part: Pick<StackPart, "id" | "role" | "toolId" | "ecosystem" | "ownerPartId" | "settings">,
   parts: readonly StackPart[],
 ): StackGraphIssue | undefined {
   return getStackPartCompatibilityIssue(part, getStackPartOptionContextForPart(part, parts));
@@ -2302,7 +2454,7 @@ function getSiblingToolIdsByRoleList(
 }
 
 function getStackPartOptionContextForPart(
-  part: Pick<StackPart, "role" | "ecosystem" | "ownerPartId">,
+  part: Pick<StackPart, "role" | "ecosystem" | "ownerPartId" | "settings">,
   parts: readonly StackPart[],
 ): StackPartOptionContext {
   const partsById = new Map(parts.map((candidate) => [candidate.id, candidate]));
@@ -2316,6 +2468,7 @@ function getStackPartOptionContextForPart(
       owner && PRIMARY_ROLES.has(owner.role) ? (owner.role as StackPrimaryRole) : undefined,
     ownerToolId: owner?.toolId,
     ownerEcosystem: owner?.ecosystem,
+    settings: part.settings,
     siblingToolIdsByRole: getSiblingToolIdsByRole(part, parts),
     siblingToolIdsByRoleList: getSiblingToolIdsByRoleList(part, parts),
     selectedToolIdsByRole: getSelectedToolIdsByRole(parts),

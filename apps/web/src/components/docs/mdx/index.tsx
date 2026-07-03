@@ -9,6 +9,7 @@ import { OptionCategoryTable, OptionReferenceSummary } from "./option-reference"
 import { CategoryCount, OptionCount } from "./option-stats";
 import { PMTabs } from "./pm-tabs";
 import { StarterPackCta, StarterPackHub } from "./starter-pack-cta";
+import { VerifiedCombinationsSummary } from "./verified-combinations-summary";
 
 /**
  * Registry of components passed to `<MDXProvider>` (or directly via the
@@ -36,4 +37,5 @@ export const mdxComponents: Record<string, ComponentType<any>> = {
   PMTabs,
   StarterPackCta,
   StarterPackHub,
+  VerifiedCombinationsSummary,
 };

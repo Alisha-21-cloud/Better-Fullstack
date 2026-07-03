@@ -1,63 +1,19 @@
 # Community-Requested Integrations
 
 Smaller feature requests from GitHub issues across both repos that do not warrant individual plan
-files. Status was refreshed on 2026-06-30; shipped items remain here only when the original request
-is useful historical context.
-
----
-
-## File Storage
-
-### Cloudinary (Better-Fullstack #80)
-
-- [x] Add `cloudinary` ✅ — managed media storage, transformation, and CDN. Image/video optimization, AI-based cropping, responsive breakpoints.
-  - **SDK:** `cloudinary` (Node.js)
-  - **Env vars:** `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
-  - **Template:** Upload helper, signed/unsigned uploads, URL generation
-  - **Category:** File Storage (alongside S3, R2)
-
-### Supabase Storage (already tracked in typescript-category-expansion.md)
-
----
-
-## Data Fetching
-
-### SWR (Better-Fullstack #79)
-
-- [x] Add `swr` ✅ — Vercel's React data-fetching library. Stale-while-revalidate pattern, smaller bundle than TanStack Query, simpler API.
-  - **When:** React-based frontends only (next, react-router, react-vite, tanstack-router, tanstack-start)
-  - **Package:** `swr`
-  - **Template:** SWR provider setup, example fetcher, typed hooks
-  - **Category:** New — "Data Fetching" (could pair with `tanstack-query` which is already an addon)
-  - **Note:** Maintainer responded positively to this request
+files. Status was refreshed on 2026-06-30; only unfinished work remains here.
 
 ---
 
 ## UI Libraries
 
-### shadcn-svelte (better-t-stack #468)
-
-- [x] Add `shadcn-svelte` ✅ — community port of shadcn/ui for SvelteKit. Same component model, Tailwind-based.
-  - **When:** Frontend = svelte
-  - **Package:** `bits-ui` (underlying primitives)
-  - **Template:** Component installation, `components.json` for Svelte variant
-  - **Category:** UI Library (conditional on svelte frontend)
-
 ### Gluestack (better-t-stack #962)
 
-- [x] Add `gluestack-ui` for React Native ✅ — mobile UI option backed by `@gluestack-ui/themed`.
-  - **Remaining:** decide whether a separate web/universal Gluestack path is worth adding, or whether mobile-only is enough.
+- [ ] Decide whether a separate web/universal Gluestack path is worth adding, or whether mobile-only is enough.
 
 ---
 
 ## API Styles
-
-### REST / OpenAPI (better-t-stack #631)
-
-- [x] Add `openapi` ✅ — plain REST API scaffolding with OpenAPI spec generation. No tRPC/oRPC overhead.
-  - **Packages:** `@asteasolutions/zod-to-openapi` + `swagger-ui-express` (or `@scalar/express-api-reference`)
-  - **Template:** Route definitions with Zod schemas, auto-generated OpenAPI spec, Swagger UI endpoint
-  - **Category:** API (alongside trpc, orpc, ts-rest, garph)
 
 ### Effect-ts HTTP API (better-t-stack #815)
 
@@ -100,8 +56,7 @@ is useful historical context.
 
 ### Mastra (better-t-stack #633)
 
-- [x] Add `mastra` ✅ — TS AI agent framework. Deploys as Hono server or inside Next.js routes.
-  - **Remaining:** verify generated template depth and add quality assertions if it is still dependency-light.
+- [ ] Verify generated template depth and add quality assertions if it is still dependency-light.
   - **Category:** AI SDK (already tracked — ensure template is comprehensive)
 
 ---
