@@ -102,6 +102,25 @@ function withCiTemplateFlags(config: ProjectConfig): ProjectConfigWithCiWorkingD
   };
 }
 
+function mergeGraphAddonSelections(
+  config: ProjectConfig,
+  projectedConfig: ProjectConfig,
+): ProjectConfig["addons"] {
+  const uniqueAddons = [...new Set([...(config.addons ?? []), ...(projectedConfig.addons ?? [])])];
+  const realAddons = uniqueAddons.filter((addon) => addon !== "none");
+  return (realAddons.length > 0 ? realAddons : uniqueAddons) as ProjectConfig["addons"];
+}
+
+function withGraphAddonSelections(
+  config: ProjectConfig,
+  projectedConfig: ProjectConfig,
+): ProjectConfig {
+  return {
+    ...projectedConfig,
+    addons: mergeGraphAddonSelections(config, projectedConfig),
+  };
+}
+
 function isPrimaryPart(part: StackPart, role: StackPart["role"]) {
   return part.role === role && !part.ownerPartId && part.source !== "provided";
 }
@@ -126,7 +145,10 @@ async function processGraphTemplates(
   templates: TemplateData,
   config: ProjectConfig,
 ): Promise<void> {
-  const tsConfig = stackGraphToLegacyProjectConfigForEcosystem(config, "typescript");
+  const tsConfig = withGraphAddonSelections(
+    config,
+    stackGraphToLegacyProjectConfigForEcosystem(config, "typescript"),
+  );
   await processBaseTemplate(vfs, templates, tsConfig);
 
   if (tsConfig.frontend.length > 0 || tsConfig.backend !== "none") {
@@ -220,11 +242,13 @@ async function processGraphTemplates(
     if (backendPart) {
       const targetPath = backendPart.targetPath ?? getRoleTargetPath("backend") ?? "apps/server";
       const addonConfig = {
-        ...stackGraphToLegacyProjectConfigForEcosystem(
+        ...withGraphAddonSelections(
           config,
-          backendPart.ecosystem as NonTypeScriptTemplateEcosystem,
+          stackGraphToLegacyProjectConfigForEcosystem(
+            config,
+            backendPart.ecosystem as NonTypeScriptTemplateEcosystem,
+          ),
         ),
-        addons: config.addons,
       } as ProjectConfigWithCiWorkingDirectory;
       if (addonConfig.addons.some((addon) => addon !== "none")) {
         addonConfig.ciWorkingDirectory = targetPath;
