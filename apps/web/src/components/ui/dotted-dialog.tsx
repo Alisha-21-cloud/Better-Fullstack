@@ -31,9 +31,9 @@ function DottedDialogOverlay({
     <DialogPrimitive.Backdrop
       data-slot="dotted-dialog-overlay"
       className={cn(
-        "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 fixed inset-0 isolate z-50 overflow-hidden bg-background/70 backdrop-blur-sm duration-200",
-        "before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--foreground)_22%,transparent)_1px,transparent_1px)] before:bg-[length:18px_18px] before:opacity-45",
-        "after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_center,transparent_0%,var(--background)_76%)]",
+        "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 fixed inset-0 isolate z-50 overflow-hidden bg-background/75 backdrop-blur-sm duration-200",
+        "before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--foreground)_38%,transparent)_1px,transparent_1px)] before:bg-[length:18px_18px]",
+        "after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_center,transparent_35%,var(--background)_92%)]",
         className,
       )}
       {...props}
@@ -57,7 +57,7 @@ function DottedDialogContent({
         className={cn(
           "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-hidden border border-border/70 bg-fd-background text-xs/relaxed shadow-2xl shadow-black/20 outline-none duration-200 sm:max-w-sm",
           "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-closed:slide-out-to-top-[2%] data-open:slide-in-from-top-[2%]",
-          "before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--foreground)_16%,transparent)_1px,transparent_1px)] before:bg-[length:16px_16px] before:opacity-25",
+          "before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--foreground)_20%,transparent)_1px,transparent_1px)] before:bg-[length:16px_16px]",
           className,
         )}
         {...props}
