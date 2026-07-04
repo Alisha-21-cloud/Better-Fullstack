@@ -1091,12 +1091,6 @@ function buildServerVars(
         "Dodo Payments environment - use 'test_mode' for testing, 'live_mode' for production",
     },
     {
-      key: "REVENUECAT_WEBHOOK_AUTH",
-      value: "",
-      condition: payments === "revenuecat",
-      comment: "Shared secret for RevenueCat webhook authentication (min 32 characters)",
-    },
-    {
       key: "RESEND_API_KEY",
       value: "",
       condition: email === "resend",

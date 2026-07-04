@@ -920,6 +920,20 @@ export const analyzeStackCompatibility = (
     }
   }
 
+  if (nextStack.payments === "revenuecat") {
+    const hasNativeFrontend = nextStack.nativeFrontend.some((f) =>
+      ["native-bare", "native-uniwind", "native-unistyles"].includes(f),
+    );
+    if (!hasNativeFrontend) {
+      nextStack.payments = "none";
+      changed = true;
+      changes.push({
+        category: "payments",
+        message: "Payments set to 'None' (RevenueCat requires a native frontend)",
+      });
+    }
+  }
+
   // ============================================
   // EMAIL CONSTRAINTS
   // ============================================
@@ -2093,7 +2107,7 @@ export const getDisabledReason = (
 
   if (category === "payments" && optionId === "revenuecat") {
     const hasNativeFrontend = currentStack.nativeFrontend.some((f) =>
-      ["native-bare", "native-uniwind", "native-unistyles"].includes(f)
+      ["native-bare", "native-uniwind", "native-unistyles"].includes(f),
     );
     if (!hasNativeFrontend) {
       return "RevenueCat payments requires a native frontend (native-bare, native-uniwind, or native-unistyles)";

@@ -1,5 +1,4 @@
-import { Column, Host, Text as ExpoUIText } from "@expo/ui";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { NAV_THEME } from "@/lib/constants";
 import { useColorScheme } from "@/lib/use-color-scheme";
@@ -12,35 +11,39 @@ export function SubscriptionStatusCard() {
 
   return (
     <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
-      <Host matchContents=\{{ vertical: true }}>
-        <Column spacing={6}>
-          <ExpoUIText textStyle=\{{ color: theme.text, fontSize: 16, fontWeight: "bold" }}>
-            Subscription
-          </ExpoUIText>
-          {!isConfigured ? (
-            <ExpoUIText textStyle=\{{ color: theme.text, fontSize: 13 }} style=\{{ opacity: 0.7 }}>
-              RevenueCat is not configured yet. Add your API keys in apps/native/.env.
-            </ExpoUIText>
-          ) : isPro ? (
-            <ExpoUIText textStyle=\{{ color: "#16a34a", fontSize: 14, fontWeight: "500" }}>
-              You're a Premium member 🎉
-            </ExpoUIText>
-          ) : (
-            <ExpoUIText textStyle=\{{ color: theme.text, fontSize: 13 }} style=\{{ opacity: 0.7 }}>
-              You're on the free plan.
-            </ExpoUIText>
-          )}
-        </Column>
-      </Host>
+      <Text style={[styles.title, { color: theme.text }]}>Subscription</Text>
+      {!isConfigured ? (
+        <Text style={[styles.muted, { color: theme.text }]}>
+          RevenueCat is not configured yet. Add your API keys in apps/native/.env.
+        </Text>
+      ) : isPro ? (
+        <Text style={styles.pro}>You're a Premium member 🎉</Text>
+      ) : (
+        <Text style={[styles.muted, { color: theme.text }]}>You're on the free plan.</Text>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
+    gap: 6,
     marginBottom: 16,
     padding: 16,
     borderWidth: 1,
     borderRadius: 16,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  pro: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#16a34a",
+  },
+  muted: {
+    fontSize: 13,
+    opacity: 0.7,
   },
 });
