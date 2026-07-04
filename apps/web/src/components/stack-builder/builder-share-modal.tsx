@@ -1,13 +1,4 @@
-import {
-  Check,
-  Copy,
-  Github,
-  MessageCircle,
-  Radio,
-  Send,
-  Share2,
-  Twitter,
-} from "lucide-react";
+import { Check, Copy, Github, MessageCircle, Radio, Send, Share2, Twitter } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -153,25 +144,25 @@ export function BuilderShareModal() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden border-border/70 bg-fd-background p-0 shadow-2xl shadow-black/20 sm:max-w-xl">
-        <div className="border-border/70 border-b bg-muted/20 px-5 py-4 sm:px-6">
-          <DialogHeader className="pr-8">
-            <div className="mb-2 flex w-fit items-center gap-2 border border-primary/25 bg-primary/10 px-2 py-1 font-mono text-[10px] text-primary uppercase">
+      <DialogContent className="gap-0 p-0 sm:max-w-lg">
+        <div className="border-border/50 border-b px-6 pt-6 pb-5">
+          <DialogHeader className="gap-2.5 pr-8">
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-[10px] text-muted-foreground uppercase tracking-wide">
               <Share2 className="size-3" aria-hidden="true" />
               Built with Better Fullstack?
-            </div>
-            <DialogTitle className="text-balance font-semibold text-2xl text-foreground leading-tight">
+            </span>
+            <DialogTitle className="text-balance font-semibold text-xl text-foreground leading-tight sm:text-2xl">
               Show us what you shipped
             </DialogTitle>
-            <DialogDescription className="max-w-[32rem] text-sm leading-relaxed">
+            <DialogDescription className="text-sm leading-relaxed">
               If Better Fullstack helped you start a project, send it over. A repo, demo,
               screenshot, launch post, or tiny work-in-progress is perfect.
             </DialogDescription>
           </DialogHeader>
         </div>
 
-        <div className="grid gap-4 px-5 py-5 sm:px-6">
-          <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-5 px-6 py-5">
+          <div className="grid gap-2.5 sm:grid-cols-2">
             {contactTargets.map((target) => {
               const Icon = target.icon;
 
@@ -181,11 +172,11 @@ export function BuilderShareModal() {
                   href={target.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="group flex min-h-16 items-center gap-3 border border-border/70 bg-background/70 px-3 py-3 text-left transition-colors hover:border-primary/35 hover:bg-muted/35"
+                  className="group flex items-center gap-3 rounded-xl border border-border/50 bg-muted/20 px-3.5 py-3 text-left transition-colors hover:border-border hover:bg-muted/50"
                 >
                   <span
                     className={cn(
-                      "flex size-9 shrink-0 items-center justify-center border border-border/70 bg-muted/35 transition-colors group-hover:border-primary/30",
+                      "flex size-9 shrink-0 items-center justify-center rounded-lg bg-background/80 shadow-sm ring-1 ring-border/50 transition-colors",
                       target.className,
                     )}
                   >
@@ -204,7 +195,7 @@ export function BuilderShareModal() {
             })}
           </div>
 
-          <div className="border border-border/70 bg-muted/20 p-3">
+          <div className="rounded-xl border border-border/50 bg-muted/30 p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-medium text-sm text-foreground">
@@ -225,37 +216,40 @@ export function BuilderShareModal() {
               </Button>
             </div>
 
-            <div className="mt-3 grid gap-2 sm:grid-cols-3">
-              <a
-                href={xShareUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-8 items-center justify-center gap-2 border border-border bg-background px-3 font-medium text-xs transition-colors hover:bg-muted"
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              <Button
+                variant="outline"
+                size="sm"
+                render={
+                  <a href={xShareUrl} target="_blank" rel="noreferrer" aria-label="Post on X" />
+                }
               >
                 <Twitter className="size-3.5" aria-hidden="true" />
                 Post on X
-              </a>
-              <a
-                href={whatsAppShareUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-8 items-center justify-center gap-2 border border-border bg-background px-3 font-medium text-xs transition-colors hover:bg-muted"
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                render={
+                  <a
+                    href={whatsAppShareUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Share on WhatsApp"
+                  />
+                }
               >
                 <MessageCircle className="size-3.5 text-emerald-500" aria-hidden="true" />
                 WhatsApp
-              </a>
-              <button
-                type="button"
-                onClick={copyMessage}
-                className="inline-flex h-8 items-center justify-center gap-2 border border-border bg-background px-3 font-medium text-xs transition-colors hover:bg-muted"
-              >
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={copyMessage}>
                 {copied ? (
                   <Check className="size-3.5 text-green-500" aria-hidden="true" />
                 ) : (
                   <Copy className="size-3.5" aria-hidden="true" />
                 )}
                 {copied ? "Copied" : "Copy text"}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

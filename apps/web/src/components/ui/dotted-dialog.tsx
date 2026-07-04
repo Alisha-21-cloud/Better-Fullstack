@@ -10,9 +10,7 @@ function DottedDialog({ ...props }: DialogPrimitive.Root.Props) {
 }
 
 function DottedDialogTrigger({ ...props }: DialogPrimitive.Trigger.Props) {
-  return (
-    <DialogPrimitive.Trigger data-slot="dotted-dialog-trigger" {...props} />
-  );
+  return <DialogPrimitive.Trigger data-slot="dotted-dialog-trigger" {...props} />;
 }
 
 function DottedDialogPortal({ ...props }: DialogPrimitive.Portal.Props) {
@@ -23,17 +21,18 @@ function DottedDialogClose({ ...props }: DialogPrimitive.Close.Props) {
   return <DialogPrimitive.Close data-slot="dotted-dialog-close" {...props} />;
 }
 
-function DottedDialogOverlay({
-  className,
-  ...props
-}: DialogPrimitive.Backdrop.Props) {
+function DottedDialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) {
   return (
     <DialogPrimitive.Backdrop
       data-slot="dotted-dialog-overlay"
       className={cn(
-        "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 fixed inset-0 isolate z-50 overflow-hidden bg-background/75 backdrop-blur-sm duration-200",
-        "before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--foreground)_38%,transparent)_1px,transparent_1px)] before:bg-[length:18px_18px]",
-        "after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_center,transparent_35%,var(--background)_92%)]",
+        "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 fixed inset-0 z-50 duration-200",
+        // Motion.dev-style dotted backdrop: a near-solid sheet the color of the
+        // page, punched with a fine grid of transparent pinholes. The pinholes
+        // reveal a brightened + blurred slice of what's behind, so the dots read
+        // as faint texture in both themes.
+        "bg-[radial-gradient(transparent_1px,var(--background)_1px)] [background-size:4px_4px]",
+        "[-webkit-backdrop-filter:brightness(1.15)_blur(3px)] [backdrop-filter:brightness(1.15)_blur(3px)]",
         className,
       )}
       {...props}
@@ -55,18 +54,17 @@ function DottedDialogContent({
       <DialogPrimitive.Popup
         data-slot="dotted-dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-hidden border border-border/70 bg-fd-background text-xs/relaxed shadow-2xl shadow-black/20 outline-none duration-200 sm:max-w-sm",
+          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 overflow-hidden rounded-2xl border border-border/60 bg-popover p-6 text-sm text-popover-foreground shadow-2xl shadow-black/30 outline-none duration-200 sm:max-w-lg",
           "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-closed:slide-out-to-top-[2%] data-open:slide-in-from-top-[2%]",
-          "before:pointer-events-none before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_center,color-mix(in_oklab,var(--foreground)_20%,transparent)_1px,transparent_1px)] before:bg-[length:16px_16px]",
           className,
         )}
         {...props}
       >
-        <div className="relative z-[1] grid min-h-0">{children}</div>
+        {children}
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dotted-dialog-close"
-            className="absolute top-4 right-4 z-[2] flex h-7 w-7 items-center justify-center border border-transparent text-muted-foreground/60 transition-all duration-150 hover:border-border hover:bg-background/70 hover:text-foreground focus:outline-none"
+            className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/60 transition-all duration-150 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
           >
             <XIcon className="h-4 w-4" />
             <span className="sr-only">{m.uiClose()}</span>
@@ -77,14 +75,11 @@ function DottedDialogContent({
   );
 }
 
-function DottedDialogHeader({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function DottedDialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dotted-dialog-header"
-      className={cn("flex flex-col gap-1.5 pr-8", className)}
+      className={cn("flex flex-col gap-1.5", className)}
       {...props}
     />
   );
@@ -106,7 +101,7 @@ function DottedDialogFooter({
     >
       {children}
       {showCloseButton && (
-        <DialogPrimitive.Close className="inline-flex h-9 items-center justify-center border border-border/50 bg-muted/20 px-4 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted/40 hover:text-foreground">
+        <DialogPrimitive.Close className="inline-flex h-8 items-center justify-center rounded-lg border border-border/60 bg-muted/30 px-4 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted/50 hover:text-foreground">
           {m.uiClose()}
         </DialogPrimitive.Close>
       )}
@@ -114,28 +109,22 @@ function DottedDialogFooter({
   );
 }
 
-function DottedDialogTitle({
-  className,
-  ...props
-}: DialogPrimitive.Title.Props) {
+function DottedDialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dotted-dialog-title"
-      className={cn("text-sm font-medium tracking-tight", className)}
+      className={cn("text-base font-semibold tracking-tight", className)}
       {...props}
     />
   );
 }
 
-function DottedDialogDescription({
-  className,
-  ...props
-}: DialogPrimitive.Description.Props) {
+function DottedDialogDescription({ className, ...props }: DialogPrimitive.Description.Props) {
   return (
     <DialogPrimitive.Description
       data-slot="dotted-dialog-description"
       className={cn(
-        "text-muted-foreground *:[a]:hover:text-foreground text-xs/relaxed *:[a]:underline *:[a]:underline-offset-3",
+        "text-muted-foreground *:[a]:hover:text-foreground text-sm/relaxed *:[a]:underline *:[a]:underline-offset-3",
         className,
       )}
       {...props}
