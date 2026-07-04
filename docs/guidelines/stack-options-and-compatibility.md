@@ -31,7 +31,8 @@ Current examples:
 3. Add or update the builder entry in `apps/web/src/lib/constant.ts`.
 4. Update compatibility rules if the option has framework-specific constraints.
 5. Update any tech links, preview labels, or prompt copy that mention the option.
-6. Run parity and release-focused tests.
+6. If the option is safe for existing-project updates, add or update stack-update coverage and make sure explicit `add --<flag>` handling remains aligned with create-time flags.
+7. Run parity and release-focused tests.
 
 ## Compatibility traps already known
 

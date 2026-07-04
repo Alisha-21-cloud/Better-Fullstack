@@ -187,6 +187,14 @@ function updateRootPackageJson(vfs: VirtualFileSystem, config: ProjectConfig): v
     scripts["db:down"] = pmConfig.filter(dbPackageName, "db:down");
   }
 
+  applyGeneratedPackageTestScripts(vfs, config);
+  const testCommands = getWorkspaceTestCommands(vfs, packageManager);
+  if (testCommands.length > 0) {
+    scripts.test = testCommands.join(" && ");
+  } else {
+    delete scripts.test;
+  }
+
   // Virtual generation runs in preview and test contexts where we cannot shell out
   // to discover the user's installed package manager version. Keep the field valid
   // so generated workspaces remain buildable; the CLI create() path rewrites this to
@@ -220,6 +228,79 @@ function updateRootPackageJson(vfs: VirtualFileSystem, config: ProjectConfig): v
     : workspaces;
 
   vfs.writeJson("package.json", pkgJson);
+}
+
+function applyGeneratedPackageTestScripts(vfs: VirtualFileSystem, config: ProjectConfig): void {
+  const testScript = getGeneratedTypeScriptTestScript(config.testing);
+  if (!testScript) return;
+
+  for (const packagePath of [
+    "apps/web/package.json",
+    "apps/server/package.json",
+    "packages/api/package.json",
+  ]) {
+    const pkgJson = vfs.readJson<PackageJson>(packagePath);
+    if (!pkgJson) continue;
+
+    pkgJson.scripts = pkgJson.scripts || {};
+    pkgJson.scripts.test = pkgJson.scripts.test || testScript;
+    vfs.writeJson(packagePath, pkgJson);
+  }
+}
+
+function getGeneratedTypeScriptTestScript(
+  testing: ProjectConfig["testing"],
+): string | undefined {
+  switch (testing) {
+    case "vitest":
+    case "vitest-playwright":
+      return "vitest run --passWithNoTests";
+    case "jest":
+      return "jest --passWithNoTests";
+    default:
+      return undefined;
+  }
+}
+
+function getWorkspaceTestCommands(
+  vfs: VirtualFileSystem,
+  packageManager: ProjectConfig["packageManager"],
+): string[] {
+  const commands: string[] = [];
+
+  for (const packagePath of [
+    "apps/web/package.json",
+    "apps/server/package.json",
+    "packages/api/package.json",
+    "apps/native/package.json",
+  ]) {
+    const pkgJson = vfs.readJson<PackageJson>(packagePath);
+    if (!pkgJson?.name || !pkgJson.scripts?.test) continue;
+    commands.push(getPackageManagerWorkspaceScript(packageManager, pkgJson.name, "test"));
+  }
+
+  return commands;
+}
+
+function getPackageManagerWorkspaceScript(
+  packageManager: ProjectConfig["packageManager"],
+  workspaceName: string,
+  script: string,
+): string {
+  switch (packageManager) {
+    case "pnpm":
+      return `pnpm --filter ${workspaceName} ${script}`;
+    case "npm":
+      return `npm run ${script} --workspace ${workspaceName}`;
+    case "bun":
+      return `bun run --filter ${workspaceName} ${script}`;
+    case "yarn":
+      return `yarn workspace ${workspaceName} ${script}`;
+    default: {
+      const _exhaustive: never = packageManager;
+      throw new Error(`Unknown package manager: ${_exhaustive}`);
+    }
+  }
 }
 
 function applyBetterAuthKyselyOverride(pkgJson: PackageJson, config: ProjectConfig): void {

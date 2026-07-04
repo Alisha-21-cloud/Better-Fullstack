@@ -24,6 +24,7 @@ import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as GuidesSplatRouteImport } from './routes/guides/$'
 import { Route as DocsSplatRouteImport } from './routes/docs/$'
 import { Route as BlogSplatRouteImport } from './routes/blog/$'
+import { Route as ApiVerifiedCombinationsRouteImport } from './routes/api/verified-combinations'
 import { Route as ApiStatsRouteImport } from './routes/api/stats'
 import { Route as ApiPreviewRouteImport } from './routes/api/preview'
 
@@ -102,6 +103,11 @@ const BlogSplatRoute = BlogSplatRouteImport.update({
   path: '/blog/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVerifiedCombinationsRoute = ApiVerifiedCombinationsRouteImport.update({
+  id: '/api/verified-combinations',
+  path: '/api/verified-combinations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStatsRoute = ApiStatsRouteImport.update({
   id: '/api/stats',
   path: '/api/stats',
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/stack': typeof StackRoute
   '/api/preview': typeof ApiPreviewRoute
   '/api/stats': typeof ApiStatsRoute
+  '/api/verified-combinations': typeof ApiVerifiedCombinationsRoute
   '/blog/$': typeof BlogSplatRoute
   '/docs/$': typeof DocsSplatRoute
   '/guides/$': typeof GuidesSplatRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/stack': typeof StackRoute
   '/api/preview': typeof ApiPreviewRoute
   '/api/stats': typeof ApiStatsRoute
+  '/api/verified-combinations': typeof ApiVerifiedCombinationsRoute
   '/blog/$': typeof BlogSplatRoute
   '/docs/$': typeof DocsSplatRoute
   '/guides/$': typeof GuidesSplatRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/stack': typeof StackRoute
   '/api/preview': typeof ApiPreviewRoute
   '/api/stats': typeof ApiStatsRoute
+  '/api/verified-combinations': typeof ApiVerifiedCombinationsRoute
   '/blog/$': typeof BlogSplatRoute
   '/docs/$': typeof DocsSplatRoute
   '/guides/$': typeof GuidesSplatRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/stack'
     | '/api/preview'
     | '/api/stats'
+    | '/api/verified-combinations'
     | '/blog/$'
     | '/docs/$'
     | '/guides/$'
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/stack'
     | '/api/preview'
     | '/api/stats'
+    | '/api/verified-combinations'
     | '/blog/$'
     | '/docs/$'
     | '/guides/$'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/stack'
     | '/api/preview'
     | '/api/stats'
+    | '/api/verified-combinations'
     | '/blog/$'
     | '/docs/$'
     | '/guides/$'
@@ -243,6 +255,7 @@ export interface RootRouteChildren {
   StackRoute: typeof StackRoute
   ApiPreviewRoute: typeof ApiPreviewRoute
   ApiStatsRoute: typeof ApiStatsRoute
+  ApiVerifiedCombinationsRoute: typeof ApiVerifiedCombinationsRoute
   BlogSplatRoute: typeof BlogSplatRoute
   DocsSplatRoute: typeof DocsSplatRoute
   GuidesSplatRoute: typeof GuidesSplatRoute
@@ -358,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/verified-combinations': {
+      id: '/api/verified-combinations'
+      path: '/api/verified-combinations'
+      fullPath: '/api/verified-combinations'
+      preLoaderRoute: typeof ApiVerifiedCombinationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/stats': {
       id: '/api/stats'
       path: '/api/stats'
@@ -387,6 +407,7 @@ const rootRouteChildren: RootRouteChildren = {
   StackRoute: StackRoute,
   ApiPreviewRoute: ApiPreviewRoute,
   ApiStatsRoute: ApiStatsRoute,
+  ApiVerifiedCombinationsRoute: ApiVerifiedCombinationsRoute,
   BlogSplatRoute: BlogSplatRoute,
   DocsSplatRoute: DocsSplatRoute,
   GuidesSplatRoute: GuidesSplatRoute,

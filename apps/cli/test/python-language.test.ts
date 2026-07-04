@@ -3109,6 +3109,7 @@ describe("Python Language Support", () => {
       expect(pyprojectContent).toContain("ruff");
       expect(pyprojectContent).toContain("[tool.ruff]");
       expect(pyprojectContent).toContain("[tool.ruff.lint]");
+      expect(pyprojectContent).toContain('"B008",   # FastAPI intentionally uses Depends() in argument defaults');
       expect(pyprojectContent).toContain("[tool.ruff.format]");
     });
 
@@ -3123,6 +3124,7 @@ describe("Python Language Support", () => {
         pythonAuth: "jwt",
         pythonTaskQueue: "rq",
         pythonQuality: "ruff",
+        caching: "upstash-redis",
       });
 
       expect(result.success).toBe(true);
@@ -3135,6 +3137,9 @@ describe("Python Language Support", () => {
       expect(getFileContent(root, "src/app/anthropic_client.py")).toContain("from collections.abc import AsyncIterator");
       expect(getFileContent(root, "src/app/rq_tasks.py")).toContain("from datetime import UTC, datetime");
       expect(getFileContent(root, "src/app/rq_tasks.py")).toContain("datetime.now(UTC)");
+
+      const cacheContent = getFileContent(root, "src/app/cache.py");
+      expect(cacheContent).toContain("from upstash_redis.asyncio import Redis\n\nredis = Redis.from_env()");
     });
   });
 

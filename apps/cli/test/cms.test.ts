@@ -763,6 +763,10 @@ describe("CMS Options", () => {
         }),
       );
       expectSuccess(result);
+
+      const tinaConfig = await Bun.file(`${result.projectDir}/apps/web/tina/config.ts`).text();
+      expect(tinaConfig).toContain("process.env.PUBLIC_TINA_CLIENT_ID");
+      expect(tinaConfig).not.toContain("import.meta.env.PUBLIC_TINA_CLIENT_ID");
     });
 
     test("tinacms with Nuxt", async () => {

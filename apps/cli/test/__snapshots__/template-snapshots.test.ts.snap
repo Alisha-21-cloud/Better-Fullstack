@@ -10008,6 +10008,7 @@ exports[`Template Snapshots Key File Content Snapshots key files: self-tanstack-
     "lucide-react": "^1.21.0"
   },
   "devDependencies": {
+    "@tanstack/react-query-devtools": "^5.101.2",
     "@tanstack/react-router-devtools": "^1.167.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
@@ -10018,8 +10019,7 @@ exports[`Template Snapshots Key File Content Snapshots key files: self-tanstack-
     "vite": "^8.1.0",
     "web-vitals": "^5.3.0",
     "typescript": "catalog:",
-    "@snapshot-self-tanstack-start-clerk/config": "workspace:*",
-    "@tanstack/react-query-devtools": "^5.101.2"
+    "@snapshot-self-tanstack-start-clerk/config": "workspace:*"
   }
 }
 "
@@ -18367,7 +18367,8 @@ export default app;
     "build": "bun run --filter '*' build",
     "check-types": "bun run --if-present --filter '*' check-types",
     "dev:native": "bun run --filter native dev",
-    "dev:server": "bun run --filter server dev"
+    "dev:server": "bun run --filter server dev",
+    "test": "bun run --filter native test"
   },
   "packageManager": "bun@1.3.5",
   "dependencies": {

@@ -247,6 +247,26 @@ describe("Cross-ecosystem graph generation", () => {
     expect(readme).not.toContain("bun run dev:web");
   });
 
+  it("keeps graph-only non-TypeScript GitHub Actions rooted in the backend app", async () => {
+    const result = await createVirtual({
+      projectName: "graph-python-ci",
+      ecosystem: "python",
+      frontend: [],
+      backend: "none",
+      api: "none",
+      runtime: "none",
+      addons: ["github-actions"],
+      stackParts: graphParts(["backend:python:fastapi"]),
+    });
+
+    expect(result.success).toBe(true);
+
+    const workflow = fileContent(result.tree!.root, ".github/workflows/ci.yml");
+    expect(workflow).toContain('working-directory: "apps/server"');
+    expect(workflow).toContain("if [ -f pyproject.toml ]; then pip install -e");
+    expect(workflow).toContain("run: pytest");
+  });
+
   it("shows ecosystem auth in the CLI config summary", () => {
     const output = displayConfig({
       backend: "none",
@@ -261,6 +281,23 @@ describe("Cross-ecosystem graph generation", () => {
     expect(output).toContain("elixir:phoenix");
     expect(output).toContain("Auth:");
     expect(output).toContain("elixir:phx-gen-auth");
+  });
+
+  it("omits disabled graph parts from the CLI config summary", () => {
+    const output = displayConfig({
+      backend: "none",
+      uiLibrary: "none",
+      stackParts: graphParts([
+        "frontend:typescript:next",
+        "frontend.ui:typescript:none",
+        "backend:go:gin",
+      ]),
+    });
+
+    expect(output).toContain("Stack Parts:");
+    expect(output).toContain("frontend:typescript:next");
+    expect(output).toContain("backend:go:gin");
+    expect(output).not.toContain("frontend.ui:typescript:none");
   });
 
   it("adds graph backend status UI to Angular, Qwik, and Redwood", async () => {

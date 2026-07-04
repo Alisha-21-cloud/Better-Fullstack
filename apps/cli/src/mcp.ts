@@ -761,7 +761,7 @@ export function getMcpGraphPreview(
   const graphSummary = stackParts.length > 0 ? getGraphSummary({ stackParts }) : undefined;
   const effectiveStack = stackParts.length > 0 ? getEffectiveStack({ stackParts }) : undefined;
   const stackPartSpecs = stackParts
-    .filter((part) => part.source !== "provided")
+    .filter((part) => part.source !== "provided" && part.toolId !== "none")
     .map((part) => formatStackPartSpec(part, stackParts));
 
   return {

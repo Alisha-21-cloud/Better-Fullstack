@@ -1,6 +1,6 @@
 # New Language Ecosystems
 
-Candidates for entirely new language ecosystem support beyond TypeScript, React Native, Rust, Go, Python, Java, Elixir, and .NET. Java, Elixir, and .NET have shipped as first-class ecosystems; this file now tracks the remaining new ecosystems and links follow-up work separately.
+Candidates for entirely new language ecosystem support beyond TypeScript, React Native, Rust, Go, Python, Java, Elixir, and .NET. This file tracks only remaining new-ecosystem decisions.
 
 ---
 
@@ -8,10 +8,8 @@ Candidates for entirely new language ecosystem support beyond TypeScript, React 
 
 | File | Language | Effort | Priority |
 |------|----------|--------|----------|
-| [../completed/java-ecosystem-foundation-2026-04-29.md](../completed/java-ecosystem-foundation-2026-04-29.md) | Java foundation | Done | Shipped in v1.6.2 |
-| [java-ecosystem-follow-ups.md](java-ecosystem-follow-ups.md) | Java expansion | Medium/Large | Follow-up — Micronaut, jOOQ, Keycloak, messaging, observability |
-| [elixir-ecosystem.md](elixir-ecosystem.md) | Elixir foundation and follow-ups | Done/Large | Foundation shipped; follow-ups remain for deeper Phoenix/LiveView coverage |
-| [../completed/dotnet-ecosystem-2026-06-10.md](../completed/dotnet-ecosystem-2026-06-10.md) | C# (ASP.NET Core, EF Core, SignalR) | Done | Shipped 2026-06-10 — foundation + multi-ecosystem backend |
+| [java-ecosystem-follow-ups.md](java-ecosystem-follow-ups.md) | Java expansion | Medium/Large | Follow-up — Micronaut, gRPC/OpenAPI generation, Actuator examples, Log4j2, runtime validation |
+| [elixir-ecosystem.md](elixir-ecosystem.md) | Elixir follow-ups | Large | Deeper Phoenix/LiveView coverage |
 
 ---
 
@@ -34,6 +32,5 @@ Candidates for entirely new language ecosystem support beyond TypeScript, React 
 
 ## Priority Order
 
-1. ~~**C# / ASP.NET** — enterprise demand, high-performance~~ ✅ Shipped 2026-06-10
-2. **Kotlin** — consider as a Java ecosystem extension rather than a separate ecosystem
-3. **Zig** — watch and wait
+1. **Kotlin** — consider as a Java ecosystem extension rather than a separate ecosystem
+2. **Zig** — watch and wait

@@ -159,6 +159,15 @@ export function getGraphBackendConnection(config: ProjectConfig): GraphBackendCo
           part.role === "observability" &&
           part.toolId === "health-checks",
       );
+      const hasTesting =
+        config.dotnetTesting.length > 0 ||
+        (config.stackParts ?? []).some(
+          (part) =>
+            part.ownerPartId === backend.id &&
+            part.role === "testing" &&
+            part.ecosystem === "dotnet" &&
+            part.toolId !== "none",
+        );
       const healthPath = hasHealthChecks ? "/health" : "/";
       return {
         ecosystem: backend.ecosystem,
@@ -171,7 +180,7 @@ export function getGraphBackendConnection(config: ProjectConfig): GraphBackendCo
         setupCommand: `cd ${targetPath} && dotnet restore`,
         devCommand: `cd ${targetPath} && dotnet run`,
         checkCommand: `cd ${targetPath} && dotnet build --no-restore`,
-        testCommand: config.dotnetTesting.length > 0 ? `cd ${targetPath} && dotnet test` : null,
+        testCommand: hasTesting ? `cd ${targetPath} && dotnet test` : null,
       };
     }
     default:

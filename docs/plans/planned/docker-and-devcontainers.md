@@ -1,87 +1,6 @@
 # Docker Follow-Ups & DevContainers
 
-Highly requested across both Better-Fullstack (#76 non-monorepo) and better-t-stack (#557, #806, #821). Docker is essential for self-hosted deployments and consistent dev environments. Status refreshed on 2026-06-30.
-
----
-
-## Dockerfile Generation
-
-- [x] Generate `Dockerfile` per app for supported deploy targets and docker-compose addon paths
-  - Multi-stage builds: `deps → build → runtime`
-  - Runtime-aware: Node.js (alpine), Bun, Deno, Rust (distroless), Python (slim), Go (scratch)
-  - Proper `.dockerignore` generation
-  - Monorepo-aware: copy only the relevant workspace package + shared deps
-
-### Template per backend runtime
-
-| Runtime | Base Image | Build | Final |
-|---------|-----------|-------|-------|
-| Node.js | `node:22-alpine` | Install + build | Copy dist + `node_modules` (prod) |
-| Bun | `oven/bun:1` | Install + build | Copy dist |
-| Rust | `rust:1-slim` | `cargo build --release` | `gcr.io/distroless/cc` |
-| Python | `python:3.13-slim` | pip/uv install | Copy venv |
-| Go | `golang:1.23` | `go build` | `scratch` or `gcr.io/distroless/static` |
-
----
-
-## Docker Compose
-
-- [x] Generate `docker-compose.yml` at monorepo root for supported addon stacks
-  - Services: web app, API server, database, cache, search
-  - Database service based on `--database` choice:
-    - PostgreSQL: `postgres:16-alpine`
-    - MySQL: `mysql:8`
-    - MongoDB: `mongo:7`
-    - SQLite: volume mount only (no service needed)
-  - Cache service when `--caching upstash-redis`: `redis:7-alpine` (local dev)
-  - Search service when search is selected: `meilisearch`, `typesense`, `elasticsearch`
-  - Volume mounts for persistence
-  - Health checks for dependency ordering
-  - `.env` file reference for secrets
-
-### Example structure
-```yaml
-services:
-  web:
-    build: ./apps/web
-    ports: ["3000:3000"]
-    depends_on: [api]
-  api:
-    build: ./apps/server
-    ports: ["3001:3001"]
-    depends_on:
-      db:
-        condition: service_healthy
-    env_file: .env
-  db:
-    image: postgres:16-alpine
-    volumes: [db-data:/var/lib/postgresql/data]
-    healthcheck: ...
-volumes:
-  db-data:
-```
-
----
-
-## DevContainers
-
-- [x] Generate `.devcontainer/devcontainer.json` ✅
-  - Based on docker-compose for full environment
-  - VS Code extensions pre-configured per stack
-  - Port forwarding for all services
-  - Post-create command: install deps + run migrations
-
-### Extension mapping
-
-| Stack Choice | VS Code Extensions |
-|-------------|-------------------|
-| TypeScript | `dbaeumer.vscode-eslint`, `esbenp.prettier-vscode` |
-| Rust | `rust-lang.rust-analyzer` |
-| Python | `ms-python.python`, `ms-python.vscode-pylance` |
-| Go | `golang.go` |
-| Prisma | `Prisma.prisma` |
-| Docker | `ms-azuretools.vscode-docker` |
-| Tailwind | `bradlc.vscode-tailwindcss` |
+Highly requested across both Better-Fullstack (#76 non-monorepo) and better-t-stack (#557, #806, #821). Docker is essential for self-hosted deployments and consistent dev environments. Status refreshed on 2026-06-30; only unfinished follow-ups remain here.
 
 ---
 
@@ -118,7 +37,3 @@ Related request from GitHub (#76, better-t-stack #678): scaffold a single app wi
 
 1. **Non-monorepo mode** — architectural change, larger effort
 2. **Generated Docker/CI quality checks** — ensure Docker, Compose, DevContainer, and GitHub Actions outputs are exercised in focused generated-project tests
-
-## Completed Reference
-
-See `docs/plans/completed/deployment-docs-and-docker-foundation-2026-05-21.md` for the verified Docker/deployment foundation.

@@ -4,18 +4,6 @@ Current: Polar, Stripe, Lemon Squeezy, Paddle, Dodo. Multiple new providers requ
 
 ---
 
-## Already Supported
-
-| Provider | Type | Notes |
-|----------|------|-------|
-| **Stripe** | Full-service | Industry standard. Cards, subscriptions, invoicing. |
-| **Polar** | MoR | Open-source friendly. Convex + Better Auth support added recently. |
-| **Lemon Squeezy** | MoR | Simple MoR for digital products. |
-| **Paddle** | MoR | Tax compliance, B2B invoicing. |
-| **Dodo** | MoR | Cheapest MoR. Has adapters for Hono, Express, Next, TanStack, Better-Auth, Convex, Svelte, React Native. |
-
----
-
 ## New Providers to Add
 
 ### Creem.io (better-t-stack #820)
@@ -48,7 +36,6 @@ Better Auth has first-party plugins for payment providers. We should leverage th
 | Provider | Plugin | Status |
 |----------|--------|--------|
 | Stripe | `@better-auth/stripe` | Existing provider; still verify generated plugin depth |
-| Polar | Custom integration | Already implemented |
 | Creem | `@creem/better-auth` | New — community plugin |
 
 - [ ] Ensure Better Auth payment plugins are auto-installed when both auth + payments are selected
@@ -60,11 +47,9 @@ Better Auth has first-party plugins for payment providers. We should leverage th
 
 Related but distinct — the organizations plugin enables multi-tenant SaaS billing:
 
-- [x] Add Better Auth `organizations` plugin support ✅
   - Team/org creation, member roles, invitations
   - Pairs naturally with payment providers (org-level subscriptions)
   - Schema: add `organization` table to auth schema
-  - Shipped as the `better-auth-organizations` auth option with server/client plugin wiring and generated organization/member/invitation schema across supported auth database adapters
 
 ### Remaining SaaS Billing Follow-Up
 

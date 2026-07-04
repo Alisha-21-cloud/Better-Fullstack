@@ -13,6 +13,7 @@ const PR_CORE_PRESET_NAMES = [
   "preset-go-gin-gorm",
   "preset-java-spring-maven",
   "preset-elixir-plain-worker",
+  "preset-native-uniwind-trpc",
   "preset-frontend-only-react-vite",
 ];
 
@@ -23,6 +24,7 @@ const PR_BROAD_PRESET_NAMES = [
   "preset-nuxt-fullstack",
   "preset-react-router-hono",
   "preset-tanstack-start-fullstack",
+  "preset-ai-search-workbench",
   "preset-rust-actix-sqlx",
   "preset-python-django-langchain",
   "preset-go-echo-sqlc",
@@ -61,5 +63,13 @@ describe("preset groups", () => {
     for (const combo of getPresetCombos("all")) {
       expect(combo.command).not.toContain(" undefined");
     }
+  });
+
+  it("keeps the Elixir core smoke preset on the compiling cache backend", () => {
+    const combo = getPresetCombos("pr-core").find(
+      (candidate) => candidate.name === "preset-elixir-plain-worker",
+    );
+
+    expect(combo?.command).toContain("--elixir-caching nebulex");
   });
 });

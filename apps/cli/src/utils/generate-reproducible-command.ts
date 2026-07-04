@@ -1,7 +1,6 @@
 import type { ProjectConfig, StackPartRole } from "../types";
 
 import { formatStackPartSpec, getAddonStackPartBinding } from "../types";
-import { hasGraphPart } from "./graph-summary";
 
 function getBaseCommand(packageManager: ProjectConfig["packageManager"]) {
   switch (packageManager) {
@@ -56,12 +55,24 @@ function hasGraphPrimaryPart(
   );
 }
 
-function hasOwnedGraphPart(
+function getGraphPartIncludingDisabled(
+  config: ProjectConfig,
+  role: StackPartRole,
+  ecosystem?: string,
+) {
+  return config.stackParts?.find(
+    (part) =>
+      part.source !== "provided" &&
+      part.role === role &&
+      (!ecosystem || part.ecosystem === ecosystem),
+  );
+}
+
+function getOwnedGraphPartIncludingDisabled(
   config: ProjectConfig,
   ownerRole: "frontend" | "backend" | "mobile" | "database",
   role: StackPartRole,
   ecosystem?: string,
-  toolId?: string,
 ) {
   const owner = config.stackParts?.find(
     (part) =>
@@ -70,78 +81,53 @@ function hasOwnedGraphPart(
       !part.ownerPartId &&
       (!ecosystem || part.ecosystem === ecosystem),
   );
-  if (!owner) return false;
+  if (!owner) return undefined;
 
-  return Boolean(
-    config.stackParts?.some(
-      (part) =>
-        part.source !== "provided" &&
-        part.role === role &&
-        part.ownerPartId === owner.id &&
-        (!ecosystem || part.ecosystem === ecosystem) &&
-        (!toolId || part.toolId === toolId),
-    ),
-  );
-}
-
-function hasGraphAddonPart(config: ProjectConfig, addon: string) {
-  const binding = getAddonStackPartBinding(addon);
-  if (!binding) return false;
-
-  if (!binding.ownerRole) {
-    return Boolean(
-      config.stackParts?.some(
-        (part) =>
-          part.source !== "provided" &&
-          part.role === binding.role &&
-          part.ecosystem === binding.ecosystem &&
-          part.toolId === addon &&
-          !part.ownerPartId,
-      ),
-    );
-  }
-
-  const owner = config.stackParts?.find(
+  return config.stackParts?.find(
     (part) =>
       part.source !== "provided" &&
-      part.role === binding.ownerRole &&
-      !part.ownerPartId &&
-      part.ecosystem === binding.ecosystem,
-  );
-  if (!owner) return false;
-
-  return Boolean(
-    config.stackParts?.some(
-      (part) =>
-        part.source !== "provided" &&
-        part.role === binding.role &&
-        part.ecosystem === binding.ecosystem &&
-        part.toolId === addon &&
-        part.ownerPartId === owner.id,
-    ),
+      part.role === role &&
+      part.ownerPartId === owner.id &&
+      (!ecosystem || part.ecosystem === ecosystem),
   );
 }
 
-function hasGraphExamplePart(config: ProjectConfig, example: string) {
+function hasAnyGraphAddonPart(config: ProjectConfig) {
+  return Boolean(
+    config.stackParts?.some((part) => {
+      if (part.source === "provided" || part.toolId === "none") return false;
+
+      const binding = getAddonStackPartBinding(part.toolId);
+      if (!binding || binding.role !== part.role || binding.ecosystem !== part.ecosystem) {
+        return false;
+      }
+
+      if (!binding.ownerRole) return !part.ownerPartId;
+
+      const owner = config.stackParts?.find(
+        (candidate) =>
+          candidate.source !== "provided" &&
+          candidate.role === binding.ownerRole &&
+          candidate.ecosystem === binding.ecosystem &&
+          candidate.id === part.ownerPartId,
+      );
+
+      return Boolean(owner);
+    }),
+  );
+}
+
+function hasAnyGraphExamplePart(config: ProjectConfig) {
   return Boolean(
     config.stackParts?.some(
       (part) =>
         part.source !== "provided" &&
+        part.toolId !== "none" &&
         part.role === "examples" &&
         part.ecosystem === "universal" &&
-        part.toolId === example &&
         !part.ownerPartId,
     ),
   );
-}
-
-function hasGraphArrayParts(
-  config: ProjectConfig,
-  values: string[],
-  hasPart: (config: ProjectConfig, value: string) => boolean,
-) {
-  const normalizedValues = values.filter((value) => value !== "none");
-  return normalizedValues.length > 0 && normalizedValues.every((value) => hasPart(config, value));
 }
 
 function appendChangedStringFlag(
@@ -164,7 +150,16 @@ function appendChangedGraphStringFlag(
   value: string,
   defaultValue: string,
 ) {
-  if (hasGraphPart(config, role, ecosystem)) return;
+  const graphPart = getGraphPartIncludingDisabled(config, role, ecosystem);
+  if (graphPart) {
+    appendChangedStringFlag(
+      flags,
+      flag,
+      graphPart.toolId === "none" ? "none" : defaultValue,
+      defaultValue,
+    );
+    return;
+  }
   appendChangedStringFlag(flags, flag, value, defaultValue);
 }
 
@@ -178,22 +173,26 @@ function appendChangedOwnedGraphStringFlag(
   value: string,
   defaultValue: string,
 ) {
-  if (hasOwnedGraphPart(config, ownerRole, role, ecosystem, value)) return;
+  const graphPart = getOwnedGraphPartIncludingDisabled(config, ownerRole, role, ecosystem);
+  if (graphPart) {
+    appendChangedStringFlag(
+      flags,
+      flag,
+      graphPart.toolId === "none" ? "none" : defaultValue,
+      defaultValue,
+    );
+    return;
+  }
   appendChangedStringFlag(flags, flag, value, defaultValue);
 }
 
-function hasOwnedGraphArrayParts(
+function hasAnyOwnedGraphArrayPart(
   config: ProjectConfig,
   ownerRole: "frontend" | "backend" | "mobile" | "database",
   role: StackPartRole,
   ecosystem: string,
-  values: string[],
 ) {
-  const normalizedValues = values.filter((value) => value !== "none");
-  if (normalizedValues.length === 0) return false;
-  return normalizedValues.every((value) =>
-    hasOwnedGraphPart(config, ownerRole, role, ecosystem, value),
-  );
+  return Boolean(getOwnedGraphPartIncludingDisabled(config, ownerRole, role, ecosystem));
 }
 
 function appendChangedOwnedGraphArrayFlag(
@@ -206,7 +205,7 @@ function appendChangedOwnedGraphArrayFlag(
   values: string[],
   defaultValues: string[],
 ) {
-  if (hasOwnedGraphArrayParts(config, ownerRole, role, ecosystem, values)) return;
+  if (hasAnyOwnedGraphArrayPart(config, ownerRole, role, ecosystem)) return;
   appendChangedArrayFlag(flags, flag, values, defaultValues);
 }
 
@@ -231,10 +230,10 @@ function appendAstroIntegrationFlag(flags: string[], config: ProjectConfig) {
 }
 
 function appendGraphExtraFlags(flags: string[], config: ProjectConfig) {
-  if (!hasGraphArrayParts(config, config.addons, hasGraphAddonPart)) {
+  if (!hasAnyGraphAddonPart(config)) {
     appendChangedArrayFlag(flags, "addons", config.addons, ["turborepo"]);
   }
-  if (!hasGraphArrayParts(config, config.examples, hasGraphExamplePart)) {
+  if (!hasAnyGraphExamplePart(config)) {
     appendChangedArrayFlag(flags, "examples", config.examples, []);
   }
 
@@ -254,6 +253,9 @@ function appendGraphExtraFlags(flags: string[], config: ProjectConfig) {
   }
 
   if (hasGraphPrimaryPart(config, "frontend", "typescript")) {
+    const graphUiPart = getGraphPartIncludingDisabled(config, "ui", "typescript");
+    const effectiveUiLibrary = graphUiPart?.toolId ?? config.uiLibrary;
+
     appendAstroIntegrationFlag(flags, config);
     appendChangedOwnedGraphStringFlag(
       flags,
@@ -283,7 +285,7 @@ function appendGraphExtraFlags(flags: string[], config: ProjectConfig) {
       config.uiLibrary,
       "shadcn-ui",
     );
-    if (config.uiLibrary === "shadcn-ui") {
+    if (effectiveUiLibrary === "shadcn-ui") {
       appendChangedStringFlag(flags, "shadcn-base", config.shadcnBase ?? "radix", "radix");
       appendChangedStringFlag(flags, "shadcn-style", config.shadcnStyle ?? "nova", "nova");
       appendChangedStringFlag(
@@ -537,9 +539,36 @@ function appendGraphExtraFlags(flags: string[], config: ProjectConfig) {
       config.mobileTesting,
       "none",
     );
-    appendChangedStringFlag(flags, "mobile-push", config.mobilePush, "none");
-    appendChangedStringFlag(flags, "mobile-ota", config.mobileOTA, "none");
-    appendChangedStringFlag(flags, "mobile-deep-linking", config.mobileDeepLinking, "none");
+    appendChangedOwnedGraphStringFlag(
+      flags,
+      config,
+      "mobile",
+      "push",
+      "react-native",
+      "mobile-push",
+      config.mobilePush,
+      "none",
+    );
+    appendChangedOwnedGraphStringFlag(
+      flags,
+      config,
+      "mobile",
+      "ota",
+      "react-native",
+      "mobile-ota",
+      config.mobileOTA,
+      "none",
+    );
+    appendChangedOwnedGraphStringFlag(
+      flags,
+      config,
+      "mobile",
+      "deepLinking",
+      "react-native",
+      "mobile-deep-linking",
+      config.mobileDeepLinking,
+      "none",
+    );
   }
 
   if (hasGraphPrimaryPart(config, "frontend", "rust")) {
@@ -1052,7 +1081,7 @@ export function generateReproducibleCommand(config: ProjectConfig) {
 
   if (config.stackParts && config.stackParts.length > 0) {
     flags = config.stackParts
-      .filter((part) => part.source !== "provided")
+      .filter((part) => part.source !== "provided" && part.toolId !== "none")
       .map((part) => `--part ${formatStackPartSpec(part, config.stackParts ?? [])}`);
     appendGraphExtraFlags(flags, config);
     appendCommonFlags(flags, config);

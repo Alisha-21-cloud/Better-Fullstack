@@ -6,6 +6,14 @@ import { homedir, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import * as JSONC from "jsonc-parser";
 
+import {
+  createCliDefaultProjectConfigBase,
+  parseStackPartSpecs,
+  type BetterTStackConfig,
+} from "@better-fullstack/types";
+
+import { betterTStackConfigToCreateInput } from "../src/utils/config-source";
+
 const CLI_ENTRY = resolve(import.meta.dir, "..", "src", "cli.ts");
 const NATIVE_BUN = resolve(homedir(), ".bun", "bin", "bun");
 const BUN_EXECUTABLE = process.env.BFS_TEST_BUN_BIN || (existsSync(NATIVE_BUN) ? NATIVE_BUN : "bun");
@@ -142,6 +150,35 @@ afterAll(async () => {
 }, 30_000);
 
 describe("create --from-history", () => {
+  it("replays full config snapshots from graph-derived cache fields", () => {
+    const stackParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "mobile:react-native:native-bare",
+      "mobile.push:react-native:none",
+      "mobile.ota:react-native:none",
+      "mobile.deepLinking:react-native:none",
+      "backend:typescript:hono",
+    ]);
+    const staleSnapshot = {
+      ...createCliDefaultProjectConfigBase(),
+      version: "0.0.0-test",
+      createdAt: "2026-07-02T00:00:00.000Z",
+      stackParts,
+      frontend: ["next", "native-bare"],
+      mobilePush: "expo-notifications",
+      mobileOTA: "expo-updates",
+      mobileDeepLinking: "expo-linking",
+    } as BetterTStackConfig;
+
+    const input = betterTStackConfigToCreateInput(staleSnapshot);
+
+    expect(input.frontend).toEqual(["next", "native-bare"]);
+    expect(input.mobilePush).toBe("none");
+    expect(input.mobileOTA).toBe("none");
+    expect(input.mobileDeepLinking).toBe("none");
+    expect(input.projectName).toBeUndefined();
+  });
+
   it(
     "replays the stack of the selected history entry and errors on a bad index",
     async () => {

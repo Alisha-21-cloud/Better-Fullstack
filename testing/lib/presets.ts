@@ -695,7 +695,7 @@ const SMOKE_TEST_PRESETS: Record<string, PresetDef> = {
       elixirHttp: "req",
       elixirJson: "jason",
       elixirEmail: "none",
-      elixirCaching: "cachex",
+      elixirCaching: "nebulex",
       elixirObservability: "none",
       elixirTesting: "ex_unit",
       elixirQuality: "credo",

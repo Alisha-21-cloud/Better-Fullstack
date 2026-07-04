@@ -9,26 +9,33 @@ const en_navanalytics1 = /** @type {(inputs: Navanalytics1Inputs) => LocalizedSt
 	return /** @type {LocalizedString} */ (`Analytics`)
 };
 
-/** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */
-const es_navanalytics1 = en_navanalytics1;
+const es_navanalytics1 = /** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Analítica`)
+};
 
-/** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */
-const zh_navanalytics1 = en_navanalytics1;
+const zh_navanalytics1 = /** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`分析`)
+};
 
-/** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */
-const ja_navanalytics1 = en_navanalytics1;
+const ja_navanalytics1 = /** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`分析`)
+};
 
-/** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */
-const ko_navanalytics1 = en_navanalytics1;
+const ko_navanalytics1 = /** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`해석학`)
+};
 
-/** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */
-const zh_hant1_navanalytics1 = zh_navanalytics1;
+const zh_hant1_navanalytics1 = /** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`分析`)
+};
 
-/** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */
-const de_navanalytics1 = en_navanalytics1;
+const de_navanalytics1 = /** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Analysen`)
+};
 
-/** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */
-const fr_navanalytics1 = en_navanalytics1;
+const fr_navanalytics1 = /** @type {(inputs: Navanalytics1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Analytique`)
+};
 
 /**
 * | output |

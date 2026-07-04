@@ -14,6 +14,7 @@ import { getDefaultConfig } from "../../constants";
 import { CreateCommandOptionsSchema } from "../../create-command-input";
 import { buildBtsConfigForPersistence, readBtsConfig, writeBtsConfig } from "../../utils/bts-config";
 import { validateConfigForProgrammaticUse } from "../../utils/config-validation";
+import { formatCode } from "../../utils/file-formatter";
 import { getEffectiveStack, getGraphSummary } from "../../utils/graph-summary";
 import {
   analyzeStackCompatibility,
@@ -29,6 +30,8 @@ import {
 } from "../../types";
 
 type JsonObject = Record<string, unknown>;
+
+type FileSnapshot = Pick<VirtualFile, "content" | "sourcePath">;
 
 type StackUpdateOperation =
   | {
@@ -246,6 +249,122 @@ function mergeStackPartSpecs(currentConfig: ProjectConfig, specs: string[]): Par
     ...stackPartsToLegacyProjectConfigPartial(stackParts),
     stackParts,
   };
+}
+
+type StackPart = NonNullable<ProjectConfig["stackParts"]>[number];
+
+const GRAPH_CACHE_CONFIG_KEYS = new Set<string>([
+  "stackParts",
+  "graphSummary",
+  "effectiveStack",
+]);
+
+function stableJson(value: unknown): string {
+  return JSON.stringify(value);
+}
+
+function getChangedConfigKeys(
+  currentConfig: ProjectConfig,
+  proposedConfig: ProjectConfig,
+): Set<keyof ProjectConfig> {
+  const keys = new Set<keyof ProjectConfig>([
+    ...(Object.keys(currentConfig) as Array<keyof ProjectConfig>),
+    ...(Object.keys(proposedConfig) as Array<keyof ProjectConfig>),
+  ]);
+  const changed = new Set<keyof ProjectConfig>();
+  for (const key of keys) {
+    if (GRAPH_CACHE_CONFIG_KEYS.has(key)) continue;
+    if (stableJson(currentConfig[key]) !== stableJson(proposedConfig[key])) {
+      changed.add(key);
+    }
+  }
+  return changed;
+}
+
+function getProjectedConfigKeys(part: StackPart, parts: readonly StackPart[]): Set<keyof ProjectConfig> {
+  const owner = part.ownerPartId
+    ? parts.find((candidate) => candidate.id === part.ownerPartId)
+    : undefined;
+  const partProjection = stackPartsToLegacyProjectConfigPartial(owner ? [owner, part] : [part]);
+  const keys = new Set<keyof ProjectConfig>();
+  for (const key of Object.keys(partProjection) as Array<keyof ProjectConfig>) {
+    if (GRAPH_CACHE_CONFIG_KEYS.has(key)) continue;
+    const value = partProjection[key];
+    if (
+      value === part.toolId ||
+      (Array.isArray(value) && (value as unknown[]).includes(part.toolId))
+    ) {
+      keys.add(key);
+    }
+  }
+  return keys;
+}
+
+function getUpdatedSpecForChangedPart(
+  part: StackPart,
+  parts: readonly StackPart[],
+  proposedConfig: ProjectConfig,
+  changedKeys: Set<keyof ProjectConfig>,
+): string | undefined {
+  const projectedKeys = getProjectedConfigKeys(part, parts);
+  for (const key of projectedKeys) {
+    if (!changedKeys.has(key)) continue;
+    const value = proposedConfig[key];
+    if (typeof value !== "string" || value === "none") continue;
+    return formatStackPartSpec({ ...part, toolId: value }, parts);
+  }
+  return undefined;
+}
+
+function mergeDerivedStackPartsWithExistingGraph(
+  currentConfig: ProjectConfig,
+  proposedConfig: ProjectConfig,
+): StackPart[] {
+  const currentStackParts = currentConfig.stackParts?.length
+    ? currentConfig.stackParts
+    : legacyProjectConfigToStackParts(currentConfig);
+  const derivedStackParts = legacyProjectConfigToStackParts(proposedConfig);
+  if (currentStackParts.length === 0) return derivedStackParts;
+
+  const changedKeys = getChangedConfigKeys(currentConfig, proposedConfig);
+  const preservedParts = currentStackParts.filter((part) => {
+    if (part.source === "provided") return false;
+    if (part.toolId === "none") return false;
+    const projectedKeys = getProjectedConfigKeys(part, currentStackParts);
+    if (projectedKeys.size === 0) return true;
+    return [...projectedKeys].every((key) => !changedKeys.has(key));
+  });
+  const updatedSpecs = currentStackParts
+    .filter((part) => part.source !== "provided" && part.toolId !== "none")
+    .flatMap((part) => {
+      const spec = getUpdatedSpecForChangedPart(part, currentStackParts, proposedConfig, changedKeys);
+      return spec ? [spec] : [];
+    });
+  const preservedSpecs = new Set(preservedParts.map((part) => formatStackPartSpec(part, currentStackParts)));
+  const coveredParts = parseStackPartSpecs(
+    [...new Set([...preservedSpecs, ...updatedSpecs])],
+    "selected",
+  );
+  const preservedProjectedKeys = new Set<keyof ProjectConfig>();
+  for (const part of coveredParts) {
+    for (const key of getProjectedConfigKeys(part, coveredParts)) {
+      preservedProjectedKeys.add(key);
+    }
+  }
+
+  const nextSpecs = [...new Set([...preservedSpecs, ...updatedSpecs])];
+  for (const part of derivedStackParts) {
+    if (part.source === "provided") continue;
+    const spec = formatStackPartSpec(part, derivedStackParts);
+    if (nextSpecs.includes(spec)) continue;
+    const projectedKeys = getProjectedConfigKeys(part, derivedStackParts);
+    const alreadyCovered = [...projectedKeys].some((key) => preservedProjectedKeys.has(key));
+    if (!alreadyCovered) {
+      nextSpecs.push(spec);
+    }
+  }
+
+  return parseStackPartSpecs([...new Set(nextSpecs)], "selected");
 }
 
 function asString(value: unknown, fallback = "none"): string {
@@ -804,6 +923,47 @@ async function generateTree(config: ProjectConfig): Promise<VirtualFileTree> {
   return result.tree;
 }
 
+async function formatGeneratedTree(tree: VirtualFileTree): Promise<void> {
+  const denoConfigDirs = new Set<string>();
+
+  function collectDenoConfigDirs(nodes: VirtualNode[]) {
+    for (const node of nodes) {
+      if (node.type === "file") {
+        if (node.name === "deno.json") {
+          denoConfigDirs.add(path.posix.dirname(node.path));
+        }
+      } else {
+        collectDenoConfigDirs(node.children);
+      }
+    }
+  }
+
+  function isUnderDenoConfig(filePath: string): boolean {
+    return [...denoConfigDirs].some(
+      (dir) => dir === "." || filePath === dir || filePath.startsWith(`${dir}/`),
+    );
+  }
+
+  async function formatNodes(nodes: VirtualNode[]) {
+    await Promise.all(
+      nodes.map(async (node) => {
+        if (node.type === "file") {
+          if (node.content === BINARY_FILE_MARKER || isUnderDenoConfig(node.path)) return;
+          const formatted = await formatCode(node.path, node.content);
+          if (formatted) {
+            node.content = formatted;
+          }
+          return;
+        }
+        await formatNodes(node.children);
+      }),
+    );
+  }
+
+  collectDenoConfigDirs(tree.root.children);
+  await formatNodes(tree.root.children);
+}
+
 function treeToFileMap(tree: VirtualFileTree): Map<string, VirtualFile> {
   const files = new Map<string, VirtualFile>();
 
@@ -819,6 +979,38 @@ function treeToFileMap(tree: VirtualFileTree): Map<string, VirtualFile> {
 
   walk(tree.root.children);
   return files;
+}
+
+function treeToFileSnapshotMap(tree: VirtualFileTree): Map<string, FileSnapshot> {
+  const files = new Map<string, FileSnapshot>();
+
+  function walk(nodes: VirtualNode[]) {
+    for (const node of nodes) {
+      if (node.type === "file") {
+        files.set(node.path, {
+          content: node.content,
+          sourcePath: node.sourcePath,
+        });
+      } else {
+        walk(node.children);
+      }
+    }
+  }
+
+  walk(tree.root.children);
+  return files;
+}
+
+function uniqueContents(contents: Array<string | undefined>): string[] {
+  return [...new Set(contents.filter((content): content is string => content !== undefined))];
+}
+
+function contentMatchesAny(content: string, candidates: readonly string[]): boolean {
+  return candidates.some((candidate) => candidate === content);
+}
+
+function contentSetsIntersect(left: readonly string[], right: readonly string[]): boolean {
+  return left.some((candidate) => right.includes(candidate));
 }
 
 function parseJson(content: string | undefined): JsonObject | null {
@@ -978,6 +1170,21 @@ function collectEnvReferences(content: string | undefined): Set<string> {
   return keys;
 }
 
+function collectImplicitEnvKeys(config: ProjectConfig): string[] {
+  const keys = new Set<string>();
+
+  if (config.email === "resend") {
+    keys.add("RESEND_API_KEY");
+    keys.add("RESEND_FROM_EMAIL");
+  }
+
+  if (config.observability === "sentry") {
+    keys.add("SENTRY_DSN");
+  }
+
+  return [...keys].sort();
+}
+
 function recordEnvReferenceChanges(
   envChanges: Record<string, string[]>,
   filePath: string,
@@ -990,6 +1197,88 @@ function recordEnvReferenceChanges(
   if (added.length > 0) {
     envChanges[filePath] = [...new Set([...(envChanges[filePath] ?? []), ...added])].sort();
   }
+}
+
+function appendMissingEnvKeys(content: string, keys: readonly string[]): { content?: string; keys: string[] } {
+  const existingKeys = parseEnvKeys(content);
+  const missing = keys.filter((key) => !existingKeys.has(key));
+  if (missing.length === 0) return { keys: [] };
+
+  const separator = content.trim().length === 0 ? "" : content.endsWith("\n") ? "\n" : "\n\n";
+  return {
+    content: `${content}${separator}${missing.map((key) => `${key}=`).join("\n")}\n`,
+    keys: missing,
+  };
+}
+
+async function addMissingEnvExampleOperation(options: {
+  projectDir: string;
+  proposedGeneratedFiles: Map<string, VirtualFile>;
+  operations: StackUpdateOperation[];
+  filesToAdd: string[];
+  filesToPatch: string[];
+  envChanges: Record<string, string[]>;
+  proposedConfig: ProjectConfig;
+}) {
+  const requiredKeys = [
+    ...new Set([
+      ...Object.entries(options.envChanges)
+        .filter(([filePath]) => !isEnvFilePath(filePath))
+        .flatMap(([, keys]) => keys),
+      ...collectImplicitEnvKeys(options.proposedConfig),
+    ]),
+  ].sort();
+  if (requiredKeys.length === 0) return;
+
+  const candidatePaths = new Set([
+    "apps/server/.env.example",
+    ".env.example",
+    ...[...options.proposedGeneratedFiles.keys()].filter(isEnvFilePath),
+  ]);
+  let targetPath: string | undefined;
+  for (const candidate of candidatePaths) {
+    if (
+      options.proposedGeneratedFiles.has(candidate) ||
+      (await fs.pathExists(path.join(options.projectDir, candidate)))
+    ) {
+      targetPath = candidate;
+      break;
+    }
+  }
+  if (!targetPath) return;
+
+  const existingOperation = options.operations.find(
+    (operation): operation is Extract<StackUpdateOperation, { writeMode: "content" }> =>
+      operation.path === targetPath && operation.writeMode === "content",
+  );
+  const targetFilePath = path.join(options.projectDir, targetPath);
+  const existingContent =
+    existingOperation?.content ??
+    ((await fs.pathExists(targetFilePath)) ? await fs.readFile(targetFilePath, "utf-8") : "");
+  const merged = appendMissingEnvKeys(existingContent, requiredKeys);
+  if (!merged.content) return;
+
+  if (existingOperation) {
+    existingOperation.content = merged.content;
+    existingOperation.summary = [...existingOperation.summary, `env refs: ${merged.keys.join(", ")}`];
+  } else {
+    options.operations.push({
+      kind: "merge",
+      path: targetPath,
+      writeMode: "content",
+      content: merged.content,
+      summary: [`env refs: ${merged.keys.join(", ")}`],
+    });
+  }
+
+  if (await fs.pathExists(targetFilePath)) {
+    options.filesToPatch.push(targetPath);
+  } else {
+    options.filesToAdd.push(targetPath);
+  }
+  options.envChanges[targetPath] = [
+    ...new Set([...(options.envChanges[targetPath] ?? []), ...merged.keys]),
+  ].sort();
 }
 
 function getInstallCommand(config: ProjectConfig): string {
@@ -1016,7 +1305,7 @@ function getGraphPreview(config: BetterTStackConfig) {
   const graphSummary = stackParts.length > 0 ? getGraphSummary({ stackParts }) : undefined;
   const effectiveStack = stackParts.length > 0 ? getEffectiveStack({ stackParts }) : undefined;
   const stackPartSpecs = stackParts
-    .filter((part) => part.source !== "provided")
+    .filter((part) => part.source !== "provided" && part.toolId !== "none")
     .map((part) => formatStackPartSpec(part, stackParts));
 
   return {
@@ -1068,7 +1357,7 @@ export async function planStackUpdate(
       compatibilityChangesToProjectConfig(compatibilityResult.adjustedStack, proposedConfig),
     );
   }
-  proposedConfig.stackParts = legacyProjectConfigToStackParts(proposedConfig);
+  proposedConfig.stackParts = mergeDerivedStackPartsWithExistingGraph(currentConfig, proposedConfig);
   Object.assign(proposedConfig, mergeStackPartSpecs(proposedConfig, stackPartSpecs));
   try {
     validateConfigForProgrammaticUse(proposedConfig);
@@ -1104,6 +1393,9 @@ export async function planStackUpdate(
       error: `Failed to generate stack update plan: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
+  const currentRawGeneratedFiles = treeToFileSnapshotMap(currentTree);
+  const proposedRawGeneratedFiles = treeToFileSnapshotMap(proposedTree);
+  await Promise.all([formatGeneratedTree(currentTree), formatGeneratedTree(proposedTree)]);
   const currentGeneratedFiles = treeToFileMap(currentTree);
   const proposedGeneratedFiles = treeToFileMap(proposedTree);
 
@@ -1127,8 +1419,12 @@ export async function planStackUpdate(
 
   for (const { filePath, proposedFile, exists, existingBuffer } of proposedFileEntries) {
     const previousFile = currentGeneratedFiles.get(filePath);
+    const previousRawFile = currentRawGeneratedFiles.get(filePath);
+    const proposedRawFile = proposedRawGeneratedFiles.get(filePath);
     const proposedContent = proposedFile.content;
     const previousContent = previousFile?.content;
+    const currentBaselineContents = uniqueContents([previousRawFile?.content, previousContent]);
+    const proposedBaselineContents = uniqueContents([proposedRawFile?.content, proposedContent]);
     const isBinaryFile =
       isGeneratedBinaryFile(proposedFile) || isGeneratedBinaryFile(previousFile);
     const existingContent =
@@ -1165,7 +1461,10 @@ export async function planStackUpdate(
       continue;
     }
 
-    if (existingContent === undefined || existingContent === proposedContent) {
+    if (
+      existingContent === undefined ||
+      contentMatchesAny(existingContent, proposedBaselineContents)
+    ) {
       filesUnchanged.push(filePath);
       continue;
     }
@@ -1210,7 +1509,15 @@ export async function planStackUpdate(
       continue;
     }
 
-    if (previousContent !== undefined && existingContent === previousContent) {
+    if (
+      existingContent !== undefined &&
+      contentMatchesAny(existingContent, currentBaselineContents)
+    ) {
+      if (contentSetsIntersect(currentBaselineContents, proposedBaselineContents)) {
+        filesUnchanged.push(filePath);
+        continue;
+      }
+
       filesToPatch.push(filePath);
       operations.push({ kind: "replace", path: filePath, writeMode: "generated" });
       recordEnvReferenceChanges(envChanges, filePath, previousContent, proposedContent);
@@ -1223,6 +1530,16 @@ export async function planStackUpdate(
 
     manualReviewBlockers.push(`${filePath}: existing file differs from the generated baseline`);
   }
+
+  await addMissingEnvExampleOperation({
+    projectDir,
+    proposedGeneratedFiles,
+    operations,
+    filesToAdd,
+    filesToPatch,
+    envChanges,
+    proposedConfig: normalizedProposedConfig,
+  });
 
   const graphPreview = getGraphPreview(persistedProposedConfig);
   return {
@@ -1261,6 +1578,7 @@ export async function applyStackUpdate(
   const projectName = await inferProjectName(plan.projectDir);
   const proposedConfig = configFromBtsConfig(plan.proposedConfig, plan.projectDir, projectName);
   const proposedTree = await generateTree(proposedConfig);
+  await formatGeneratedTree(proposedTree);
   const generatedPaths = new Set(
     plan.operations
       .filter((operation) => operation.writeMode === "generated")

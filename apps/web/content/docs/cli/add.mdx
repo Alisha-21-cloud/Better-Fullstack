@@ -1,24 +1,33 @@
 ---
 title: Add Features
-description: Add supported addons to existing Better Fullstack projects.
+description: Add supported addons, deployment targets, and stack capabilities to existing Better Fullstack projects.
 ---
 
-The `add` command updates an existing Better Fullstack project. It reads `bts.jsonc`, validates requested addons, writes supported files, and updates the project config.
+The `add` command updates an existing Better Fullstack project. It reads `bts.jsonc`, plans the requested stack change, writes safe generated-file updates, and updates the project config.
 
 ```npm
 npm create better-fullstack@latest add -- --addons mcp skills
 ```
 
+Preview a service update before writing files:
+
+```npm
+npm create better-fullstack@latest add -- --email resend --dry-run
+```
+
 ## What add does
 
 - Reads `bts.jsonc` from the current project, or from `--project-dir`.
-- Prompts for compatible addons when `--addons` is omitted.
+- Prompts for compatible addons when no explicit stack flags are passed.
+- Accepts additive stack flags such as `--email`, `--observability`, `--search`, `--file-storage`, `--web-deploy`, and `--server-deploy`.
+- Uses the same safe planning engine as the MCP stack-update tools for explicit stack flags.
 - Skips addons that are already installed.
-- Writes addon templates and dependency changes when a new addon is selected.
+- Writes generated files, dependency changes, env examples, and config updates when the existing files still match the generated baseline.
+- Refuses to overwrite user-edited generated files and prints the manual-review blockers.
 - Prints an install command when dependency installation is skipped.
 
-<Callout kind="warn" title="Addon-first command">
-`add` currently exits when no new addon is selected. Choose deployment targets during `create` when possible; deployment-only `add --web-deploy ...` or `add --server-deploy ...` flows are not complete yet.
+<Callout kind="info" title="Preview first">
+Use `--dry-run` to inspect the file, dependency, env var, compatibility, and manual-review summary before applying a stack capability.
 </Callout>
 
 ## Flags
@@ -26,11 +35,16 @@ npm create better-fullstack@latest add -- --addons mcp skills
 | Flag | Values or behavior |
 | --- | --- |
 | `--addons` | `pwa` `tauri` `starlight` `biome` `lefthook` `husky` `ruler` `mcp` `skills` `turborepo` `fumadocs` `ultracite` `oxlint` `opentui` `wxt` `msw` `storybook` `swr` `tanstack-query` `tanstack-table` `tanstack-virtual` `tanstack-db` `tanstack-pacer` `backend-utils` `docker-compose` `none` |
+| `--dry-run` | Plan the update and print the summary without writing files. |
 | `--project-dir` | Path to the generated project. Defaults to the current directory. |
 | `--install` | Install dependencies after adding files. Defaults to false for `add`. |
 | `--package-manager` | `npm` `pnpm` `bun` `yarn` |
-| `--web-deploy` | Records a web deployment target after addon processing. |
-| `--server-deploy` | Records a server deployment target after addon processing. |
+| `--email` | Add an email provider such as `resend`, when compatible with the existing stack. |
+| `--observability` | Add an observability provider such as `sentry`, when compatible with the existing stack. |
+| `--search` `--vector-db` `--file-storage` | Add supported service integrations. |
+| `--web-deploy` `--server-deploy` | Add or update supported deployment targets. |
+
+Most create-time stack fields are accepted for existing-project updates when the planner can apply them safely. Risky architecture swaps may require manual review or a fresh scaffold.
 
 ## Addon reference
 
@@ -50,12 +64,13 @@ npm create better-fullstack@latest add -- --addons mcp skills
 
 ## Idempotency
 
-`bts.jsonc` is the source of truth for installed addons. If every requested addon is already present, `add` reports that no new addons were selected and exits without applying unrelated changes.
+`bts.jsonc` is the source of truth for installed addons and selected stack parts. If every requested addon or capability is already present, `add` reports that there are no stack changes to apply.
 
 ## Recommended workflow
 
 1. Commit or stash current work.
-2. Run `add` with explicit addon flags.
+2. Run `add --dry-run` with explicit stack flags.
 3. Review generated file changes.
-4. Install dependencies if the command skipped install.
-5. Run the project's test, lint, or typecheck command.
+4. Re-run `add` without `--dry-run`.
+5. Install dependencies if the command skipped install.
+6. Run `create-better-fullstack check --skip-checks` for config/dependency/env validation, then the project's test, lint, or typecheck command.
