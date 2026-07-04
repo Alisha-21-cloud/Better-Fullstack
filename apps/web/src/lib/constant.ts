@@ -996,6 +996,14 @@ export const TECH_OPTIONS: Record<
       default: false,
     },
     {
+      id: "revenuecat",
+      name: "RevenueCat",
+      description: "In-app subscriptions and cross-platform monetization for mobile.",
+      icon: "https://cdn.simpleicons.org/revenuecat/F2545B",
+      color: "from-red-400 to-red-600",
+      default: false,
+    },
+    {
       id: "none",
       name: "No Payments",
       description: "Skip payments integration",
