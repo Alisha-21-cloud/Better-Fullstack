@@ -2199,6 +2199,24 @@ export const TECH_OPTIONS: Record<
       color: "from-sky-500 to-sky-700",
     },
   ],
+  workspaceShape: [
+    {
+      id: "monorepo",
+      name: "Monorepo",
+      description: "apps/* + packages/* workspaces",
+      icon: "",
+      color: "from-slate-500 to-slate-700",
+      default: true,
+    },
+    {
+      id: "single-app",
+      name: "Single App",
+      description: "Flat root app (no workspaces); thin self apps only",
+      icon: "",
+      color: "from-teal-500 to-teal-700",
+      isNew: true,
+    },
+  ],
   versionChannel: [
     {
       id: "stable",
@@ -4679,6 +4697,25 @@ export const TECH_OPTIONS: Record<
       default: false,
     },
   ],
+  javaLanguage: [
+    {
+      id: "java",
+      name: "Java",
+      description: "Classic Java sources",
+      icon: "/icon/java.svg",
+      color: "from-orange-500 to-red-600",
+      default: true,
+    },
+    {
+      id: "kotlin",
+      name: "Kotlin",
+      description: "Idiomatic Kotlin sources (Spring Boot only)",
+      icon: "https://cdn.simpleicons.org/kotlin/7F52FF",
+      color: "from-purple-500 to-indigo-600",
+      default: false,
+      isNew: true,
+    },
+  ],
   javaBuildTool: [
     {
       id: "maven",
@@ -5029,6 +5066,15 @@ export const TECH_OPTIONS: Record<
       description: "Generate Spring API interfaces + models from an OpenAPI spec at build time",
       icon: "https://cdn.simpleicons.org/openapiinitiative/6BA539",
       color: "from-lime-500 to-green-600",
+      default: false,
+      isNew: true,
+    },
+    {
+      id: "grpc",
+      name: "gRPC",
+      description: "grpc-java service (protoc codegen) started alongside Spring Boot",
+      icon: "/icon/grpc.svg",
+      color: "from-sky-500 to-blue-600",
       default: false,
       isNew: true,
     },

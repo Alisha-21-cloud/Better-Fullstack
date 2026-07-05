@@ -4,10 +4,11 @@ import pc from "picocolors";
 import { createCli } from "trpc-cli";
 import z from "zod";
 
+import type { AddResult } from "./helpers/core/add-handler";
+
 import { historyHandler } from "./commands/history";
 import { telemetryHandler } from "./commands/telemetry";
 import { CreateCommandInputSchema, CreateCommandOptionsSchema } from "./create-command-input";
-import type { AddResult } from "./helpers/core/add-handler";
 import { createProjectHandler } from "./helpers/core/command-handlers";
 import {
   type AddInput,
@@ -194,8 +195,16 @@ const AddCommandInputSchema = CreateCommandOptionsSchema.omit({
   renderTitle: true,
   disableAnalytics: true,
   manualDb: true,
+  // Workspace shape is a create-time structural choice, not a stack update.
+  workspaceShape: true,
 }).extend({
   projectDir: z.string().optional().describe("Project directory (defaults to current)"),
+  acknowledgeArchitectureChange: z
+    .boolean()
+    .optional()
+    .describe(
+      "Acknowledge that this update replaces an existing database/orm/auth/api/backend/runtime choice (data/schema migration required)",
+    ),
 });
 
 const ProjectCheckInputSchema = z.tuple([
@@ -329,6 +338,110 @@ export const router = os.router({
         all: input.all,
         ecosystem: input.ecosystem,
       });
+    }),
+  gen: os
+    .meta({
+      description:
+        "Generate in-project code for an existing Better Fullstack project (e.g. `gen resource <name>` / `gen route <name>` for a new trpc/orpc API resource router)",
+    })
+    .input(
+      z.tuple([
+        z.enum(["resource", "route"]).describe("What to generate: resource (alias: route)"),
+        z.string().describe("Name of the resource/route (e.g. post)"),
+        z.object({
+          dir: z.string().optional().describe("Project directory (defaults to current)"),
+          dryRun: z
+            .boolean()
+            .default(false)
+            .describe("Print the planned changes without writing any files"),
+        }),
+      ]),
+    )
+    .handler(async ({ input }) => {
+      const [kind, name, options] = input;
+      const { genCommand } = await import("./commands/gen.js");
+      await genCommand({ kind, name, dir: options.dir, dryRun: options.dryRun });
+    }),
+  registry: os
+    .meta({
+      description:
+        "Manage community/private capability packs for an existing Better Fullstack project (`registry add <source>` installs a pack from a local path or file:// URL; `registry list` shows installed packs)",
+    })
+    .input(
+      z.tuple([
+        z
+          .enum(["add", "list"])
+          .optional()
+          .default("list")
+          .describe("Action to perform: add (install a pack) or list (default)"),
+        z
+          .string()
+          .optional()
+          .describe("Pack source: a local path or file:// URL (required for `add`)"),
+        z.object({
+          projectDir: z.string().optional().describe("Project directory (defaults to current)"),
+          json: z.boolean().optional().default(false).describe("Output the result as JSON"),
+          dryRun: z
+            .boolean()
+            .optional()
+            .default(false)
+            .describe("Preview the install without writing any files"),
+        }),
+      ]),
+    )
+    .handler(async ({ input }) => {
+      const [action, source, options] = input;
+      const { registryHandler } = await import("./commands/registry.js");
+      await registryHandler({
+        action,
+        source,
+        projectDir: options.projectDir,
+        json: options.json,
+        dryRun: options.dryRun,
+      });
+    }),
+  update: os
+    .meta({
+      description:
+        "Re-apply the current bundled templates to an existing Better Fullstack project, classifying template drift vs. your local edits from the bts.lock.json scaffold baseline. Default is a dry-run plan; `--apply` writes safe drift patches + new files. Distinct from the maintainer `update-deps` command.",
+    })
+    .input(
+      z.tuple([
+        z
+          .string()
+          .optional()
+          .describe("Project directory to update (defaults to current directory)"),
+        z.object({
+          dryRun: z
+            .boolean()
+            .optional()
+            .default(false)
+            .describe("Preview the plan without writing (default behavior)"),
+          apply: z
+            .boolean()
+            .optional()
+            .default(false)
+            .describe("Write safe template-drift patches and new files, refreshing the baseline"),
+          check: z
+            .boolean()
+            .optional()
+            .default(false)
+            .describe("Exit non-zero when actionable template drift exists (CI gate)"),
+          json: z.boolean().optional().default(false).describe("Output the plan as JSON"),
+          recordBaseline: z
+            .boolean()
+            .optional()
+            .default(false)
+            .describe(
+              "Adopt the current on-disk state as the scaffold baseline (for projects created before the update engine)",
+            ),
+        }),
+      ]),
+    )
+    .handler(async ({ input }) => {
+      const [projectDir, options] = input;
+      const { updateCommand } = await import("./commands/update.js");
+      await updateCommand({ projectDir, ...options });
     }),
   mcp: os
     .meta({
@@ -510,5 +623,43 @@ export async function check(
   return caller.check([
     projectDir,
     { skipChecks: options?.skipChecks ?? false, json: options?.json ?? false },
+  ]);
+}
+
+export async function registry(
+  action: "add" | "list" = "list",
+  source?: string,
+  options?: { projectDir?: string; json?: boolean; dryRun?: boolean },
+) {
+  return caller.registry([
+    action,
+    source,
+    {
+      projectDir: options?.projectDir,
+      json: options?.json ?? false,
+      dryRun: options?.dryRun ?? false,
+    },
+  ]);
+}
+
+export async function update(
+  projectDir?: string,
+  options?: {
+    dryRun?: boolean;
+    apply?: boolean;
+    check?: boolean;
+    json?: boolean;
+    recordBaseline?: boolean;
+  },
+) {
+  return caller.update([
+    projectDir,
+    {
+      dryRun: options?.dryRun ?? false,
+      apply: options?.apply ?? false,
+      check: options?.check ?? false,
+      json: options?.json ?? false,
+      recordBaseline: options?.recordBaseline ?? false,
+    },
   ]);
 }

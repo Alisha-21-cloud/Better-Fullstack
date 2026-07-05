@@ -473,10 +473,12 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   chi: { type: "si", slug: "go", hex: "00ADD8" },
   stdlib: { type: "si", slug: "go", hex: "00ADD8" },
   "grpc-go": { type: "local", src: "/icon/grpc.svg" },
+  grpc: { type: "local", src: "/icon/grpc.svg" },
   "urfave-cli": { type: "si", slug: "go", hex: "00ADD8" },
   logrus: { type: "si", slug: "go", hex: "00ADD8" },
 
   // ─── Java ──────────────────────────────────────────────────────────────────
+  kotlin: { type: "si", slug: "kotlin", hex: "7F52FF" },
   "spring-boot": { type: "si", slug: "springboot", hex: "6DB33F" },
   quarkus: { type: "si", slug: "quarkus", hex: "4695EB" },
   micronaut: { type: "local", src: "/icon/micronaut.svg" },

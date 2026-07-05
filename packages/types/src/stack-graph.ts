@@ -123,6 +123,7 @@ import {
   ELIXIR_QUALITY_VALUES,
   StackPartRoleSchema,
   STATE_MANAGEMENT_VALUES,
+  TESTING_VALUES,
   UI_LIBRARY_VALUES,
   VALIDATION_VALUES,
   WEB_DEPLOY_VALUES,
@@ -313,8 +314,12 @@ const LEGACY_TYPESCRIPT_BACKEND_SINGLE_CATEGORIES = {
   cms: "cms",
   // Shared web+server categories collapse onto the backend owner (inventory §5 decision 3);
   // without a TypeScript backend they stay flat-only, like the rest of this map.
+  // `testing` (vitest/playwright/jest/cypress) is the shared test-runner choice; owning it
+  // on the backend keeps it in a different scope from the frontend-owned msw/storybook
+  // testing addons, so the two never collide in a single `(owner, role)` scope.
   validation: "validation",
   effect: "effect",
+  testing: "testing",
 } as const satisfies Partial<Record<StackPartRole, keyof ProjectConfig>>;
 
 const LEGACY_TYPESCRIPT_BACKEND_INFRA_CATEGORIES = {
@@ -666,6 +671,7 @@ const GRAPH_PROJECTION_DEFAULT_LEGACY_CATEGORIES = [
   "orm",
   "api",
   "auth",
+  "astroIntegration",
   "rustFrontend",
   ...Object.values(LEGACY_BACKEND_CATEGORY_BY_ECOSYSTEM),
   ...Object.values(LEGACY_CAPABILITY_CATEGORIES_BY_ECOSYSTEM).flatMap((categories) =>
@@ -798,6 +804,9 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(CMS_VALUES, "cms", "typescript", "cms"),
   ...defineTools(VALIDATION_VALUES, "validation", "typescript", "validation"),
   ...defineTools(EFFECT_VALUES, "effect", "typescript", "effect"),
+  // TypeScript test-runner framework (distinct toolIds from the msw/storybook testing
+  // addons registered above), backend-owned so it never shares a scope with them.
+  ...defineTools(TESTING_VALUES, "testing", "typescript", "testing"),
   ...defineTools(AUTH_VALUES, "auth", "react-native", "auth"),
   ...defineTools(MOBILE_NAVIGATION_VALUES, "navigation", "react-native", "mobileNavigation"),
   ...defineTools(MOBILE_UI_VALUES, "ui", "react-native", "mobileUI"),
@@ -2571,9 +2580,10 @@ function addLegacyPart(
   toolId: string | undefined,
   source: StackPartSource,
   ownerPartId?: string,
+  settings?: Record<string, unknown>,
 ) {
   if (!toolId || toolId === "none") return undefined;
-  const part = createStackPart({ role, ecosystem, toolId, source, ownerPartId });
+  const part = createStackPart({ role, ecosystem, toolId, source, ownerPartId, settings });
   parts.push(part);
   return part;
 }
@@ -2635,6 +2645,16 @@ export function legacyProjectConfigToStackParts(
   const webFrontend = webFrontends[0];
   const nativeFrontend = nativeFrontends[0];
   const frontendPart = addLegacyPart(parts, "frontend", "typescript", webFrontend, source);
+  // The Astro sub-framework choice is a settings-shaped detail carried on the
+  // Astro frontend part itself (rather than a scoped capability part), so a pure
+  // graph round-trips the integration without a flat-field side channel.
+  if (
+    frontendPart?.toolId === "astro" &&
+    config.astroIntegration &&
+    config.astroIntegration !== "none"
+  ) {
+    frontendPart.settings = { astroIntegration: config.astroIntegration };
+  }
   const mobilePart = addLegacyPart(parts, "mobile", "react-native", nativeFrontend, source);
 
   let backendPart: StackPart | undefined;
@@ -2896,6 +2916,10 @@ export function stackPartsToLegacyProjectConfigPartial(
           ...(config.frontend ?? []),
           part.toolId as ProjectConfig["frontend"][number],
         ];
+        const astroIntegration = part.settings?.astroIntegration;
+        if (typeof astroIntegration === "string") {
+          config.astroIntegration = astroIntegration as ProjectConfig["astroIntegration"];
+        }
       } else if (part.role === "frontend" && part.ecosystem === "rust") {
         config.rustFrontend = part.toolId as ProjectConfig["rustFrontend"];
       } else if (part.role === "mobile") {
@@ -3096,6 +3120,18 @@ export function stackGraphToLegacyProjectConfigForEcosystem(
   projectLegacyCategoryFromPart(projected, auth, ecosystem, parts);
   if (ecosystem === "go" && config.auth === "go-better-auth") {
     projected.auth = config.auth;
+  }
+
+  // astroIntegration is reset to "none" by the default-category loop above; prefer
+  // the graph-owned value carried on the Astro frontend part's settings, falling
+  // back to the flat field so graph-mode specs (which cannot express the setting)
+  // keep projecting the same value the spread used to carry.
+  const astroIntegrationSetting =
+    frontend?.toolId === "astro" ? frontend.settings?.astroIntegration : undefined;
+  if (typeof astroIntegrationSetting === "string") {
+    projected.astroIntegration = astroIntegrationSetting as ProjectConfig["astroIntegration"];
+  } else if (config.astroIntegration !== undefined) {
+    projected.astroIntegration = config.astroIntegration;
   }
 
   const backendScopedPartRoles = new Set<StackPartRole>(["database", "orm", "api", "auth"]);

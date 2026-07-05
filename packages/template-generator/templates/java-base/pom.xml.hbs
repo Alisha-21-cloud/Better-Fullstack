@@ -34,6 +34,12 @@
 		<openapi-generator.version>7.23.0</openapi-generator.version>
 		<swagger-annotations.version>2.2.52</swagger-annotations.version>
 {{/if}}
+{{#if hasJavaGrpc}}
+		<grpc.version>1.68.1</grpc.version>
+		<protobuf.version>4.28.2</protobuf.version>
+		<protobuf-plugin.version>0.6.1</protobuf-plugin.version>
+		<os-plugin.version>1.7.1</os-plugin.version>
+{{/if}}
 {{#if hasJavaSpringdocOpenapi}}
 		<springdoc.version>3.0.3</springdoc.version>
 {{/if}}
@@ -369,6 +375,36 @@
 			<artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 {{/if}}
+{{#if hasJavaGrpc}}
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-netty-shaded</artifactId>
+			<version>${grpc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-protobuf</artifactId>
+			<version>${grpc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-stub</artifactId>
+			<version>${grpc.version}</version>
+		</dependency>
+		<!-- Pin protobuf-java to the protoc version so gencode/runtime match. -->
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>${protobuf.version}</version>
+		</dependency>
+		<!-- javax.annotation.Generated used by grpc-java stubs (compile only). -->
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>annotations-api</artifactId>
+			<version>6.0.53</version>
+			<scope>provided</scope>
+		</dependency>
+{{/if}}
 {{#if hasJavaAmqp}}
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -605,6 +641,16 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-log4j2</artifactId>
+		</dependency>
+{{/if}}
+{{#if isJavaKotlin}}
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-reflect</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-kotlin</artifactId>
 		</dependency>
 {{/if}}
 {{#if hasJavaJpa}}
@@ -1018,12 +1064,86 @@
 	</dependencies>
 
 	<build>
+{{#if isJavaKotlin}}
+		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+		<testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+{{/if}}
+{{#if hasJavaGrpc}}
+		<extensions>
+			<!-- os-maven-plugin exposes ${os.detected.classifier}, used to select
+			     the platform-native protoc / grpc plugin binaries below. -->
+			<extension>
+				<groupId>kr.motd.maven</groupId>
+				<artifactId>os-maven-plugin</artifactId>
+				<version>${os-plugin.version}</version>
+			</extension>
+		</extensions>
+{{/if}}
 		<plugins>
 {{#if isJavaSpringBoot}}
+{{#if isJavaKotlin}}
+			<!-- Compiles src/main/kotlin. The Spring Boot parent manages the plugin
+			     version and its compile/test-compile executions; the all-open plugin
+			     opens @Component/@Configuration classes (required by Spring) and the
+			     no-arg plugin synthesizes the no-arg constructor JPA entities need. -->
+			<plugin>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-maven-plugin</artifactId>
+				<configuration>
+					<args>
+						<arg>-Xjsr305=strict</arg>
+					</args>
+					<compilerPlugins>
+						<plugin>spring</plugin>
+{{#if hasJavaJpa}}
+						<plugin>jpa</plugin>
+{{/if}}
+					</compilerPlugins>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.jetbrains.kotlin</groupId>
+						<artifactId>kotlin-maven-allopen</artifactId>
+						<version>${kotlin.version}</version>
+					</dependency>
+{{#if hasJavaJpa}}
+					<dependency>
+						<groupId>org.jetbrains.kotlin</groupId>
+						<artifactId>kotlin-maven-noarg</artifactId>
+						<version>${kotlin.version}</version>
+					</dependency>
+{{/if}}
+				</dependencies>
+			</plugin>
+{{/if}}
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+{{#if hasJavaGrpc}}
+			<!-- protoc (downloaded per-platform) generates protobuf message
+			     classes (compile) and grpc-java stubs (compile-custom) from
+			     src/main/proto into target/generated-sources/protobuf, which the
+			     plugin adds to the compile source roots. -->
+			<plugin>
+				<groupId>org.xolstice.maven.plugins</groupId>
+				<artifactId>protobuf-maven-plugin</artifactId>
+				<version>${protobuf-plugin.version}</version>
+				<configuration>
+					<protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
+					<pluginId>grpc-java</pluginId>
+					<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>compile-custom</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+{{/if}}
 {{#if isJavaOpenApiGenerator}}
 			<plugin>
 				<groupId>org.openapitools</groupId>

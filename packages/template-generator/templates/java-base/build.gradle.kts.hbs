@@ -1,10 +1,25 @@
+{{#if hasJavaGrpc}}
+import com.google.protobuf.gradle.id
+
+{{/if}}
 plugins {
 {{#if isJavaSpringBoot}}
+{{#if isJavaKotlin}}
+	kotlin("jvm") version "2.2.20"
+	kotlin("plugin.spring") version "2.2.20"
+{{#if hasJavaJpa}}
+	kotlin("plugin.jpa") version "2.2.20"
+{{/if}}
+{{else}}
 	java
+{{/if}}
 	id("org.springframework.boot") version "4.0.6"
 	id("io.spring.dependency-management") version "1.1.7"
 {{#if isJavaOpenApiGenerator}}
 	id("org.openapi.generator") version "7.23.0"
+{{/if}}
+{{#if hasJavaGrpc}}
+	id("com.google.protobuf") version "0.9.4"
 {{/if}}
 {{else if isJavaQuarkus}}
 	java
@@ -39,6 +54,15 @@ java {
 	}
 }
 
+{{#if isJavaKotlin}}
+kotlin {
+	jvmToolchain(21)
+	compilerOptions {
+		freeCompilerArgs.add("-Xjsr305=strict")
+	}
+}
+
+{{/if}}
 repositories {
 	mavenCentral()
 }
@@ -90,6 +114,21 @@ dependencies {
 	// Generated models import jakarta.validation.constraints.*; the annotation
 	// API is enough to compile them (version managed by Spring Boot BOM).
 	implementation("jakarta.validation:jakarta.validation-api")
+{{/if}}
+{{#if hasJavaGrpc}}
+	// grpc-java runtime. netty-shaded bundles its own Netty so it never
+	// clashes with the Netty that Spring Boot pulls in.
+	implementation("io.grpc:grpc-netty-shaded:1.68.1")
+	implementation("io.grpc:grpc-protobuf:1.68.1")
+	implementation("io.grpc:grpc-stub:1.68.1")
+	// Pin protobuf-java to the protoc version so the gencode/runtime versions
+	// match (the Spring Boot BOM would otherwise force a different one that the
+	// generated stubs fail their runtime compatibility check against).
+	implementation("com.google.protobuf:protobuf-java:4.28.2")
+	// The grpc-java generated stubs are annotated with
+	// javax.annotation.Generated (source-retention), which is not on the JDK
+	// since Java 9 — supply it at compile time only.
+	compileOnly("org.apache.tomcat:annotations-api:6.0.53")
 {{/if}}
 {{#if hasJavaAmqp}}
 	implementation("org.springframework.boot:spring-boot-starter-amqp")
@@ -162,6 +201,10 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-log4j2")
 {{else}}
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
+{{/if}}
+{{#if isJavaKotlin}}
+	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 {{/if}}
 {{#if hasJavaJpa}}
 	runtimeOnly("com.h2database:h2")
@@ -348,6 +391,30 @@ sourceSets.named("main") {
 
 tasks.named("compileJava") {
 	dependsOn("openApiGenerate")
+}
+
+{{/if}}
+{{#if hasJavaGrpc}}
+// Run protoc (downloaded by the plugin) + the grpc-java plugin over
+// src/main/proto before compiling. The protobuf plugin adds the generated
+// message + stub sources to the main source set and makes compileJava depend
+// on the generateProto task, so the stubs land on the compile classpath.
+protobuf {
+	protoc {
+		artifact = "com.google.protobuf:protoc:4.28.2"
+	}
+	plugins {
+		id("grpc") {
+			artifact = "io.grpc:protoc-gen-grpc-java:1.68.1"
+		}
+	}
+	generateProtoTasks {
+		all().forEach {
+			it.plugins {
+				id("grpc")
+			}
+		}
+	}
 }
 
 {{/if}}
