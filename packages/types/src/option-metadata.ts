@@ -343,6 +343,7 @@ export const REACT_NATIVE_CATEGORY_ORDER = [
   "mobileOTA",
   "mobileDeepLinking",
   "auth",
+  "payments",
   "packageManager",
   "aiDocs",
   "git",

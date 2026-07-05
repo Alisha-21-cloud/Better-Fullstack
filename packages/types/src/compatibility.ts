@@ -215,6 +215,11 @@ export type CompatibilityInput = {
 };
 
 const DEFAULT_RUNTIME = "bun";
+const REVENUECAT_NATIVE_FRONTENDS = new Set<Frontend>([
+  "native-bare",
+  "native-uniwind",
+  "native-unistyles",
+]);
 const PARAGLIDE_COMPATIBLE_FRONTENDS = new Set<Frontend>([
   "next",
   "nuxt",
@@ -228,6 +233,17 @@ const PARAGLIDE_COMPATIBLE_FRONTENDS = new Set<Frontend>([
   "solid-start",
   "astro",
 ]);
+const INTLAYER_COMPATIBLE_FRONTENDS = new Set<Frontend>([
+  "next",
+  "vinext",
+  "tanstack-router",
+  "tanstack-start",
+  "react-router",
+  "react-vite",
+]);
+
+const hasRevenueCatCompatibleNativeFrontend = (frontends: readonly string[]) =>
+  frontends.some((frontend) => REVENUECAT_NATIVE_FRONTENDS.has(frontend as Frontend));
 
 export function validateProjectName(name: string): string | undefined {
   const INVALID_CHARS = ["<", ">", ":", '"', "|", "?", "*", "/", "\\"];
@@ -390,6 +406,10 @@ export const analyzeStackCompatibility = (
 
   if (nextStack.backend === "none") {
     // No backend means no runtime, database, orm, api, auth, dbSetup, serverDeploy
+    const shouldKeepRevenueCatPayments =
+      nextStack.payments === "revenuecat" &&
+      (nextStack.ecosystem === "react-native" ||
+        hasRevenueCatCompatibleNativeFrontend(nextStack.nativeFrontend));
     const noneOverrides: Partial<CompatibilityInput> = {
       runtime: "none",
       database: "none",
@@ -397,7 +417,6 @@ export const analyzeStackCompatibility = (
       api: "none",
       dbSetup: "none",
       serverDeploy: "none",
-      payments: "none",
       search: "none",
       vectorDb: "none",
       rateLimit: "none",
@@ -418,6 +437,15 @@ export const analyzeStackCompatibility = (
           message: `${getCategoryDisplayName(catKey)} set to '${value}' (no backend)`,
         });
       }
+    }
+
+    if (!shouldKeepRevenueCatPayments && nextStack.payments !== "none") {
+      nextStack.payments = "none";
+      changed = true;
+      changes.push({
+        category: "backend",
+        message: "Payments set to 'none' (no backend)",
+      });
     }
 
     // Clear examples
@@ -951,9 +979,9 @@ export const analyzeStackCompatibility = (
   }
 
   if (nextStack.payments === "revenuecat") {
-    const hasNativeFrontend = nextStack.nativeFrontend.some((f) =>
-      ["native-bare", "native-uniwind", "native-unistyles"].includes(f),
-    );
+    const hasNativeFrontend =
+      nextStack.ecosystem === "react-native" ||
+      hasRevenueCatCompatibleNativeFrontend(nextStack.nativeFrontend);
     if (!hasNativeFrontend) {
       nextStack.payments = "none";
       changed = true;
@@ -1033,7 +1061,6 @@ export const analyzeStackCompatibility = (
       ["realtime", "none", "Realtime set to 'None' (React Native ecosystem)"],
       ["jobQueue", "none", "Job queue set to 'None' (React Native ecosystem)"],
       ["fileUpload", "none", "File upload set to 'None' (React Native ecosystem)"],
-      ["payments", "none", "Payments set to 'None' (React Native ecosystem)"],
       ["email", "none", "Email set to 'None' (React Native ecosystem)"],
       ["search", "none", "Search set to 'None' (React Native ecosystem)"],
       ["vectorDb", "none", "Vector database set to 'None' (React Native ecosystem)"],
@@ -1063,6 +1090,15 @@ export const analyzeStackCompatibility = (
         changed = true;
         changes.push({ category, message });
       }
+    }
+
+    if (nextStack.payments !== "none" && nextStack.payments !== "revenuecat") {
+      nextStack.payments = "none";
+      changed = true;
+      changes.push({
+        category: "payments",
+        message: "Payments set to 'None' (React Native payments currently support RevenueCat only)",
+      });
     }
 
     if (!hasNativeFrontend) {
@@ -1428,6 +1464,15 @@ export const analyzeStackCompatibility = (
         });
       }
 
+      if (nextStack.javaApi !== "none") {
+        nextStack.javaApi = "none";
+        changed = true;
+        changes.push({
+          category: "javaWebFramework",
+          message: "Java API set to 'None' (current scaffold only supports it with Spring Boot)",
+        });
+      }
+
       if (nextStack.javaLibraries.some((library) => library !== "none")) {
         nextStack.javaLibraries = [];
         changed = true;
@@ -1467,6 +1512,24 @@ export const analyzeStackCompatibility = (
           message: "Liquibase cleared (Flyway and Liquibase cannot be combined)",
         });
       }
+    }
+  }
+
+  if (nextStack.i18n === "intlayer") {
+    const hasWebFrontend = nextStack.webFrontend.some((frontend) => frontend !== "none");
+    const unsupportedFrontend = nextStack.webFrontend.find(
+      (frontend) => frontend !== "none" && !INTLAYER_COMPATIBLE_FRONTENDS.has(frontend as Frontend),
+    );
+
+    if (!hasWebFrontend || unsupportedFrontend) {
+      nextStack.i18n = "none";
+      changed = true;
+      changes.push({
+        category: "i18n",
+        message: unsupportedFrontend
+          ? `i18n set to 'None' (Intlayer is not wired for the '${unsupportedFrontend}' frontend)`
+          : "i18n set to 'None' (Intlayer requires a web frontend)",
+      });
     }
   }
 
@@ -1683,11 +1746,16 @@ export const getDisabledReason = (
       "mobileOTA",
       "mobileDeepLinking",
       "auth",
+      "payments",
       "packageManager",
       "aiDocs",
       "git",
       "install",
     ]);
+
+    if (category === "payments" && optionId !== "none" && optionId !== "revenuecat") {
+      return "React Native payments currently support RevenueCat only";
+    }
 
     if (!reactNativeCategories.has(category) && optionId !== "none" && optionId !== "false") {
       return "React Native ecosystem only supports native mobile options";
@@ -1716,7 +1784,7 @@ export const getDisabledReason = (
     if (category === "serverDeploy" && optionId !== "none") {
       return "No backend selected";
     }
-    if (category === "payments" && optionId !== "none") {
+    if (category === "payments" && optionId !== "none" && optionId !== "revenuecat") {
       return "No backend selected";
     }
     if (category === "search" && optionId !== "none") {
@@ -1745,7 +1813,11 @@ export const getDisabledReason = (
     }
   }
 
-  const graphDisabledReason = getGraphDisabledReason(currentStack, category, optionId);
+  const graphDisabledReason =
+    (category === "payments" && optionId === "revenuecat") ||
+    (category === "i18n" && optionId === "intlayer")
+      ? { handled: false, authoritative: false, reason: null }
+      : getGraphDisabledReason(currentStack, category, optionId);
   if (graphDisabledReason.reason) {
     return graphDisabledReason.reason;
   }
@@ -2136,9 +2208,7 @@ export const getDisabledReason = (
   }
 
   if (category === "payments" && optionId === "revenuecat") {
-    const hasNativeFrontend = currentStack.nativeFrontend.some((f) =>
-      ["native-bare", "native-uniwind", "native-unistyles"].includes(f),
-    );
+    const hasNativeFrontend = hasRevenueCatCompatibleNativeFrontend(currentStack.nativeFrontend);
     if (!hasNativeFrontend) {
       return "RevenueCat payments requires a native frontend (native-bare, native-uniwind, or native-unistyles)";
     }
@@ -2542,6 +2612,17 @@ export const getDisabledReason = (
         return "next-intl requires Next.js";
       }
     }
+
+    if (optionId === "intlayer") {
+      const unsupportedFrontend = currentStack.webFrontend.find(
+        (frontend) =>
+          frontend !== "none" && !INTLAYER_COMPATIBLE_FRONTENDS.has(frontend as Frontend),
+      );
+
+      if (unsupportedFrontend) {
+        return `Intlayer is not yet wired for the '${unsupportedFrontend}' frontend`;
+      }
+    }
   }
 
   // ============================================
@@ -2573,6 +2654,9 @@ export const getDisabledReason = (
       if (currentStack.javaAuth !== "none") {
         return "Java auth support requires Maven or Gradle";
       }
+      if (currentStack.javaApi !== "none") {
+        return "Java API support requires Maven or Gradle";
+      }
       if (currentStack.javaLibraries.some((library) => library !== "none")) {
         return "Java libraries require Maven or Gradle";
       }
@@ -2597,6 +2681,15 @@ export const getDisabledReason = (
     }
     if (optionId !== "none" && currentStack.javaBuildTool === "none") {
       return "Java auth support requires Maven or Gradle";
+    }
+  }
+
+  if (category === "javaApi") {
+    if (optionId !== "none" && currentStack.javaWebFramework !== "spring-boot") {
+      return "Java API support currently requires Spring Boot";
+    }
+    if (optionId !== "none" && currentStack.javaBuildTool === "none") {
+      return "Java API support requires Maven or Gradle";
     }
   }
 
