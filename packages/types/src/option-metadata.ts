@@ -343,6 +343,7 @@ export const REACT_NATIVE_CATEGORY_ORDER = [
   "mobileOTA",
   "mobileDeepLinking",
   "auth",
+  "payments",
   "packageManager",
   "aiDocs",
   "git",
@@ -1399,6 +1400,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   javaApi: {
     "spring-graphql": "Spring for GraphQL",
     "openapi-generator": "OpenAPI Generator",
+    grpc: "gRPC",
   },
   javaLogging: {
     logback: "Logback",

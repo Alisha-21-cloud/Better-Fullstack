@@ -7,6 +7,7 @@ import {
   DEFAULT_STACK_SELECTION,
   EcosystemSchema,
   evaluateCompatibility,
+  JavaApiSchema,
   JavaAuthSchema,
   JavaBuildToolSchema,
   JavaLibrariesSchema,
@@ -14,6 +15,8 @@ import {
   JavaTestingLibrariesSchema,
   JavaWebFrameworkSchema,
 } from "../src/types";
+import { validateConfigForProgrammaticUse } from "../src/utils/config-validation";
+import { runWithContext } from "../src/utils/context";
 import {
   extractEnumValues,
 } from "./test-utils";
@@ -72,6 +75,7 @@ const JAVA_BUILD_TOOLS = extractEnumValues(JavaBuildToolSchema);
 const JAVA_LIBRARIES = extractEnumValues(JavaLibrariesSchema);
 const JAVA_ORMS = extractEnumValues(JavaOrmSchema);
 const JAVA_AUTHS = extractEnumValues(JavaAuthSchema);
+const JAVA_APIS = extractEnumValues(JavaApiSchema);
 const JAVA_TESTING_LIBRARIES = extractEnumValues(JavaTestingLibrariesSchema);
 
 describe("Java Ecosystem", () => {
@@ -114,6 +118,7 @@ describe("Java Ecosystem", () => {
       ]);
       expect(JAVA_ORMS).toEqual(["spring-data-jpa", "jooq", "mybatis", "none"]);
       expect(JAVA_AUTHS).toEqual(["spring-security", "keycloak", "none"]);
+      expect(JAVA_APIS).toEqual(["spring-graphql", "openapi-generator", "grpc", "none"]);
       expect(JAVA_TESTING_LIBRARIES).toEqual([
         "junit5",
         "mockito",
@@ -909,6 +914,7 @@ describe("Java Ecosystem", () => {
           javaBuildTool: "maven",
           javaOrm: "spring-data-jpa",
           javaAuth: "spring-security",
+          javaApi: "openapi-generator",
           javaLibraries: ["spring-actuator", "flyway"],
           javaTestingLibraries: ["junit5", "mockito"],
         }),
@@ -917,11 +923,30 @@ describe("Java Ecosystem", () => {
       expect(result.adjustedStack?.javaWebFramework).toBe("none");
       expect(result.adjustedStack?.javaOrm).toBe("none");
       expect(result.adjustedStack?.javaAuth).toBe("none");
+      expect(result.adjustedStack?.javaApi).toBe("none");
       expect(result.adjustedStack?.javaLibraries).toEqual([]);
       expect(result.adjustedStack?.javaTestingLibraries).toEqual(["junit5", "mockito"]);
       expect(result.changes.some((adjustment) => adjustment.category === "javaWebFramework")).toBe(
         true,
       );
+    });
+
+    it("should reject Java API scaffolds outside Spring Boot during validation", () => {
+      expect(() =>
+        runWithContext({ silent: true }, () =>
+          validateConfigForProgrammaticUse({
+            projectName: "java-quarkus-openapi",
+            ecosystem: "java",
+            javaWebFramework: "quarkus",
+            javaBuildTool: "maven",
+            javaOrm: "none",
+            javaAuth: "none",
+            javaApi: "openapi-generator",
+            javaLibraries: [],
+            javaTestingLibraries: [],
+          }),
+        ),
+      ).toThrow("Spring-only Java features require the Spring Boot scaffold with Maven or Gradle.");
     });
 
     it("should clear the Java framework and testing libraries when the build tool is none", () => {
