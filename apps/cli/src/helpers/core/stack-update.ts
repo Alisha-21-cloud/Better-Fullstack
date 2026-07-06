@@ -348,6 +348,22 @@ function getUpdatedSpecForChangedPart(
   return undefined;
 }
 
+function pruneScopedSpecsWithoutOwners(specs: string[]): string[] {
+  const primaryRoles = new Set<string>();
+  for (const spec of specs) {
+    const rolePath = spec.split(":")[0];
+    if (rolePath && !rolePath.includes(".")) {
+      primaryRoles.add(rolePath);
+    }
+  }
+
+  return specs.filter((spec) => {
+    const rolePath = spec.split(":")[0];
+    const ownerRole = rolePath?.split(".")[0];
+    return !rolePath?.includes(".") || (ownerRole !== undefined && primaryRoles.has(ownerRole));
+  });
+}
+
 function mergeDerivedStackPartsWithExistingGraph(
   currentConfig: ProjectConfig,
   proposedConfig: ProjectConfig,
@@ -373,8 +389,9 @@ function mergeDerivedStackPartsWithExistingGraph(
       return spec ? [spec] : [];
     });
   const preservedSpecs = new Set(preservedParts.map((part) => formatStackPartSpec(part, currentStackParts)));
+  const coveredSpecs = pruneScopedSpecsWithoutOwners([...new Set([...preservedSpecs, ...updatedSpecs])]);
   const coveredParts = parseStackPartSpecs(
-    [...new Set([...preservedSpecs, ...updatedSpecs])],
+    coveredSpecs,
     "selected",
   );
   const preservedProjectedKeys = new Set<keyof ProjectConfig>();
@@ -384,7 +401,7 @@ function mergeDerivedStackPartsWithExistingGraph(
     }
   }
 
-  const nextSpecs = [...new Set([...preservedSpecs, ...updatedSpecs])];
+  const nextSpecs = [...coveredSpecs];
   for (const part of derivedStackParts) {
     if (part.source === "provided") continue;
     const spec = formatStackPartSpec(part, derivedStackParts);
@@ -396,7 +413,7 @@ function mergeDerivedStackPartsWithExistingGraph(
     }
   }
 
-  return parseStackPartSpecs([...new Set(nextSpecs)], "selected");
+  return parseStackPartSpecs(pruneScopedSpecsWithoutOwners([...new Set(nextSpecs)]), "selected");
 }
 
 function asString(value: unknown, fallback = "none"): string {
@@ -664,6 +681,26 @@ function getDefaultNativeFrontendForRequestedUpdate(
   return needsNativeFrontend ? "native-bare" : undefined;
 }
 
+function hasSelectedTypeScriptBackendPart(config: ProjectConfig): boolean {
+  return (
+    config.stackParts?.some(
+      (part) =>
+        part.source !== "provided" &&
+        !part.ownerPartId &&
+        part.role === "backend" &&
+        part.ecosystem === "typescript" &&
+        part.toolId !== "none",
+    ) ?? false
+  );
+}
+
+function getCompatibilityEcosystem(config: ProjectConfig): ProjectConfig["ecosystem"] {
+  if (config.ecosystem === "react-native" && hasSelectedTypeScriptBackendPart(config)) {
+    return "typescript";
+  }
+  return config.ecosystem;
+}
+
 function buildCompatibilityInputFromConfig(config: ProjectConfig): CompatibilityInput {
   const frontend = asStringArray(config.frontend);
   const addons = asStringArray(config.addons);
@@ -685,7 +722,7 @@ function buildCompatibilityInputFromConfig(config: ProjectConfig): Compatibility
   }
 
   return {
-    ecosystem: config.ecosystem,
+    ecosystem: getCompatibilityEcosystem(config),
     projectName: config.projectName ?? null,
     webFrontend,
     nativeFrontend,

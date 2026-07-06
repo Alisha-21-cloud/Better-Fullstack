@@ -691,6 +691,74 @@ describe("stack update planner", () => {
     expect(btsConfig.effectiveStack).not.toHaveProperty("frontend.ui");
   });
 
+  it("preserves a TypeScript backend owner when updating a native project", async () => {
+    const root = await makeTempRoot("bfs-stack-update-native-ts-backend-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(
+      makeConfig(projectDir, {
+        ecosystem: "typescript",
+        frontend: ["native-bare"],
+        backend: "hono",
+        runtime: "bun",
+        database: "none",
+        orm: "none",
+        api: "none",
+        auth: "none",
+        payments: "none",
+        validation: "zod",
+        addons: [],
+        examples: [],
+        mobileNavigation: "none",
+        mobileUI: "none",
+        mobileStorage: "none",
+        mobileTesting: "none",
+        mobilePush: "none",
+        mobileOTA: "none",
+        mobileDeepLinking: "none",
+      }),
+    );
+
+    const initialBtsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
+    expect(initialBtsConfig.ecosystem).toBe("react-native");
+    expect(initialBtsConfig.effectiveStack).toMatchObject({
+      mobile: "react-native:native-bare",
+      backend: "typescript:hono",
+      "backend.runtime": "typescript:bun",
+      "backend.validation": "typescript:zod",
+    });
+
+    const plan = await planStackUpdate(projectDir, { payments: "revenuecat" });
+    expect(plan.success).toBe(true);
+    if (!plan.success) return;
+
+    expect(plan.proposedConfig.payments).toBe("revenuecat");
+    expect(plan.proposedConfig.backend).toBe("hono");
+    expect(plan.proposedConfig.runtime).toBe("bun");
+    expect(plan.stackPartSpecs).toEqual(
+      expect.arrayContaining([
+        "mobile:react-native:native-bare",
+        "backend:typescript:hono",
+        "backend.runtime:typescript:bun",
+        "backend.validation:typescript:zod",
+        "backend.payments:typescript:revenuecat",
+      ]),
+    );
+    expect(plan.stackPartSpecs).not.toContain("validation:typescript:zod");
+
+    const result = await applyStackUpdate(projectDir, { payments: "revenuecat" });
+    expect(result.success).toBe(true);
+
+    const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
+    expect(btsConfig.payments).toBe("revenuecat");
+    expect(btsConfig.effectiveStack).toMatchObject({
+      mobile: "react-native:native-bare",
+      backend: "typescript:hono",
+      "backend.runtime": "typescript:bun",
+      "backend.validation": "typescript:zod",
+      "backend.payments": "typescript:revenuecat",
+    });
+  });
+
   it("preserves existing scoped graph parts when applying unrelated flat-field updates", async () => {
     const root = await makeTempRoot("bfs-stack-update-scoped-graph-preserve-");
     const projectDir = join(root, "app");
