@@ -1,7 +1,7 @@
 import consola from "consola";
 import pc from "picocolors";
 
-import type { CLIInput, Database, DatabaseSetup, ProjectConfig, Runtime } from "../types";
+import type { CLIInput, Database, DatabaseSetup, Frontend, ProjectConfig, Runtime } from "../types";
 
 import { normalizeCapabilitySelection, validateStackParts } from "../types";
 import {
@@ -13,6 +13,7 @@ import {
   validatePaymentsCompatibility,
   validateSelfBackendCompatibility,
   validateServerDeployRequiresBackend,
+  splitFrontends,
   validateUILibraryCSSFrameworkCompatibility,
   validateUILibraryFrontendCompatibility,
   validateWebDeployFrontendTemplates,
@@ -24,6 +25,15 @@ import { isSilent } from "./context";
 import { constraintError, incompatibilityError, missingRequirementError } from "./error-formatter";
 import { exitWithError } from "./errors";
 import { validatePeerDependencies } from "./peer-dependency-validator";
+
+const INTLAYER_COMPATIBLE_FRONTENDS = new Set<Frontend>([
+  "next",
+  "vinext",
+  "tanstack-router",
+  "tanstack-start",
+  "react-router",
+  "react-vite",
+]);
 
 function validateDatabaseOrmAuth(cfg: Partial<ProjectConfig>, flags?: Set<string>) {
   const db = cfg.database;
@@ -485,7 +495,9 @@ function validateBackendNoneConstraints(
     );
   }
 
-  if (has("payments") && config.payments !== "none") {
+  const isNativeRevenueCat =
+    config.payments === "revenuecat" && splitFrontends(config.frontend ?? []).native.length > 0;
+  if (has("payments") && config.payments !== "none" && !isNativeRevenueCat) {
     exitWithError(
       "Backend 'none' requires '--payments none'. Please remove the --payments flag or set it to 'none'.",
     );
@@ -715,8 +727,9 @@ function validateJavaConstraints(
   const hasJavaTestingLibraries = (config.javaTestingLibraries ?? []).some(
     (library) => library !== "none",
   );
+  const hasJavaApi = (config.javaApi ?? "none") !== "none";
   const hasSpringOnlyFeatures =
-    config.javaOrm !== "none" || config.javaAuth !== "none" || hasJavaLibraries;
+    config.javaOrm !== "none" || config.javaAuth !== "none" || hasJavaLibraries || hasJavaApi;
 
   if (hasNoBuildTool && hasJavaWebFramework) {
     incompatibilityError({
@@ -740,11 +753,12 @@ function validateJavaConstraints(
         "java-build-tool": config.javaBuildTool ?? "none",
         "java-orm": config.javaOrm ?? "none",
         "java-auth": config.javaAuth ?? "none",
+        "java-api": config.javaApi ?? "none",
         "java-libraries": (config.javaLibraries ?? []).join(" ") || "none",
       },
       suggestions: [
         "Use --java-web-framework spring-boot and a real build tool for Spring features",
-        "Clear --java-orm, --java-auth, and --java-libraries when using plain Java or Quarkus",
+        "Clear --java-orm, --java-auth, --java-api, and --java-libraries when using plain Java or Quarkus",
       ],
     });
   }
@@ -967,7 +981,14 @@ function validateRateLimitConstraints(config: Partial<ProjectConfig>) {
 function validateSearchConstraints(config: Partial<ProjectConfig>) {
   if (!config.search || config.search === "none") return;
   const ecosystem = config.ecosystem ?? "typescript";
-  if (ecosystem !== "typescript" && config.search !== "meilisearch") {
+  // Non-TypeScript ecosystems default to Meilisearch, but a few have native
+  // options: Go adds Bleve (embedded) and Python adds Elasticsearch.
+  const nonTsSearchAllowlist: Record<string, string[]> = {
+    go: ["meilisearch", "bleve"],
+    python: ["meilisearch", "elasticsearch"],
+  };
+  const allowedSearch = nonTsSearchAllowlist[ecosystem] ?? ["meilisearch"];
+  if (ecosystem !== "typescript" && !allowedSearch.includes(config.search)) {
     incompatibilityError({
       message: "Only Meilisearch search is available for non-TypeScript ecosystems.",
       provided: { ecosystem, search: config.search },
@@ -1041,6 +1062,30 @@ export function validatePythonApiConstraints(config: Partial<ProjectConfig>) {
   }
 }
 
+function validateI18nConstraints(config: Partial<ProjectConfig>) {
+  if (config.i18n !== "intlayer") return;
+
+  const { web } = splitFrontends(config.frontend ?? []);
+  const unsupportedFrontend = web.find(
+    (frontend) => !INTLAYER_COMPATIBLE_FRONTENDS.has(frontend),
+  );
+
+  if (web.length === 0 || unsupportedFrontend) {
+    incompatibilityError({
+      message:
+        "Intlayer i18n is currently wired only for Next.js, Vinext, TanStack Router/Start, React Router, and React + Vite frontends.",
+      provided: {
+        frontend: web.join(" ") || "none",
+        i18n: "intlayer",
+      },
+      suggestions: [
+        "Use --frontend next, vinext, tanstack-router, tanstack-start, react-router, or react-vite",
+        "Set --i18n none or choose another i18n provider for this frontend",
+      ],
+    });
+  }
+}
+
 export function validateFullConfig(
   config: Partial<ProjectConfig>,
   providedFlags: Set<string>,
@@ -1076,6 +1121,7 @@ export function validateFullConfig(
   validateSearchConstraints(config);
   validateJavaConstraints(config, providedFlags);
   validateElixirConstraints(config);
+  validateI18nConstraints(config);
 
   const hasGraphBackend = config.stackParts?.some(
     (part) =>
@@ -1227,6 +1273,7 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
     validateSearchConstraints(config);
     validateJavaConstraints(config);
     validateElixirConstraints(config);
+    validateI18nConstraints(config);
 
     validatePaymentsCompatibility(config.payments, config.auth, config.backend, config.frontend);
 

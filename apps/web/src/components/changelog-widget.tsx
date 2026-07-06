@@ -2,6 +2,10 @@ import { History, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { ChangelogModal } from "@/components/changelog-modal";
+import {
+  hasSeenBuilderShareModal,
+  isBuilderRoute,
+} from "@/lib/builder-share-modal-visibility";
 import { latestChangelogRelease } from "@/lib/changelog";
 import {
   type ChangelogInteractionState,
@@ -32,6 +36,14 @@ export function ChangelogWidget() {
     if (!latestChangelogRelease) return;
 
     try {
+      if (
+        isBuilderRoute(window.location.pathname) &&
+        !hasSeenBuilderShareModal(window.localStorage)
+      ) {
+        setIsVisible(false);
+        return;
+      }
+
       setIsVisible(
         shouldShowChangelogRelease(window.localStorage, latestChangelogRelease.version),
       );

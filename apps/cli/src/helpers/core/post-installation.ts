@@ -138,6 +138,8 @@ export async function displayPostInstallInstructions(
   );
   const polarInstructions =
     config.payments === "polar" ? getPolarInstructions(backend, packageManager) : "";
+  const revenueCatInstructions =
+    config.payments === "revenuecat" ? getRevenueCatInstructions(backend, packageManager) : "";
   const paymentSetupInstructions = getPaymentSetupInstructions(config.payments, backend);
   const alchemyDeployInstructions = getAlchemyDeployInstructions(
     runCmd,
@@ -283,6 +285,7 @@ export async function displayPostInstallInstructions(
   if (authSetupInstructions) output += `\n${authSetupInstructions.trim()}\n`;
   if (betterAuthConvexInstructions) output += `\n${betterAuthConvexInstructions.trim()}\n`;
   if (polarInstructions) output += `\n${polarInstructions.trim()}\n`;
+  if (revenueCatInstructions) output += `\n${revenueCatInstructions.trim()}\n`;
   if (paymentSetupInstructions) output += `\n${paymentSetupInstructions.trim()}\n`;
 
   if (noOrmWarning) output += `\n${noOrmWarning.trim()}\n`;
@@ -656,6 +659,31 @@ function getPaymentSetupInstructions(
     );
   }
 
+  if (payments === "creem") {
+    return (
+      `${pc.bold("Creem Setup:")}\n` +
+      `${pc.cyan("•")} Get your API key from ${pc.underline("https://docs.creem.io")} (Developers > API Keys)\n` +
+      `${pc.cyan("•")} Set ${pc.white("CREEM_API_KEY")}, ${pc.white("CREEM_WEBHOOK_SECRET")}, and ${pc.white("CREEM_ENVIRONMENT")} (test|prod) in ${pc.white(envPath)}`
+    );
+  }
+
+  if (payments === "autumn") {
+    return (
+      `${pc.bold("Autumn Setup:")}\n` +
+      `${pc.cyan("•")} Sign up at ${pc.underline("https://useautumn.com")} and connect Stripe\n` +
+      `${pc.cyan("•")} Set ${pc.white("AUTUMN_SECRET_KEY")} in ${pc.white(envPath)} and mount handleAutumnRequest at ${pc.white("/api/autumn/*")}\n` +
+      `${pc.cyan("•")} Define plans/features with ${pc.white("npx atmn@latest")} (Autumn is webhookless)`
+    );
+  }
+
+  if (payments === "commet") {
+    return (
+      `${pc.bold("Commet Setup:")}\n` +
+      `${pc.cyan("•")} Get your API key from ${pc.underline("https://commet.co")} (Settings > API Keys)\n` +
+      `${pc.cyan("•")} Set ${pc.white("COMMET_API_KEY")} and ${pc.white("COMMET_WEBHOOK_SECRET")} in ${pc.white(envPath)}`
+    );
+  }
+
   return "";
 }
 
@@ -688,6 +716,29 @@ function getPolarInstructions(backend: Backend, packageManager: string) {
   }
   const envPath = backend === "self" ? "apps/web/.env" : "apps/server/.env";
   return `${pc.bold("Polar Payments Setup:")}\n${pc.cyan("•")} Get access token & product ID from ${pc.underline("https://sandbox.polar.sh/")}\n${pc.cyan("•")} Set POLAR_ACCESS_TOKEN in ${envPath}`;
+}
+
+function getRevenueCatInstructions(backend: Backend, packageManager: string) {
+  const base =
+    `${pc.bold("RevenueCat Payments Setup:")}\n` +
+    `${pc.cyan("•")} Create a project, entitlement, and offering in ${pc.underline("https://app.revenuecat.com/")}\n` +
+    `${pc.cyan("•")} Set the public SDK keys in ${pc.white("apps/native/.env")}:\n` +
+    `${pc.white("   EXPO_PUBLIC_REVENUECAT_IOS_KEY=appl_your_ios_key")}\n` +
+    `${pc.white("   EXPO_PUBLIC_REVENUECAT_ANDROID_KEY=goog_your_android_key")}\n` +
+    `${pc.white("   EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID=pro")}`;
+
+  if (backend === "convex") {
+    const cmd = packageManager === "npm" ? "npx" : packageManager;
+    return (
+      `${base}\n` +
+      `${pc.cyan("•")} Set the webhook secret (min 32 chars) from ${pc.white("packages/backend")}:\n` +
+      `${pc.white("   cd packages/backend")}\n` +
+      `${pc.white(`   ${cmd} convex env set REVENUECAT_WEBHOOK_AUTH your_webhook_secret`)}\n` +
+      `${pc.cyan("•")} Configure a RevenueCat webhook to ${pc.white("https://<your-convex-site-url>/webhooks/revenuecat")} using the same value as the Authorization header`
+    );
+  }
+
+  return base;
 }
 
 function getAlchemyDeployInstructions(

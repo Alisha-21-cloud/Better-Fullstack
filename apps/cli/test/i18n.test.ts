@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { createCustomConfig, expectSuccess, runTRPCTest } from "./test-utils";
+import { createCustomConfig, expectError, expectSuccess, runTRPCTest } from "./test-utils";
 
 async function readWebFile(projectDir: string, path: string) {
   return readFile(join(projectDir, "apps/web", path), "utf-8");
@@ -101,6 +101,44 @@ describe("i18n Options", () => {
       expect(nextConfig).toContain("webpackConfig.plugins.push(");
       expect(nextConfig).toContain("paraglideWebpackPlugin({");
       expect(nextConfig).toContain('outdir: "./src/paraglide"');
+    });
+  });
+
+  describe("Intlayer", () => {
+    test("generates Intlayer setup for TanStack Router", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "intlayer-tanstack-router",
+          frontend: ["tanstack-router"],
+          backend: "hono",
+          i18n: "intlayer",
+        }),
+      );
+      expectSuccess(result);
+
+      const pkg = await readFile(join(result.projectDir!, "apps/web/package.json"), "utf-8");
+      expect(pkg).toContain("intlayer");
+
+      const config = await readFile(
+        join(result.projectDir!, "apps/web/intlayer.config.ts"),
+        "utf-8",
+      );
+      expect(config).toContain("intlayer");
+    });
+
+    test("rejects Intlayer for unsupported frontend templates", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "intlayer-svelte",
+          frontend: ["svelte"],
+          backend: "self",
+          runtime: "none",
+          api: "orpc",
+          i18n: "intlayer",
+        }),
+      );
+
+      expectError(result, "Intlayer i18n is currently wired only");
     });
   });
 });

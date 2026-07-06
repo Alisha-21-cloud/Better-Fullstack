@@ -558,6 +558,21 @@ const SMOKE_TEST_PRESETS: Record<string, PresetDef> = {
       search: "meilisearch",
     },
   },
+  // Exercises this branch's Go additions in one combo: net/http stdlib web
+  // framework + Bun (uptrace) ORM + Bleve embedded search.
+  "go-stdlib-bun-bleve": {
+    ecosystem: "go",
+    overrides: {
+      goWebFramework: "stdlib",
+      goOrm: "bun",
+      goApi: "none",
+      goCli: "cobra",
+      goLogging: "slog",
+      database: "sqlite",
+      search: "bleve",
+      goTesting: ["testify"],
+    },
+  },
 
   // === PYTHON PRESETS ===
   "python-fastapi-sqlalchemy": {
@@ -581,6 +596,19 @@ const SMOKE_TEST_PRESETS: Record<string, PresetDef> = {
       observability: "sentry",
       caching: "upstash-redis",
       search: "meilisearch",
+    },
+  },
+  // Verifies this branch's Python Elasticsearch search option end-to-end
+  // (was CLI-blocked before the non-TS search allowlist fix).
+  "python-elasticsearch": {
+    ecosystem: "python",
+    overrides: {
+      pythonWebFramework: "fastapi",
+      pythonOrm: "none",
+      pythonValidation: "pydantic",
+      pythonQuality: "ruff",
+      pythonTesting: ["pytest"],
+      search: "elasticsearch",
     },
   },
   "python-django-langchain": {
@@ -640,6 +668,22 @@ const SMOKE_TEST_PRESETS: Record<string, PresetDef> = {
       javaAuth: "none",
       javaLibraries: [],
       javaTestingLibraries: [],
+    },
+  },
+  // Log4j2 + Spring Boot: guards against the Logback/Log4j2 dual-binding
+  // regression (non-webmvc starters like Actuator pull Logback transitively).
+  // junit5-only (no Testcontainers) so it verifies the Spring context / Log4j2
+  // init at runtime without needing a Docker daemon.
+  "java-spring-log4j2": {
+    ecosystem: "java",
+    overrides: {
+      javaWebFramework: "spring-boot",
+      javaBuildTool: "gradle",
+      javaOrm: "jooq",
+      javaAuth: "none",
+      javaLogging: "log4j2",
+      javaLibraries: ["spring-actuator", "caffeine"],
+      javaTestingLibraries: ["junit5"],
     },
   },
 
@@ -749,9 +793,12 @@ const PRESET_GROUPS = {
     "ai-search-workbench",
     "rust-actix-sqlx",
     "python-django-langchain",
+    "python-elasticsearch",
     "go-echo-sqlc",
+    "go-stdlib-bun-bleve",
     "java-spring-gradle-jpa",
     "java-plain-cli",
+    "java-spring-log4j2",
     "elixir-phoenix-api",
     "dotnet-minimal-efcore",
     "react-vite-hono",

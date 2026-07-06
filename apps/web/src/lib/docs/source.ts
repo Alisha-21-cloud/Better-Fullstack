@@ -1,4 +1,8 @@
 import { docsMeta } from "virtual:content-meta";
+import {
+  localizedDocsMdxLoaders,
+  localizedDocsRawMdxLoaders,
+} from "virtual:localized-content";
 
 import {
   type LocalizedContentLocale,
@@ -106,6 +110,7 @@ const DOC_FOLDER_TITLE_TRANSLATIONS: Record<string, LocalizedFrontmatter<{ title
     "zh-Hant": { title: "AI 代理" },
     de: { title: "KI-Agenten" },
     fr: { title: "Agents IA" },
+    uk: { title: "AI-агенти" },
   },
   "Better Fullstack": {
     es: { title: "Better Fullstack" },
@@ -115,6 +120,7 @@ const DOC_FOLDER_TITLE_TRANSLATIONS: Record<string, LocalizedFrontmatter<{ title
     "zh-Hant": { title: "Better Fullstack" },
     de: { title: "Better Fullstack" },
     fr: { title: "Better Fullstack" },
+    uk: { title: "Better Fullstack" },
   },
   CLI: {
     es: { title: "CLI" },
@@ -124,6 +130,7 @@ const DOC_FOLDER_TITLE_TRANSLATIONS: Record<string, LocalizedFrontmatter<{ title
     "zh-Hant": { title: "CLI" },
     de: { title: "CLI" },
     fr: { title: "CLI" },
+    uk: { title: "CLI" },
   },
   Ecosystems: {
     es: { title: "Ecosistemas" },
@@ -133,6 +140,7 @@ const DOC_FOLDER_TITLE_TRANSLATIONS: Record<string, LocalizedFrontmatter<{ title
     "zh-Hant": { title: "生態系統" },
     de: { title: "Ökosysteme" },
     fr: { title: "Écosystèmes" },
+    uk: { title: "Екосистеми" },
   },
   "Getting Started": {
     es: { title: "Primeros pasos" },
@@ -142,6 +150,7 @@ const DOC_FOLDER_TITLE_TRANSLATIONS: Record<string, LocalizedFrontmatter<{ title
     "zh-Hant": { title: "入門" },
     de: { title: "Erste Schritte" },
     fr: { title: "Bien démarrer" },
+    uk: { title: "Початок роботи" },
   },
   Options: {
     es: { title: "Opciones" },
@@ -151,6 +160,27 @@ const DOC_FOLDER_TITLE_TRANSLATIONS: Record<string, LocalizedFrontmatter<{ title
     "zh-Hant": { title: "選項" },
     de: { title: "Optionen" },
     fr: { title: "Options" },
+    uk: { title: "Опції" },
+  },
+  "Stack Guides": {
+    es: { title: "Guías de stack" },
+    zh: { title: "技术栈指南" },
+    ja: { title: "スタックガイド" },
+    ko: { title: "스택 가이드" },
+    "zh-Hant": { title: "技術棧指南" },
+    de: { title: "Stack-Guides" },
+    fr: { title: "Guides de stack" },
+    uk: { title: "Посібники зі стеку" },
+  },
+  "Provider Setup": {
+    es: { title: "Configuración de proveedores" },
+    zh: { title: "服务商配置" },
+    ja: { title: "プロバイダー設定" },
+    ko: { title: "공급자 설정" },
+    "zh-Hant": { title: "服務商設定" },
+    de: { title: "Provider-Einrichtung" },
+    fr: { title: "Configuration des fournisseurs" },
+    uk: { title: "Налаштування провайдерів" },
   },
   Reference: {
     es: { title: "Referencia" },
@@ -160,6 +190,7 @@ const DOC_FOLDER_TITLE_TRANSLATIONS: Record<string, LocalizedFrontmatter<{ title
     "zh-Hant": { title: "參考" },
     de: { title: "Referenz" },
     fr: { title: "Référence" },
+    uk: { title: "Довідник" },
   },
   Sections: {
     es: { title: "Secciones" },
@@ -169,6 +200,7 @@ const DOC_FOLDER_TITLE_TRANSLATIONS: Record<string, LocalizedFrontmatter<{ title
     "zh-Hant": { title: "功能分區" },
     de: { title: "Abschnitte" },
     fr: { title: "Sections" },
+    uk: { title: "Розділи" },
   },
 };
 
@@ -190,8 +222,12 @@ function localizedFilePath(filePath: string, locale: ContentLocale): string {
   return filePath.replace(/\.mdx$/, `.${locale}.mdx`);
 }
 
+function localizedContentKey(filePath: string, locale: ContentLocale): string {
+  return `${locale}:${filePath}`;
+}
+
 function hasLocalizedContent(filePath: string, locale: ContentLocale): boolean {
-  return locale !== "en" && localizedFilePath(filePath, locale) in mdxLoaders;
+  return locale !== "en" && localizedContentKey(filePath, locale) in localizedDocsMdxLoaders;
 }
 
 function contentCacheKey(page: DocPage, locale: ContentLocale): string {
@@ -263,12 +299,16 @@ const contentCache = createSuspenseCache<DocPageContent>();
 
 async function loadPageContent(page: DocPage): Promise<DocPageContent> {
   const locale = currentContentLocale();
-  const filePath = hasLocalizedContent(page.filePath, locale)
-    ? localizedFilePath(page.filePath, locale)
-    : page.filePath;
+  const localizedKey = localizedContentKey(page.filePath, locale);
+  const hasLocalized = hasLocalizedContent(page.filePath, locale);
+  const filePath = hasLocalized ? localizedFilePath(page.filePath, locale) : page.filePath;
+  const moduleLoader = hasLocalized ? localizedDocsMdxLoaders[localizedKey] : mdxLoaders[filePath];
+  const rawLoader = hasLocalized
+    ? localizedDocsRawMdxLoaders[localizedKey]
+    : rawMdxLoaders[filePath];
   const [module, raw] = await Promise.all([
-    mdxLoaders[filePath]?.(),
-    rawMdxLoaders[filePath]?.(),
+    moduleLoader?.(),
+    rawLoader?.(),
   ]);
   if (!module) throw new Error(`Docs content module missing for ${filePath}`);
   return {
@@ -304,10 +344,13 @@ export async function loadAllRawPages(): Promise<Map<string, string>> {
   const locale = currentContentLocale();
   const entries = await Promise.all(
     getAllPages().map(async (page) => {
-      const filePath = hasLocalizedContent(page.filePath, locale)
-        ? localizedFilePath(page.filePath, locale)
-        : page.filePath;
-      return [page.filePath, (await rawMdxLoaders[filePath]?.()) ?? ""] as const;
+      const localizedKey = localizedContentKey(page.filePath, locale);
+      const hasLocalized = hasLocalizedContent(page.filePath, locale);
+      const filePath = hasLocalized ? localizedFilePath(page.filePath, locale) : page.filePath;
+      const rawLoader = hasLocalized
+        ? localizedDocsRawMdxLoaders[localizedKey]
+        : rawMdxLoaders[filePath];
+      return [page.filePath, (await rawLoader?.()) ?? ""] as const;
     }),
   );
   return new Map(entries);

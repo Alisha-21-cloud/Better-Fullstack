@@ -13,6 +13,18 @@ const VERSION_CACHE = new Map<string, NpmPackageInfo>();
 const PRERELEASE_TAG_PRIORITY = ["beta", "next", "rc", "canary", "alpha"] as const;
 const REGISTRY_FETCH_TIMEOUT_MS = 10_000;
 const REGISTRY_CONCURRENCY = 10;
+const SYNCHRONIZED_VERSION_FAMILIES = [
+  {
+    name: "oRPC",
+    packages: [
+      "@orpc/server",
+      "@orpc/client",
+      "@orpc/openapi",
+      "@orpc/zod",
+      "@orpc/tanstack-query",
+    ],
+  },
+] as const;
 
 function mapWithConcurrency<T, R>(
   items: T[],
@@ -40,6 +52,29 @@ type ParsedVersion = {
   patch: number;
   prerelease: Array<number | string>;
 };
+
+type PackageJsonVersionSection = Record<string, string>;
+
+function getVersionSections(packageJson: Record<string, unknown>): PackageJsonVersionSection[] {
+  const sections: PackageJsonVersionSection[] = [];
+
+  for (const sectionName of ["dependencies", "devDependencies"] as const) {
+    const section = packageJson[sectionName];
+    if (section && typeof section === "object" && !Array.isArray(section)) {
+      sections.push(section as PackageJsonVersionSection);
+    }
+  }
+
+  const workspaces = packageJson.workspaces;
+  if (workspaces && typeof workspaces === "object" && !Array.isArray(workspaces)) {
+    const catalog = (workspaces as Record<string, unknown>).catalog;
+    if (catalog && typeof catalog === "object" && !Array.isArray(catalog)) {
+      sections.push(catalog as PackageJsonVersionSection);
+    }
+  }
+
+  return sections;
+}
 
 export function parseVersion(value: string): ParsedVersion {
   const normalized = value.replace(/^[^\d]*/, "");
@@ -154,18 +189,66 @@ export function selectRegistryVersionForChannel(
   return tags.latest ?? null;
 }
 
-async function resolveRegistryVersion(
-  packageName: string,
+function getVersionsForChannel(
+  packageInfo: NpmPackageInfo,
   channel: Exclude<VersionChannel, "stable">,
-): Promise<string> {
-  const packageInfo = await fetchPackageInfo(packageName);
-  const version = selectRegistryVersionForChannel(packageInfo, channel);
+): string[] {
+  const versions = Object.keys(packageInfo.versions ?? {});
 
-  if (!version) {
-    throw new Error(`No ${channel} version available for ${packageName}`);
+  if (channel === "latest") {
+    return versions.filter((version) => !isPrerelease(version));
   }
 
-  return version;
+  const prereleases = versions.filter(isPrerelease);
+  return prereleases.length > 0 ? prereleases : versions.filter((version) => !isPrerelease(version));
+}
+
+function resolveSharedFamilyVersion(
+  packageInfos: NpmPackageInfo[],
+  channel: Exclude<VersionChannel, "stable">,
+): string | null {
+  if (packageInfos.length === 0) return null;
+
+  const firstInfo = packageInfos[0];
+  if (!firstInfo) return null;
+
+  let commonVersions = new Set(getVersionsForChannel(firstInfo, channel));
+  const remainingInfos = packageInfos.slice(1);
+
+  for (const packageInfo of remainingInfos) {
+    const availableVersions = new Set(getVersionsForChannel(packageInfo, channel));
+    commonVersions = new Set([...commonVersions].filter((version) => availableVersions.has(version)));
+  }
+
+  return [...commonVersions].sort((left, right) => compareVersions(right, left))[0] ?? null;
+}
+
+function applySynchronizedFamilyVersions(
+  resolvedVersions: Map<string, string>,
+  packageInfos: Map<string, NpmPackageInfo>,
+  channel: Exclude<VersionChannel, "stable">,
+): void {
+  for (const family of SYNCHRONIZED_VERSION_FAMILIES) {
+    const selectedPackages = family.packages.filter((packageName) => resolvedVersions.has(packageName));
+    if (selectedPackages.length < 2) continue;
+
+    const selectedPackageInfos = selectedPackages.flatMap((packageName) => {
+      const packageInfo = packageInfos.get(packageName);
+      return packageInfo ? [packageInfo] : [];
+    });
+    if (selectedPackageInfos.length !== selectedPackages.length) continue;
+
+    const sharedVersion = resolveSharedFamilyVersion(selectedPackageInfos, channel);
+
+    if (!sharedVersion) {
+      log.warn(`Failed to resolve shared ${channel} version for ${family.name} packages`);
+      continue;
+    }
+
+    for (const packageName of selectedPackages) {
+      resolvedVersions.set(packageName, sharedVersion);
+    }
+  }
 }
 
 async function collectPackageJsonPaths(projectDir: string): Promise<string[]> {
@@ -209,15 +292,11 @@ export async function applyDependencyVersionChannel(
   for (const packageJsonPath of packageJsonPaths) {
     const packageJson = await fs.readJson(packageJsonPath);
 
-    for (const [depName, depVersion] of Object.entries(packageJson.dependencies ?? {})) {
-      if (typeof depVersion === "string" && isRegistrySemverSpec(depVersion)) {
-        packageNames.add(depName);
-      }
-    }
-
-    for (const [depName, depVersion] of Object.entries(packageJson.devDependencies ?? {})) {
-      if (typeof depVersion === "string" && isRegistrySemverSpec(depVersion)) {
-        packageNames.add(depName);
+    for (const section of getVersionSections(packageJson)) {
+      for (const [depName, depVersion] of Object.entries(section)) {
+        if (typeof depVersion === "string" && isRegistrySemverSpec(depVersion)) {
+          packageNames.add(depName);
+        }
       }
     }
   }
@@ -225,12 +304,18 @@ export async function applyDependencyVersionChannel(
   if (packageNames.size === 0) return;
 
   const resolvedVersions = new Map<string, string>();
+  const packageInfos = new Map<string, NpmPackageInfo>();
 
   await mapWithConcurrency(
     [...packageNames],
     async (packageName) => {
       try {
-        const resolvedVersion = await resolveRegistryVersion(packageName, channel);
+        const packageInfo = await fetchPackageInfo(packageName);
+        const resolvedVersion = selectRegistryVersionForChannel(packageInfo, channel);
+        if (!resolvedVersion) {
+          throw new Error(`No ${channel} version available for ${packageName}`);
+        }
+        packageInfos.set(packageName, packageInfo);
         resolvedVersions.set(packageName, resolvedVersion);
       } catch (error) {
         log.warn(
@@ -245,14 +330,13 @@ export async function applyDependencyVersionChannel(
 
   if (resolvedVersions.size === 0) return;
 
+  applySynchronizedFamilyVersions(resolvedVersions, packageInfos, channel);
+
   for (const packageJsonPath of packageJsonPaths) {
     const packageJson = await fs.readJson(packageJsonPath);
     let changed = false;
 
-    for (const sectionName of ["dependencies", "devDependencies"] as const) {
-      const section = packageJson[sectionName] as Record<string, string> | undefined;
-      if (!section) continue;
-
+    for (const section of getVersionSections(packageJson)) {
       for (const [packageName, currentVersion] of Object.entries(section)) {
         if (!isRegistrySemverSpec(currentVersion)) continue;
 

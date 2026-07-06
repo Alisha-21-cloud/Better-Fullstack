@@ -7,6 +7,7 @@ import {
   DEFAULT_STACK_SELECTION,
   EcosystemSchema,
   evaluateCompatibility,
+  JavaApiSchema,
   JavaAuthSchema,
   JavaBuildToolSchema,
   JavaLibrariesSchema,
@@ -14,6 +15,8 @@ import {
   JavaTestingLibrariesSchema,
   JavaWebFrameworkSchema,
 } from "../src/types";
+import { validateConfigForProgrammaticUse } from "../src/utils/config-validation";
+import { runWithContext } from "../src/utils/context";
 import {
   extractEnumValues,
 } from "./test-utils";
@@ -72,6 +75,7 @@ const JAVA_BUILD_TOOLS = extractEnumValues(JavaBuildToolSchema);
 const JAVA_LIBRARIES = extractEnumValues(JavaLibrariesSchema);
 const JAVA_ORMS = extractEnumValues(JavaOrmSchema);
 const JAVA_AUTHS = extractEnumValues(JavaAuthSchema);
+const JAVA_APIS = extractEnumValues(JavaApiSchema);
 const JAVA_TESTING_LIBRARIES = extractEnumValues(JavaTestingLibrariesSchema);
 
 describe("Java Ecosystem", () => {
@@ -83,7 +87,7 @@ describe("Java Ecosystem", () => {
     });
 
     it("should expose scaffolded Java web framework values", () => {
-      expect(JAVA_WEB_FRAMEWORKS).toEqual(["spring-boot", "quarkus", "none"]);
+      expect(JAVA_WEB_FRAMEWORKS).toEqual(["spring-boot", "quarkus", "micronaut", "none"]);
     });
 
     it("should only expose scaffolded Java build tool values", () => {
@@ -114,6 +118,7 @@ describe("Java Ecosystem", () => {
       ]);
       expect(JAVA_ORMS).toEqual(["spring-data-jpa", "jooq", "mybatis", "none"]);
       expect(JAVA_AUTHS).toEqual(["spring-security", "keycloak", "none"]);
+      expect(JAVA_APIS).toEqual(["spring-graphql", "openapi-generator", "grpc", "none"]);
       expect(JAVA_TESTING_LIBRARIES).toEqual([
         "junit5",
         "mockito",
@@ -244,6 +249,91 @@ describe("Java Ecosystem", () => {
       expect(readmeContent).toContain("http://localhost:8080/hello");
       expect(claudeContent).toContain("Web Framework: quarkus");
       expect(claudeContent).toContain("./mvnw quarkus:dev");
+    });
+
+    it("should create a Micronaut Maven project with REST support", async () => {
+      const result = await createVirtual({
+        projectName: "java-micronaut-maven",
+        ecosystem: "java",
+        javaWebFramework: "micronaut",
+        javaBuildTool: "maven",
+        javaOrm: "none",
+        javaAuth: "none",
+        javaLibraries: [],
+        javaTestingLibraries: ["junit5", "mockito", "archunit"],
+        aiDocs: ["claude-md"],
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+
+      expect(hasFile(root, "pom.xml")).toBe(true);
+      expect(hasFile(root, "mvnw")).toBe(true);
+      expect(hasFile(root, "src/main/java/com/example/javamicronautmaven/Application.java")).toBe(
+        true,
+      );
+      expect(
+        hasFile(
+          root,
+          "src/main/java/com/example/javamicronautmaven/controller/HelloController.java",
+        ),
+      ).toBe(true);
+      expect(hasFile(root, "src/main/resources/application.yml")).toBe(true);
+
+      const pomContent = getFileContent(root, "pom.xml");
+      const applicationContent = getFileContent(
+        root,
+        "src/main/java/com/example/javamicronautmaven/Application.java",
+      );
+
+      expect(pomContent).toContain("io.micronaut");
+      expect(pomContent).not.toContain("spring-boot-starter-parent");
+      expect(applicationContent).toContain("Micronaut.run");
+    });
+
+    it("should wire log4j2 for a Spring Boot Maven project", async () => {
+      const result = await createVirtual({
+        projectName: "java-log4j2-maven",
+        ecosystem: "java",
+        javaWebFramework: "spring-boot",
+        javaBuildTool: "maven",
+        javaOrm: "none",
+        javaAuth: "none",
+        javaLogging: "log4j2",
+        javaLibraries: [],
+        javaTestingLibraries: ["junit5"],
+        aiDocs: ["claude-md"],
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+
+      const pomContent = getFileContent(root, "pom.xml");
+      expect(pomContent).toContain("spring-boot-starter-log4j2");
+      expect(hasFile(root, "src/main/resources/log4j2-spring.xml")).toBe(true);
+      expect(hasFile(root, "src/main/resources/logback-spring.xml")).toBe(false);
+    });
+
+    it("should wire OpenAPI Generator for a Spring Boot Maven project", async () => {
+      const result = await createVirtual({
+        projectName: "java-openapi-maven",
+        ecosystem: "java",
+        javaWebFramework: "spring-boot",
+        javaBuildTool: "maven",
+        javaApi: "openapi-generator",
+        javaOrm: "none",
+        javaAuth: "none",
+        javaLibraries: [],
+        javaTestingLibraries: ["junit5"],
+        aiDocs: ["claude-md"],
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+
+      const pomContent = getFileContent(root, "pom.xml");
+      expect(pomContent).toContain("openapi-generator-maven-plugin");
+      expect(hasFile(root, "src/main/resources/openapi.yaml")).toBe(true);
     });
 
     it("should create a Quarkus Gradle project with REST support", async () => {
@@ -824,6 +914,7 @@ describe("Java Ecosystem", () => {
           javaBuildTool: "maven",
           javaOrm: "spring-data-jpa",
           javaAuth: "spring-security",
+          javaApi: "openapi-generator",
           javaLibraries: ["spring-actuator", "flyway"],
           javaTestingLibraries: ["junit5", "mockito"],
         }),
@@ -832,11 +923,30 @@ describe("Java Ecosystem", () => {
       expect(result.adjustedStack?.javaWebFramework).toBe("none");
       expect(result.adjustedStack?.javaOrm).toBe("none");
       expect(result.adjustedStack?.javaAuth).toBe("none");
+      expect(result.adjustedStack?.javaApi).toBe("none");
       expect(result.adjustedStack?.javaLibraries).toEqual([]);
       expect(result.adjustedStack?.javaTestingLibraries).toEqual(["junit5", "mockito"]);
       expect(result.changes.some((adjustment) => adjustment.category === "javaWebFramework")).toBe(
         true,
       );
+    });
+
+    it("should reject Java API scaffolds outside Spring Boot during validation", () => {
+      expect(() =>
+        runWithContext({ silent: true }, () =>
+          validateConfigForProgrammaticUse({
+            projectName: "java-quarkus-openapi",
+            ecosystem: "java",
+            javaWebFramework: "quarkus",
+            javaBuildTool: "maven",
+            javaOrm: "none",
+            javaAuth: "none",
+            javaApi: "openapi-generator",
+            javaLibraries: [],
+            javaTestingLibraries: [],
+          }),
+        ),
+      ).toThrow("Spring-only Java features require the Spring Boot scaffold with Maven or Gradle.");
     });
 
     it("should clear the Java framework and testing libraries when the build tool is none", () => {
