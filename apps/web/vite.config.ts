@@ -75,24 +75,25 @@ export default defineConfig({
       // from the client bundle entirely (~1.4MB gzip savings).
       external: ["ts-morph"],
       output: {
-        // Localized MDX bodies are lazy-loaded per (page, locale) via dynamic
-        // imports of `virtual:localized-content-mdx/<subdir>/<locale>/<path>`.
-        // Rollup's default name keeps only the page slug, so the locale is lost
-        // and every locale's chunk is indistinguishable from the English one.
-        // Stamp the locale into the filename (`<page>.<locale>-<hash>.js`) so the
-        // performance-budget check can recognise and exclude this lazy,
-        // non-critical-path content from the initial-load JS budget.
+        // Localized MDX bodies are lazy-loaded per locale. Stamp those chunks
+        // with a stable localized-content prefix so the performance-budget check
+        // can exclude this non-critical-path content from initial-load JS.
         chunkFileNames(chunkInfo) {
           const id = chunkInfo.facadeModuleId;
           if (id) {
+            const bundle =
+              /virtual:localized-content-mdx-bundle\/(docs|guides|blog)\/([^/]+)/.exec(id);
+            if (bundle) {
+              return `assets/localized-content-${bundle[1]}-${bundle[2]}-[hash].js`;
+            }
             const mdx =
               /virtual:localized-content-mdx\/(?:docs|guides|blog)\/([^/]+)\//.exec(id);
             if (mdx) {
-              return `assets/[name].${mdx[1]}-[hash].js`;
+              return `assets/localized-content-${mdx[1]}-[name]-[hash].js`;
             }
             const raw = /virtual:localized-content-raw\/([^/]+)/.exec(id);
             if (raw) {
-              return `assets/[name].${raw[1]}-[hash].js`;
+              return `assets/localized-content-raw-${raw[1]}-[hash].js`;
             }
           }
           return "assets/[name]-[hash].js";

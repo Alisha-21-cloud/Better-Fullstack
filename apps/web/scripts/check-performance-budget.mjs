@@ -20,7 +20,8 @@ const TRACKED_KEYS = [
 
 const MAIN_JS_PATTERNS = [/^main-.*\.js$/, /^index-.*\.js$/];
 const MAIN_CSS_PATTERNS = [/^main-.*\.css$/, /^index-.*\.css$/];
-const LOCALIZED_CONTENT_JS_PATTERN = /\.(?:es|zh-Hant|zh|ja|ko|de|fr|uk)-.*\.js$/;
+const LOCALIZED_CONTENT_JS_PATTERN =
+  /^(?:localized-content-|(?:es|zh-Hant|zh|ja|ko|de|fr|uk)[.-]).*\.js$/;
 
 const DEFAULT_BUDGETS = {
   mainJsGzip: 8 * 1024,
@@ -81,7 +82,9 @@ async function collectMetrics() {
 
   const mainJs = findAsset(jsSizes, MAIN_JS_PATTERNS);
   const mainCss = findAsset(cssSizes, MAIN_CSS_PATTERNS);
-  const stackBuilderJs = jsSizes.find((entry) => /^stack-builder-.*\.js$/.test(entry.file));
+  const stackBuilderJs = [...jsSizes]
+    .filter((entry) => /^stack-builder-.*\.js$/.test(entry.file))
+    .sort((a, b) => b.gzip - a.gzip || a.file.localeCompare(b.file))[0];
   const localizedContentJsSizes = jsSizes.filter((entry) => isLocalizedContentAsset(entry.file));
   const budgetedJsSizes = jsSizes.filter((entry) => !isLocalizedContentAsset(entry.file));
 
