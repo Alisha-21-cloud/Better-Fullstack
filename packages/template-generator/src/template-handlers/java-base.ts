@@ -14,14 +14,19 @@ type JavaTemplateContext = ProjectConfig & {
   isJavaMaven: boolean;
   isJavaGradle: boolean;
   isJavaSpringBoot: boolean;
+  isJavaKotlin: boolean;
   isJavaQuarkus: boolean;
+  isJavaMicronaut: boolean;
   isJavaPlainJava: boolean;
   hasJavaJpa: boolean;
   hasJavaJooq: boolean;
   hasJavaMybatis: boolean;
   hasJavaKeycloak: boolean;
   hasJavaGraphql: boolean;
+  isJavaOpenApiGenerator: boolean;
+  hasJavaGrpc: boolean;
   hasJavaLogback: boolean;
+  hasJavaLog4j2: boolean;
   hasJavaAmqp: boolean;
   hasJavaOtel: boolean;
   hasJavaSecurity: boolean;
@@ -155,6 +160,36 @@ function createJavaTemplateContext(config: ProjectConfig): JavaTemplateContext {
   // plain-Java path instead of emitting uncompilable Spring sources.
   const isJavaSpringBoot = config.javaWebFramework === "spring-boot" && hasJavaBuildTool;
   const isJavaQuarkus = config.javaWebFramework === "quarkus" && hasJavaBuildTool;
+  // `micronaut` is added to `JavaWebFrameworkSchema` separately; cast so this
+  // handler compiles ahead of (and after) that schema widening landing.
+  const isJavaMicronaut = config.javaWebFramework === "micronaut" && hasJavaBuildTool;
+  // Kotlin is only wired for the Spring Boot scaffold and its common option
+  // surface. Everything else falls back to the (byte-identical) Java path so the
+  // generator never emits a half-built Kotlin project. This mirrors the
+  // normalization in compatibility.ts and is repeated here so direct
+  // `createVirtual`/MCP callers (which bypass compatibility) stay safe.
+  const kotlinUnsupportedTestingLibraries = new Set([
+    "testcontainers",
+    "rest-assured",
+    "wiremock",
+    "awaitility",
+    "archunit",
+    "jqwik",
+  ]);
+  const isJavaKotlin =
+    config.javaLanguage === "kotlin" &&
+    isJavaSpringBoot &&
+    config.javaOrm !== "jooq" &&
+    config.javaOrm !== "mybatis" &&
+    config.javaApi !== "grpc" &&
+    config.javaApi !== "openapi-generator" &&
+    config.email !== "resend" &&
+    config.search !== "meilisearch" &&
+    config.caching !== "upstash-redis" &&
+    config.observability !== "sentry" &&
+    !(config.javaTestingLibraries || []).some((library) =>
+      kotlinUnsupportedTestingLibraries.has(library),
+    );
   const hasJavaJpa = isJavaSpringBoot && config.javaOrm === "spring-data-jpa";
   const rawLibraries = isJavaSpringBoot
     ? (config.javaLibraries || []).filter((library) => library !== "none")
@@ -172,6 +207,13 @@ function createJavaTemplateContext(config: ProjectConfig): JavaTemplateContext {
       continue;
     }
     if (library === "liquibase" && rawLibrarySet.has("flyway")) {
+      continue;
+    }
+    // Lombok and MapStruct are Java annotation-processor tooling. In Kotlin they
+    // are redundant (data classes replace Lombok) and not wired (MapStruct would
+    // need kapt), so drop them from the effective library set — the Kotlin
+    // scaffold uses idiomatic Kotlin instead of the DTO/mapper example.
+    if (isJavaKotlin && (library === "lombok" || library === "mapstruct")) {
       continue;
     }
     javaLibraries.push(library);
@@ -199,14 +241,31 @@ function createJavaTemplateContext(config: ProjectConfig): JavaTemplateContext {
     isJavaMaven: config.javaBuildTool === "maven",
     isJavaGradle: config.javaBuildTool === "gradle",
     isJavaSpringBoot,
+    isJavaKotlin,
     isJavaQuarkus,
-    isJavaPlainJava: !isJavaSpringBoot && !isJavaQuarkus,
+    isJavaMicronaut,
+    isJavaPlainJava: !isJavaSpringBoot && !isJavaQuarkus && !isJavaMicronaut,
     hasJavaJpa,
     hasJavaJooq: isJavaSpringBoot && config.javaOrm === "jooq",
     hasJavaMybatis: isJavaSpringBoot && config.javaOrm === "mybatis",
     hasJavaKeycloak: isJavaSpringBoot && config.javaAuth === "keycloak",
     hasJavaGraphql: isJavaSpringBoot && config.javaApi === "spring-graphql",
+    // The OpenAPI Generator `spring` generator targets Spring Boot, so this
+    // API layer is gated to Spring Boot exactly like `spring-graphql`.
+    // `openapi-generator` is added to `JavaApiSchema` separately; cast to string
+    // so this handler compiles ahead of (and after) that schema widening.
+    isJavaOpenApiGenerator: isJavaSpringBoot && config.javaApi === "openapi-generator",
+    // grpc-java runs its own gRPC server (via protoc codegen) alongside the
+    // Spring Boot web server, so this API layer is gated to Spring Boot exactly
+    // like `spring-graphql` and `openapi-generator`.
+    hasJavaGrpc: isJavaSpringBoot && config.javaApi === "grpc",
     hasJavaLogback: isJavaSpringBoot && config.javaLogging === "logback",
+    // log4j2 is an additive logging backend supported for Spring Boot,
+    // Micronaut, and plain Java. Quarkus keeps its own default logging
+    // subsystem (JBoss LogManager) and ignores this flag.
+    // `log4j2` is added to `JavaLoggingSchema` separately; cast to string so
+    // this handler compiles ahead of (and after) that schema widening landing.
+    hasJavaLog4j2: config.javaLogging === "log4j2",
     hasJavaAmqp: javaLibraries.includes("spring-amqp"),
     hasJavaOtel: javaLibraries.includes("opentelemetry-java"),
     hasJavaSecurity: isJavaSpringBoot && config.javaAuth === "spring-security",
@@ -240,8 +299,76 @@ function createJavaTemplateContext(config: ProjectConfig): JavaTemplateContext {
   };
 }
 
+// Kotlin sources live under src/main/kotlin / src/test/kotlin and are emitted
+// only for the Kotlin variant. They mirror the Spring Boot Java surface for the
+// supported option set (JPA/none ORM, Spring Security/Keycloak/none auth, Spring
+// GraphQL/none API, and the source-bearing libraries caffeine/otel).
+function shouldSkipKotlinSource(templatePath: string, context: JavaTemplateContext): boolean {
+  if (!context.hasJavaJpa) {
+    if (
+      templatePath.includes("/domain/") ||
+      templatePath.includes("/repository/") ||
+      templatePath.endsWith("/service/AppUserService.kt.hbs") ||
+      templatePath.endsWith("/controller/UserController.kt.hbs") ||
+      templatePath.endsWith("/service/AppUserServiceTest.kt.hbs")
+    ) {
+      return true;
+    }
+  }
+  if (!context.hasJavaSecurity && templatePath.endsWith("/config/SecurityConfig.kt.hbs")) {
+    return true;
+  }
+  if (!context.hasJavaKeycloak && templatePath.endsWith("/config/ResourceServerConfig.kt.hbs")) {
+    return true;
+  }
+  if (!context.hasJavaOtel && templatePath.endsWith("/config/OtelConfig.kt.hbs")) {
+    return true;
+  }
+  if (!context.hasJavaGraphql && templatePath.endsWith("/controller/GraphqlController.kt.hbs")) {
+    return true;
+  }
+  if (
+    !context.hasJavaCaffeine &&
+    (templatePath.endsWith("/controller/CacheController.kt.hbs") ||
+      templatePath.endsWith("/cache/CachedTimeService.kt.hbs"))
+  ) {
+    return true;
+  }
+  if (!context.hasJavaTests && templatePath.includes("/src/test/kotlin/")) {
+    return true;
+  }
+  if (
+    !context.hasJavaMockito &&
+    (templatePath.endsWith("/MockitoSmokeTest.kt.hbs") ||
+      templatePath.endsWith("/service/AppUserServiceTest.kt.hbs"))
+  ) {
+    return true;
+  }
+  if (
+    !context.hasJavaTestcontainers &&
+    templatePath.endsWith("/ApplicationContainerTests.kt.hbs")
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function shouldSkipJavaTemplate(templatePath: string, context: JavaTemplateContext): boolean {
   const isEmailServiceTemplate = templatePath.endsWith("/service/EmailService.java.hbs");
+
+  const isKotlinSourceTemplate =
+    templatePath.includes("/src/main/kotlin/") || templatePath.includes("/src/test/kotlin/");
+  const isJavaSourceTemplate =
+    templatePath.includes("/src/main/java/") || templatePath.includes("/src/test/java/");
+
+  if (context.isJavaKotlin) {
+    // Kotlin project: never emit the Java sources; gate the Kotlin sources.
+    if (isJavaSourceTemplate) return true;
+    if (isKotlinSourceTemplate) return shouldSkipKotlinSource(templatePath, context);
+  } else if (isKotlinSourceTemplate) {
+    // Java (default) project: never emit the Kotlin sources.
+    return true;
+  }
 
   if (
     (!context.isJavaMaven &&
@@ -259,8 +386,16 @@ function shouldSkipJavaTemplate(templatePath: string, context: JavaTemplateConte
     return true;
   }
 
+  // Plain Java keeps no config/controller/resource surface, EXCEPT the log4j2
+  // config file when javaLogging === "log4j2" and there is a build tool to
+  // wire the log4j2 dependencies (a source-only scaffold has no classpath).
+  const isPlainJavaLog4j2Config =
+    context.hasJavaLog4j2 &&
+    context.hasJavaBuildTool &&
+    templatePath.endsWith("/log4j2.xml.hbs");
   if (
     context.isJavaPlainJava &&
+    !isPlainJavaLog4j2Config &&
     (templatePath.includes("/config/") ||
       templatePath.includes("/controller/") ||
       templatePath.includes("src/main/resources/"))
@@ -278,6 +413,27 @@ function shouldSkipJavaTemplate(templatePath: string, context: JavaTemplateConte
     ) {
       return true;
     }
+  }
+
+  // Micronaut keeps its own web surface: a single `HelloController` (health +
+  // root endpoint) and a Micronaut-flavoured `application.yml`. Skip the
+  // Spring-specific `HealthController` and the Spring/plain-Java lifecycle tests
+  // (`Application.main` there either boots Spring or prints a greeting — neither
+  // matches a Micronaut server main).
+  if (context.isJavaMicronaut) {
+    if (
+      templatePath.endsWith("/controller/HealthController.java.hbs") ||
+      templatePath.endsWith("/ApplicationTests.java.hbs") ||
+      templatePath.endsWith("/ApplicationContainerTests.java.hbs")
+    ) {
+      return true;
+    }
+  }
+
+  // The Micronaut `HelloController` is Micronaut-only; every other framework
+  // (Spring Boot, Quarkus, plain Java) must not emit it.
+  if (!context.isJavaMicronaut && templatePath.endsWith("/controller/HelloController.java.hbs")) {
+    return true;
   }
 
   if (!context.isJavaQuarkus && templatePath.includes("/resource/")) {
@@ -325,6 +481,19 @@ function shouldSkipJavaTemplate(templatePath: string, context: JavaTemplateConte
   ) {
     return true;
   }
+  // gRPC surface: the .proto contract (src/main/proto) is the protoc codegen
+  // input and the /grpc/ Java sources are the service impl + server lifecycle.
+  // Emit them only when the gRPC API layer is selected (Spring Boot only).
+  if (!context.hasJavaGrpc && (templatePath.includes("/proto/") || templatePath.includes("/grpc/"))) {
+    return true;
+  }
+  // The OpenAPI spec is the codegen input; emit it only when the OpenAPI
+  // Generator API layer is selected (Spring Boot only). Other frameworks skip
+  // src/main/resources wholesale above, so this guard is what keeps it out of a
+  // Spring Boot scaffold that did not opt into openapi-generator.
+  if (!context.isJavaOpenApiGenerator && templatePath.endsWith("/openapi.yaml.hbs")) {
+    return true;
+  }
   if (!context.hasJavaJooq && templatePath.includes("/jooqdata/")) {
     return true;
   }
@@ -332,6 +501,26 @@ function shouldSkipJavaTemplate(templatePath: string, context: JavaTemplateConte
     return true;
   }
   if (!context.hasJavaLogback && templatePath.endsWith("/logback-spring.xml.hbs")) {
+    return true;
+  }
+
+  // log4j2 config files are emitted only when javaLogging === "log4j2".
+  // Spring Boot uses the `-spring` variant so Spring controls initialization;
+  // Micronaut and plain Java (with a build tool) use the standard `log4j2.xml`.
+  if (
+    templatePath.endsWith("/log4j2-spring.xml.hbs") &&
+    !(context.hasJavaLog4j2 && context.isJavaSpringBoot)
+  ) {
+    return true;
+  }
+  if (
+    templatePath.endsWith("/log4j2.xml.hbs") &&
+    !(
+      context.hasJavaLog4j2 &&
+      context.hasJavaBuildTool &&
+      (context.isJavaMicronaut || context.isJavaPlainJava)
+    )
+  ) {
     return true;
   }
 

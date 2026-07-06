@@ -81,6 +81,13 @@ async function expectFileNotContains(path: string, expected: string): Promise<vo
   await expect(readFile(path, "utf-8")).resolves.not.toContain(expected);
 }
 
+async function pathExists(target: string): Promise<boolean> {
+  return readFile(target, "utf-8").then(
+    () => true,
+    () => false,
+  );
+}
+
 afterAll(async () => {
   await Promise.all(TEMP_ROOTS.map((dir) => rm(dir, { recursive: true, force: true })));
 });
@@ -100,6 +107,7 @@ const CREATE_ONLY_KEYS = new Set([
   "renderTitle",
   "disableAnalytics",
   "manualDb",
+  "workspaceShape",
 ]);
 
 const NON_TS_BASE_CONFIG: Partial<ProjectConfig> = {
@@ -263,7 +271,10 @@ describe("stack update planner", () => {
       .filter((key) => !CREATE_ONLY_KEYS.has(key))
       .sort();
     const mcpUpdateKeys = Object.keys(MCP_STACK_UPDATE_SCHEMA)
-      .filter((key) => key !== "projectDir" && key !== "projectName")
+      .filter(
+        (key) =>
+          key !== "projectDir" && key !== "projectName" && key !== "acknowledgeArchitectureChange",
+      )
       .sort();
 
     expect(mcpUpdateKeys).toEqual(expectedStackKeys);
@@ -680,6 +691,74 @@ describe("stack update planner", () => {
     expect(btsConfig.effectiveStack).not.toHaveProperty("frontend.ui");
   });
 
+  it("preserves a TypeScript backend owner when updating a native project", async () => {
+    const root = await makeTempRoot("bfs-stack-update-native-ts-backend-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(
+      makeConfig(projectDir, {
+        ecosystem: "typescript",
+        frontend: ["native-bare"],
+        backend: "hono",
+        runtime: "bun",
+        database: "none",
+        orm: "none",
+        api: "none",
+        auth: "none",
+        payments: "none",
+        validation: "zod",
+        addons: [],
+        examples: [],
+        mobileNavigation: "none",
+        mobileUI: "none",
+        mobileStorage: "none",
+        mobileTesting: "none",
+        mobilePush: "none",
+        mobileOTA: "none",
+        mobileDeepLinking: "none",
+      }),
+    );
+
+    const initialBtsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
+    expect(initialBtsConfig.ecosystem).toBe("react-native");
+    expect(initialBtsConfig.effectiveStack).toMatchObject({
+      mobile: "react-native:native-bare",
+      backend: "typescript:hono",
+      "backend.runtime": "typescript:bun",
+      "backend.validation": "typescript:zod",
+    });
+
+    const plan = await planStackUpdate(projectDir, { payments: "revenuecat" });
+    expect(plan.success).toBe(true);
+    if (!plan.success) return;
+
+    expect(plan.proposedConfig.payments).toBe("revenuecat");
+    expect(plan.proposedConfig.backend).toBe("hono");
+    expect(plan.proposedConfig.runtime).toBe("bun");
+    expect(plan.stackPartSpecs).toEqual(
+      expect.arrayContaining([
+        "mobile:react-native:native-bare",
+        "backend:typescript:hono",
+        "backend.runtime:typescript:bun",
+        "backend.validation:typescript:zod",
+        "backend.payments:typescript:revenuecat",
+      ]),
+    );
+    expect(plan.stackPartSpecs).not.toContain("validation:typescript:zod");
+
+    const result = await applyStackUpdate(projectDir, { payments: "revenuecat" });
+    expect(result.success).toBe(true);
+
+    const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
+    expect(btsConfig.payments).toBe("revenuecat");
+    expect(btsConfig.effectiveStack).toMatchObject({
+      mobile: "react-native:native-bare",
+      backend: "typescript:hono",
+      "backend.runtime": "typescript:bun",
+      "backend.validation": "typescript:zod",
+      "backend.payments": "typescript:revenuecat",
+    });
+  });
+
   it("preserves existing scoped graph parts when applying unrelated flat-field updates", async () => {
     const root = await makeTempRoot("bfs-stack-update-scoped-graph-preserve-");
     const projectDir = join(root, "app");
@@ -775,7 +854,10 @@ describe("stack update planner", () => {
     expect(plan.stackPartSpecs).toContain("backend.database:typescript:postgres");
     expect(plan.stackPartSpecs).not.toContain("database:universal:postgres");
 
-    const result = await applyStackUpdate(projectDir, { database: "postgres" });
+    const result = await applyStackUpdate(projectDir, {
+      database: "postgres",
+      acknowledgeArchitectureChange: true,
+    });
     expect(result.success).toBe(true);
 
     const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
@@ -1633,7 +1715,10 @@ describe("stack update planner", () => {
       expect(plan.compatibilityAdjustments).toContain(testCase.expectedAdjustment);
       expect(plan.manualReviewBlockers).toEqual([]);
 
-      const result = await applyStackUpdate(projectDir, { serverDeploy: testCase.serverDeploy });
+      const result = await applyStackUpdate(projectDir, {
+        serverDeploy: testCase.serverDeploy,
+        acknowledgeArchitectureChange: true,
+      });
       expect(result.success).toBe(true);
 
       const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
@@ -1867,7 +1952,10 @@ describe("stack update planner", () => {
     );
     expect(plan.manualReviewBlockers).toEqual([]);
 
-    const result = await applyStackUpdate(projectDir, { examples: ["chat-sdk"] });
+    const result = await applyStackUpdate(projectDir, {
+      examples: ["chat-sdk"],
+      acknowledgeArchitectureChange: true,
+    });
     expect(result.success).toBe(true);
 
     const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
@@ -1940,7 +2028,10 @@ describe("stack update planner", () => {
     );
     expect(plan.manualReviewBlockers).toEqual([]);
 
-    const result = await applyStackUpdate(projectDir, { dbSetup: "d1" });
+    const result = await applyStackUpdate(projectDir, {
+      dbSetup: "d1",
+      acknowledgeArchitectureChange: true,
+    });
     expect(result.success).toBe(true);
 
     const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
@@ -3413,5 +3504,144 @@ describe("stack update planner", () => {
     expect(result.success).toBe(false);
     if (result.success) return;
     expect(result.error).toContain("Manual review required");
+  });
+
+  const ARCH_BASE_CONFIG: Partial<ProjectConfig> = {
+    frontend: ["react-vite"],
+    backend: "hono",
+    runtime: "bun",
+    database: "sqlite",
+    orm: "drizzle",
+    api: "none",
+    auth: "better-auth",
+  };
+
+  it("flags database, orm, and auth swaps as architecture changes carrying migration steps", async () => {
+    const root = await makeTempRoot("bfs-stack-update-arch-flags-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(makeConfig(projectDir, ARCH_BASE_CONFIG));
+
+    const plan = await planStackUpdate(projectDir, {
+      database: "postgres",
+      orm: "prisma",
+      auth: "none",
+    });
+    expect(plan.success).toBe(true);
+    if (!plan.success) return;
+
+    expect(plan.requiresArchitectureAck).toBe(true);
+    expect(plan.architectureChanges).toContainEqual({
+      key: "database",
+      from: "sqlite",
+      to: "postgres",
+    });
+    expect(plan.architectureChanges).toContainEqual({
+      key: "orm",
+      from: "drizzle",
+      to: "prisma",
+    });
+    expect(plan.architectureChanges).toContainEqual({
+      key: "auth",
+      from: "better-auth",
+      to: "none",
+    });
+    expect(plan.migrationSteps.length).toBeGreaterThan(0);
+    expect(
+      plan.migrationSteps.some((step) => step.startsWith("database (sqlite -> postgres)")),
+    ).toBe(true);
+    expect(plan.migrationSteps.some((step) => step.startsWith("orm (drizzle -> prisma)"))).toBe(
+      true,
+    );
+    expect(plan.migrationSteps.some((step) => step.startsWith("auth (better-auth -> none)"))).toBe(
+      true,
+    );
+  });
+
+  it("refuses to apply an architecture change without acknowledgment and leaves the project untouched", async () => {
+    const root = await makeTempRoot("bfs-stack-update-arch-refuse-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(makeConfig(projectDir, ARCH_BASE_CONFIG));
+
+    const before = await readJsonc(join(projectDir, "bts.jsonc"));
+
+    const result = await applyStackUpdate(projectDir, { database: "postgres" });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(result.error).toContain("architecture change requires acknowledgment");
+    expect(result.error).toContain("database: sqlite -> postgres");
+    expect(result.error).toContain("acknowledgeArchitectureChange: true");
+
+    const after = await readJsonc(join(projectDir, "bts.jsonc"));
+    expect(after.database).toBe("sqlite");
+    expect(after).toEqual(before);
+    expect(await pathExists(join(projectDir, "MIGRATION.md"))).toBe(false);
+  });
+
+  it("applies an architecture change with acknowledgment and appends a MIGRATION.md checklist", async () => {
+    const root = await makeTempRoot("bfs-stack-update-arch-apply-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(makeConfig(projectDir, ARCH_BASE_CONFIG));
+
+    const result = await applyStackUpdate(projectDir, {
+      database: "postgres",
+      acknowledgeArchitectureChange: true,
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+
+    const btsConfig = await readJsonc(join(projectDir, "bts.jsonc"));
+    expect(btsConfig.database).toBe("postgres");
+
+    const migrationPath = join(projectDir, "MIGRATION.md");
+    const migration = await readFile(migrationPath, "utf-8");
+    expect(migration).toContain("# Migration checklist");
+    expect(migration).toContain("database (sqlite -> postgres)");
+    expect(migration).toContain("Data and schema are NOT migrated automatically");
+
+    // A second architecture change appends (does not overwrite) a new checklist section.
+    const second = await applyStackUpdate(projectDir, {
+      orm: "prisma",
+      acknowledgeArchitectureChange: true,
+    });
+    expect(second.success).toBe(true);
+    const migrationAfter = await readFile(migrationPath, "utf-8");
+    expect(migrationAfter).toContain("database (sqlite -> postgres)");
+    expect(migrationAfter).toContain("orm (drizzle -> prisma)");
+    expect(migrationAfter.match(/## Architecture change/g)?.length).toBe(2);
+  });
+
+  it("does not gate additive addon updates", async () => {
+    const root = await makeTempRoot("bfs-stack-update-arch-addon-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(makeConfig(projectDir, ARCH_BASE_CONFIG));
+
+    const plan = await planStackUpdate(projectDir, { addons: ["ultracite"] });
+    expect(plan.success).toBe(true);
+    if (!plan.success) return;
+
+    expect(plan.requiresArchitectureAck).toBe(false);
+    expect(plan.architectureChanges).toEqual([]);
+    expect(plan.migrationSteps).toEqual([]);
+
+    const result = await applyStackUpdate(projectDir, { addons: ["ultracite"] });
+    expect(result.success).toBe(true);
+    expect(await pathExists(join(projectDir, "MIGRATION.md"))).toBe(false);
+  });
+
+  it("does not gate additive (none -> X) stack additions", async () => {
+    const root = await makeTempRoot("bfs-stack-update-arch-add-none-");
+    const projectDir = join(root, "app");
+    await scaffoldGeneratedProject(makeConfig(projectDir, TYPESCRIPT_SERVICE_BASE_CONFIG));
+
+    const plan = await planStackUpdate(projectDir, { auth: "better-auth" });
+    expect(plan.success).toBe(true);
+    if (!plan.success) return;
+
+    expect(plan.requiresArchitectureAck).toBe(false);
+    expect(plan.architectureChanges).toEqual([]);
+
+    const result = await applyStackUpdate(projectDir, { auth: "better-auth" });
+    expect(result.success).toBe(true);
+    expect(await pathExists(join(projectDir, "MIGRATION.md"))).toBe(false);
   });
 });

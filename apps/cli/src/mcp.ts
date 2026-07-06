@@ -75,6 +75,7 @@ import {
   GoWebFrameworkSchema,
   JavaAuthSchema,
   JavaApiSchema,
+  JavaLanguageSchema,
   JavaLoggingSchema,
   JavaBuildToolSchema,
   JavaLibrariesSchema,
@@ -486,6 +487,7 @@ const MCP_COMPATIBILITY_DEFAULTS = {
   mobilePush: "none",
   mobileOTA: "none",
   packageManager: "bun",
+  workspaceShape: "monorepo",
   versionChannel: "stable",
   examples: [],
   aiSdk: "none",
@@ -536,6 +538,7 @@ const MCP_COMPATIBILITY_DEFAULTS = {
   goCaching: "none",
   goConfig: "none",
   goObservability: "none",
+  javaLanguage: "java",
   javaWebFramework: "spring-boot",
   javaBuildTool: "maven",
   javaOrm: "none",
@@ -1007,6 +1010,11 @@ const stackUpdateOutputSchema = {
   scriptChanges: z.record(z.string(), z.array(z.string())).optional(),
   envChanges: z.record(z.string(), z.array(z.string())).optional(),
   manualReviewBlockers: z.array(z.string()).optional(),
+  architectureChanges: z
+    .array(z.object({ key: z.string(), from: z.string(), to: z.string() }))
+    .optional(),
+  migrationSteps: z.array(z.string()).optional(),
+  requiresArchitectureAck: z.boolean().optional(),
   compatibilityAdjustments: z.array(z.string()).optional(),
   compatibilityWarnings: z.array(z.string()).optional(),
   installCommand: z.string().optional(),
@@ -1086,7 +1094,7 @@ function matchNearestPreset(input: Record<string, unknown>): Template | null {
   return best && best.score >= 3 ? best.id : null;
 }
 
-function recommendStackFromBrief(
+export function recommendStackFromBrief(
   brief: string,
   ecosystemHint?: ProjectConfig["ecosystem"],
 ): { input: Record<string, unknown>; rationale: string[]; matchedPreset: Template | null } {
@@ -1335,6 +1343,7 @@ const crossEcosystemInputSchema = {
   goCaching: GoCachingSchema.optional().describe("Go caching library"),
   goConfig: GoConfigSchema.optional().describe("Go config management"),
   goObservability: GoObservabilitySchema.optional().describe("Go observability"),
+  javaLanguage: JavaLanguageSchema.optional().describe("JVM language (java, kotlin)"),
   javaWebFramework: JavaWebFrameworkSchema.optional().describe("Java web framework"),
   javaBuildTool: JavaBuildToolSchema.optional().describe("Java build tool"),
   javaOrm: JavaOrmSchema.optional().describe("Java ORM"),
@@ -1445,6 +1454,12 @@ export const MCP_PLAN_CREATE_SCHEMA = {
 export const MCP_STACK_UPDATE_SCHEMA = {
   ...MCP_PLAN_CREATE_SCHEMA,
   projectDir: z.string().describe("Absolute path to the existing Better-Fullstack project"),
+  acknowledgeArchitectureChange: z
+    .boolean()
+    .optional()
+    .describe(
+      "Acknowledge that this update replaces an existing database/orm/auth/api/backend/runtime choice. Required to apply architecture-changing updates; data and schema are NOT migrated automatically.",
+    ),
 };
 
 export async function startMcpServer() {
@@ -1972,7 +1987,13 @@ export async function startMcpServer() {
           message:
             plan.manualReviewBlockers.length > 0
               ? "Plan created, but manual review is required before applying."
-              : `Plan created. If approved, call bfs_apply_stack_update, then run: ${plan.installCommand}`,
+              : plan.requiresArchitectureAck
+                ? `Plan created. This is an architecture change (${plan.architectureChanges
+                    .map((change) => `${change.key}: ${change.from} -> ${change.to}`)
+                    .join(
+                      "; ",
+                    )}); data and schema are NOT migrated automatically. Review migrationSteps, then call bfs_apply_stack_update with acknowledgeArchitectureChange: true, then run: ${plan.installCommand}`
+                : `Plan created. If approved, call bfs_apply_stack_update, then run: ${plan.installCommand}`,
         };
         return {
           content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],

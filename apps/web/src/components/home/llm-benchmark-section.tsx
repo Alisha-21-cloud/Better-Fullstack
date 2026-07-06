@@ -70,6 +70,13 @@ const PATH_TAB_ORDER: readonly PathId[] = ["prompt", "mcp", "cli"] as const;
 // hygiene, the quality-gate fixes) more than model capability. Prompt — where the
 // model writes everything itself — is the clean model-capability signal.
 const V2_PATH_TABS: readonly PathId[] = ["prompt"] as const;
+// v2.1 additionally surfaces the MCP path (DeepSeek V4 Flash is the only model
+// with an MCP sweep so far). Per the note above, the assisted MCP numbers run our
+// own scaffolder, so this tab reads model+scaffolder, not raw model capability.
+const V2_1_PATH_TABS: readonly PathId[] = ["prompt", "mcp"] as const;
+function pathTabsFor(version: BenchmarkVersionId | LeaderboardVersion): readonly PathId[] {
+  return version === "v2.1" ? V2_1_PATH_TABS : V2_PATH_TABS;
+}
 
 const PATHS: Record<PathId, { glyph: string; short: string; detail: string }> = {
   mcp: {
@@ -902,9 +909,9 @@ const PROVIDER_BAR_COLOR: Record<"claude" | "codex" | "opencode" | "kilo" | "agy
 
 const BAR_TRACK_STYLE: CSSProperties = { backgroundColor: "var(--bar-track)" };
 
-// One row per model: Model · bar · Pass 1 · Avg cost · Out tok · Steps.
+// One row per model: Model · bar · Core · Full · Wired · Time · Avg cost · Out tok · Steps.
 const LEADERBOARD_GRID =
-  "grid grid-cols-[minmax(9rem,14rem)_minmax(0,1fr)_4rem_4.5rem_4rem_3rem] items-center gap-x-3";
+  "grid grid-cols-[minmax(9rem,13rem)_minmax(0,1fr)_4.25rem_4.25rem_4.5rem_4rem_4.5rem_4rem_3rem] items-center gap-x-3";
 
 const PASS_AXIS_TICKS: readonly number[] = [0, 20, 40, 60, 80, 100] as const;
 
@@ -927,8 +934,14 @@ interface ModelLeaderRow {
   color: string;
   /** brand logo shown to the left of the model name (undefined = no logo). */
   logo?: ProviderLogoId;
-  /** Pass 1 as a 0–100 percentage; doubles as the bar fill width. */
+  /** Core pass 1 as a 0–100 percentage; doubles as the bar fill width. */
   pass: number;
+  /** Full (core + quality gate) pass as a percentage; null when not measured (v1). */
+  full: number | null;
+  /** mean wired-libs percentage across scored cells, preformatted ("93%" / "—"). */
+  wired: string;
+  /** mean scaffold wall-clock, preformatted ("47s" / "4.5m" / "—"). */
+  time: string;
   /** numeric avg cost for sorting (Infinity when unpriced). */
   costNum: number;
   cost: string;
@@ -938,6 +951,13 @@ interface ModelLeaderRow {
 
 function formatPercent(passing: number, total: number): number {
   return total === 0 ? 0 : Math.round((100 * passing) / total);
+}
+
+// Scaffold wall-clock: seconds under 2 min, else minutes (one decimal). Median
+// per spec, averaged across a model's scored cells.
+function formatDuration(ms: number): string {
+  const seconds = ms / 1000;
+  return seconds < 120 ? `${Math.round(seconds)}s` : `${(seconds / 60).toFixed(1)}m`;
 }
 
 function mean(values: readonly number[]): number {
@@ -981,19 +1001,27 @@ function computeV2ModelRows(
   mode: ValidationMode,
   specs: ReadonlySet<string>,
 ): ModelLeaderRow[] {
-  const rows = dataset.models.map((model) => {
+  const rows = dataset.models.flatMap((model) => {
     const cells = dataset.cells.filter(
       (cell) =>
         cell.modelKey === model.key &&
         (leaderPath === "all" || cell.path === leaderPath) &&
         specs.has(cell.spec),
     );
+    // On a specific creation path (not the pooled "all"), a model with no cells
+    // for that path was never run on it — drop it entirely rather than show a
+    // fake 0% row. This is what keeps the MCP tab to just the models we swept.
+    if (leaderPath !== "all" && cells.length === 0) return [];
     const scored = cells.filter((cell) => cell.scored);
     const passing = scored.filter((cell) =>
       mode === "core" ? cell.corePass : cell.fullPass,
     ).length;
+    const fullPassing = scored.filter((cell) => cell.fullPass).length;
     const costs = scored.map((cell) => cell.costUsd).filter((v): v is number => v !== null);
     const tokens = scored.map((cell) => cell.outTokens).filter((v): v is number => v !== null);
+    const durations = scored
+      .map((cell) => cell.durationMs)
+      .filter((v): v is number => v !== null && v !== undefined && v > 0);
     return {
       key: model.key,
       label: model.label,
@@ -1002,6 +1030,9 @@ function computeV2ModelRows(
       color: PROVIDER_BAR_COLOR[model.provider],
       logo: PROVIDER_LOGO[model.provider],
       pass: formatPercent(passing, scored.length),
+      full: scored.length > 0 ? formatPercent(fullPassing, scored.length) : null,
+      wired: scored.length > 0 ? `${Math.round(mean(scored.map((cell) => cell.wiredPct)))}%` : "—",
+      time: durations.length > 0 ? formatDuration(mean(durations)) : "—",
       costNum: costs.length > 0 ? mean(costs) : Number.POSITIVE_INFINITY,
       cost: costs.length > 0 ? `$${mean(costs).toFixed(2)}` : "—",
       outTok: tokens.length > 0 ? `${(mean(tokens) / 1000).toFixed(1)}k` : "—",
@@ -1026,6 +1057,9 @@ function computeV1ModelRows(leaderPath: LeaderPath): ModelLeaderRow[] {
       color: CHART_PALETTE.models[m],
       logo: V1_MODEL_LOGO[m],
       pass: combos.length > 0 ? Math.round(mean(combos.map((combo) => combo.pass))) : 0,
+      full: null,
+      wired: "—",
+      time: "—",
       costNum: Number.POSITIVE_INFINITY,
       cost: "—",
       outTok: combos.length > 0 ? `${mean(combos.map((combo) => combo.tokens)).toFixed(1)}k` : "—",
@@ -1427,9 +1461,11 @@ function BenchmarkChartCard() {
   // ablation views; both share this chart's rendering and differ only in dataset.
   const isV2 = version === "v2" || version === "v2.1";
   const v2DatasetValue = useMemo(() => v2Dataset(version), [version]);
-  // V2-family is Prompt-only (see V2_PATH_TABS): force the path so a stale v1
-  // selection (e.g. mcp) can't leak the wrong data into the v2 chart.
-  const v2Path: PathId = isV2 ? "prompt" : activePath;
+  // V2-family exposes a restricted tab set (pathTabsFor): v2 legacy is Prompt-only;
+  // v2.1 adds MCP. Clamp to a tab this version actually offers so a stale v1
+  // selection (e.g. cli) can't leak the wrong data into the v2 chart.
+  const v2Tabs = pathTabsFor(version);
+  const v2Path: PathId = isV2 ? (v2Tabs.includes(activePath) ? activePath : "prompt") : activePath;
   const v2ModelPoints = useMemo(
     () => computeV2ModelPoints(v2DatasetValue, v2Path),
     [v2DatasetValue, v2Path],
@@ -1460,9 +1496,16 @@ function BenchmarkChartCard() {
     },
     [version],
   );
+  // On the Prompt tab the model picker drives visibility. On the assisted MCP tab
+  // the picker's paid-only default would hide the only model swept there (DeepSeek,
+  // a free provider), so show every model that has data on the path instead; points
+  // with no data for the active metric are dropped by v2PlottedPoints below.
   const v2VisiblePoints = useMemo(
-    () => v2ModelPoints.filter((point) => v2ActiveSelection.includes(point.key)),
-    [v2ModelPoints, v2ActiveSelection],
+    () =>
+      v2Path === "prompt"
+        ? v2ModelPoints.filter((point) => v2ActiveSelection.includes(point.key))
+        : v2ModelPoints,
+    [v2ModelPoints, v2ActiveSelection, v2Path],
   );
   // A visible model with no data for the active metric is left OFF the plot
   // (footnoted below the chart) — plotting it at 0 would fake "cheapest".
@@ -1537,9 +1580,9 @@ function BenchmarkChartCard() {
               <PillButton value="v1" label="v1" active={version === "v1"} onSelect={setVersion} />
             </div>
             <PathTabs
-              active={isV2 ? "prompt" : activePath}
+              active={isV2 ? v2Path : activePath}
               onSelect={setActivePath}
-              paths={isV2 ? V2_PATH_TABS : PATH_TAB_ORDER}
+              paths={isV2 ? v2Tabs : PATH_TAB_ORDER}
             />
             {isV2 ? null : <PathsHelp />}
           </div>
@@ -1697,6 +1740,26 @@ function PathsHelp() {
             </li>
           ))}
         </ul>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+// Compact "?" affix for a leaderboard column header — hover explains the metric.
+// Mirrors PathsHelp, sized down to sit inside the 10px uppercase header labels.
+function MetricHelp({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <Tooltip delay={0}>
+      <TooltipTrigger
+        type="button"
+        aria-label={`What does ${label} mean?`}
+        className="flex size-3.5 shrink-0 cursor-default items-center justify-center rounded-full border border-[#d9d8d2] text-[9px] font-bold leading-none text-[#71706a] transition-colors hover:border-[#1b1a17] hover:text-[#1b1a17] dark:border-[rgba(237,235,228,0.2)] dark:text-[#8f8d84] dark:hover:border-[#dad8d0] dark:hover:text-[#dad8d0]"
+      >
+        ?
+      </TooltipTrigger>
+      <TooltipContent className="max-w-[17rem] normal-case tracking-normal">
+        <p className="font-semibold">{label}</p>
+        <p className="mt-1 font-normal">{children}</p>
       </TooltipContent>
     </Tooltip>
   );
@@ -2531,9 +2594,15 @@ function ScaffbenchLeaderboardCard() {
   // overstated Full). computeV2ModelRows still takes a mode so Full can return
   // with one line once that re-run lands.
   const MODE = "core" as const;
-  // V2-family is Prompt-only (see V2_PATH_TABS): the assisted paths measure our
-  // generator, not the model. Force the path so a stale v1 selection can't leak in.
-  const effectiveLeaderPath: LeaderPath = isV2 ? "prompt" : leaderPath;
+  // V2-family exposes a restricted tab set (pathTabsFor): v2 legacy is Prompt-only;
+  // v2.1 adds the assisted MCP path. Clamp to a tab this version offers so the
+  // pooled "all" default (or a stale v1 selection) resolves to Prompt.
+  const v2LeaderTabs = pathTabsFor(version);
+  const effectiveLeaderPath: LeaderPath = isV2
+    ? v2LeaderTabs.includes(leaderPath as PathId)
+      ? leaderPath
+      : "prompt"
+    : leaderPath;
   const specsSet = useMemo(() => new Set<string>(selectedSpecs), [selectedSpecs]);
   // One row per model, sorted best-first, for the chosen creation path.
   const rows = useMemo(
@@ -2593,9 +2662,18 @@ function ScaffbenchLeaderboardCard() {
             </div>
             <div className="flex items-center gap-1" role="tablist" aria-label="Creation path">
               {isV2 ? (
-                // V2-family is Prompt-only (assisted paths measure our generator,
-                // not the model) — show just the Prompt path, no MCP/CLI/All.
-                <PillButton value="prompt" label="Prompt" active onSelect={setLeaderPath} accent="teal" />
+                // V2-family shows the version's restricted tab set (pathTabsFor):
+                // v2 legacy is Prompt-only; v2.1 adds the assisted MCP path.
+                v2LeaderTabs.map((p) => (
+                  <PillButton
+                    key={p}
+                    value={p}
+                    label={LEADERBOARD_LABELS[p]}
+                    active={effectiveLeaderPath === p}
+                    onSelect={setLeaderPath}
+                    accent="teal"
+                  />
+                ))
               ) : (
                 <>
                   <PillButton
@@ -2642,14 +2720,14 @@ function ScaffbenchLeaderboardCard() {
           className="overflow-x-auto"
           tabIndex={0}
         >
-          <div className="mx-auto w-full min-w-[680px] max-w-[1180px] px-3">
+          <div className="mx-auto w-full min-w-[920px] max-w-[1180px] px-3">
             <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <p className="text-sm font-semibold">Pass 1 by model</p>
               <p className="text-xs text-[#71706a] dark:text-[#8f8d84]">
                 {effectiveLeaderPath === "all"
                   ? "All creation paths"
                   : LEADERBOARD_LABELS[effectiveLeaderPath]}
-                {isV2 ? " · Core validation" : ""}
+                {isV2 ? " · Core + Full pass, wired libs & time" : ""}
               </p>
             </div>
 
@@ -2661,7 +2739,28 @@ function ScaffbenchLeaderboardCard() {
             >
               <span>Model</span>
               <span aria-hidden />
-              <span className="text-right">Pass 1</span>
+              <span className="flex items-center justify-end gap-1">
+                Core
+                <MetricHelp label="Core pass@1">
+                  The project installs, builds, type-checks, and native-compiles from the prompt — the
+                  real "does it actually run" pass.
+                </MetricHelp>
+              </span>
+              <span className="flex items-center justify-end gap-1">
+                Full
+                <MetricHelp label="Full pass">
+                  Core, plus every applicable quality gate (lint, format, tests). Stricter than Core —
+                  a project can build green yet still fail Full.
+                </MetricHelp>
+              </span>
+              <span className="flex items-center justify-end gap-1">
+                Wired
+                <MetricHelp label="Wired libs">
+                  How many of the spec's required libraries actually show up in the generated
+                  project — dependencies, imports, and files — not just mentioned by name.
+                </MetricHelp>
+              </span>
+              <span className="text-right">Time</span>
               <span className="text-right">Avg cost</span>
               <span className="text-right">Out tok</span>
               <span className="text-right">Steps</span>
@@ -2695,6 +2794,9 @@ function ScaffbenchLeaderboardCard() {
                   <span key={tick}>{tick}%</span>
                 ))}
               </div>
+              <span aria-hidden />
+              <span aria-hidden />
+              <span aria-hidden />
               <span aria-hidden />
               <span aria-hidden />
               <span aria-hidden />
@@ -2803,6 +2905,9 @@ function ModelLeaderRow({ row }: { row: ModelLeaderRow }) {
         />
       </div>
       <span className="text-right font-mono text-sm font-bold">{row.pass}%</span>
+      <span className="text-right font-mono text-xs">{row.full === null ? "—" : `${row.full}%`}</span>
+      <span className="text-right font-mono text-xs">{row.wired}</span>
+      <span className="text-right font-mono text-xs">{row.time}</span>
       <span className="text-right font-mono text-xs">{row.cost}</span>
       <span className="text-right font-mono text-xs">{row.outTok}</span>
       <span className="text-right font-mono text-xs">{row.steps}</span>

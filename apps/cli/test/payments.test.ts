@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { createCustomConfig, expectError, expectSuccess, runTRPCTest } from "./test-utils";
@@ -680,6 +681,187 @@ describe("Payments Options", () => {
           backend: "hono",
           api: "none",
           payments: "dodo",
+        }),
+      );
+      expectSuccess(result);
+    });
+  });
+
+  describe("RevenueCat payments", () => {
+    test("revenuecat with native-bare frontend", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "revenuecat-native-bare",
+          frontend: ["native-bare"],
+          backend: "hono",
+          api: "none",
+          payments: "revenuecat",
+        }),
+      );
+      expectSuccess(result);
+    });
+
+    test("revenuecat with native-unistyles frontend", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "revenuecat-native-unistyles",
+          frontend: ["native-unistyles"],
+          backend: "convex",
+          runtime: "none",
+          database: "none",
+          orm: "none",
+          api: "none",
+          payments: "revenuecat",
+        }),
+      );
+      expectSuccess(result);
+    });
+
+    test("revenuecat with native-uniwind and better-auth (convex combined webhook)", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "revenuecat-uniwind-better-auth",
+          frontend: ["native-uniwind"],
+          backend: "convex",
+          runtime: "none",
+          database: "none",
+          orm: "none",
+          api: "none",
+          auth: "better-auth",
+          payments: "revenuecat",
+        }),
+      );
+      expectSuccess(result);
+    });
+
+    test("revenuecat with React Native ecosystem and no backend", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "revenuecat-react-native",
+          ecosystem: "react-native",
+          frontend: ["native-bare"],
+          backend: "none",
+          runtime: "none",
+          database: "none",
+          orm: "none",
+          dbSetup: "none",
+          api: "none",
+          auth: "none",
+          payments: "revenuecat",
+          cssFramework: "none",
+        }),
+      );
+
+      expectSuccess(result);
+    });
+  });
+
+  describe("Creem provider", () => {
+    test("creem with TanStack Router + Better Auth", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "creem-tanstack-router",
+          frontend: ["tanstack-router"],
+          backend: "hono",
+          auth: "better-auth",
+          payments: "creem",
+        }),
+      );
+      expectSuccess(result);
+
+      const pkg = await readFile(join(result.projectDir!, "packages/auth/package.json"), "utf-8");
+      expect(pkg).toContain("creem");
+      expect(pkg).toContain("@creem_io/better-auth");
+
+      const lib = await readFile(
+        join(result.projectDir!, "packages/auth/src/lib/creem.ts"),
+        "utf-8",
+      );
+      expect(lib).toContain('from "creem"');
+    });
+
+    test("creem with Next.js fullstack", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "creem-nextjs",
+          frontend: ["next"],
+          backend: "self",
+          runtime: "none",
+          payments: "creem",
+        }),
+      );
+      expectSuccess(result);
+    });
+  });
+
+  describe("Autumn provider", () => {
+    test("autumn with TanStack Router + Better Auth", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "autumn-tanstack-router",
+          frontend: ["tanstack-router"],
+          backend: "hono",
+          auth: "better-auth",
+          payments: "autumn",
+        }),
+      );
+      expectSuccess(result);
+
+      const pkg = await readFile(join(result.projectDir!, "packages/auth/package.json"), "utf-8");
+      expect(pkg).toContain("autumn-js");
+
+      const lib = await readFile(
+        join(result.projectDir!, "packages/auth/src/lib/autumn.ts"),
+        "utf-8",
+      );
+      expect(lib).toContain('from "autumn-js"');
+    });
+
+    test("autumn with Svelte", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "autumn-svelte",
+          frontend: ["svelte"],
+          backend: "hono",
+          api: "none",
+          payments: "autumn",
+        }),
+      );
+      expectSuccess(result);
+    });
+  });
+
+  describe("Commet provider", () => {
+    test("commet with React Router + Better Auth", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "commet-react-router",
+          frontend: ["react-router"],
+          backend: "hono",
+          auth: "better-auth",
+          payments: "commet",
+        }),
+      );
+      expectSuccess(result);
+
+      const pkg = await readFile(join(result.projectDir!, "packages/auth/package.json"), "utf-8");
+      expect(pkg).toContain("@commet/node");
+
+      const lib = await readFile(
+        join(result.projectDir!, "packages/auth/src/lib/commet.ts"),
+        "utf-8",
+      );
+      expect(lib).toContain('from "@commet/node"');
+    });
+
+    test("commet with Solid", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "commet-solid",
+          frontend: ["solid"],
+          backend: "hono",
+          api: "none",
+          payments: "commet",
         }),
       );
       expectSuccess(result);

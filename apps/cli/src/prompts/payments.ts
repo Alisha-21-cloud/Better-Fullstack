@@ -25,7 +25,40 @@ export function resolvePaymentsPrompt(
     };
   }
 
+  const isPolarCompatible =
+    (context.auth === "better-auth" || context.auth === "better-auth-organizations") &&
+    (context.frontends?.length === 0 || splitFrontends(context.frontends).web.length > 0);
+
+  const hasNativeFrontend = (context.frontends ?? []).some(
+    (frontend) =>
+      frontend === "native-bare" ||
+      frontend === "native-uniwind" ||
+      frontend === "native-unistyles",
+  );
+
+  const isRevenueCatCompatible = hasNativeFrontend;
+
   if (context.backend === "none") {
+    if (isRevenueCatCompatible) {
+      return {
+        shouldPrompt: true,
+        mode: "single",
+        options: [
+          {
+            value: "revenuecat" as Payments,
+            label: "RevenueCat",
+            hint: "In-app subscriptions and cross-platform monetization for mobile.",
+          },
+          {
+            value: "none" as Payments,
+            label: "None",
+            hint: "No payments integration",
+          },
+        ],
+        initialValue: DEFAULT_CONFIG.payments,
+      };
+    }
+
     return {
       shouldPrompt: false,
       mode: "single",
@@ -33,10 +66,6 @@ export function resolvePaymentsPrompt(
       autoValue: "none",
     };
   }
-
-  const isPolarCompatible =
-    (context.auth === "better-auth" || context.auth === "better-auth-organizations") &&
-    (context.frontends?.length === 0 || splitFrontends(context.frontends).web.length > 0);
 
   const options: Array<{ value: Payments; label: string; hint: string }> = [];
 
@@ -70,11 +99,35 @@ export function resolvePaymentsPrompt(
       hint: "Simple payment infrastructure for developers.",
     },
     {
+      value: "creem" as Payments,
+      label: "Creem",
+      hint: "Cheapest merchant-of-record payments & billing, with a Better Auth plugin.",
+    },
+    {
+      value: "autumn" as Payments,
+      label: "Autumn",
+      hint: "Usage-based pricing & billing for SaaS and AI apps.",
+    },
+    {
+      value: "commet" as Payments,
+      label: "Commet",
+      hint: "All-in-one plan-first billing for SaaS and AI products.",
+    },
+    {
       value: "none" as Payments,
       label: "None",
       hint: "No payments integration",
     },
   );
+
+  if (isRevenueCatCompatible) {
+    options.push({
+      value: "revenuecat" as Payments,
+      label: "RevenueCat",
+      hint: "In-app subscriptions and cross-platform monetization for mobile.",
+    });
+  }
+
 
   return {
     shouldPrompt: true,

@@ -1,6 +1,7 @@
 import type {
   JavaAuth,
   JavaApi,
+  JavaLanguage,
   JavaLogging,
   JavaBuildTool,
   JavaLibraries,
@@ -29,9 +30,27 @@ const JAVA_WEB_FRAMEWORK_PROMPT_OPTIONS: PromptOption<JavaWebFramework>[] = [
     hint: "Cloud-native Java framework optimized for fast startup and lower memory use",
   },
   {
+    value: "micronaut",
+    label: "Micronaut",
+    hint: "Modern JVM framework with compile-time DI/AOP and fast startup, low memory",
+  },
+  {
     value: "none",
     label: "None",
     hint: "No Java web framework",
+  },
+];
+
+const JAVA_LANGUAGE_PROMPT_OPTIONS: PromptOption<JavaLanguage>[] = [
+  {
+    value: "java",
+    label: "Java",
+    hint: "Classic Java sources (default)",
+  },
+  {
+    value: "kotlin",
+    label: "Kotlin",
+    hint: "Idiomatic Kotlin sources (Spring Boot only)",
   },
 ];
 
@@ -270,6 +289,27 @@ export async function getJavaWebFrameworkChoice(javaWebFramework?: JavaWebFramew
   return response;
 }
 
+export function resolveJavaLanguagePrompt(javaLanguage?: JavaLanguage) {
+  return createStaticSinglePromptResolution(JAVA_LANGUAGE_PROMPT_OPTIONS, "java", javaLanguage);
+}
+
+export async function getJavaLanguageChoice(javaLanguage?: JavaLanguage) {
+  const resolution = resolveJavaLanguagePrompt(javaLanguage);
+  if (!resolution.shouldPrompt) {
+    return resolution.autoValue ?? "java";
+  }
+
+  const response = await navigableSelect<JavaLanguage>({
+    message: "Select JVM language",
+    options: resolution.options,
+    initialValue: resolution.initialValue as JavaLanguage,
+  });
+
+  if (isCancel(response)) return exitCancelled("Operation cancelled");
+
+  return response;
+}
+
 export function resolveJavaBuildToolPrompt(javaBuildTool?: JavaBuildTool) {
   return createStaticSinglePromptResolution(JAVA_BUILD_TOOL_PROMPT_OPTIONS, "maven", javaBuildTool);
 }
@@ -392,6 +432,16 @@ const JAVA_API_PROMPT_OPTIONS: PromptOption<JavaApi>[] = [
     hint: "GraphQL schema + annotated controllers on Spring Boot",
   },
   {
+    value: "openapi-generator",
+    label: "OpenAPI Generator",
+    hint: "Generate Spring API interfaces + models from an OpenAPI spec at build time",
+  },
+  {
+    value: "grpc",
+    label: "gRPC",
+    hint: "grpc-java service (protoc codegen) started alongside Spring Boot",
+  },
+  {
     value: "none",
     label: "None",
     hint: "REST controllers only",
@@ -403,6 +453,11 @@ const JAVA_LOGGING_PROMPT_OPTIONS: PromptOption<JavaLogging>[] = [
     value: "logback",
     label: "Logback",
     hint: "Spring Boot default logger with explicit logback-spring.xml",
+  },
+  {
+    value: "log4j2",
+    label: "Log4j2",
+    hint: "High-performance Apache logging with async loggers (Spring Boot, Micronaut, plain Java)",
   },
   {
     value: "none",
