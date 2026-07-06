@@ -1,4 +1,4 @@
-import { Check, Copy, Github, MessageCircle, Radio, Send, Share2, Twitter } from "lucide-react";
+import { Check, Copy, Github, Share2, Twitter } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -17,48 +17,26 @@ import {
 import { SITE_URL } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
-const TELEGRAM_URL = "https://t.me/TheCr1nge";
 const X_PROFILE_URL = "https://x.com/IbrahimElkamali";
-const WHATSAPP_URL = "https://wa.me/380665662448";
-const SIGNAL_URL = "https://signal.me/#p/+380665662448";
 const GITHUB_DISCUSSIONS_URL = "https://github.com/Marve10s/Better-Fullstack/discussions";
+const PREVIEW_IMAGE_URL =
+  "https://images.unsplash.com/photo-1782149493127-3b4a84f651f7?q=80&w=1035&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
 type ShareTarget = {
   label: string;
   description: string;
   href: string;
-  icon: typeof MessageCircle;
+  icon: typeof Twitter;
   className: string;
 };
 
 const contactTargets: ShareTarget[] = [
-  {
-    label: "Telegram",
-    description: "@TheCr1nge",
-    href: TELEGRAM_URL,
-    icon: Send,
-    className: "text-sky-500",
-  },
   {
     label: "X",
     description: "@IbrahimElkamali",
     href: X_PROFILE_URL,
     icon: Twitter,
     className: "text-foreground",
-  },
-  {
-    label: "Signal",
-    description: "+380 66 566 2448",
-    href: SIGNAL_URL,
-    icon: Radio,
-    className: "text-blue-500",
-  },
-  {
-    label: "WhatsApp",
-    description: "+380 66 566 2448",
-    href: WHATSAPP_URL,
-    icon: MessageCircle,
-    className: "text-emerald-500",
   },
   {
     label: "GitHub Discussions",
@@ -112,7 +90,6 @@ export function BuilderShareModal() {
   const shareMessage = useMemo(() => getShareMessage(shareUrl), [shareUrl]);
   const encodedShareMessage = encodeURIComponent(shareMessage);
   const xShareUrl = `https://twitter.com/intent/tweet?text=${encodedShareMessage}`;
-  const whatsAppShareUrl = `https://wa.me/?text=${encodedShareMessage}`;
 
   const copyMessage = useCallback(async () => {
     try {
@@ -145,6 +122,16 @@ export function BuilderShareModal() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="gap-0 p-0 sm:max-w-lg">
+        <div className="relative aspect-[2/1] w-full shrink-0 overflow-hidden bg-muted">
+          <img
+            src={PREVIEW_IMAGE_URL}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-popover via-transparent to-transparent" />
+        </div>
+
         <div className="border-border/50 border-b px-6 pt-6 pb-5">
           <DialogHeader className="gap-2.5 pr-8">
             <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-1 font-mono text-[10px] text-muted-foreground uppercase tracking-wide">
@@ -216,7 +203,7 @@ export function BuilderShareModal() {
               </Button>
             </div>
 
-            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -226,21 +213,6 @@ export function BuilderShareModal() {
               >
                 <Twitter className="size-3.5" aria-hidden="true" />
                 Post on X
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                render={
-                  <a
-                    href={whatsAppShareUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Share on WhatsApp"
-                  />
-                }
-              >
-                <MessageCircle className="size-3.5 text-emerald-500" aria-hidden="true" />
-                WhatsApp
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={copyMessage}>
                 {copied ? (
