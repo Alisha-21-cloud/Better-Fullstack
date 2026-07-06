@@ -1,7 +1,7 @@
 import { env } from "@{{projectName}}/env/server";
 import { Kysely, MysqlDialect } from "kysely";
 import { createPool } from "mysql2";
-import type { Database as DB } from "./schema";
+import type { Database as DB } from "./schema/index.js";
 
 {{#if (eq dbSetup "planetscale")}}
 const dialect = new MysqlDialect({
