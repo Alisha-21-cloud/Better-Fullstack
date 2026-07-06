@@ -303,6 +303,63 @@ describe("applyDependencyVersionChannel", () => {
     expect(requestedPackages.sort()).toEqual(["next", "react", "tailwindcss", "typescript"]);
   });
 
+  it("keeps oRPC packages on the newest shared latest version", async () => {
+    const projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "bfs-version-channel-orpc-"));
+
+    await fs.writeJson(
+      path.join(projectDir, "package.json"),
+      {
+        name: "orpc-version-channel-test",
+        workspaces: {
+          catalog: {
+            "@orpc/server": "^1.14.6",
+            "@orpc/client": "^1.14.6",
+          },
+        },
+        dependencies: {
+          "@orpc/tanstack-query": "^1.14.6",
+          react: "^19.2.4",
+        },
+      },
+      { spaces: 2 },
+    );
+
+    global.fetch = mock(async (input: string | URL | Request) => {
+      const url = String(input);
+      const packageName = decodeURIComponent(url.split("/").pop() ?? "");
+
+      const versionsByPackage: Record<string, { latest: string; versions: string[] }> = {
+        "@orpc/server": { latest: "1.14.7", versions: ["1.14.6", "1.14.7"] },
+        "@orpc/client": { latest: "1.14.7", versions: ["1.14.6", "1.14.7"] },
+        "@orpc/tanstack-query": { latest: "1.14.6", versions: ["1.14.6"] },
+        react: { latest: "19.3.0", versions: ["19.2.4", "19.3.0"] },
+      };
+      const packageVersions = versionsByPackage[packageName];
+
+      return new Response(
+        JSON.stringify({
+          "dist-tags": {
+            latest: packageVersions?.latest,
+          },
+          versions: Object.fromEntries((packageVersions?.versions ?? []).map((version) => [version, {}])),
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }) as unknown as typeof fetch;
+
+    await applyDependencyVersionChannel(projectDir, "latest");
+
+    const packageJson = await fs.readJson(path.join(projectDir, "package.json"));
+
+    expect(packageJson.workspaces.catalog["@orpc/server"]).toBe("^1.14.6");
+    expect(packageJson.workspaces.catalog["@orpc/client"]).toBe("^1.14.6");
+    expect(packageJson.dependencies["@orpc/tanstack-query"]).toBe("^1.14.6");
+    expect(packageJson.dependencies.react).toBe("^19.3.0");
+  });
+
   it("resolves latest channel from real npm registry",
     async () => {
       const projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "bfs-version-channel-real-"));
