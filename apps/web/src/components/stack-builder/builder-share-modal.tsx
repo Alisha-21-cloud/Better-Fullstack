@@ -58,7 +58,6 @@ function getShareMessage(url: string) {
 export function BuilderShareModal() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [shareUrl, setShareUrl] = useState(SITE_URL);
 
   useEffect(() => {
     if (window.navigator.webdriver || !canUseBrowserStorage()) {
@@ -70,7 +69,6 @@ export function BuilderShareModal() {
         return;
       }
 
-      setShareUrl(window.location.href || SITE_URL);
       setOpen(true);
     } catch {
       setOpen(false);
@@ -87,7 +85,7 @@ export function BuilderShareModal() {
     setOpen(nextOpen);
   }, []);
 
-  const shareMessage = useMemo(() => getShareMessage(shareUrl), [shareUrl]);
+  const shareMessage = useMemo(() => getShareMessage(SITE_URL), []);
   const encodedShareMessage = encodeURIComponent(shareMessage);
   const xShareUrl = `https://twitter.com/intent/tweet?text=${encodedShareMessage}`;
 
@@ -108,7 +106,7 @@ export function BuilderShareModal() {
         await navigator.share({
           title: "Better Fullstack",
           text: "I built a full-stack app setup with Better Fullstack.",
-          url: shareUrl,
+          url: SITE_URL,
         });
         return;
       } catch (error) {
@@ -117,11 +115,14 @@ export function BuilderShareModal() {
     }
 
     await copyMessage();
-  }, [copyMessage, shareUrl]);
+  }, [copyMessage]);
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="gap-0 p-0 sm:max-w-lg">
+      <DialogContent
+        className="gap-0 p-0 sm:max-w-lg"
+        closeButtonClassName="text-white/90 hover:bg-black/40 hover:text-white"
+      >
         <div className="relative aspect-[2/1] w-full shrink-0 overflow-hidden bg-muted">
           <img
             src={PREVIEW_IMAGE_URL}
@@ -214,7 +215,13 @@ export function BuilderShareModal() {
                 <Twitter className="size-3.5" aria-hidden="true" />
                 Post on X
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={copyMessage}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="cursor-pointer"
+                onClick={copyMessage}
+              >
                 {copied ? (
                   <Check className="size-3.5 text-green-500" aria-hidden="true" />
                 ) : (

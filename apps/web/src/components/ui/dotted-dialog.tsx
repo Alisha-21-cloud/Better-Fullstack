@@ -44,9 +44,11 @@ function DottedDialogContent({
   className,
   children,
   showCloseButton = true,
+  closeButtonClassName,
   ...props
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean;
+  closeButtonClassName?: string;
 }) {
   return (
     <DottedDialogPortal>
@@ -64,7 +66,10 @@ function DottedDialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dotted-dialog-close"
-            className="absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/60 transition-all duration-150 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+            className={cn(
+              "absolute top-4 right-4 z-10 flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground/60 transition-all duration-150 hover:bg-muted/60 hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+              closeButtonClassName,
+            )}
           >
             <XIcon className="h-4 w-4" />
             <span className="sr-only">{m.uiClose()}</span>
