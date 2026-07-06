@@ -18,11 +18,11 @@ const zh_hometestimonialsdescriptionc3 = /** @type {(inputs: Hometestimonialsdes
 };
 
 const ja_hometestimonialsdescriptionc3 = /** @type {(inputs: Hometestimonialsdescriptionc3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`それと一緒に発送した人々によって。`)
+	return /** @type {LocalizedString} */ (`これで出荷した人々によるものです。`)
 };
 
 const ko_hometestimonialsdescriptionc3 = /** @type {(inputs: Hometestimonialsdescriptionc3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`그것과 함께 배송 한 사람들에 의해.`)
+	return /** @type {LocalizedString} */ (`이 도구로 출시한 사람들이 남긴 글입니다.`)
 };
 
 const zh_hant1_hometestimonialsdescriptionc3 = /** @type {(inputs: Hometestimonialsdescriptionc3Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_hometestimonialsdescriptionc3 = /** @type {(inputs: Hometestimoni
 };
 
 const de_hometestimonialsdescriptionc3 = /** @type {(inputs: Hometestimonialsdescriptionc3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`von Leuten, die damit verschickt haben.`)
+	return /** @type {LocalizedString} */ (`von Leuten, die damit ausgeliefert haben.`)
 };
 
 const fr_hometestimonialsdescriptionc3 = /** @type {(inputs: Hometestimonialsdescriptionc3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`par les personnes qui l'ont expédié avec.`)
+	return /** @type {LocalizedString} */ (`par des personnes qui l'ont utilisé pour livrer.`)
+};
+
+const uk_hometestimonialsdescriptionc3 = /** @type {(inputs: Hometestimonialsdescriptionc3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`від людей, які вже шипили з ним.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_hometestimonialsdescriptionc3 = /** @type {(inputs: Hometestimonialsdes
 * | "by people who shipped with it." |
 *
 * @param {Hometestimonialsdescriptionc3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const hometestimonialsdescriptionc3 = /** @type {((inputs?: Hometestimonialsdescriptionc3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Hometestimonialsdescriptionc3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const hometestimonialsdescriptionc3 = /** @type {((inputs?: Hometestimonialsdescriptionc3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Hometestimonialsdescriptionc3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_hometestimonialsdescriptionc3(inputs)
 	if (locale === "es") return es_hometestimonialsdescriptionc3(inputs)
@@ -55,6 +59,7 @@ const hometestimonialsdescriptionc3 = /** @type {((inputs?: Hometestimonialsdesc
 	if (locale === "ko") return ko_hometestimonialsdescriptionc3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_hometestimonialsdescriptionc3(inputs)
 	if (locale === "de") return de_hometestimonialsdescriptionc3(inputs)
-	return fr_hometestimonialsdescriptionc3(inputs)
+	if (locale === "fr") return fr_hometestimonialsdescriptionc3(inputs)
+	return uk_hometestimonialsdescriptionc3(inputs)
 });
 export { hometestimonialsdescriptionc3 as "homeTestimonialsDescriptionC" }

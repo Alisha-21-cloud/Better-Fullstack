@@ -22,7 +22,7 @@ const ja_comparedeploytargets2 = /** @type {(inputs: Comparedeploytargets2Inputs
 };
 
 const ko_comparedeploytargets2 = /** @type {(inputs: Comparedeploytargets2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`대상 배포(Vercel, CF, Docker 등)`)
+	return /** @type {LocalizedString} */ (`배포 대상(Vercel, CF, Docker 등)`)
 };
 
 const zh_hant1_comparedeploytargets2 = /** @type {(inputs: Comparedeploytargets2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_comparedeploytargets2 = /** @type {(inputs: Comparedeploytargets2Inputs
 	return /** @type {LocalizedString} */ (`Déployer des cibles (Vercel, CF, Docker, etc.)`)
 };
 
+const uk_comparedeploytargets2 = /** @type {(inputs: Comparedeploytargets2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Цілі деплою (Vercel, CF, Docker тощо)`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Deploy targets (Vercel, CF, Docker, etc.)" |
 *
 * @param {Comparedeploytargets2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const comparedeploytargets2 = /** @type {((inputs?: Comparedeploytargets2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Comparedeploytargets2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const comparedeploytargets2 = /** @type {((inputs?: Comparedeploytargets2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Comparedeploytargets2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_comparedeploytargets2(inputs)
 	if (locale === "es") return es_comparedeploytargets2(inputs)
@@ -55,6 +59,7 @@ const comparedeploytargets2 = /** @type {((inputs?: Comparedeploytargets2Inputs,
 	if (locale === "ko") return ko_comparedeploytargets2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_comparedeploytargets2(inputs)
 	if (locale === "de") return de_comparedeploytargets2(inputs)
-	return fr_comparedeploytargets2(inputs)
+	if (locale === "fr") return fr_comparedeploytargets2(inputs)
+	return uk_comparedeploytargets2(inputs)
 });
 export { comparedeploytargets2 as "compareDeployTargets" }

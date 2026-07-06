@@ -10,7 +10,7 @@ const en_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) 
 };
 
 const es_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`En ScaffBench, crear proyectos guiados por MCP es más rápido y fiable que pedir a un agente escribir todo desde cero.`)
+	return /** @type {LocalizedString} */ (`En ScaffBench, crear proyectos guiados por MCP es más rápido y fiable que pedirle a un agente que escriba todo desde cero.`)
 };
 
 const zh_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) => LocalizedString} */ () => {
@@ -18,7 +18,7 @@ const zh_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) 
 };
 
 const ja_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`ScaffBench、MCP のガイド付きプロジェクト作成は、エージェントにプロジェクトを最初から手書きで作成するよう依頼するよりも速く、信頼性が高くなります。`)
+	return /** @type {LocalizedString} */ (`ScaffBench では、MCP のガイド付きプロジェクト作成は、エージェントにプロジェクトを最初から手書きで作成させるよりも速く、信頼性が高くなります。`)
 };
 
 const ko_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) => LocalizedString} */ () => {
@@ -26,7 +26,7 @@ const ko_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) 
 };
 
 const zh_hant1_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`在 ScaffBench 中，由 MCP 引導的項目建立比讓代理從零手寫項目更快也更可靠。`)
+	return /** @type {LocalizedString} */ (`在 ScaffBench 中，由 MCP 引導的專案建立比讓代理從零手寫專案更快也更可靠。`)
 };
 
 const de_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) 
 	return /** @type {LocalizedString} */ (`Dans ScaffBench, la création de projet guidée par MCP est plus rapide et plus fiable que de demander à un agent d'écrire manuellement un projet à partir de zéro.`)
 };
 
+const uk_mcpfinaldescription2 = /** @type {(inputs: Mcpfinaldescription2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`У ScaffBench створення проєкту через MCP швидше й надійніше, ніж просити агента писати проєкт вручну з нуля.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "In ScaffBench, MCP-guided project creation is faster and more reliable than asking an agent to hand-write a project from scratch." |
 *
 * @param {Mcpfinaldescription2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const mcpfinaldescription2 = /** @type {((inputs?: Mcpfinaldescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mcpfinaldescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const mcpfinaldescription2 = /** @type {((inputs?: Mcpfinaldescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mcpfinaldescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_mcpfinaldescription2(inputs)
 	if (locale === "es") return es_mcpfinaldescription2(inputs)
@@ -55,6 +59,7 @@ const mcpfinaldescription2 = /** @type {((inputs?: Mcpfinaldescription2Inputs, o
 	if (locale === "ko") return ko_mcpfinaldescription2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_mcpfinaldescription2(inputs)
 	if (locale === "de") return de_mcpfinaldescription2(inputs)
-	return fr_mcpfinaldescription2(inputs)
+	if (locale === "fr") return fr_mcpfinaldescription2(inputs)
+	return uk_mcpfinaldescription2(inputs)
 });
 export { mcpfinaldescription2 as "mcpFinalDescription" }

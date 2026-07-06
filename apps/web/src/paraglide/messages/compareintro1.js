@@ -22,7 +22,7 @@ const ja_compareintro1 = /** @type {(inputs: Compareintro1Inputs) => LocalizedSt
 };
 
 const ko_compareintro1 = /** @type {(inputs: Compareintro1Inputs) => LocalizedString} */ (i) => {
-	return /** @type {LocalizedString} */ (`대부분의 스캐폴딩 도구는 하나의 프레임워크와 하나의 의견을 처리합니다. Better Fullstack는 ${i?.ecosystemCount} 생태계(프론트엔드, 백엔드, 데이터베이스, 인증, 결제, AI 및 배포) 전반에 걸쳐 ${i?.optionCount} 옵션을 제공하며 모두 사전 구성되어 실행 가능합니다.`)
+	return /** @type {LocalizedString} */ (`대부분의 스캐폴딩 도구는 하나의 프레임워크와 하나의 의견을 처리합니다. Better Fullstack은 ${i?.ecosystemCount} 생태계(프론트엔드, 백엔드, 데이터베이스, 인증, 결제, AI 및 배포) 전반에 걸쳐 ${i?.optionCount} 옵션을 제공하며 모두 사전 구성되어 실행 가능합니다.`)
 };
 
 const zh_hant1_compareintro1 = /** @type {(inputs: Compareintro1Inputs) => LocalizedString} */ (i) => {
@@ -37,16 +37,20 @@ const fr_compareintro1 = /** @type {(inputs: Compareintro1Inputs) => LocalizedSt
 	return /** @type {LocalizedString} */ (`La plupart des outils d'échafaudage gèrent un seul cadre et une seule opinion. Better Fullstack vous offre ${i?.optionCount} options dans les écosystèmes ${i?.ecosystemCount} : frontend, backend, base de données, authentification, paiements, AI et déploiement, tous préconfigurés et prêts à fonctionner.`)
 };
 
+const uk_compareintro1 = /** @type {(inputs: Compareintro1Inputs) => LocalizedString} */ (i) => {
+	return /** @type {LocalizedString} */ (`Більшість інструментів скафолдингу працюють з одним фреймворком і одним набором припущень. Better Fullstack дає ${i?.optionCount} опцій у ${i?.ecosystemCount} екосистемах — фронтенд, бекенд, база даних, автентифікація, платежі, ШІ та деплой — усе вже налаштовано й готове до запуску.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Most scaffolding tools handle one framework and one opinion. Better Fullstack gives you {optionCount} options across {ecosystemCount} ecosystems — frontend, ..." |
 *
 * @param {Compareintro1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const compareintro1 = /** @type {((inputs: Compareintro1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Compareintro1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs, options = {}) => {
+const compareintro1 = /** @type {((inputs: Compareintro1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Compareintro1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_compareintro1(inputs)
 	if (locale === "es") return es_compareintro1(inputs)
@@ -55,6 +59,7 @@ const compareintro1 = /** @type {((inputs: Compareintro1Inputs, options?: { loca
 	if (locale === "ko") return ko_compareintro1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_compareintro1(inputs)
 	if (locale === "de") return de_compareintro1(inputs)
-	return fr_compareintro1(inputs)
+	if (locale === "fr") return fr_compareintro1(inputs)
+	return uk_compareintro1(inputs)
 });
 export { compareintro1 as "compareIntro" }

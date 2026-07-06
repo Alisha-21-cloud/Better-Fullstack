@@ -22,7 +22,7 @@ const ja_navhome1 = /** @type {(inputs: Navhome1Inputs) => LocalizedString} */ (
 };
 
 const ko_navhome1 = /** @type {(inputs: Navhome1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Better Fullstack 집`)
+	return /** @type {LocalizedString} */ (`Better Fullstack 홈`)
 };
 
 const zh_hant1_navhome1 = /** @type {(inputs: Navhome1Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_navhome1 = /** @type {(inputs: Navhome1Inputs) => LocalizedString
 };
 
 const de_navhome1 = /** @type {(inputs: Navhome1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Better Fullstack Zuhause`)
+	return /** @type {LocalizedString} */ (`Better Fullstack Startseite`)
 };
 
 const fr_navhome1 = /** @type {(inputs: Navhome1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Better Fullstack domicile`)
+	return /** @type {LocalizedString} */ (`Accueil Better Fullstack`)
+};
+
+const uk_navhome1 = /** @type {(inputs: Navhome1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Головна Better Fullstack`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_navhome1 = /** @type {(inputs: Navhome1Inputs) => LocalizedString} */ (
 * | "Better Fullstack home" |
 *
 * @param {Navhome1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const navhome1 = /** @type {((inputs?: Navhome1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Navhome1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const navhome1 = /** @type {((inputs?: Navhome1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Navhome1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_navhome1(inputs)
 	if (locale === "es") return es_navhome1(inputs)
@@ -55,6 +59,7 @@ const navhome1 = /** @type {((inputs?: Navhome1Inputs, options?: { locale?: "en"
 	if (locale === "ko") return ko_navhome1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_navhome1(inputs)
 	if (locale === "de") return de_navhome1(inputs)
-	return fr_navhome1(inputs)
+	if (locale === "fr") return fr_navhome1(inputs)
+	return uk_navhome1(inputs)
 });
 export { navhome1 as "navHome" }

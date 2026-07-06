@@ -2199,6 +2199,24 @@ export const TECH_OPTIONS: Record<
       color: "from-sky-500 to-sky-700",
     },
   ],
+  workspaceShape: [
+    {
+      id: "monorepo",
+      name: "Monorepo",
+      description: "apps/* + packages/* workspaces",
+      icon: "",
+      color: "from-slate-500 to-slate-700",
+      default: true,
+    },
+    {
+      id: "single-app",
+      name: "Single App",
+      description: "Flat root app (no workspaces); thin self apps only",
+      icon: "",
+      color: "from-teal-500 to-teal-700",
+      isNew: true,
+    },
+  ],
   versionChannel: [
     {
       id: "stable",
@@ -4677,6 +4695,25 @@ export const TECH_OPTIONS: Record<
       icon: "",
       color: "from-gray-400 to-gray-600",
       default: false,
+    },
+  ],
+  javaLanguage: [
+    {
+      id: "java",
+      name: "Java",
+      description: "Classic Java sources",
+      icon: "/icon/java.svg",
+      color: "from-orange-500 to-red-600",
+      default: true,
+    },
+    {
+      id: "kotlin",
+      name: "Kotlin",
+      description: "Idiomatic Kotlin sources (Spring Boot only)",
+      icon: "https://cdn.simpleicons.org/kotlin/7F52FF",
+      color: "from-purple-500 to-indigo-600",
+      default: false,
+      isNew: true,
     },
   ],
   javaBuildTool: [

@@ -22,7 +22,7 @@ const ja_builderyolotooltip2 = /** @type {(inputs: Builderyolotooltip2Inputs) =>
 };
 
 const ko_builderyolotooltip2 = /** @type {(inputs: Builderyolotooltip2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`모든 검증을 비활성화하고 --yolo 플래그를 명령에 추가합니다. Use at your own risk!`)
+	return /** @type {LocalizedString} */ (`모든 검증을 비활성화하고 --yolo 플래그를 명령에 추가합니다. 사용에 따른 책임은 본인에게 있습니다!`)
 };
 
 const zh_hant1_builderyolotooltip2 = /** @type {(inputs: Builderyolotooltip2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_builderyolotooltip2 = /** @type {(inputs: Builderyolotooltip2Inputs) =>
 	return /** @type {LocalizedString} */ (`Désactive toute validation et ajoute l'indicateur --yolo à la commande. Utilisez à vos propres risques !`)
 };
 
+const uk_builderyolotooltip2 = /** @type {(inputs: Builderyolotooltip2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Вимикає всі перевірки й додає до команди прапорець --yolo. Використовуйте обережно.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Disables all validation and adds --yolo flag to the command. Use at your own risk!" |
 *
 * @param {Builderyolotooltip2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const builderyolotooltip2 = /** @type {((inputs?: Builderyolotooltip2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Builderyolotooltip2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const builderyolotooltip2 = /** @type {((inputs?: Builderyolotooltip2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Builderyolotooltip2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_builderyolotooltip2(inputs)
 	if (locale === "es") return es_builderyolotooltip2(inputs)
@@ -55,6 +59,7 @@ const builderyolotooltip2 = /** @type {((inputs?: Builderyolotooltip2Inputs, opt
 	if (locale === "ko") return ko_builderyolotooltip2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_builderyolotooltip2(inputs)
 	if (locale === "de") return de_builderyolotooltip2(inputs)
-	return fr_builderyolotooltip2(inputs)
+	if (locale === "fr") return fr_builderyolotooltip2(inputs)
+	return uk_builderyolotooltip2(inputs)
 });
 export { builderyolotooltip2 as "builderYoloTooltip" }

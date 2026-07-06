@@ -10,15 +10,15 @@ const en_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => L
 };
 
 const es_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Los resultados (una tabla de clasificación, un pase por especificación, bibliotecas cableadas y el costo) se guardan en el directorio de salida, con el mismo formato que el archivo. `)
+	return /** @type {LocalizedString} */ (`Los resultados (una tabla de clasificación, el resultado por especificación, las librerías integradas y el coste) se guardan en el directorio de salida, con el mismo formato que los `)
 };
 
 const zh_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`结果——包括排行榜、按规范进行的测试、已连接的库以及成本——会以与输出目录相同的格式保存在输出目录中。 `)
+	return /** @type {LocalizedString} */ (`结果——包括排行榜、每个规范的通过情况、已连接的库以及成本——都会保存到输出目录，格式参照`)
 };
 
 const ja_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`結果（リーダーボード、仕様ごとのパス、wired-libraries、およびコスト）は、出力ディレクトリに、 `)
+	return /** @type {LocalizedString} */ (`結果（リーダーボード、仕様ごとの合否、wired-libraries、コスト）は、出力ディレクトリに保存されます。形式は次と同じです: `)
 };
 
 const ko_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => LocalizedString} */ () => {
@@ -26,7 +26,7 @@ const ko_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => L
 };
 
 const zh_hant1_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`結果——包括排行榜、按規範進行的測試、已連接的庫以及成本——會以與輸出目錄相同的格式保存在輸出目錄中。 `)
+	return /** @type {LocalizedString} */ (`結果——排行榜、各規範的通過情況、已串接的函式庫以及成本——都會落在輸出目錄中，格式比照 `)
 };
 
 const de_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => L
 	return /** @type {LocalizedString} */ (`Les résultats — un classement, un passage par spécification, les bibliothèques câblées et le coût — sont enregistrés dans le répertoire de sortie, sous la même forme que le `)
 };
 
+const uk_runresultsnotepre3 = /** @type {(inputs: Runresultsnotepre3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Результати — leaderboard, проходження за специфікаціями, підключені бібліотеки й вартість — потрапляють у вихідний каталог у тому самому форматі, що й`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Results — a leaderboard, per-spec pass, wired-libraries, and cost — land in the output directory, in the same shape as the" |
 *
 * @param {Runresultsnotepre3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runresultsnotepre3 = /** @type {((inputs?: Runresultsnotepre3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runresultsnotepre3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runresultsnotepre3 = /** @type {((inputs?: Runresultsnotepre3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runresultsnotepre3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runresultsnotepre3(inputs)
 	if (locale === "es") return es_runresultsnotepre3(inputs)
@@ -55,6 +59,7 @@ const runresultsnotepre3 = /** @type {((inputs?: Runresultsnotepre3Inputs, optio
 	if (locale === "ko") return ko_runresultsnotepre3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runresultsnotepre3(inputs)
 	if (locale === "de") return de_runresultsnotepre3(inputs)
-	return fr_runresultsnotepre3(inputs)
+	if (locale === "fr") return fr_runresultsnotepre3(inputs)
+	return uk_runresultsnotepre3(inputs)
 });
 export { runresultsnotepre3 as "runResultsNotePre" }

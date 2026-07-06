@@ -9,6 +9,7 @@ import type {
   AddonsSchema,
   ExamplesSchema,
   PackageManagerSchema,
+  WorkspaceShapeSchema,
   VersionChannelSchema,
   DatabaseSetupSchema,
   APISchema,
@@ -99,6 +100,7 @@ import type {
   GoCachingSchema,
   GoConfigSchema,
   GoObservabilitySchema,
+  JavaLanguageSchema,
   JavaWebFrameworkSchema,
   JavaBuildToolSchema,
   JavaOrmSchema,
@@ -157,6 +159,7 @@ export type Frontend = z.infer<typeof FrontendSchema>;
 export type Addons = z.infer<typeof AddonsSchema>;
 export type Examples = z.infer<typeof ExamplesSchema>;
 export type PackageManager = z.infer<typeof PackageManagerSchema>;
+export type WorkspaceShape = z.infer<typeof WorkspaceShapeSchema>;
 export type VersionChannel = z.infer<typeof VersionChannelSchema>;
 export type DatabaseSetup = z.infer<typeof DatabaseSetupSchema>;
 export type API = z.infer<typeof APISchema>;
@@ -240,6 +243,7 @@ export type GoMessageQueue = z.infer<typeof GoMessageQueueSchema>;
 export type GoCaching = z.infer<typeof GoCachingSchema>;
 export type GoConfig = z.infer<typeof GoConfigSchema>;
 export type GoObservability = z.infer<typeof GoObservabilitySchema>;
+export type JavaLanguage = z.infer<typeof JavaLanguageSchema>;
 export type JavaWebFramework = z.infer<typeof JavaWebFrameworkSchema>;
 export type JavaBuildTool = z.infer<typeof JavaBuildToolSchema>;
 export type JavaOrm = z.infer<typeof JavaOrmSchema>;

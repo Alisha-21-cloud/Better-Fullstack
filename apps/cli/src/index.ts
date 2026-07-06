@@ -13,6 +13,7 @@ export {
   telemetry,
   doctor,
   check,
+  update,
 } from "./run";
 
 import type { ProjectConfig } from "./types";
@@ -86,6 +87,7 @@ export async function createVirtual(
       effect: options.effect || "none",
       git: options.git ?? false,
       packageManager: options.packageManager || "bun",
+      workspaceShape: options.workspaceShape || "monorepo",
       versionChannel: options.versionChannel || "stable",
       install: false,
       dbSetup: options.dbSetup || "none",
@@ -174,6 +176,7 @@ export async function createVirtual(
       goObservability: options.goObservability || "none",
       javaWebFramework:
         options.javaWebFramework || (options.ecosystem === "java" ? "spring-boot" : "none"),
+      javaLanguage: options.javaLanguage || "java",
       javaBuildTool: options.javaBuildTool || (options.ecosystem === "java" ? "maven" : "none"),
       javaOrm: options.javaOrm || "none",
       javaAuth: options.javaAuth || "none",

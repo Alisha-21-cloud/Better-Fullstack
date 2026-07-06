@@ -18,7 +18,7 @@ const zh_homelikedonx3 = /** @type {(inputs: Homelikedonx3Inputs) => LocalizedSt
 };
 
 const ja_homelikedonx3 = /** @type {(inputs: Homelikedonx3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`×で「いいね！」しました`)
+	return /** @type {LocalizedString} */ (`X で「いいね」`)
 };
 
 const ko_homelikedonx3 = /** @type {(inputs: Homelikedonx3Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_homelikedonx3 = /** @type {(inputs: Homelikedonx3Inputs) => Local
 };
 
 const de_homelikedonx3 = /** @type {(inputs: Homelikedonx3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Gefällt mir am x`)
+	return /** @type {LocalizedString} */ (`Likes auf X`)
 };
 
 const fr_homelikedonx3 = /** @type {(inputs: Homelikedonx3Inputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`aimé sur x`)
+};
+
+const uk_homelikedonx3 = /** @type {(inputs: Homelikedonx3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`лайків на X`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_homelikedonx3 = /** @type {(inputs: Homelikedonx3Inputs) => LocalizedSt
 * | "liked on x" |
 *
 * @param {Homelikedonx3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const homelikedonx3 = /** @type {((inputs?: Homelikedonx3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homelikedonx3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const homelikedonx3 = /** @type {((inputs?: Homelikedonx3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homelikedonx3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_homelikedonx3(inputs)
 	if (locale === "es") return es_homelikedonx3(inputs)
@@ -55,6 +59,7 @@ const homelikedonx3 = /** @type {((inputs?: Homelikedonx3Inputs, options?: { loc
 	if (locale === "ko") return ko_homelikedonx3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_homelikedonx3(inputs)
 	if (locale === "de") return de_homelikedonx3(inputs)
-	return fr_homelikedonx3(inputs)
+	if (locale === "fr") return fr_homelikedonx3(inputs)
+	return uk_homelikedonx3(inputs)
 });
 export { homelikedonx3 as "homeLikedOnX" }

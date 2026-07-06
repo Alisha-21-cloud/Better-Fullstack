@@ -47,6 +47,12 @@ type StackUpdateOperation =
       summary: string[];
     };
 
+export type ArchitectureChange = {
+  key: string;
+  from: string;
+  to: string;
+};
+
 export type StackUpdatePlan = {
   success: true;
   projectDir: string;
@@ -59,6 +65,9 @@ export type StackUpdatePlan = {
   scriptChanges: Record<string, string[]>;
   envChanges: Record<string, string[]>;
   manualReviewBlockers: string[];
+  architectureChanges: ArchitectureChange[];
+  migrationSteps: string[];
+  requiresArchitectureAck: boolean;
   operations: StackUpdateOperation[];
   installCommand: string;
   compatibilityAdjustments: string[];
@@ -107,6 +116,9 @@ const NON_STACK_UPDATE_CREATE_KEYS = new Set([
   "renderTitle",
   "disableAnalytics",
   "manualDb",
+  // Workspace shape is a create-time structural choice; converting an existing
+  // project between monorepo and single-app is out of scope for stack updates.
+  "workspaceShape",
 ]);
 
 export const SUPPORTED_STACK_UPDATE_KEYS = Object.keys(CreateCommandOptionsSchema.shape)
@@ -114,7 +126,27 @@ export const SUPPORTED_STACK_UPDATE_KEYS = Object.keys(CreateCommandOptionsSchem
   .sort();
 
 const SUPPORTED_STACK_UPDATE_KEY_SET = new Set(SUPPORTED_STACK_UPDATE_KEYS);
-const IGNORED_REQUEST_KEYS = new Set(["projectDir", "projectName", "install", "git"]);
+const IGNORED_REQUEST_KEYS = new Set([
+  "projectDir",
+  "projectName",
+  "install",
+  "git",
+  "acknowledgeArchitectureChange",
+]);
+
+// Architecture-defining stack choices. Replacing a non-"none" value for one of
+// these (a genuine swap, e.g. sqlite->postgres, drizzle->prisma, bun->workers,
+// better-auth->none) requires an explicit acknowledgment because data/schema
+// are NOT migrated automatically. Adding a brand-new choice (none->X) stays
+// frictionless and is intentionally NOT gated.
+const RISKY_ARCHITECTURE_KEYS: Array<keyof ProjectConfig> = [
+  "database",
+  "orm",
+  "auth",
+  "api",
+  "backend",
+  "runtime",
+];
 const PACKAGE_JSON_SECTIONS = ["dependencies", "devDependencies", "peerDependencies", "scripts"];
 const BINARY_FILE_MARKER = "[Binary file]";
 
@@ -163,7 +195,7 @@ async function inferProjectName(projectDir: string): Promise<string> {
   return path.basename(projectDir);
 }
 
-function configFromBtsConfig(
+export function configFromBtsConfig(
   config: BetterTStackConfig,
   projectDir: string,
   projectName: string,
@@ -316,6 +348,22 @@ function getUpdatedSpecForChangedPart(
   return undefined;
 }
 
+function pruneScopedSpecsWithoutOwners(specs: string[]): string[] {
+  const primaryRoles = new Set<string>();
+  for (const spec of specs) {
+    const rolePath = spec.split(":")[0];
+    if (rolePath && !rolePath.includes(".")) {
+      primaryRoles.add(rolePath);
+    }
+  }
+
+  return specs.filter((spec) => {
+    const rolePath = spec.split(":")[0];
+    const ownerRole = rolePath?.split(".")[0];
+    return !rolePath?.includes(".") || (ownerRole !== undefined && primaryRoles.has(ownerRole));
+  });
+}
+
 function mergeDerivedStackPartsWithExistingGraph(
   currentConfig: ProjectConfig,
   proposedConfig: ProjectConfig,
@@ -341,8 +389,9 @@ function mergeDerivedStackPartsWithExistingGraph(
       return spec ? [spec] : [];
     });
   const preservedSpecs = new Set(preservedParts.map((part) => formatStackPartSpec(part, currentStackParts)));
+  const coveredSpecs = pruneScopedSpecsWithoutOwners([...new Set([...preservedSpecs, ...updatedSpecs])]);
   const coveredParts = parseStackPartSpecs(
-    [...new Set([...preservedSpecs, ...updatedSpecs])],
+    coveredSpecs,
     "selected",
   );
   const preservedProjectedKeys = new Set<keyof ProjectConfig>();
@@ -352,7 +401,7 @@ function mergeDerivedStackPartsWithExistingGraph(
     }
   }
 
-  const nextSpecs = [...new Set([...preservedSpecs, ...updatedSpecs])];
+  const nextSpecs = [...coveredSpecs];
   for (const part of derivedStackParts) {
     if (part.source === "provided") continue;
     const spec = formatStackPartSpec(part, derivedStackParts);
@@ -364,11 +413,104 @@ function mergeDerivedStackPartsWithExistingGraph(
     }
   }
 
-  return parseStackPartSpecs([...new Set(nextSpecs)], "selected");
+  return parseStackPartSpecs(pruneScopedSpecsWithoutOwners([...new Set(nextSpecs)]), "selected");
 }
 
 function asString(value: unknown, fallback = "none"): string {
   return typeof value === "string" ? value : fallback;
+}
+
+function computeArchitectureChanges(
+  currentConfig: ProjectConfig,
+  proposedConfig: ProjectConfig,
+): ArchitectureChange[] {
+  const changes: ArchitectureChange[] = [];
+  for (const key of RISKY_ARCHITECTURE_KEYS) {
+    const from = asString(currentConfig[key]);
+    const to = asString(proposedConfig[key]);
+    // Gate only genuine REPLACEMENTS of an existing choice; additive none->X flows stay frictionless.
+    if (from !== "none" && from !== to) {
+      changes.push({ key: key as string, from, to });
+    }
+  }
+  return changes;
+}
+
+function buildMigrationSteps(changes: ArchitectureChange[]): string[] {
+  const steps: string[] = [];
+  for (const { key, from, to } of changes) {
+    const label = `${key} (${from} -> ${to})`;
+    switch (key) {
+      case "database":
+        steps.push(
+          `${label}: Back up all existing data from the ${from} database before making changes.`,
+          `${label}: Provision a ${to} database and update DATABASE_URL in .env and .env.example.`,
+          `${label}: Regenerate the schema for ${to} and create + run an initial migration.`,
+          `${label}: Export rows from ${from} and import them into ${to} (data is NOT migrated automatically).`,
+        );
+        break;
+      case "orm":
+        steps.push(
+          `${label}: Re-author the database schema/models using ${to} conventions.`,
+          `${label}: Regenerate the ${to} client and create an initial ${to} migration.`,
+          `${label}: Port existing ${from} queries and migration history to ${to}, then remove ${from} artifacts.`,
+        );
+        break;
+      case "auth":
+        steps.push(
+          `${label}: Migrate existing user/account records into the ${to} schema.`,
+          `${label}: Invalidate current sessions and update auth secrets/env vars for ${to}.`,
+          `${label}: Update sign-in/sign-up flows and protected routes to use ${to}.`,
+        );
+        break;
+      case "api":
+        steps.push(
+          `${label}: Port server routers/handlers from ${from} to ${to}.`,
+          `${label}: Update client call sites and generated types to the ${to} client.`,
+        );
+        break;
+      case "backend":
+        steps.push(
+          `${label}: Port the server entrypoint, routes, and middleware from ${from} to ${to}.`,
+          `${label}: Reconcile runtime and deploy configuration for the ${to} server.`,
+        );
+        break;
+      case "runtime":
+        steps.push(
+          `${label}: Update the runtime toolchain, scripts, and deploy target for ${to}.`,
+          `${label}: Verify runtime-specific APIs and environment bindings behave correctly on ${to}.`,
+        );
+        break;
+      default:
+        steps.push(`${label}: Review and migrate affected code manually.`);
+    }
+  }
+  return steps;
+}
+
+async function writeMigrationChecklist(projectDir: string, plan: StackUpdatePlan): Promise<void> {
+  if (plan.architectureChanges.length === 0 || plan.migrationSteps.length === 0) return;
+  const migrationPath = path.join(projectDir, "MIGRATION.md");
+  const timestamp = new Date().toISOString();
+  const swaps = plan.architectureChanges
+    .map((change) => `\`${change.key}\`: \`${change.from}\` -> \`${change.to}\``)
+    .join(", ");
+  const section = [
+    `## Architecture change - ${timestamp}`,
+    "",
+    `Swapped: ${swaps}`,
+    "",
+    "Data and schema are NOT migrated automatically. Complete these steps manually:",
+    "",
+    ...plan.migrationSteps.map((step) => `- [ ] ${step}`),
+  ].join("\n");
+
+  if (await fs.pathExists(migrationPath)) {
+    const existing = (await fs.readFile(migrationPath, "utf-8")).trimEnd();
+    await fs.writeFile(migrationPath, `${existing}\n\n${section}\n`, "utf-8");
+  } else {
+    await fs.writeFile(migrationPath, `# Migration checklist\n\n${section}\n`, "utf-8");
+  }
 }
 
 function asStringArray(value: unknown): string[] {
@@ -539,6 +681,26 @@ function getDefaultNativeFrontendForRequestedUpdate(
   return needsNativeFrontend ? "native-bare" : undefined;
 }
 
+function hasSelectedTypeScriptBackendPart(config: ProjectConfig): boolean {
+  return (
+    config.stackParts?.some(
+      (part) =>
+        part.source !== "provided" &&
+        !part.ownerPartId &&
+        part.role === "backend" &&
+        part.ecosystem === "typescript" &&
+        part.toolId !== "none",
+    ) ?? false
+  );
+}
+
+function getCompatibilityEcosystem(config: ProjectConfig): ProjectConfig["ecosystem"] {
+  if (config.ecosystem === "react-native" && hasSelectedTypeScriptBackendPart(config)) {
+    return "typescript";
+  }
+  return config.ecosystem;
+}
+
 function buildCompatibilityInputFromConfig(config: ProjectConfig): CompatibilityInput {
   const frontend = asStringArray(config.frontend);
   const addons = asStringArray(config.addons);
@@ -560,7 +722,7 @@ function buildCompatibilityInputFromConfig(config: ProjectConfig): Compatibility
   }
 
   return {
-    ecosystem: config.ecosystem,
+    ecosystem: getCompatibilityEcosystem(config),
     projectName: config.projectName ?? null,
     webFrontend,
     nativeFrontend,
@@ -613,6 +775,7 @@ function buildCompatibilityInputFromConfig(config: ProjectConfig): Compatibility
     documentation,
     appPlatforms,
     packageManager: asString(config.packageManager, "bun"),
+    workspaceShape: asString(config.workspaceShape, "monorepo"),
     versionChannel: asString(config.versionChannel, "stable"),
     examples: asStringArray(config.examples),
     aiSdk: asString(config.ai),
@@ -663,6 +826,7 @@ function buildCompatibilityInputFromConfig(config: ProjectConfig): Compatibility
     goCaching: asString(config.goCaching),
     goConfig: asString(config.goConfig),
     goObservability: asString(config.goObservability),
+    javaLanguage: asString(config.javaLanguage, "java"),
     javaWebFramework: asString(config.javaWebFramework),
     javaBuildTool: asString(config.javaBuildTool),
     javaOrm: asString(config.javaOrm),
@@ -930,7 +1094,7 @@ function applyKnownDependencyExpansions(
   return { config: next, adjustments };
 }
 
-async function generateTree(config: ProjectConfig): Promise<VirtualFileTree> {
+export async function generateTree(config: ProjectConfig): Promise<VirtualFileTree> {
   const result = await generateVirtualProject({ config, templates: EMBEDDED_TEMPLATES });
   if (!result.success || !result.tree) {
     throw new Error(result.error ?? "Failed to generate virtual project");
@@ -938,7 +1102,7 @@ async function generateTree(config: ProjectConfig): Promise<VirtualFileTree> {
   return result.tree;
 }
 
-async function formatGeneratedTree(tree: VirtualFileTree): Promise<void> {
+export async function formatGeneratedTree(tree: VirtualFileTree): Promise<void> {
   const denoConfigDirs = new Set<string>();
 
   function collectDenoConfigDirs(nodes: VirtualNode[]) {
@@ -979,7 +1143,7 @@ async function formatGeneratedTree(tree: VirtualFileTree): Promise<void> {
   await formatNodes(tree.root.children);
 }
 
-function treeToFileMap(tree: VirtualFileTree): Map<string, VirtualFile> {
+export function treeToFileMap(tree: VirtualFileTree): Map<string, VirtualFile> {
   const files = new Map<string, VirtualFile>();
 
   function walk(nodes: VirtualNode[]) {
@@ -1557,6 +1721,8 @@ export async function planStackUpdate(
   });
 
   const graphPreview = getGraphPreview(persistedProposedConfig);
+  const architectureChanges = computeArchitectureChanges(currentConfig, proposedConfig);
+  const migrationSteps = buildMigrationSteps(architectureChanges);
   return {
     success: true,
     projectDir,
@@ -1569,6 +1735,9 @@ export async function planStackUpdate(
     scriptChanges,
     envChanges,
     manualReviewBlockers,
+    architectureChanges,
+    migrationSteps,
+    requiresArchitectureAck: architectureChanges.length > 0,
     operations,
     installCommand: getInstallCommand(normalizedProposedConfig),
     compatibilityAdjustments,
@@ -1587,6 +1756,22 @@ export async function applyStackUpdate(
       success: false,
       projectDir: plan.projectDir,
       error: `Manual review required before applying stack update: ${plan.manualReviewBlockers.join("; ")}`,
+    };
+  }
+
+  const acknowledgeArchitectureChange = input.acknowledgeArchitectureChange === true;
+  if (plan.requiresArchitectureAck && !acknowledgeArchitectureChange) {
+    const swaps = plan.architectureChanges
+      .map((change) => `${change.key}: ${change.from} -> ${change.to}`)
+      .join("; ");
+    const checklist = plan.migrationSteps.map((step) => `  - ${step}`).join("\n");
+    return {
+      success: false,
+      projectDir: plan.projectDir,
+      error:
+        `This architecture change requires acknowledgment before it can be applied. ` +
+        `It replaces existing architecture-defining choices (${swaps}); data and schema are NOT migrated automatically. ` +
+        `Re-run with acknowledgeArchitectureChange: true (MCP) or --acknowledge-architecture-change (CLI) after reviewing the migration checklist:\n${checklist}`,
     };
   }
 
@@ -1620,6 +1805,8 @@ export async function applyStackUpdate(
     version: plan.proposedConfig.version,
     createdAt: plan.proposedConfig.createdAt,
   });
+
+  await writeMigrationChecklist(plan.projectDir, plan);
 
   return plan;
 }

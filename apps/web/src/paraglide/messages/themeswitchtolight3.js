@@ -22,7 +22,7 @@ const ja_themeswitchtolight3 = /** @type {(inputs: Themeswitchtolight3Inputs) =>
 };
 
 const ko_themeswitchtolight3 = /** @type {(inputs: Themeswitchtolight3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`조명 모드로 전환`)
+	return /** @type {LocalizedString} */ (`밝은 모드로 전환`)
 };
 
 const zh_hant1_themeswitchtolight3 = /** @type {(inputs: Themeswitchtolight3Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_themeswitchtolight3 = /** @type {(inputs: Themeswitchtolight3Inputs) =>
 };
 
 const fr_themeswitchtolight3 = /** @type {(inputs: Themeswitchtolight3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Passer en mode lumière`)
+	return /** @type {LocalizedString} */ (`Passer en mode clair`)
+};
+
+const uk_themeswitchtolight3 = /** @type {(inputs: Themeswitchtolight3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Увімкнути світлу тему`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_themeswitchtolight3 = /** @type {(inputs: Themeswitchtolight3Inputs) =>
 * | "Switch to light mode" |
 *
 * @param {Themeswitchtolight3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const themeswitchtolight3 = /** @type {((inputs?: Themeswitchtolight3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Themeswitchtolight3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const themeswitchtolight3 = /** @type {((inputs?: Themeswitchtolight3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Themeswitchtolight3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_themeswitchtolight3(inputs)
 	if (locale === "es") return es_themeswitchtolight3(inputs)
@@ -55,6 +59,7 @@ const themeswitchtolight3 = /** @type {((inputs?: Themeswitchtolight3Inputs, opt
 	if (locale === "ko") return ko_themeswitchtolight3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_themeswitchtolight3(inputs)
 	if (locale === "de") return de_themeswitchtolight3(inputs)
-	return fr_themeswitchtolight3(inputs)
+	if (locale === "fr") return fr_themeswitchtolight3(inputs)
+	return uk_themeswitchtolight3(inputs)
 });
 export { themeswitchtolight3 as "themeSwitchToLight" }

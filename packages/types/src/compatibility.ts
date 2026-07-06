@@ -127,6 +127,7 @@ export type CompatibilityInput = {
   documentation: string[];
   appPlatforms: string[];
   packageManager: string;
+  workspaceShape: string;
   versionChannel: string;
   examples: string[];
   aiSdk: string;
@@ -177,6 +178,7 @@ export type CompatibilityInput = {
   goCaching: string;
   goConfig: string;
   goObservability: string;
+  javaLanguage: string;
   javaWebFramework: string;
   javaBuildTool: string;
   javaOrm: string;
@@ -304,6 +306,70 @@ export type CompatibilityAnalysisResult = {
  * This follows the CLI approach: when you make a selection, dependent items adjust automatically.
  * The flow is: frontend -> backend -> runtime -> database -> orm -> api -> auth -> etc.
  */
+/**
+ * Backends that can collapse into a flat single-app layout (no separate
+ * apps/server or packages/* workspace). These are the "thin self" fullstack
+ * frameworks whose web app already owns the server via route handlers AND that
+ * expose a `@/*` -> ./src path alias so the inlined env module resolves cleanly.
+ * Nuxt is intentionally excluded from the MVP (different alias convention).
+ */
+const SINGLE_APP_SELF_BACKENDS = new Set(["self-next", "self-tanstack-start"]);
+const SINGLE_APP_WEB_FRONTEND_BY_BACKEND: Record<string, string> = {
+  "self-next": "next",
+  "self-tanstack-start": "tanstack-start",
+};
+
+/**
+ * A single-app (flat) layout is only safe for a "thin self" stack that emits no
+ * sibling workspace package (database/orm, better-auth server, trpc/orpc
+ * packages/api, payments, email, etc.) and no separate native/server app. For
+ * anything else, `single-app` is normalized back to `monorepo` so we never emit
+ * a broken flat layout. appPlatforms (turborepo/nx) are ignored here — the
+ * generator drops the workspace tooling when it flattens.
+ */
+export function stackQualifiesForSingleApp(stack: CompatibilityInput): boolean {
+  if (!SINGLE_APP_SELF_BACKENDS.has(stack.backend)) return false;
+
+  const nativeFrontends = (stack.nativeFrontend ?? []).filter((f) => f && f !== "none");
+  if (nativeFrontends.length > 0) return false;
+
+  const webFrontends = (stack.webFrontend ?? []).filter((f) => f && f !== "none");
+  if (webFrontends.length !== 1) return false;
+  if (webFrontends[0] !== SINGLE_APP_WEB_FRONTEND_BY_BACKEND[stack.backend]) return false;
+
+  const siblingPackageScalars = [
+    stack.api,
+    stack.database,
+    stack.orm,
+    stack.auth,
+    stack.payments,
+    stack.email,
+    stack.fileUpload,
+    stack.realtime,
+    stack.jobQueue,
+    stack.caching,
+    stack.rateLimit,
+    stack.i18n,
+    stack.search,
+    stack.vectorDb,
+    stack.fileStorage,
+    stack.cms,
+    stack.aiSdk,
+    stack.analytics,
+    stack.featureFlags,
+    stack.observability,
+    stack.logging,
+    stack.webDeploy,
+    stack.serverDeploy,
+  ];
+  if (siblingPackageScalars.some((value) => value && value !== "none")) return false;
+
+  const nonNoneExamples = (stack.examples ?? []).filter((e) => e && e !== "none");
+  if (nonNoneExamples.length > 0) return false;
+
+  return true;
+}
+
 export const analyzeStackCompatibility = (
   stack: CompatibilityInput,
 ): CompatibilityAnalysisResult => {
@@ -1513,6 +1579,48 @@ export const analyzeStackCompatibility = (
         });
       }
     }
+
+    // Kotlin is only wired for the Spring Boot scaffold (with Maven or Gradle)
+    // and its common option surface. For every other Java combination we
+    // normalize the language back to `java` so the generator never emits a
+    // half-built Kotlin project. The uncovered surface is: non-Spring-Boot
+    // frameworks, source-only scaffolds, jOOQ/MyBatis ORMs, the gRPC/OpenAPI
+    // API layers (protoc/codegen paths), and the Java-only third-party service
+    // integrations (Resend email, Meilisearch, Upstash Redis, Sentry).
+    if (nextStack.javaLanguage === "kotlin") {
+      const kotlinUnsupportedTestingLibraries = new Set([
+        "testcontainers",
+        "rest-assured",
+        "wiremock",
+        "awaitility",
+        "archunit",
+        "jqwik",
+      ]);
+      const kotlinSupported =
+        nextStack.javaWebFramework === "spring-boot" &&
+        nextStack.javaBuildTool !== "none" &&
+        nextStack.javaOrm !== "jooq" &&
+        nextStack.javaOrm !== "mybatis" &&
+        nextStack.javaApi !== "grpc" &&
+        nextStack.javaApi !== "openapi-generator" &&
+        nextStack.email !== "resend" &&
+        nextStack.search !== "meilisearch" &&
+        nextStack.caching !== "upstash-redis" &&
+        nextStack.observability !== "sentry" &&
+        !nextStack.javaTestingLibraries.some((library) =>
+          kotlinUnsupportedTestingLibraries.has(library),
+        );
+
+      if (!kotlinSupported) {
+        nextStack.javaLanguage = "java";
+        changed = true;
+        changes.push({
+          category: "javaLanguage",
+          message:
+            "Java language set to 'Java' (Kotlin currently targets the Spring Boot scaffold with Spring Data JPA/none, Spring GraphQL/none, and no jOOQ/MyBatis/gRPC/OpenAPI or Java-only service integrations)",
+        });
+      }
+    }
   }
 
   if (nextStack.i18n === "intlayer") {
@@ -1659,6 +1767,19 @@ export const analyzeStackCompatibility = (
     changes.push({
       category: "serverDeploy",
       message: "Server deploy set to 'None' (not needed for this backend)",
+    });
+  }
+
+  // Workspace shape: single-app (flat) only applies to a qualifying thin self
+  // app; normalize back to monorepo for anything else so we never emit a broken
+  // flat layout.
+  if (nextStack.workspaceShape === "single-app" && !stackQualifiesForSingleApp(nextStack)) {
+    nextStack.workspaceShape = "monorepo";
+    changed = true;
+    changes.push({
+      category: "workspaceShape",
+      message:
+        "Workspace shape set to 'Monorepo' (single-app only supports a thin self app: Next.js or TanStack Start fullstack with no separate database/auth/api/server packages)",
     });
   }
 
@@ -1814,7 +1935,8 @@ export const getDisabledReason = (
   }
 
   const graphDisabledReason =
-    category === "payments" && optionId === "revenuecat"
+    (category === "payments" && optionId === "revenuecat") ||
+    (category === "i18n" && optionId === "intlayer")
       ? { handled: false, authoritative: false, reason: null }
       : getGraphDisabledReason(currentStack, category, optionId);
   if (graphDisabledReason.reason) {

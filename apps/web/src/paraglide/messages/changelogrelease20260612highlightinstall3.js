@@ -30,11 +30,15 @@ const zh_hant1_changelogrelease20260612highlightinstall3 = /** @type {(inputs: C
 };
 
 const de_changelogrelease20260612highlightinstall3 = /** @type {(inputs: Changelogrelease20260612highlightinstall3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Reduzieren Sie die Installationsgröße um 42 % (122 MB → 71 MB) und den Webeintragsteil um 32 %.`)
+	return /** @type {LocalizedString} */ (`Installationsgröße um 42 % reduziert (122 MB → 71 MB) und den Web-Entry-Chunk um 32 %.`)
 };
 
 const fr_changelogrelease20260612highlightinstall3 = /** @type {(inputs: Changelogrelease20260612highlightinstall3Inputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`Réduisez la taille de l'installation de 42 % (122 Mo → 71 Mo) et la taille de l'entrée Web de 32 %.`)
+};
+
+const uk_changelogrelease20260612highlightinstall3 = /** @type {(inputs: Changelogrelease20260612highlightinstall3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Зменшили розмір встановлення на 42% (122 МБ → 71 МБ) і web entry chunk на 32%.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_changelogrelease20260612highlightinstall3 = /** @type {(inputs: Changel
 * | "Cut install size by 42% (122 MB → 71 MB) and the web entry chunk by 32%." |
 *
 * @param {Changelogrelease20260612highlightinstall3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const changelogrelease20260612highlightinstall3 = /** @type {((inputs?: Changelogrelease20260612highlightinstall3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Changelogrelease20260612highlightinstall3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const changelogrelease20260612highlightinstall3 = /** @type {((inputs?: Changelogrelease20260612highlightinstall3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Changelogrelease20260612highlightinstall3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_changelogrelease20260612highlightinstall3(inputs)
 	if (locale === "es") return es_changelogrelease20260612highlightinstall3(inputs)
@@ -55,6 +59,7 @@ const changelogrelease20260612highlightinstall3 = /** @type {((inputs?: Changelo
 	if (locale === "ko") return ko_changelogrelease20260612highlightinstall3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_changelogrelease20260612highlightinstall3(inputs)
 	if (locale === "de") return de_changelogrelease20260612highlightinstall3(inputs)
-	return fr_changelogrelease20260612highlightinstall3(inputs)
+	if (locale === "fr") return fr_changelogrelease20260612highlightinstall3(inputs)
+	return uk_changelogrelease20260612highlightinstall3(inputs)
 });
 export { changelogrelease20260612highlightinstall3 as "changelogRelease20260612HighlightInstall" }

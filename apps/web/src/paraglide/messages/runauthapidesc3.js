@@ -10,11 +10,11 @@ const en_runauthapidesc3 = /** @type {(inputs: Runauthapidesc3Inputs) => Localiz
 };
 
 const es_runauthapidesc3 = /** @type {(inputs: Runauthapidesc3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`¿Prefieres una clave API? Exporta la clave del proveedor y la misma interfaz de línea de comandos del agente facturará con ella; no se requiere suscripción. Publicamos ejecuciones con suscripción; las ejecuciones con API no han sido probadas, pero cuentan con soporte.`)
+	return /** @type {LocalizedString} */ (`¿Prefieres una clave API? Exporta la clave del proveedor y la misma CLI del agente facturará con ella; no se requiere suscripción. Publicamos ejecuciones con suscripción; las ejecuciones con API no están probadas, pero cuentan con soporte.`)
 };
 
 const zh_runauthapidesc3 = /** @type {(inputs: Runauthapidesc3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`更倾向于使用 API 密钥？导出提供商密钥，即可使用同一代理 CLI 进行计费——无需订阅。我们提供订阅驱动的运行服务；API 运行服务未经测试，但我们提供支持。`)
+	return /** @type {LocalizedString} */ (`更倾向于使用 API 密钥？导出提供商密钥，即可使用同一代理 CLI 进行计费——无需订阅。我们发布基于订阅的运行结果；API 方式的运行未经测试，但同样受支持。`)
 };
 
 const ja_runauthapidesc3 = /** @type {(inputs: Runauthapidesc3Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_runauthapidesc3 = /** @type {(inputs: Runauthapidesc3Inputs) => Localiz
 	return /** @type {LocalizedString} */ (`Vous préférez une clé API ? Exportez la clé du fournisseur : la même interface de ligne de commande de l’agent facturera automatiquement l’exécution avec cette clé, sans abonnement. Nous publions les exécutions sur abonnement ; les exécutions via API ne sont pas testées, mais sont prises en charge.`)
 };
 
+const uk_runauthapidesc3 = /** @type {(inputs: Runauthapidesc3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Бажаєте ключ API? Експортуйте ключ постачальника, і той самий агент CLI виставляє рахунки за нього — підписка не потрібна. Ми публікуємо прогони за підпискою; прогони через API не перевірені, але підтримуються.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Prefer an API key? Export the provider key and the same agent CLI bills against it — no subscription needed. We publish subscription-driven runs; API runs ar..." |
 *
 * @param {Runauthapidesc3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runauthapidesc3 = /** @type {((inputs?: Runauthapidesc3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runauthapidesc3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runauthapidesc3 = /** @type {((inputs?: Runauthapidesc3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runauthapidesc3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runauthapidesc3(inputs)
 	if (locale === "es") return es_runauthapidesc3(inputs)
@@ -55,6 +59,7 @@ const runauthapidesc3 = /** @type {((inputs?: Runauthapidesc3Inputs, options?: {
 	if (locale === "ko") return ko_runauthapidesc3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runauthapidesc3(inputs)
 	if (locale === "de") return de_runauthapidesc3(inputs)
-	return fr_runauthapidesc3(inputs)
+	if (locale === "fr") return fr_runauthapidesc3(inputs)
+	return uk_runauthapidesc3(inputs)
 });
 export { runauthapidesc3 as "runAuthApiDesc" }
