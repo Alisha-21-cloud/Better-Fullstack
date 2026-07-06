@@ -25,15 +25,6 @@ export function resolvePaymentsPrompt(
     };
   }
 
-  if (context.backend === "none") {
-    return {
-      shouldPrompt: false,
-      mode: "single",
-      options: [],
-      autoValue: "none",
-    };
-  }
-
   const isPolarCompatible =
     (context.auth === "better-auth" || context.auth === "better-auth-organizations") &&
     (context.frontends?.length === 0 || splitFrontends(context.frontends).web.length > 0);
@@ -46,6 +37,35 @@ export function resolvePaymentsPrompt(
   );
 
   const isRevenueCatCompatible = hasNativeFrontend;
+
+  if (context.backend === "none") {
+    if (isRevenueCatCompatible) {
+      return {
+        shouldPrompt: true,
+        mode: "single",
+        options: [
+          {
+            value: "revenuecat" as Payments,
+            label: "RevenueCat",
+            hint: "In-app subscriptions and cross-platform monetization for mobile.",
+          },
+          {
+            value: "none" as Payments,
+            label: "None",
+            hint: "No payments integration",
+          },
+        ],
+        initialValue: DEFAULT_CONFIG.payments,
+      };
+    }
+
+    return {
+      shouldPrompt: false,
+      mode: "single",
+      options: [],
+      autoValue: "none",
+    };
+  }
 
   const options: Array<{ value: Payments; label: string; hint: string }> = [];
 

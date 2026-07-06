@@ -733,6 +733,27 @@ describe("Payments Options", () => {
       );
       expectSuccess(result);
     });
+
+    test("revenuecat with React Native ecosystem and no backend", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "revenuecat-react-native",
+          ecosystem: "react-native",
+          frontend: ["native-bare"],
+          backend: "none",
+          runtime: "none",
+          database: "none",
+          orm: "none",
+          dbSetup: "none",
+          api: "none",
+          auth: "none",
+          payments: "revenuecat",
+          cssFramework: "none",
+        }),
+      );
+
+      expectSuccess(result);
+    });
   });
 
   describe("Creem provider", () => {

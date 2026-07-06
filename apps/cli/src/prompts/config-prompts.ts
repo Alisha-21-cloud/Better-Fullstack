@@ -517,7 +517,9 @@ export async function gatherConfig(
         return Promise.resolve("none" as Auth);
       },
       payments: ({ results }) => {
-        if (results.ecosystem !== "typescript") return Promise.resolve("none" as Payments);
+        if (results.ecosystem !== "typescript" && results.ecosystem !== "react-native") {
+          return Promise.resolve("none" as Payments);
+        }
         return getPaymentsChoice(flags.payments, results.auth, results.backend, results.frontend);
       },
       email: ({ results }) => {

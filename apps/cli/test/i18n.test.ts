@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { createCustomConfig, expectSuccess, runTRPCTest } from "./test-utils";
+import { createCustomConfig, expectError, expectSuccess, runTRPCTest } from "./test-utils";
 
 async function readWebFile(projectDir: string, path: string) {
   return readFile(join(projectDir, "apps/web", path), "utf-8");
@@ -124,6 +124,21 @@ describe("i18n Options", () => {
         "utf-8",
       );
       expect(config).toContain("intlayer");
+    });
+
+    test("rejects Intlayer for unsupported frontend templates", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "intlayer-svelte",
+          frontend: ["svelte"],
+          backend: "self",
+          runtime: "none",
+          api: "orpc",
+          i18n: "intlayer",
+        }),
+      );
+
+      expectError(result, "Intlayer i18n is currently wired only");
     });
   });
 });
