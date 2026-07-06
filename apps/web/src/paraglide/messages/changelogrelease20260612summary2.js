@@ -18,7 +18,7 @@ const zh_changelogrelease20260612summary2 = /** @type {(inputs: Changelogrelease
 };
 
 const ja_changelogrelease20260612summary2 = /** @type {(inputs: Changelogrelease20260612summary2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`このリリースでは、AI エージェントが Better Fullstack でどのようにスキャフォールディングするかをベンチマークし、その結果をホームページで公開し、新しいスタック グラフにファーストクラスのエコシステムとして .NET を追加し、より無駄のないインストールを出荷します。また、ベンチマーク自体が発見した 4 つの足場のバグも修正されています。`)
+	return /** @type {LocalizedString} */ (`このリリースでは、AI エージェントが Better Fullstack でどのようにスキャフォールディングするかをベンチマークし、その結果をホームページで公開し、新しいスタック グラフにファーストクラスのエコシステムとして .NET を追加し、より無駄のないインストールをリリースします。また、ベンチマーク自体が発見した 4 つのスキャフォールドのバグも修正されています。`)
 };
 
 const ko_changelogrelease20260612summary2 = /** @type {(inputs: Changelogrelease20260612summary2Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_changelogrelease20260612summary2 = /** @type {(inputs: Changelogrelease
 };
 
 const fr_changelogrelease20260612summary2 = /** @type {(inputs: Changelogrelease20260612summary2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Cette version évalue la façon dont les agents AI s'articulent avec Better Fullstack et publie les résultats sur la page d'accueil, ajoute .NET en tant qu'écosystème de première classe sur le nouveau graphique de pile et fournit une installation beaucoup plus simple. Il corrige également quatre bugs d’échafaudage découverts par le benchmark lui-même.`)
+	return /** @type {LocalizedString} */ (`Cette version évalue la façon dont les agents AI échafaudent avec Better Fullstack et publie les résultats sur la page d'accueil, ajoute .NET en tant qu'écosystème de première classe sur le nouveau graphique de pile et fournit une installation beaucoup plus légère. Elle corrige également quatre bugs d’échafaudage découverts par le benchmark lui-même.`)
+};
+
+const uk_changelogrelease20260612summary2 = /** @type {(inputs: Changelogrelease20260612summary2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`У цьому релізі ми виміряли, як AI-агенти генерують проєкти з Better Fullstack, опублікували результати на головній, додали .NET як повноцінну екосистему в граф стеку й суттєво полегшили встановлення. Також виправили чотири помилки скафолдингу, які сам бенчмарк і виявив.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_changelogrelease20260612summary2 = /** @type {(inputs: Changelogrelease
 * | "This release benchmarks how AI agents scaffold with Better Fullstack and publishes the results on the homepage, adds .NET as a first-class ecosystem on the n..." |
 *
 * @param {Changelogrelease20260612summary2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const changelogrelease20260612summary2 = /** @type {((inputs?: Changelogrelease20260612summary2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Changelogrelease20260612summary2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const changelogrelease20260612summary2 = /** @type {((inputs?: Changelogrelease20260612summary2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Changelogrelease20260612summary2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_changelogrelease20260612summary2(inputs)
 	if (locale === "es") return es_changelogrelease20260612summary2(inputs)
@@ -55,6 +59,7 @@ const changelogrelease20260612summary2 = /** @type {((inputs?: Changelogrelease2
 	if (locale === "ko") return ko_changelogrelease20260612summary2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_changelogrelease20260612summary2(inputs)
 	if (locale === "de") return de_changelogrelease20260612summary2(inputs)
-	return fr_changelogrelease20260612summary2(inputs)
+	if (locale === "fr") return fr_changelogrelease20260612summary2(inputs)
+	return uk_changelogrelease20260612summary2(inputs)
 });
 export { changelogrelease20260612summary2 as "changelogRelease20260612Summary" }

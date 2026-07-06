@@ -18,7 +18,7 @@ const zh_homeuniverselifetimes2 = /** @type {(inputs: Homeuniverselifetimes2Inpu
 };
 
 const ja_homeuniverselifetimes2 = /** @type {(inputs: Homeuniverselifetimes2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`宇宙の生涯`)
+	return /** @type {LocalizedString} */ (`宇宙の寿命`)
 };
 
 const ko_homeuniverselifetimes2 = /** @type {(inputs: Homeuniverselifetimes2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_homeuniverselifetimes2 = /** @type {(inputs: Homeuniverselifetimes2Inpu
 	return /** @type {LocalizedString} */ (`durées de vie de l'univers`)
 };
 
+const uk_homeuniverselifetimes2 = /** @type {(inputs: Homeuniverselifetimes2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`життів Всесвіту`)
+};
+
 /**
 * | output |
 * | --- |
 * | "universe lifetimes" |
 *
 * @param {Homeuniverselifetimes2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const homeuniverselifetimes2 = /** @type {((inputs?: Homeuniverselifetimes2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homeuniverselifetimes2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const homeuniverselifetimes2 = /** @type {((inputs?: Homeuniverselifetimes2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homeuniverselifetimes2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_homeuniverselifetimes2(inputs)
 	if (locale === "es") return es_homeuniverselifetimes2(inputs)
@@ -55,6 +59,7 @@ const homeuniverselifetimes2 = /** @type {((inputs?: Homeuniverselifetimes2Input
 	if (locale === "ko") return ko_homeuniverselifetimes2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_homeuniverselifetimes2(inputs)
 	if (locale === "de") return de_homeuniverselifetimes2(inputs)
-	return fr_homeuniverselifetimes2(inputs)
+	if (locale === "fr") return fr_homeuniverselifetimes2(inputs)
+	return uk_homeuniverselifetimes2(inputs)
 });
 export { homeuniverselifetimes2 as "homeUniverseLifetimes" }

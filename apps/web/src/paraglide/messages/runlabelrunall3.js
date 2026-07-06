@@ -10,15 +10,15 @@ const en_runlabelrunall3 = /** @type {(inputs: Runlabelrunall3Inputs) => Localiz
 };
 
 const es_runlabelrunall3 = /** @type {(inputs: Runlabelrunall3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Ejecutar las 13 especificaciones, ruta de solicitud`)
+	return /** @type {LocalizedString} */ (`ejecutar las 13 especificaciones, ruta prompt`)
 };
 
 const zh_runlabelrunall3 = /** @type {(inputs: Runlabelrunall3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`运行所有 13 个测试用例，提示路径`)
+	return /** @type {LocalizedString} */ (`运行所有 13 个规范，prompt 路径`)
 };
 
 const ja_runlabelrunall3 = /** @type {(inputs: Runlabelrunall3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`全13個の仕様を実行し、プロンプトパスを表示します`)
+	return /** @type {LocalizedString} */ (`全13仕様を実行（プロンプトパス）`)
 };
 
 const ko_runlabelrunall3 = /** @type {(inputs: Runlabelrunall3Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_runlabelrunall3 = /** @type {(inputs: Runlabelrunall3Inputs) => Localiz
 };
 
 const fr_runlabelrunall3 = /** @type {(inputs: Runlabelrunall3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`exécuter les 13 spécifications, chemin d'accès`)
+	return /** @type {LocalizedString} */ (`exécuter les 13 spécifications, chemin d'invite`)
+};
+
+const uk_runlabelrunall3 = /** @type {(inputs: Runlabelrunall3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`запустити всі 13 специфікацій, шлях prompt`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_runlabelrunall3 = /** @type {(inputs: Runlabelrunall3Inputs) => Localiz
 * | "run all 13 specs, prompt path" |
 *
 * @param {Runlabelrunall3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runlabelrunall3 = /** @type {((inputs?: Runlabelrunall3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runlabelrunall3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runlabelrunall3 = /** @type {((inputs?: Runlabelrunall3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runlabelrunall3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runlabelrunall3(inputs)
 	if (locale === "es") return es_runlabelrunall3(inputs)
@@ -55,6 +59,7 @@ const runlabelrunall3 = /** @type {((inputs?: Runlabelrunall3Inputs, options?: {
 	if (locale === "ko") return ko_runlabelrunall3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runlabelrunall3(inputs)
 	if (locale === "de") return de_runlabelrunall3(inputs)
-	return fr_runlabelrunall3(inputs)
+	if (locale === "fr") return fr_runlabelrunall3(inputs)
+	return uk_runlabelrunall3(inputs)
 });
 export { runlabelrunall3 as "runLabelRunAll" }

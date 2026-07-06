@@ -34,7 +34,11 @@ const de_guidesupdated1 = /** @type {(inputs: Guidesupdated1Inputs) => Localized
 };
 
 const fr_guidesupdated1 = /** @type {(inputs: Guidesupdated1Inputs) => LocalizedString} */ (i) => {
-	return /** @type {LocalizedString} */ (`${i?.date} mis à jour`)
+	return /** @type {LocalizedString} */ (`Mis à jour le ${i?.date}`)
+};
+
+const uk_guidesupdated1 = /** @type {(inputs: Guidesupdated1Inputs) => LocalizedString} */ (i) => {
+	return /** @type {LocalizedString} */ (`Оновлено ${i?.date}`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_guidesupdated1 = /** @type {(inputs: Guidesupdated1Inputs) => Localized
 * | "Updated {date}" |
 *
 * @param {Guidesupdated1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const guidesupdated1 = /** @type {((inputs: Guidesupdated1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Guidesupdated1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs, options = {}) => {
+const guidesupdated1 = /** @type {((inputs: Guidesupdated1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Guidesupdated1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_guidesupdated1(inputs)
 	if (locale === "es") return es_guidesupdated1(inputs)
@@ -55,6 +59,7 @@ const guidesupdated1 = /** @type {((inputs: Guidesupdated1Inputs, options?: { lo
 	if (locale === "ko") return ko_guidesupdated1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_guidesupdated1(inputs)
 	if (locale === "de") return de_guidesupdated1(inputs)
-	return fr_guidesupdated1(inputs)
+	if (locale === "fr") return fr_guidesupdated1(inputs)
+	return uk_guidesupdated1(inputs)
 });
 export { guidesupdated1 as "guidesUpdated" }

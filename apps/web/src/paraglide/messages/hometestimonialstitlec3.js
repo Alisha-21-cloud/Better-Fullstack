@@ -30,11 +30,15 @@ const zh_hant1_hometestimonialstitlec3 = /** @type {(inputs: Hometestimonialstit
 };
 
 const de_hometestimonialstitlec3 = /** @type {(inputs: Hometestimonialstitlec3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Ich liebe es.`)
+	return /** @type {LocalizedString} */ (`lieben es.`)
 };
 
 const fr_hometestimonialstitlec3 = /** @type {(inputs: Hometestimonialstitlec3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`aimer.`)
+	return /** @type {LocalizedString} */ (`l'adorent.`)
+};
+
+const uk_hometestimonialstitlec3 = /** @type {(inputs: Hometestimonialstitlec3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`закохані.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_hometestimonialstitlec3 = /** @type {(inputs: Hometestimonialstitlec3In
 * | "love it." |
 *
 * @param {Hometestimonialstitlec3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const hometestimonialstitlec3 = /** @type {((inputs?: Hometestimonialstitlec3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Hometestimonialstitlec3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const hometestimonialstitlec3 = /** @type {((inputs?: Hometestimonialstitlec3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Hometestimonialstitlec3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_hometestimonialstitlec3(inputs)
 	if (locale === "es") return es_hometestimonialstitlec3(inputs)
@@ -55,6 +59,7 @@ const hometestimonialstitlec3 = /** @type {((inputs?: Hometestimonialstitlec3Inp
 	if (locale === "ko") return ko_hometestimonialstitlec3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_hometestimonialstitlec3(inputs)
 	if (locale === "de") return de_hometestimonialstitlec3(inputs)
-	return fr_hometestimonialstitlec3(inputs)
+	if (locale === "fr") return fr_hometestimonialstitlec3(inputs)
+	return uk_hometestimonialstitlec3(inputs)
 });
 export { hometestimonialstitlec3 as "homeTestimonialsTitleC" }

@@ -22,7 +22,7 @@ const ja_presettrackaiagentdescription4 = /** @type {(inputs: Presettrackaiagent
 };
 
 const ko_presettrackaiagentdescription4 = /** @type {(inputs: Presettrackaiagentdescription4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`AI CLI 흐름, MCP, 기술 및 생성된 상담사 문서를 위해 준비된 Next.js 작업 영역입니다.`)
+	return /** @type {LocalizedString} */ (`AI CLI 흐름, MCP, Skills 및 생성된 에이전트 문서를 위해 준비된 Next.js 작업 영역입니다.`)
 };
 
 const zh_hant1_presettrackaiagentdescription4 = /** @type {(inputs: Presettrackaiagentdescription4Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_presettrackaiagentdescription4 = /** @type {(inputs: Presettrackaiagent
 	return /** @type {LocalizedString} */ (`Un espace de travail Next.js préparé pour les flux AI CLI, MCP, les compétences et les documents d'agent générés.`)
 };
 
+const uk_presettrackaiagentdescription4 = /** @type {(inputs: Presettrackaiagentdescription4Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Next.js workspace, підготовлений для AI CLI-флоу, MCP, Skills і згенерованих agent docs.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "A Next.js workspace prepared for AI CLI flows, MCP, skills, and generated agent docs." |
 *
 * @param {Presettrackaiagentdescription4Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const presettrackaiagentdescription4 = /** @type {((inputs?: Presettrackaiagentdescription4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Presettrackaiagentdescription4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const presettrackaiagentdescription4 = /** @type {((inputs?: Presettrackaiagentdescription4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Presettrackaiagentdescription4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_presettrackaiagentdescription4(inputs)
 	if (locale === "es") return es_presettrackaiagentdescription4(inputs)
@@ -55,6 +59,7 @@ const presettrackaiagentdescription4 = /** @type {((inputs?: Presettrackaiagentd
 	if (locale === "ko") return ko_presettrackaiagentdescription4(inputs)
 	if (locale === "zh-Hant") return zh_hant1_presettrackaiagentdescription4(inputs)
 	if (locale === "de") return de_presettrackaiagentdescription4(inputs)
-	return fr_presettrackaiagentdescription4(inputs)
+	if (locale === "fr") return fr_presettrackaiagentdescription4(inputs)
+	return uk_presettrackaiagentdescription4(inputs)
 });
 export { presettrackaiagentdescription4 as "presetTrackAiAgentDescription" }

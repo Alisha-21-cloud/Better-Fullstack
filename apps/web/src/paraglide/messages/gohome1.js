@@ -18,11 +18,11 @@ const zh_gohome1 = /** @type {(inputs: Gohome1Inputs) => LocalizedString} */ () 
 };
 
 const ja_gohome1 = /** @type {(inputs: Gohome1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`家に帰れ`)
+	return /** @type {LocalizedString} */ (`ホームに戻る`)
 };
 
 const ko_gohome1 = /** @type {(inputs: Gohome1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`집으로 이동`)
+	return /** @type {LocalizedString} */ (`홈으로 이동`)
 };
 
 const zh_hant1_gohome1 = /** @type {(inputs: Gohome1Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_gohome1 = /** @type {(inputs: Gohome1Inputs) => LocalizedString} 
 };
 
 const de_gohome1 = /** @type {(inputs: Gohome1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Nach Hause gehen`)
+	return /** @type {LocalizedString} */ (`Zur Startseite`)
 };
 
 const fr_gohome1 = /** @type {(inputs: Gohome1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Rentrer à la maison`)
+	return /** @type {LocalizedString} */ (`Retour à l'accueil`)
+};
+
+const uk_gohome1 = /** @type {(inputs: Gohome1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`На головну`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_gohome1 = /** @type {(inputs: Gohome1Inputs) => LocalizedString} */ () 
 * | "Go Home" |
 *
 * @param {Gohome1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const gohome1 = /** @type {((inputs?: Gohome1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Gohome1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const gohome1 = /** @type {((inputs?: Gohome1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Gohome1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_gohome1(inputs)
 	if (locale === "es") return es_gohome1(inputs)
@@ -55,6 +59,7 @@ const gohome1 = /** @type {((inputs?: Gohome1Inputs, options?: { locale?: "en" |
 	if (locale === "ko") return ko_gohome1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_gohome1(inputs)
 	if (locale === "de") return de_gohome1(inputs)
-	return fr_gohome1(inputs)
+	if (locale === "fr") return fr_gohome1(inputs)
+	return uk_gohome1(inputs)
 });
 export { gohome1 as "goHome" }

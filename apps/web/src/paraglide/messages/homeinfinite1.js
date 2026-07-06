@@ -34,7 +34,11 @@ const de_homeinfinite1 = /** @type {(inputs: Homeinfinite1Inputs) => LocalizedSt
 };
 
 const fr_homeinfinite1 = /** @type {(inputs: Homeinfinite1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Infini`)
+	return /** @type {LocalizedString} */ (`Infinies`)
+};
+
+const uk_homeinfinite1 = /** @type {(inputs: Homeinfinite1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Нескінченні`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_homeinfinite1 = /** @type {(inputs: Homeinfinite1Inputs) => LocalizedSt
 * | "Infinite" |
 *
 * @param {Homeinfinite1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const homeinfinite1 = /** @type {((inputs?: Homeinfinite1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homeinfinite1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const homeinfinite1 = /** @type {((inputs?: Homeinfinite1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homeinfinite1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_homeinfinite1(inputs)
 	if (locale === "es") return es_homeinfinite1(inputs)
@@ -55,6 +59,7 @@ const homeinfinite1 = /** @type {((inputs?: Homeinfinite1Inputs, options?: { loc
 	if (locale === "ko") return ko_homeinfinite1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_homeinfinite1(inputs)
 	if (locale === "de") return de_homeinfinite1(inputs)
-	return fr_homeinfinite1(inputs)
+	if (locale === "fr") return fr_homeinfinite1(inputs)
+	return uk_homeinfinite1(inputs)
 });
 export { homeinfinite1 as "homeInfinite" }

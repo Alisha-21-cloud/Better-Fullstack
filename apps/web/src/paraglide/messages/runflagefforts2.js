@@ -10,11 +10,11 @@ const en_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => Localiz
 };
 
 const es_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`esfuerzo de razonamiento, donde el modelo lo respalda`)
+	return /** @type {LocalizedString} */ (`esfuerzo de razonamiento, cuando el modelo lo admite`)
 };
 
 const zh_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`推理努力，在模型支持的情况下`)
+	return /** @type {LocalizedString} */ (`推理强度，在模型支持的情况下`)
 };
 
 const ja_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => LocalizedString} */ () => {
@@ -26,7 +26,7 @@ const ko_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => Localiz
 };
 
 const zh_hant1_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`推理努力，在模型支持的情況下`)
+	return /** @type {LocalizedString} */ (`推理強度（在模型支援的情況下）`)
 };
 
 const de_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => Localiz
 };
 
 const fr_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`effort de raisonnement, là où le modèle le soutient`)
+	return /** @type {LocalizedString} */ (`effort de raisonnement, lorsque le modèle le prend en charge`)
+};
+
+const uk_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`міркування, якщо модель підтримує це`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_runflagefforts2 = /** @type {(inputs: Runflagefforts2Inputs) => Localiz
 * | "reasoning effort, where the model supports it" |
 *
 * @param {Runflagefforts2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runflagefforts2 = /** @type {((inputs?: Runflagefforts2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runflagefforts2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runflagefforts2 = /** @type {((inputs?: Runflagefforts2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runflagefforts2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runflagefforts2(inputs)
 	if (locale === "es") return es_runflagefforts2(inputs)
@@ -55,6 +59,7 @@ const runflagefforts2 = /** @type {((inputs?: Runflagefforts2Inputs, options?: {
 	if (locale === "ko") return ko_runflagefforts2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runflagefforts2(inputs)
 	if (locale === "de") return de_runflagefforts2(inputs)
-	return fr_runflagefforts2(inputs)
+	if (locale === "fr") return fr_runflagefforts2(inputs)
+	return uk_runflagefforts2(inputs)
 });
 export { runflagefforts2 as "runFlagEfforts" }

@@ -22,7 +22,7 @@ const ja_buildergroupedaddonsdescription3 = /** @type {(inputs: Buildergroupedad
 };
 
 const ko_buildergroupedaddonsdescription3 = /** @type {(inputs: Buildergroupedaddonsdescription3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`플랫폼, 통합, AI 에이전트 및 TanStack 추가 항목은 아래에 분할되어 있습니다. MCP 및 Skills는 여전히 애드온 플래그를 먼저 추가한 다음 CLI이 이를 구성하기 위해 후속 질문을 합니다.`)
+	return /** @type {LocalizedString} */ (`플랫폼, 통합, AI 에이전트 및 TanStack 추가 항목은 아래에 분할되어 있습니다. MCP 및 Skills는 여전히 애드온 플래그를 먼저 추가한 다음 CLI가 이를 구성하기 위해 후속 질문을 합니다.`)
 };
 
 const zh_hant1_buildergroupedaddonsdescription3 = /** @type {(inputs: Buildergroupedaddonsdescription3Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_buildergroupedaddonsdescription3 = /** @type {(inputs: Buildergroupedad
 	return /** @type {LocalizedString} */ (`les plates-formes, les intégrations, les agents AI et les extras TanStack sont répartis ci-dessous. MCP et Skills ajoutent toujours les indicateurs du module complémentaire en premier, puis CLI pose des questions de suivi pour les configurer.`)
 };
 
+const uk_buildergroupedaddonsdescription3 = /** @type {(inputs: Buildergroupedaddonsdescription3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`платформи, інтеграції, AI-агенти та додаткові TanStack-функції винесені нижче. MCP і Skills спочатку додають addon-прапорці, а CLI потім ставить додаткові запитання для налаштування.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "platforms, integrations, AI agents, and TanStack extras are split below. MCP and Skills still add the addon flags first, then the CLI asks follow-up question..." |
 *
 * @param {Buildergroupedaddonsdescription3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const buildergroupedaddonsdescription3 = /** @type {((inputs?: Buildergroupedaddonsdescription3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Buildergroupedaddonsdescription3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const buildergroupedaddonsdescription3 = /** @type {((inputs?: Buildergroupedaddonsdescription3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Buildergroupedaddonsdescription3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_buildergroupedaddonsdescription3(inputs)
 	if (locale === "es") return es_buildergroupedaddonsdescription3(inputs)
@@ -55,6 +59,7 @@ const buildergroupedaddonsdescription3 = /** @type {((inputs?: Buildergroupedadd
 	if (locale === "ko") return ko_buildergroupedaddonsdescription3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_buildergroupedaddonsdescription3(inputs)
 	if (locale === "de") return de_buildergroupedaddonsdescription3(inputs)
-	return fr_buildergroupedaddonsdescription3(inputs)
+	if (locale === "fr") return fr_buildergroupedaddonsdescription3(inputs)
+	return uk_buildergroupedaddonsdescription3(inputs)
 });
 export { buildergroupedaddonsdescription3 as "builderGroupedAddonsDescription" }
