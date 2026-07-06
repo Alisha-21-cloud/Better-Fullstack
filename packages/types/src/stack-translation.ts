@@ -75,6 +75,7 @@ export const DEFAULT_STACK_SELECTION: StackSelectionState = {
   documentation: [],
   appPlatforms: ["turborepo"],
   packageManager: "bun",
+  workspaceShape: "monorepo",
   versionChannel: "stable",
   examples: [],
   aiSdk: "none",
@@ -125,6 +126,7 @@ export const DEFAULT_STACK_SELECTION: StackSelectionState = {
   goCaching: "none",
   goConfig: "none",
   goObservability: "none",
+  javaLanguage: "java",
   javaWebFramework: "spring-boot",
   javaBuildTool: "maven",
   javaOrm: "none",
@@ -230,6 +232,7 @@ export const STACK_SELECTION_OPTION_CATEGORY_BY_KEY: Record<
   documentation: "documentation",
   appPlatforms: "appPlatforms",
   packageManager: "packageManager",
+  workspaceShape: "workspaceShape",
   versionChannel: "versionChannel",
   examples: "examples",
   aiSdk: "ai",
@@ -279,6 +282,7 @@ export const STACK_SELECTION_OPTION_CATEGORY_BY_KEY: Record<
   goCaching: "goCaching",
   goConfig: "goConfig",
   goObservability: "goObservability",
+  javaLanguage: "javaLanguage",
   javaWebFramework: "javaWebFramework",
   javaBuildTool: "javaBuildTool",
   javaOrm: "javaOrm",
@@ -392,6 +396,7 @@ export const STACK_SELECTION_URL_KEYS = {
   documentation: "doc",
   appPlatforms: "ap",
   packageManager: "pm",
+  workspaceShape: "ws",
   versionChannel: "vc",
   examples: "ex",
   aiSdk: "aisdk",
@@ -442,6 +447,7 @@ export const STACK_SELECTION_URL_KEYS = {
   goCaching: "gcache",
   goConfig: "gcfg",
   goObservability: "gobs",
+  javaLanguage: "jlang",
   javaWebFramework: "jwf",
   javaBuildTool: "jbt",
   javaOrm: "jorm",
@@ -712,6 +718,7 @@ const CLI_SCALAR_CONFIG_FIELDS = [
   ["runtime", "runtime"],
   ["dbSetup", "dbSetup"],
   ["packageManager", "packageManager"],
+  ["workspaceShape", "workspaceShape"],
   ["versionChannel", "versionChannel"],
   ["webDeploy", "webDeploy"],
   ["serverDeploy", "serverDeploy"],
@@ -760,6 +767,7 @@ const CLI_SCALAR_CONFIG_FIELDS = [
   ["goCaching", "goCaching"],
   ["goConfig", "goConfig"],
   ["goObservability", "goObservability"],
+  ["javaLanguage", "javaLanguage"],
   ["javaWebFramework", "javaWebFramework"],
   ["javaBuildTool", "javaBuildTool"],
   ["javaOrm", "javaOrm"],
@@ -879,6 +887,7 @@ const GO_CONFIG_KEYS = [
 ] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
 
 const JAVA_CONFIG_KEYS = [
+  "javaLanguage",
   "javaWebFramework",
   "javaBuildTool",
   "javaOrm",
@@ -1167,6 +1176,7 @@ const GRAPH_GO_BACKEND_PART_SELECTION_KEYS = [
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_PART_SELECTION_KEYS = [
+  ["javaLanguage", "language"],
   ["javaBuildTool", "buildTool"],
   ["caching", "caching"],
   ["search", "search"],
@@ -1798,6 +1808,7 @@ function buildProjectConfigBase(
 ): CliDefaultProjectConfigBase {
   const stack = getAdjustedSelection(selection);
   const graphStack = isGraphStackSelection(selection) ? selection : stack;
+  const usesEffectBackend = stack.backend === "effect";
   const frontend = [
     ...toUniqueNonNoneArray(stack.webFrontend),
     ...toUniqueNonNoneArray(stack.nativeFrontend),
@@ -1821,13 +1832,14 @@ function buildProjectConfigBase(
     payments: stack.payments as ProjectConfig["payments"],
     email: stack.email as ProjectConfig["email"],
     fileUpload: stack.fileUpload as ProjectConfig["fileUpload"],
-    effect: stack.backendLibraries as ProjectConfig["effect"],
+    effect: (usesEffectBackend ? "effect-full" : stack.backendLibraries) as ProjectConfig["effect"],
     ai: stack.aiSdk as ProjectConfig["ai"],
     stateManagement: stack.stateManagement as ProjectConfig["stateManagement"],
     forms: stack.forms as ProjectConfig["forms"],
     testing: stack.testing as ProjectConfig["testing"],
     git: stack.git === "true",
     packageManager: stack.packageManager as ProjectConfig["packageManager"],
+    workspaceShape: stack.workspaceShape as ProjectConfig["workspaceShape"],
     versionChannel: stack.versionChannel as ProjectConfig["versionChannel"],
     install,
     dbSetup: stack.dbSetup as ProjectConfig["dbSetup"],
@@ -1844,7 +1856,9 @@ function buildProjectConfigBase(
     shadcnBaseColor: stack.shadcnBaseColor as ProjectConfig["shadcnBaseColor"],
     shadcnFont: stack.shadcnFont as ProjectConfig["shadcnFont"],
     shadcnRadius: stack.shadcnRadius as ProjectConfig["shadcnRadius"],
-    validation: stack.validation as ProjectConfig["validation"],
+    validation: (usesEffectBackend
+      ? "effect-schema"
+      : stack.validation) as ProjectConfig["validation"],
     realtime: stack.realtime as ProjectConfig["realtime"],
     jobQueue: stack.jobQueue as ProjectConfig["jobQueue"],
     animation: stack.animation as ProjectConfig["animation"],
@@ -1906,6 +1920,7 @@ function buildProjectConfigBase(
     goCaching: stack.goCaching as ProjectConfig["goCaching"],
     goConfig: stack.goConfig as ProjectConfig["goConfig"],
     goObservability: stack.goObservability as ProjectConfig["goObservability"],
+    javaLanguage: stack.javaLanguage as ProjectConfig["javaLanguage"],
     javaWebFramework: stack.javaWebFramework as ProjectConfig["javaWebFramework"],
     javaBuildTool: stack.javaBuildTool as ProjectConfig["javaBuildTool"],
     javaOrm: stack.javaOrm as ProjectConfig["javaOrm"],
@@ -1956,10 +1971,14 @@ function buildProjectConfigBase(
 
   const stackParts = getGraphStackParts(graphStack);
   const loweredGraphConfig = stackPartsToLegacyProjectConfigPartial(stackParts);
+  const graphBackend = loweredGraphConfig.backend === "effect" || baseConfig.backend === "effect";
 
   return {
     ...baseConfig,
     ...loweredGraphConfig,
+    ...(graphBackend
+      ? { effect: "effect-full" as const, validation: "effect-schema" as const }
+      : {}),
     projectName,
     relativePath,
     git: stack.git === "true",
@@ -2112,6 +2131,10 @@ function generateTypeScriptCommand(selection: StackSelectionInput, projectName: 
   }
 
   const cliBackend = mapBackendToCli(selection.backend);
+  const effectSelection =
+    selection.backend === "effect" ? "effect-full" : selection.backendLibraries;
+  const validationSelection =
+    selection.backend === "effect" ? "effect-schema" : selection.validation;
   const flags = [
     "--ecosystem typescript",
     `--frontend ${
@@ -2158,16 +2181,17 @@ function generateTypeScriptCommand(selection: StackSelectionInput, projectName: 
     `--vector-db ${selection.vectorDb}`,
     `--file-storage ${selection.fileStorage}`,
     `--cms ${selection.cms}`,
-    `--effect ${selection.backendLibraries}`,
+    `--effect ${effectSelection}`,
     `--ai ${selection.aiSdk}`,
     `--state-management ${selection.stateManagement}`,
     `--forms ${selection.forms}`,
-    `--validation ${selection.validation}`,
+    `--validation ${validationSelection}`,
     `--testing ${selection.testing}`,
     `--animation ${selection.animation}`,
     `--database ${selection.database}`,
     `--orm ${selection.orm}`,
     `--db-setup ${selection.dbSetup}`,
+    `--workspace-shape ${selection.workspaceShape}`,
     `--package-manager ${selection.packageManager}`,
     ...(selection.versionChannel !== "stable"
       ? [`--version-channel ${selection.versionChannel}`]
@@ -2197,6 +2221,7 @@ function generateReactNativeCommand(selection: StackSelectionInput, projectName:
         .join(" ") || "native-bare"
     }`,
     `--auth ${selection.auth}`,
+    `--payments ${selection.payments}`,
     `--mobile-navigation ${selection.mobileNavigation}`,
     `--mobile-ui ${selection.mobileUI}`,
     `--mobile-storage ${selection.mobileStorage}`,
@@ -2310,6 +2335,9 @@ function generateJavaCommand(selection: StackSelectionInput, projectName: string
   const flags: string[] = [
     "--ecosystem java",
     `--java-web-framework ${selection.javaWebFramework}`,
+    // Emit the language flag only for the non-default (Kotlin) variant so the
+    // command for every existing Java selection stays byte-identical.
+    ...(selection.javaLanguage === "kotlin" ? [`--java-language ${selection.javaLanguage}`] : []),
     `--java-build-tool ${selection.javaBuildTool}`,
     `--java-orm ${selection.javaOrm}`,
     `--java-auth ${selection.javaAuth}`,

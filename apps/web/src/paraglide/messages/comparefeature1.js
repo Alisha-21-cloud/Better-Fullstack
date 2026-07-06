@@ -18,11 +18,11 @@ const zh_comparefeature1 = /** @type {(inputs: Comparefeature1Inputs) => Localiz
 };
 
 const ja_comparefeature1 = /** @type {(inputs: Comparefeature1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`特徴`)
+	return /** @type {LocalizedString} */ (`機能`)
 };
 
 const ko_comparefeature1 = /** @type {(inputs: Comparefeature1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`특징`)
+	return /** @type {LocalizedString} */ (`기능`)
 };
 
 const zh_hant1_comparefeature1 = /** @type {(inputs: Comparefeature1Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_comparefeature1 = /** @type {(inputs: Comparefeature1Inputs) => L
 };
 
 const de_comparefeature1 = /** @type {(inputs: Comparefeature1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Besonderheit`)
+	return /** @type {LocalizedString} */ (`Funktion`)
 };
 
 const fr_comparefeature1 = /** @type {(inputs: Comparefeature1Inputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`Fonctionnalité`)
+};
+
+const uk_comparefeature1 = /** @type {(inputs: Comparefeature1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Можливість`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_comparefeature1 = /** @type {(inputs: Comparefeature1Inputs) => Localiz
 * | "Feature" |
 *
 * @param {Comparefeature1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const comparefeature1 = /** @type {((inputs?: Comparefeature1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Comparefeature1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const comparefeature1 = /** @type {((inputs?: Comparefeature1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Comparefeature1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_comparefeature1(inputs)
 	if (locale === "es") return es_comparefeature1(inputs)
@@ -55,6 +59,7 @@ const comparefeature1 = /** @type {((inputs?: Comparefeature1Inputs, options?: {
 	if (locale === "ko") return ko_comparefeature1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_comparefeature1(inputs)
 	if (locale === "de") return de_comparefeature1(inputs)
-	return fr_comparefeature1(inputs)
+	if (locale === "fr") return fr_comparefeature1(inputs)
+	return uk_comparefeature1(inputs)
 });
 export { comparefeature1 as "compareFeature" }

@@ -59,6 +59,7 @@ export const StackPartRoleSchema = z
     "dataFetching",
     "workspaceTooling",
     "examples",
+    "language",
     "buildTool",
     "cli",
     "errorHandling",
@@ -100,6 +101,7 @@ export const BackendSchema = z
     "fastify",
     "elysia",
     "fets",
+    "effect",
     "nestjs",
     "adonisjs",
     "nitro",
@@ -188,6 +190,10 @@ export const VersionChannelSchema = z
   .enum(["stable", "latest", "beta"])
   .describe("Dependency version channel");
 
+export const WorkspaceShapeSchema = z
+  .enum(["monorepo", "single-app"])
+  .describe("Workspace layout: monorepo (apps/* + packages/*) or single-app (flat root app)");
+
 export const DatabaseSetupSchema = z
   .enum([
     "turso",
@@ -224,7 +230,18 @@ export const AuthSchema = z
   .describe("Authentication provider");
 
 export const PaymentsSchema = z
-  .enum(["polar", "stripe", "lemon-squeezy", "paddle", "dodo", "none"])
+  .enum([
+    "revenuecat",
+    "polar",
+    "stripe",
+    "lemon-squeezy",
+    "paddle",
+    "dodo",
+    "creem",
+    "autumn",
+    "commet",
+    "none",
+  ])
   .describe("Payments provider");
 
 export const WebDeploySchema = z
@@ -255,7 +272,7 @@ export const AISchema = z
 export const EffectSchema = z
   .enum(["effect", "effect-full", "none"])
   .describe(
-    "Effect ecosystem (effect-full includes effect/Schema, @effect/platform, @effect/sql)",
+    "Effect services/layers for TypeScript (effect-full includes effect/Schema, @effect/platform, @effect/sql)",
   );
 
 export const StateManagementSchema = z
@@ -322,21 +339,21 @@ export const CMSSchema = z
   .describe("Headless CMS solution");
 
 export const CachingSchema = z
-  .enum(["upstash-redis", "none"])
-  .describe("Caching solution (upstash-redis for serverless Redis)");
+  .enum(["upstash-redis", "redis", "none"])
+  .describe("Caching solution (upstash-redis for serverless Redis, redis for self-hosted Redis)");
 
 export const RateLimitSchema = z
   .enum(["arcjet", "upstash-ratelimit", "none"])
   .describe("Rate limiting and abuse protection");
 
 export const I18nSchema = z
-  .enum(["paraglide", "i18next", "next-intl", "none"])
+  .enum(["paraglide", "i18next", "next-intl", "intlayer", "none"])
   .describe("Internationalization (i18n) library");
 
 export const SearchSchema = z
-  .enum(["meilisearch", "typesense", "elasticsearch", "opensearch", "algolia", "none"])
+  .enum(["meilisearch", "typesense", "elasticsearch", "opensearch", "algolia", "bleve", "none"])
   .describe(
-    "Search engine solution (meilisearch, typesense, elasticsearch, opensearch, or algolia for fast search experiences)",
+    "Search engine solution (meilisearch, typesense, elasticsearch, opensearch, or algolia for fast search experiences; bleve is a Go-native embedded full-text engine)",
   );
 
 export const VectorDbSchema = z
@@ -346,8 +363,8 @@ export const VectorDbSchema = z
   );
 
 export const FileStorageSchema = z
-  .enum(["s3", "r2", "cloudinary", "none"])
-  .describe("File storage solution (AWS S3, Cloudflare R2, or Cloudinary)");
+  .enum(["s3", "r2", "cloudinary", "supabase-storage", "none"])
+  .describe("File storage solution (AWS S3, Cloudflare R2, Cloudinary, or Supabase Storage)");
 
 export const AnimationSchema = z
   .enum(["framer-motion", "gsap", "react-spring", "auto-animate", "lottie", "none"])
@@ -370,8 +387,8 @@ export const FeatureFlagsSchema = z
   .describe("Feature flags provider for A/B testing and feature management");
 
 export const AnalyticsSchema = z
-  .enum(["plausible", "umami", "none"])
-  .describe("Privacy-focused analytics provider");
+  .enum(["plausible", "umami", "posthog", "none"])
+  .describe("Product analytics provider");
 
 export const MobileNavigationSchema = z
   .enum(["expo-router", "react-navigation", "none"])
@@ -403,7 +420,7 @@ export const MobileDeepLinkingSchema = z
 
 // Rust ecosystem schemas
 export const RustWebFrameworkSchema = z
-  .enum(["axum", "actix-web", "rocket", "none"])
+  .enum(["axum", "actix-web", "rocket", "poem", "loco", "none"])
   .describe("Rust web framework");
 
 export const RustFrontendSchema = z
@@ -544,11 +561,11 @@ export const PythonCliSchema = z
 
 // Go ecosystem schemas
 export const GoWebFrameworkSchema = z
-  .enum(["gin", "echo", "fiber", "chi", "none"])
+  .enum(["gin", "echo", "fiber", "chi", "stdlib", "none"])
   .describe("Go web framework");
 
 export const GoOrmSchema = z
-  .enum(["gorm", "sqlc", "ent", "none"])
+  .enum(["gorm", "sqlc", "ent", "bun", "none"])
   .describe("Go ORM/database layer");
 
 export const GoApiSchema = z
@@ -592,8 +609,12 @@ export const GoObservabilitySchema = z
   .describe("Go observability/tracing library");
 
 // Java ecosystem schemas
+export const JavaLanguageSchema = z
+  .enum(["java", "kotlin"])
+  .describe("JVM language variant for the Java ecosystem (java or kotlin)");
+
 export const JavaWebFrameworkSchema = z
-  .enum(["spring-boot", "quarkus", "none"])
+  .enum(["spring-boot", "quarkus", "micronaut", "none"])
   .describe("Java web framework");
 
 export const JavaBuildToolSchema = z.enum(["maven", "gradle", "none"]).describe("Java build tool");
@@ -607,11 +628,11 @@ export const JavaAuthSchema = z
   .describe("Java authentication library");
 
 export const JavaApiSchema = z
-  .enum(["spring-graphql", "none"])
+  .enum(["spring-graphql", "openapi-generator", "grpc", "none"])
   .describe("Java API layer");
 
 export const JavaLoggingSchema = z
-  .enum(["logback", "none"])
+  .enum(["logback", "log4j2", "none"])
   .describe("Java logging configuration");
 
 export const JavaLibrariesSchema = z
@@ -845,7 +866,7 @@ export const DirectoryConflictSchema = z
   .describe("How to handle existing directory conflicts");
 
 export const TemplateSchema = z
-  .enum(["mern", "pern", "t3", "uniwind", "none"])
+  .enum(["mern", "pern", "t3", "saas", "uniwind", "none"])
   .describe("Predefined project template");
 
 export const ProjectNameSchema = z
@@ -882,6 +903,7 @@ export const CreateInputSchema = z.object({
   examples: z.array(ExamplesSchema).optional(),
   git: z.boolean().optional(),
   packageManager: PackageManagerSchema.optional(),
+  workspaceShape: WorkspaceShapeSchema.optional(),
   versionChannel: VersionChannelSchema.optional(),
   install: z.boolean().optional(),
   dbSetup: DatabaseSetupSchema.optional(),
@@ -977,6 +999,7 @@ export const CreateInputSchema = z.object({
   goConfig: GoConfigSchema.optional(),
   goObservability: GoObservabilitySchema.optional(),
   // Java ecosystem options
+  javaLanguage: JavaLanguageSchema.optional(),
   javaWebFramework: JavaWebFrameworkSchema.optional(),
   javaBuildTool: JavaBuildToolSchema.optional(),
   javaOrm: JavaOrmSchema.optional(),
@@ -1033,6 +1056,7 @@ export const AddInputSchema = CreateInputSchema.omit({
   manualDb: true,
 }).extend({
   projectDir: z.string().optional(),
+  acknowledgeArchitectureChange: z.boolean().optional(),
 });
 
 export const CLIInputSchema = CreateInputSchema.extend({
@@ -1055,6 +1079,7 @@ export const ProjectConfigSchema = z.object({
   payments: PaymentsSchema,
   git: z.boolean(),
   packageManager: PackageManagerSchema,
+  workspaceShape: WorkspaceShapeSchema.optional(),
   versionChannel: VersionChannelSchema,
   install: z.boolean(),
   dbSetup: DatabaseSetupSchema,
@@ -1144,6 +1169,7 @@ export const ProjectConfigSchema = z.object({
   goConfig: GoConfigSchema,
   goObservability: GoObservabilitySchema,
   // Java ecosystem options
+  javaLanguage: JavaLanguageSchema.optional(),
   javaWebFramework: JavaWebFrameworkSchema,
   javaBuildTool: JavaBuildToolSchema,
   javaOrm: JavaOrmSchema,
@@ -1211,6 +1237,7 @@ export const BetterTStackConfigSchema = z.object({
   auth: AuthSchema,
   payments: PaymentsSchema,
   packageManager: PackageManagerSchema,
+  workspaceShape: WorkspaceShapeSchema.optional(),
   versionChannel: VersionChannelSchema,
   dbSetup: DatabaseSetupSchema,
   api: APISchema,
@@ -1299,6 +1326,7 @@ export const BetterTStackConfigSchema = z.object({
   goConfig: GoConfigSchema,
   goObservability: GoObservabilitySchema,
   // Java ecosystem options
+  javaLanguage: JavaLanguageSchema.optional(),
   javaWebFramework: JavaWebFrameworkSchema,
   javaBuildTool: JavaBuildToolSchema,
   javaOrm: JavaOrmSchema,
@@ -1382,6 +1410,7 @@ export const FRONTEND_VALUES = FrontendSchema.options;
 export const ADDONS_VALUES = AddonsSchema.options;
 export const EXAMPLES_VALUES = ExamplesSchema.options;
 export const PACKAGE_MANAGER_VALUES = PackageManagerSchema.options;
+export const WORKSPACE_SHAPE_VALUES = WorkspaceShapeSchema.options;
 export const VERSION_CHANNEL_VALUES = VersionChannelSchema.options;
 export const DATABASE_SETUP_VALUES = DatabaseSetupSchema.options;
 export const API_VALUES = APISchema.options;
@@ -1464,6 +1493,7 @@ export const GO_MESSAGE_QUEUE_VALUES = GoMessageQueueSchema.options;
 export const GO_CACHING_VALUES = GoCachingSchema.options;
 export const GO_CONFIG_VALUES = GoConfigSchema.options;
 export const GO_OBSERVABILITY_VALUES = GoObservabilitySchema.options;
+export const JAVA_LANGUAGE_VALUES = JavaLanguageSchema.options;
 export const JAVA_WEB_FRAMEWORK_VALUES = JavaWebFrameworkSchema.options;
 export const JAVA_BUILD_TOOL_VALUES = JavaBuildToolSchema.options;
 export const JAVA_ORM_VALUES = JavaOrmSchema.options;

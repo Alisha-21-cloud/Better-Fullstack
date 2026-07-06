@@ -62,12 +62,29 @@ describe("generateStackCommand parity", () => {
       webFrontend: ["none"],
       nativeFrontend: ["native-bare"],
       mobileNavigation: "expo-router",
+      payments: "revenuecat",
     });
 
     expect(command).toContain("--ecosystem react-native");
     expect(command).toContain("--frontend native-bare");
     expect(command).toContain("--mobile-navigation expo-router");
+    expect(command).toContain("--payments revenuecat");
     expect(command).not.toContain("--backend");
+  });
+
+  it("serializes single-app workspace shape in copied TypeScript commands", () => {
+    const command = generateStackCommand({
+      ...DEFAULT_STACK,
+      workspaceShape: "single-app",
+      webFrontend: ["next"],
+      backend: "self-next",
+      database: "none",
+      orm: "none",
+      auth: "none",
+      api: "none",
+    });
+
+    expect(command).toContain("--workspace-shape single-app");
   });
 
   it("serializes addons from codeQuality, documentation, and appPlatforms", () => {

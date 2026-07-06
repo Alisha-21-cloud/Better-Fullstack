@@ -126,7 +126,7 @@ describe("API Configurations", () => {
       expectError(result, "tRPC API requires React-based frontends");
     });
 
-    const backends = ["hono", "express", "fastify", "elysia"];
+    const backends = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of backends) {
       it(`should work with tRPC + ${backend}`, async () => {
@@ -138,6 +138,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
@@ -304,7 +306,7 @@ describe("API Configurations", () => {
       expectError(result, "ts-rest API requires React-based frontends");
     });
 
-    const backends = ["hono", "express", "fastify", "elysia"];
+    const backends = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of backends) {
       it(`should work with ts-rest + ${backend}`, async () => {
@@ -316,6 +318,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
@@ -503,7 +507,7 @@ describe("API Configurations", () => {
       expectError(result, "garph API requires React-based frontends");
     });
 
-    const backends = ["hono", "express", "fastify", "elysia"];
+    const backends = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of backends) {
       it(`should work with Garph + ${backend}`, async () => {
@@ -515,6 +519,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
@@ -647,7 +653,7 @@ describe("API Configurations", () => {
       });
     }
 
-    const backends = ["hono", "express", "fastify", "elysia"];
+    const backends = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of backends) {
       it(`should work with oRPC + ${backend}`, async () => {
@@ -659,6 +665,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
@@ -1007,7 +1015,7 @@ describe("API Configurations", () => {
   });
 
   describe("Apollo Server API", () => {
-    const supportedBackends: Backend[] = ["hono", "express", "fastify", "elysia"];
+    const supportedBackends: Backend[] = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of supportedBackends) {
       it(`should generate Apollo Server routes for ${backend}`, async () => {
@@ -1020,6 +1028,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
@@ -1038,7 +1048,7 @@ describe("API Configurations", () => {
         expect(apiIndex).toContain('from "@apollo/server"');
         expect(apiIndex).toContain("new ApolloServer");
         expect(apiIndex).toContain("executeHTTPGraphQLRequest");
-        expect(apiIndex).toContain("health: () => \"OK\"");
+        expect(apiIndex).toContain('health: () => "OK"');
         expect(serverIndex).toContain('"/graphql"');
         expect(serverIndex).toContain("executeApolloRequest");
         expect(apiPackage).toContain('"@apollo/server"');
@@ -1094,7 +1104,10 @@ describe("API Configurations", () => {
         expectError: true,
       });
 
-      expectError(result, "Apollo Server currently supports Hono, Express, Fastify, and Elysia backends");
+      expectError(
+        result,
+        "Apollo Server currently supports Hono, Effect, Express, Fastify, and Elysia backends",
+      );
     });
 
     it("should reject Apollo Server for non-React web frontends", async () => {
@@ -1142,7 +1155,7 @@ describe("API Configurations", () => {
   });
 
   describe("OpenAPI API", () => {
-    const supportedBackends: Backend[] = ["hono", "express", "fastify", "elysia"];
+    const supportedBackends: Backend[] = ["hono", "effect", "express", "fastify", "elysia"];
 
     for (const backend of supportedBackends) {
       it(`should generate OpenAPI routes and docs for ${backend}`, async () => {
@@ -1155,6 +1168,8 @@ describe("API Configurations", () => {
           database: "sqlite",
           orm: "drizzle",
           auth: "none",
+          effect: backend === "effect" ? "effect-full" : "none",
+          validation: backend === "effect" ? "effect-schema" : "zod",
           addons: ["none"],
           examples: ["none"],
           dbSetup: "none",
@@ -1211,7 +1226,10 @@ describe("API Configurations", () => {
       });
 
       expectSuccess(result);
-      const openApiJson = await readFile(`${result.projectDir}/packages/api/src/openapi.json`, "utf-8");
+      const openApiJson = await readFile(
+        `${result.projectDir}/packages/api/src/openapi.json`,
+        "utf-8",
+      );
       expect(openApiJson).toContain('"bearerAuth"');
       expect(openApiJson).toContain('"/private"');
     });
@@ -1234,7 +1252,10 @@ describe("API Configurations", () => {
         expectError: true,
       });
 
-      expectError(result, "OpenAPI currently supports Hono, Express, Fastify, and Elysia backends");
+      expectError(
+        result,
+        "OpenAPI currently supports Hono, Effect, Express, Fastify, and Elysia backends",
+      );
     });
   });
 

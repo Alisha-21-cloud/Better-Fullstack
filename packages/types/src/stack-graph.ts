@@ -67,6 +67,7 @@ import {
   JAVA_AUTH_VALUES,
   JAVA_API_VALUES,
   JAVA_LOGGING_VALUES,
+  JAVA_LANGUAGE_VALUES,
   JAVA_BUILD_TOOL_VALUES,
   JAVA_LIBRARIES_VALUES,
   JAVA_ORM_VALUES,
@@ -123,6 +124,7 @@ import {
   ELIXIR_QUALITY_VALUES,
   StackPartRoleSchema,
   STATE_MANAGEMENT_VALUES,
+  TESTING_VALUES,
   UI_LIBRARY_VALUES,
   VALIDATION_VALUES,
   WEB_DEPLOY_VALUES,
@@ -313,8 +315,12 @@ const LEGACY_TYPESCRIPT_BACKEND_SINGLE_CATEGORIES = {
   cms: "cms",
   // Shared web+server categories collapse onto the backend owner (inventory §5 decision 3);
   // without a TypeScript backend they stay flat-only, like the rest of this map.
+  // `testing` (vitest/playwright/jest/cypress) is the shared test-runner choice; owning it
+  // on the backend keeps it in a different scope from the frontend-owned msw/storybook
+  // testing addons, so the two never collide in a single `(owner, role)` scope.
   validation: "validation",
   effect: "effect",
+  testing: "testing",
 } as const satisfies Partial<Record<StackPartRole, keyof ProjectConfig>>;
 
 const LEGACY_TYPESCRIPT_BACKEND_INFRA_CATEGORIES = {
@@ -666,6 +672,7 @@ const GRAPH_PROJECTION_DEFAULT_LEGACY_CATEGORIES = [
   "orm",
   "api",
   "auth",
+  "astroIntegration",
   "rustFrontend",
   ...Object.values(LEGACY_BACKEND_CATEGORY_BY_ECOSYSTEM),
   ...Object.values(LEGACY_CAPABILITY_CATEGORIES_BY_ECOSYSTEM).flatMap((categories) =>
@@ -798,6 +805,9 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(CMS_VALUES, "cms", "typescript", "cms"),
   ...defineTools(VALIDATION_VALUES, "validation", "typescript", "validation"),
   ...defineTools(EFFECT_VALUES, "effect", "typescript", "effect"),
+  // TypeScript test-runner framework (distinct toolIds from the msw/storybook testing
+  // addons registered above), backend-owned so it never shares a scope with them.
+  ...defineTools(TESTING_VALUES, "testing", "typescript", "testing"),
   ...defineTools(AUTH_VALUES, "auth", "react-native", "auth"),
   ...defineTools(MOBILE_NAVIGATION_VALUES, "navigation", "react-native", "mobileNavigation"),
   ...defineTools(MOBILE_UI_VALUES, "ui", "react-native", "mobileUI"),
@@ -863,10 +873,11 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(GO_MESSAGE_QUEUE_VALUES, "jobQueue", "go", "goMessageQueue"),
   ...defineTools(GO_CACHING_VALUES, "caching", "go", "goCaching"),
   ...defineTools(["upstash-redis"], "caching", "go", "caching"),
-  ...defineTools(["meilisearch"], "search", "go", "search"),
+  ...defineTools(["meilisearch", "bleve"], "search", "go", "search"),
   ...defineTools(GO_CONFIG_VALUES, "config", "go", "goConfig"),
   ...defineTools(GO_OBSERVABILITY_VALUES, "observability", "go", "goObservability"),
   ...defineTools(JAVA_WEB_FRAMEWORK_VALUES, "backend", "java", "javaWebFramework"),
+  ...defineTools(JAVA_LANGUAGE_VALUES, "language", "java", "javaLanguage"),
   ...defineTools(JAVA_BUILD_TOOL_VALUES, "buildTool", "java", "javaBuildTool"),
   ...defineTools(JAVA_ORM_VALUES, "orm", "java", "javaOrm"),
   ...defineTools(JAVA_AUTH_VALUES, "auth", "java", "javaAuth"),
@@ -1203,6 +1214,28 @@ function createTypeScriptBackendCompatibilityIssue(
 ): StackGraphIssue | undefined {
   if (part.ecosystem !== "typescript" || context.ownerRole !== "backend") return undefined;
 
+  if (context.ownerToolId === "effect") {
+    if (part.role === "effect" && part.toolId !== "effect-full") {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_OWNER_TOOL",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Effect backend requires Effect Platform + SQL services.",
+      });
+    }
+
+    if (part.role === "validation" && part.toolId !== "effect-schema") {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_OWNER_TOOL",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Effect backend requires Effect Schema validation.",
+      });
+    }
+  }
+
   if (part.role === "payments" && part.toolId === "polar") {
     const authTool = context.siblingToolIdsByRole?.auth;
     if (authTool !== "better-auth" && authTool !== "better-auth-organizations") {
@@ -1343,7 +1376,14 @@ function createSharedBackendServiceCompatibilityIssue(
     return undefined;
   }
 
-  if (part.toolId !== rule.allowedToolId) {
+  // Some non-TypeScript ecosystems have native search engines beyond
+  // Meilisearch: Bleve (embedded) for Go and Elasticsearch for Python.
+  const isNativeEcosystemSearch =
+    part.role === "search" &&
+    ((part.ecosystem === "go" && part.toolId === "bleve") ||
+      (part.ecosystem === "python" && part.toolId === "elasticsearch"));
+
+  if (part.toolId !== rule.allowedToolId && !isNativeEcosystemSearch) {
     return createStackGraphIssue({
       code: "INCOMPATIBLE_ECOSYSTEM_TOOL",
       partId: part.id,
@@ -1740,6 +1780,10 @@ function createAddonCompatibilityIssue(
       const title = part.toolId === "devcontainer" ? "DevContainer" : "Docker Compose";
       const databaseTool = context.primaryToolIdsByRole?.database;
       const primaryEcosystem = backendEcosystem ?? frontendEcosystem ?? context.settings?.ecosystem;
+      const selectedEcosystems = [backendEcosystem, frontendEcosystem, context.settings?.ecosystem];
+      const hasCompatibleEcosystem = selectedEcosystems.some(
+        (ecosystem) => ecosystem && DOCKER_COMPOSE_COMPATIBLE_ECOSYSTEMS.has(ecosystem),
+      );
 
       if (backendTool === "convex") {
         return createStackGraphIssue({
@@ -1759,7 +1803,7 @@ function createAddonCompatibilityIssue(
           message: `${title} is not compatible with Cloudflare Workers runtime.`,
         });
       }
-      if (!primaryEcosystem || !DOCKER_COMPOSE_COMPATIBLE_ECOSYSTEMS.has(primaryEcosystem)) {
+      if (!hasCompatibleEcosystem) {
         return createStackGraphIssue({
           code: "INCOMPATIBLE_GRAPH_SELECTION",
           partId: part.id,
@@ -2538,9 +2582,10 @@ function addLegacyPart(
   toolId: string | undefined,
   source: StackPartSource,
   ownerPartId?: string,
+  settings?: Record<string, unknown>,
 ) {
   if (!toolId || toolId === "none") return undefined;
-  const part = createStackPart({ role, ecosystem, toolId, source, ownerPartId });
+  const part = createStackPart({ role, ecosystem, toolId, source, ownerPartId, settings });
   parts.push(part);
   return part;
 }
@@ -2602,6 +2647,16 @@ export function legacyProjectConfigToStackParts(
   const webFrontend = webFrontends[0];
   const nativeFrontend = nativeFrontends[0];
   const frontendPart = addLegacyPart(parts, "frontend", "typescript", webFrontend, source);
+  // The Astro sub-framework choice is a settings-shaped detail carried on the
+  // Astro frontend part itself (rather than a scoped capability part), so a pure
+  // graph round-trips the integration without a flat-field side channel.
+  if (
+    frontendPart?.toolId === "astro" &&
+    config.astroIntegration &&
+    config.astroIntegration !== "none"
+  ) {
+    frontendPart.settings = { astroIntegration: config.astroIntegration };
+  }
   const mobilePart = addLegacyPart(parts, "mobile", "react-native", nativeFrontend, source);
 
   let backendPart: StackPart | undefined;
@@ -2863,6 +2918,10 @@ export function stackPartsToLegacyProjectConfigPartial(
           ...(config.frontend ?? []),
           part.toolId as ProjectConfig["frontend"][number],
         ];
+        const astroIntegration = part.settings?.astroIntegration;
+        if (typeof astroIntegration === "string") {
+          config.astroIntegration = astroIntegration as ProjectConfig["astroIntegration"];
+        }
       } else if (part.role === "frontend" && part.ecosystem === "rust") {
         config.rustFrontend = part.toolId as ProjectConfig["rustFrontend"];
       } else if (part.role === "mobile") {
@@ -2896,6 +2955,11 @@ export function stackPartsToLegacyProjectConfigPartial(
       (config as Record<string, unknown>)[legacyCategory] = part.toolId;
       continue;
     }
+  }
+
+  if (config.backend === "effect") {
+    config.effect = "effect-full";
+    config.validation = "effect-schema";
   }
 
   return config;
@@ -3058,6 +3122,18 @@ export function stackGraphToLegacyProjectConfigForEcosystem(
   projectLegacyCategoryFromPart(projected, auth, ecosystem, parts);
   if (ecosystem === "go" && config.auth === "go-better-auth") {
     projected.auth = config.auth;
+  }
+
+  // astroIntegration is reset to "none" by the default-category loop above; prefer
+  // the graph-owned value carried on the Astro frontend part's settings, falling
+  // back to the flat field so graph-mode specs (which cannot express the setting)
+  // keep projecting the same value the spread used to carry.
+  const astroIntegrationSetting =
+    frontend?.toolId === "astro" ? frontend.settings?.astroIntegration : undefined;
+  if (typeof astroIntegrationSetting === "string") {
+    projected.astroIntegration = astroIntegrationSetting as ProjectConfig["astroIntegration"];
+  } else if (config.astroIntegration !== undefined) {
+    projected.astroIntegration = config.astroIntegration;
   }
 
   const backendScopedPartRoles = new Set<StackPartRole>(["database", "orm", "api", "auth"]);

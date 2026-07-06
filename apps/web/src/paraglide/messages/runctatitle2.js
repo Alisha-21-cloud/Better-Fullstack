@@ -10,7 +10,7 @@ const en_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedStri
 };
 
 const es_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Mira cómo se compara tu carrera`)
+	return /** @type {LocalizedString} */ (`Mira cómo se compara tu ejecución`)
 };
 
 const zh_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedString} */ () => {
@@ -18,7 +18,7 @@ const zh_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedStri
 };
 
 const ja_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`あなたのランニングがどのくらい優れているか見てみましょう`)
+	return /** @type {LocalizedString} */ (`あなたの実行結果がどれだけ通用するか見てみましょう`)
 };
 
 const ko_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => Localiz
 };
 
 const de_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Vergleiche deine Leistung mit der anderer Läufer`)
+	return /** @type {LocalizedString} */ (`Sehen Sie, wie Ihr Durchlauf abschneidet`)
 };
 
 const fr_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Comparez vos performances à celles des autres coureurs.`)
+	return /** @type {LocalizedString} */ (`Voyez comment votre exécution se compare.`)
+};
+
+const uk_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Подивіться, як виглядає ваш прогін`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_runctatitle2 = /** @type {(inputs: Runctatitle2Inputs) => LocalizedStri
 * | "See how your run stacks up" |
 *
 * @param {Runctatitle2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runctatitle2 = /** @type {((inputs?: Runctatitle2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runctatitle2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runctatitle2 = /** @type {((inputs?: Runctatitle2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runctatitle2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runctatitle2(inputs)
 	if (locale === "es") return es_runctatitle2(inputs)
@@ -55,6 +59,7 @@ const runctatitle2 = /** @type {((inputs?: Runctatitle2Inputs, options?: { local
 	if (locale === "ko") return ko_runctatitle2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runctatitle2(inputs)
 	if (locale === "de") return de_runctatitle2(inputs)
-	return fr_runctatitle2(inputs)
+	if (locale === "fr") return fr_runctatitle2(inputs)
+	return uk_runctatitle2(inputs)
 });
 export { runctatitle2 as "runCtaTitle" }

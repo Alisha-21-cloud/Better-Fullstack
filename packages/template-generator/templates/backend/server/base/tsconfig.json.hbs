@@ -6,7 +6,7 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "jsx": "react-jsx"{{#if (eq backend "hono")}},
+    "jsx": "react-jsx"{{#if (or (eq backend "hono") (eq backend "effect"))}},
     "jsxImportSource": "hono/jsx"{{/if}}{{#if (eq backend "nestjs")}},
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true{{/if}}

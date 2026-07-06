@@ -18,11 +18,11 @@ const zh_builderpreviewshowwarnings3 = /** @type {(inputs: Builderpreviewshowwar
 };
 
 const ja_builderpreviewshowwarnings3 = /** @type {(inputs: Builderpreviewshowwarnings3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`見せる`)
+	return /** @type {LocalizedString} */ (`表示`)
 };
 
 const ko_builderpreviewshowwarnings3 = /** @type {(inputs: Builderpreviewshowwarnings3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`보여주다`)
+	return /** @type {LocalizedString} */ (`보기`)
 };
 
 const zh_hant1_builderpreviewshowwarnings3 = /** @type {(inputs: Builderpreviewshowwarnings3Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_builderpreviewshowwarnings3 = /** @type {(inputs: Builderpreviewshowwar
 	return /** @type {LocalizedString} */ (`montrer`)
 };
 
+const uk_builderpreviewshowwarnings3 = /** @type {(inputs: Builderpreviewshowwarnings3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`показати`)
+};
+
 /**
 * | output |
 * | --- |
 * | "show" |
 *
 * @param {Builderpreviewshowwarnings3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const builderpreviewshowwarnings3 = /** @type {((inputs?: Builderpreviewshowwarnings3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Builderpreviewshowwarnings3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const builderpreviewshowwarnings3 = /** @type {((inputs?: Builderpreviewshowwarnings3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Builderpreviewshowwarnings3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_builderpreviewshowwarnings3(inputs)
 	if (locale === "es") return es_builderpreviewshowwarnings3(inputs)
@@ -55,6 +59,7 @@ const builderpreviewshowwarnings3 = /** @type {((inputs?: Builderpreviewshowwarn
 	if (locale === "ko") return ko_builderpreviewshowwarnings3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_builderpreviewshowwarnings3(inputs)
 	if (locale === "de") return de_builderpreviewshowwarnings3(inputs)
-	return fr_builderpreviewshowwarnings3(inputs)
+	if (locale === "fr") return fr_builderpreviewshowwarnings3(inputs)
+	return uk_builderpreviewshowwarnings3(inputs)
 });
 export { builderpreviewshowwarnings3 as "builderPreviewShowWarnings" }

@@ -73,6 +73,7 @@ import {
   GoWebFrameworkSchema,
   JavaAuthSchema,
   JavaApiSchema,
+  JavaLanguageSchema,
   JavaLoggingSchema,
   JavaBuildToolSchema,
   JavaLibrariesSchema,
@@ -85,6 +86,7 @@ import {
   ObservabilitySchema,
   ORMSchema,
   PackageManagerSchema,
+  WorkspaceShapeSchema,
   PaymentsSchema,
   ProjectNameSchema,
   PythonAiSchema,
@@ -226,6 +228,9 @@ export const CreateCommandOptionsSchema = z.object({
   examples: z.array(ExamplesSchema).optional(),
   git: z.boolean().optional(),
   packageManager: PackageManagerSchema.optional(),
+  workspaceShape: WorkspaceShapeSchema.optional().describe(
+    "Workspace layout: monorepo (default) or single-app (flat root app; only for a thin self app)",
+  ),
   install: z.boolean().optional(),
   versionChannel: VersionChannelSchema.optional().describe(
     "Dependency version channel (stable, latest, beta)",
@@ -335,6 +340,7 @@ export const CreateCommandOptionsSchema = z.object({
   javaWebFramework: JavaWebFrameworkSchema.optional().describe(
     "Java web framework (spring-boot, quarkus, none)",
   ),
+  javaLanguage: JavaLanguageSchema.optional().describe("JVM language (java, kotlin)"),
   javaBuildTool: JavaBuildToolSchema.optional().describe("Java build tool (maven, gradle, none)"),
   javaOrm: JavaOrmSchema.optional().describe("Java ORM/database (spring-data-jpa)"),
   javaAuth: JavaAuthSchema.optional().describe("Java auth (spring-security)"),

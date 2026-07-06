@@ -26,6 +26,7 @@ Task planning documents are organized by state:
 - `docs/plans/planned/new-ecosystems.md` - future language ecosystem watch list
 - `docs/plans/planned/elixir-ecosystem.md` - remaining Elixir/Phoenix follow-ups
 - `docs/plans/planned/scaffbench-2-readiness.md` - ScaffBench 2 suite, run commands, scoring signals, and output contract
+- `docs/plans/planned/scaffbench-public-positioning.md` - public ScaffBench framing around agent fullstack correctness
 - `docs/plans/planned/competitive-landscape-2026-06-12.md` - historical June 2026 competitive snapshot; verify before using for marketing
 - `docs/plans/planned/stack-graph-phase-0-library-inventory.md` - reference inventory for remaining stack-graph authority cleanup
 

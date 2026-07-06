@@ -30,11 +30,15 @@ const zh_hant1_buildersavecurrentstacktooltip4 = /** @type {(inputs: Buildersave
 };
 
 const de_buildersavecurrentstacktooltip4 = /** @type {(inputs: Buildersavecurrentstacktooltip4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Speichern Sie den aktuellen Stapel als benannte Voreinstellung`)
+	return /** @type {LocalizedString} */ (`Speichern Sie den aktuellen Stack als benannte Voreinstellung`)
 };
 
 const fr_buildersavecurrentstacktooltip4 = /** @type {(inputs: Buildersavecurrentstacktooltip4Inputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`Enregistrez la pile actuelle en tant que préréglage nommé`)
+};
+
+const uk_buildersavecurrentstacktooltip4 = /** @type {(inputs: Buildersavecurrentstacktooltip4Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Збережіть поточний стек як іменований пресет`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_buildersavecurrentstacktooltip4 = /** @type {(inputs: Buildersavecurren
 * | "Save the current stack as a named preset" |
 *
 * @param {Buildersavecurrentstacktooltip4Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const buildersavecurrentstacktooltip4 = /** @type {((inputs?: Buildersavecurrentstacktooltip4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Buildersavecurrentstacktooltip4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const buildersavecurrentstacktooltip4 = /** @type {((inputs?: Buildersavecurrentstacktooltip4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Buildersavecurrentstacktooltip4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_buildersavecurrentstacktooltip4(inputs)
 	if (locale === "es") return es_buildersavecurrentstacktooltip4(inputs)
@@ -55,6 +59,7 @@ const buildersavecurrentstacktooltip4 = /** @type {((inputs?: Buildersavecurrent
 	if (locale === "ko") return ko_buildersavecurrentstacktooltip4(inputs)
 	if (locale === "zh-Hant") return zh_hant1_buildersavecurrentstacktooltip4(inputs)
 	if (locale === "de") return de_buildersavecurrentstacktooltip4(inputs)
-	return fr_buildersavecurrentstacktooltip4(inputs)
+	if (locale === "fr") return fr_buildersavecurrentstacktooltip4(inputs)
+	return uk_buildersavecurrentstacktooltip4(inputs)
 });
 export { buildersavecurrentstacktooltip4 as "builderSaveCurrentStackTooltip" }

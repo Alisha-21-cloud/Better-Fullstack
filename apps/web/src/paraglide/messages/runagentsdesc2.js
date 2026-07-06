@@ -10,11 +10,11 @@ const en_runagentsdesc2 = /** @type {(inputs: Runagentsdesc2Inputs) => Localized
 };
 
 const es_runagentsdesc2 = /** @type {(inputs: Runagentsdesc2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`El proveedor se deduce del ID del modelo, por lo que un solo indicador selecciona tanto el modelo como la interfaz de línea de comandos (CLI) que lo controla.`)
+	return /** @type {LocalizedString} */ (`El proveedor se infiere del id del modelo, así que un solo flag selecciona tanto el modelo como la CLI que lo controla.`)
 };
 
 const zh_runagentsdesc2 = /** @type {(inputs: Runagentsdesc2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`提供程序是从模型 ID 推断出来的，因此一个标志既可以选择模型，也可以选择驱动该模型的 CLI。`)
+	return /** @type {LocalizedString} */ (`提供商由模型 ID 推断得出，因此一个 flag 会同时选定模型和驱动它的 CLI。`)
 };
 
 const ja_runagentsdesc2 = /** @type {(inputs: Runagentsdesc2Inputs) => LocalizedString} */ () => {
@@ -26,7 +26,7 @@ const ko_runagentsdesc2 = /** @type {(inputs: Runagentsdesc2Inputs) => Localized
 };
 
 const zh_hant1_runagentsdesc2 = /** @type {(inputs: Runagentsdesc2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`提供程序是從模型 ID 推斷出來的，因此一個標誌既可以選擇模型，也可以選擇驅動該模型的 CLI。`)
+	return /** @type {LocalizedString} */ (`提供者由模型 ID 推斷得出，因此一個旗標就能同時選定模型與驅動它的 CLI。`)
 };
 
 const de_runagentsdesc2 = /** @type {(inputs: Runagentsdesc2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_runagentsdesc2 = /** @type {(inputs: Runagentsdesc2Inputs) => Localized
 	return /** @type {LocalizedString} */ (`Le fournisseur est déduit de l'identifiant du modèle ; un seul indicateur sélectionne donc à la fois le modèle et l'interface de ligne de commande qui le pilote.`)
 };
 
+const uk_runagentsdesc2 = /** @type {(inputs: Runagentsdesc2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Постачальник визначається за ідентифікатором моделі, тому один прапор вибирає як модель, так і CLI, який нею керує.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "The provider is inferred from the model id, so one flag picks both the model and the CLI that drives it." |
 *
 * @param {Runagentsdesc2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runagentsdesc2 = /** @type {((inputs?: Runagentsdesc2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runagentsdesc2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runagentsdesc2 = /** @type {((inputs?: Runagentsdesc2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runagentsdesc2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runagentsdesc2(inputs)
 	if (locale === "es") return es_runagentsdesc2(inputs)
@@ -55,6 +59,7 @@ const runagentsdesc2 = /** @type {((inputs?: Runagentsdesc2Inputs, options?: { l
 	if (locale === "ko") return ko_runagentsdesc2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runagentsdesc2(inputs)
 	if (locale === "de") return de_runagentsdesc2(inputs)
-	return fr_runagentsdesc2(inputs)
+	if (locale === "fr") return fr_runagentsdesc2(inputs)
+	return uk_runagentsdesc2(inputs)
 });
 export { runagentsdesc2 as "runAgentsDesc" }

@@ -26,7 +26,7 @@ const ko_savedtitle1 = /** @type {(inputs: Savedtitle1Inputs) => LocalizedString
 };
 
 const zh_hant1_savedtitle1 = /** @type {(inputs: Savedtitle1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`已儲存項目和預設`)
+	return /** @type {LocalizedString} */ (`已儲存的專案和預設`)
 };
 
 const de_savedtitle1 = /** @type {(inputs: Savedtitle1Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_savedtitle1 = /** @type {(inputs: Savedtitle1Inputs) => LocalizedString
 	return /** @type {LocalizedString} */ (`Projets et préréglages enregistrés`)
 };
 
+const uk_savedtitle1 = /** @type {(inputs: Savedtitle1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Збережені проєкти та пресети`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Saved Projects & Presets" |
 *
 * @param {Savedtitle1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const savedtitle1 = /** @type {((inputs?: Savedtitle1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Savedtitle1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const savedtitle1 = /** @type {((inputs?: Savedtitle1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Savedtitle1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_savedtitle1(inputs)
 	if (locale === "es") return es_savedtitle1(inputs)
@@ -55,6 +59,7 @@ const savedtitle1 = /** @type {((inputs?: Savedtitle1Inputs, options?: { locale?
 	if (locale === "ko") return ko_savedtitle1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_savedtitle1(inputs)
 	if (locale === "de") return de_savedtitle1(inputs)
-	return fr_savedtitle1(inputs)
+	if (locale === "fr") return fr_savedtitle1(inputs)
+	return uk_savedtitle1(inputs)
 });
 export { savedtitle1 as "savedTitle" }

@@ -14,7 +14,7 @@ const es_runheroeyebrow2 = /** @type {(inputs: Runheroeyebrow2Inputs) => Localiz
 };
 
 const zh_runheroeyebrow2 = /** @type {(inputs: Runheroeyebrow2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`重现此问题`)
+	return /** @type {LocalizedString} */ (`亲自重现`)
 };
 
 const ja_runheroeyebrow2 = /** @type {(inputs: Runheroeyebrow2Inputs) => LocalizedString} */ () => {
@@ -26,7 +26,7 @@ const ko_runheroeyebrow2 = /** @type {(inputs: Runheroeyebrow2Inputs) => Localiz
 };
 
 const zh_hant1_runheroeyebrow2 = /** @type {(inputs: Runheroeyebrow2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`重現此問題`)
+	return /** @type {LocalizedString} */ (`自行重現`)
 };
 
 const de_runheroeyebrow2 = /** @type {(inputs: Runheroeyebrow2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_runheroeyebrow2 = /** @type {(inputs: Runheroeyebrow2Inputs) => Localiz
 	return /** @type {LocalizedString} */ (`Reproduisez-le`)
 };
 
+const uk_runheroeyebrow2 = /** @type {(inputs: Runheroeyebrow2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Відтворіть самі`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Reproduce it" |
 *
 * @param {Runheroeyebrow2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runheroeyebrow2 = /** @type {((inputs?: Runheroeyebrow2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runheroeyebrow2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runheroeyebrow2 = /** @type {((inputs?: Runheroeyebrow2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runheroeyebrow2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runheroeyebrow2(inputs)
 	if (locale === "es") return es_runheroeyebrow2(inputs)
@@ -55,6 +59,7 @@ const runheroeyebrow2 = /** @type {((inputs?: Runheroeyebrow2Inputs, options?: {
 	if (locale === "ko") return ko_runheroeyebrow2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runheroeyebrow2(inputs)
 	if (locale === "de") return de_runheroeyebrow2(inputs)
-	return fr_runheroeyebrow2(inputs)
+	if (locale === "fr") return fr_runheroeyebrow2(inputs)
+	return uk_runheroeyebrow2(inputs)
 });
 export { runheroeyebrow2 as "runHeroEyebrow" }

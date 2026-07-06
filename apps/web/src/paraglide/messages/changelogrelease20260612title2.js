@@ -22,7 +22,7 @@ const ja_changelogrelease20260612title2 = /** @type {(inputs: Changelogrelease20
 };
 
 const ko_changelogrelease20260612title2 = /** @type {(inputs: Changelogrelease20260612title2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`에이전트 벤치마크, .NET 에코시스템 및 42% 더 가벼운 설치`)
+	return /** @type {LocalizedString} */ (`에이전트 벤치마크, .NET 생태계 및 42% 더 가벼운 설치`)
 };
 
 const zh_hant1_changelogrelease20260612title2 = /** @type {(inputs: Changelogrelease20260612title2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_changelogrelease20260612title2 = /** @type {(inputs: Changelogrelease20
 	return /** @type {LocalizedString} */ (`Benchmark d'agent, écosystème .NET et installation 42 % plus légère`)
 };
 
+const uk_changelogrelease20260612title2 = /** @type {(inputs: Changelogrelease20260612title2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Бенчмарк агентів, екосистема .NET і встановлення на 42% легше`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Agent benchmark, .NET ecosystem, and a 42% lighter install" |
 *
 * @param {Changelogrelease20260612title2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const changelogrelease20260612title2 = /** @type {((inputs?: Changelogrelease20260612title2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Changelogrelease20260612title2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const changelogrelease20260612title2 = /** @type {((inputs?: Changelogrelease20260612title2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Changelogrelease20260612title2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_changelogrelease20260612title2(inputs)
 	if (locale === "es") return es_changelogrelease20260612title2(inputs)
@@ -55,6 +59,7 @@ const changelogrelease20260612title2 = /** @type {((inputs?: Changelogrelease202
 	if (locale === "ko") return ko_changelogrelease20260612title2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_changelogrelease20260612title2(inputs)
 	if (locale === "de") return de_changelogrelease20260612title2(inputs)
-	return fr_changelogrelease20260612title2(inputs)
+	if (locale === "fr") return fr_changelogrelease20260612title2(inputs)
+	return uk_changelogrelease20260612title2(inputs)
 });
 export { changelogrelease20260612title2 as "changelogRelease20260612Title" }

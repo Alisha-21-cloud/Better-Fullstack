@@ -18,11 +18,11 @@ const zh_homeherodescription2 = /** @type {(inputs: Homeherodescription2Inputs) 
 };
 
 const ja_homeherodescription2 = /** @type {(inputs: Homeherodescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`CLI は、7 つの言語エコシステムにわたって実稼働対応のフルスタック アプリを足場にします。スタック (フロントエンド、データベース、認証、支払い、AI) を選択し、コマンドを 1 つ実行します。`)
+	return /** @type {LocalizedString} */ (`7 つの言語エコシステムにわたって、実稼働対応のフルスタックアプリをスキャフォールドする CLI です。スタック (フロントエンド、データベース、認証、支払い、AI) を選んで、コマンドを 1 つ実行するだけ。`)
 };
 
 const ko_homeherodescription2 = /** @type {(inputs: Homeherodescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`7개 언어 생태계에 걸쳐 프로덕션 지원 풀스택 앱을 스캐폴드하는 CLI입니다. 프런트엔드, 데이터베이스, 인증, 결제, AI 등 스택을 선택하고 명령 하나를 실행하세요.`)
+	return /** @type {LocalizedString} */ (`7개 언어 생태계에 걸쳐 프로덕션 준비가 완료된 풀스택 앱을 스캐폴드하는 CLI입니다. 프런트엔드, 데이터베이스, 인증, 결제, AI 등 스택을 선택하고 명령 하나를 실행하세요.`)
 };
 
 const zh_hant1_homeherodescription2 = /** @type {(inputs: Homeherodescription2Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_homeherodescription2 = /** @type {(inputs: Homeherodescription2Inputs) 
 };
 
 const fr_homeherodescription2 = /** @type {(inputs: Homeherodescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Un CLI qui héberge des applications fullstack prêtes pour la production dans sept écosystèmes linguistiques. Choisissez votre pile – frontend, base de données, authentification, paiements, AI – et exécutez une commande.`)
+	return /** @type {LocalizedString} */ (`Un CLI qui échafaude des applications fullstack prêtes pour la production dans sept écosystèmes de langages. Choisissez votre pile – frontend, base de données, authentification, paiements, AI – et exécutez une commande.`)
+};
+
+const uk_homeherodescription2 = /** @type {(inputs: Homeherodescription2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`CLI, який генерує готові до продакшену фулстек-застосунки у семи мовних екосистемах. Оберіть стек — фронтенд, базу даних, автентифікацію, платежі, ШІ — і запустіть одну команду.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_homeherodescription2 = /** @type {(inputs: Homeherodescription2Inputs) 
 * | "A CLI that scaffolds production-ready fullstack apps across seven language ecosystems. Pick your stack — frontend, database, auth, payments, AI — and run one..." |
 *
 * @param {Homeherodescription2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const homeherodescription2 = /** @type {((inputs?: Homeherodescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homeherodescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const homeherodescription2 = /** @type {((inputs?: Homeherodescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homeherodescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_homeherodescription2(inputs)
 	if (locale === "es") return es_homeherodescription2(inputs)
@@ -55,6 +59,7 @@ const homeherodescription2 = /** @type {((inputs?: Homeherodescription2Inputs, o
 	if (locale === "ko") return ko_homeherodescription2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_homeherodescription2(inputs)
 	if (locale === "de") return de_homeherodescription2(inputs)
-	return fr_homeherodescription2(inputs)
+	if (locale === "fr") return fr_homeherodescription2(inputs)
+	return uk_homeherodescription2(inputs)
 });
 export { homeherodescription2 as "homeHeroDescription" }

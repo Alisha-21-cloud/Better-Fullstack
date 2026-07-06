@@ -12,14 +12,15 @@ export async function processFileStorageTemplates(
   if (!config.fileStorage || config.fileStorage === "none") return;
   if (config.backend === "convex") return;
   if (config.backend === "none") return;
-  if (config.backend === "self") return;
+
+  const targetPath = config.backend === "self" ? "apps/web" : "apps/server";
 
   // Process server-side file storage templates
   processTemplatesFromPrefix(
     vfs,
     templates,
     `file-storage/${config.fileStorage}/server/base`,
-    "apps/server",
+    targetPath,
     config,
   );
 }

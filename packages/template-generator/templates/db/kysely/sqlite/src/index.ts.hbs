@@ -1,7 +1,7 @@
 import { env } from "@{{projectName}}/env/server";
 import { Kysely, SqliteDialect } from "kysely";
 import Database from "better-sqlite3";
-import type { Database as DB } from "./schema";
+import type { Database as DB } from "./schema/index.js";
 
 const dialect = new SqliteDialect({
 	database: new Database(env.DATABASE_URL.replace("file:", "")),

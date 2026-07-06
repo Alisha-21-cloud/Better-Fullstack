@@ -264,6 +264,16 @@ describe("CLI prompts vs schemas parity", () => {
     expect(goResolution.options.map((option) => option.value)).toContain("go-better-auth");
   });
 
+  it("offers RevenueCat payments for backendless native stacks", () => {
+    const resolution = PROMPT_RESOLVER_REGISTRY.payments.resolve({
+      backend: "none",
+      frontends: ["native-bare"],
+    });
+
+    expect(resolution.shouldPrompt).toBe(true);
+    expect(resolution.options.map((option) => option.value)).toEqual(["revenuecat", "none"]);
+  });
+
   it("auto-resolves shared service prompts for ecosystems that do not use them", () => {
     for (const prompt of ["email", "observability", "caching"] as const) {
       const reactNativeResolution = PROMPT_RESOLVER_REGISTRY[prompt].resolve({

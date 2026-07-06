@@ -9,23 +9,23 @@ export async function getEffectChoice(effect?: Effect) {
   const effectOptions = [
     {
       value: "effect" as const,
-      label: "Effect (core)",
-      hint: "Powerful effect system for TypeScript",
+      label: "Effect Core",
+      hint: "Add Effect services and layers to the selected stack",
     },
     {
       value: "effect-full" as const,
-      label: "Effect Full",
-      hint: "Full Effect ecosystem with schema validation, platform abstractions, and SQL",
+      label: "Effect Platform + SQL",
+      hint: "Core plus Platform, browser/server adapters, SQL, and Vitest integration",
     },
     {
       value: "none" as const,
       label: "None",
-      hint: "No Effect ecosystem",
+      hint: "No additional Effect services",
     },
   ];
 
   const response = await navigableSelect<Effect>({
-    message: "Select Effect ecosystem",
+    message: "Select Effect services",
     options: effectOptions,
     initialValue: "none",
   });

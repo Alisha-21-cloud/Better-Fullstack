@@ -22,7 +22,7 @@ const ja_changelogrelease20260612highlightstorybook3 = /** @type {(inputs: Chang
 };
 
 const ko_changelogrelease20260612highlightstorybook3 = /** @type {(inputs: Changelogrelease20260612highlightstorybook3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Next.js 프로젝트의 Storybook 스캐폴드를 수정했습니다. 이제 프레임워크 감지가 다중 프런트엔드 스택과 렌더러 패키지에서 가져온 스토리 유형을 처리하므로 앱 유형 확인 및 빌드가 생성됩니다.`)
+	return /** @type {LocalizedString} */ (`Next.js 프로젝트의 Storybook 스캐폴드를 수정했습니다. 이제 프레임워크 감지가 다중 프런트엔드 스택을 처리하고 스토리 타입을 렌더러 패키지에서 가져오므로, 생성된 앱이 타입 검사를 통과하고 빌드됩니다.`)
 };
 
 const zh_hant1_changelogrelease20260612highlightstorybook3 = /** @type {(inputs: Changelogrelease20260612highlightstorybook3Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_changelogrelease20260612highlightstorybook3 = /** @type {(inputs: Chang
 	return /** @type {LocalizedString} */ (`Correction des échafaudages Storybook sur les projets Next.js : la détection du framework gère désormais les piles multi-frontend et l'importation des types d'histoires à partir du package de rendu, de sorte que les applications générées vérifient et construisent.`)
 };
 
+const uk_changelogrelease20260612highlightstorybook3 = /** @type {(inputs: Changelogrelease20260612highlightstorybook3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Виправили Storybook-скафолди в Next.js-проєктах: визначення фреймворку тепер підтримує стеки з кількома фронтендами, а типи story імпортуються з renderer-пакета, тож згенеровані застосунки проходять typecheck і build.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Fixed Storybook scaffolds on Next.js projects: framework detection now handles multi-frontend stacks and story types import from the renderer package, so gen..." |
 *
 * @param {Changelogrelease20260612highlightstorybook3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const changelogrelease20260612highlightstorybook3 = /** @type {((inputs?: Changelogrelease20260612highlightstorybook3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Changelogrelease20260612highlightstorybook3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const changelogrelease20260612highlightstorybook3 = /** @type {((inputs?: Changelogrelease20260612highlightstorybook3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Changelogrelease20260612highlightstorybook3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_changelogrelease20260612highlightstorybook3(inputs)
 	if (locale === "es") return es_changelogrelease20260612highlightstorybook3(inputs)
@@ -55,6 +59,7 @@ const changelogrelease20260612highlightstorybook3 = /** @type {((inputs?: Change
 	if (locale === "ko") return ko_changelogrelease20260612highlightstorybook3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_changelogrelease20260612highlightstorybook3(inputs)
 	if (locale === "de") return de_changelogrelease20260612highlightstorybook3(inputs)
-	return fr_changelogrelease20260612highlightstorybook3(inputs)
+	if (locale === "fr") return fr_changelogrelease20260612highlightstorybook3(inputs)
+	return uk_changelogrelease20260612highlightstorybook3(inputs)
 });
 export { changelogrelease20260612highlightstorybook3 as "changelogRelease20260612HighlightStorybook" }

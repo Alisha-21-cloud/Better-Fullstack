@@ -67,6 +67,7 @@ import {
   GO_OBSERVABILITY_VALUES,
   JAVA_AUTH_VALUES,
   JAVA_API_VALUES,
+  JAVA_LANGUAGE_VALUES,
   JAVA_LOGGING_VALUES,
   JAVA_BUILD_TOOL_VALUES,
   JAVA_LIBRARIES_VALUES,
@@ -78,6 +79,7 @@ import {
   OBSERVABILITY_VALUES,
   ORM_VALUES,
   PACKAGE_MANAGER_VALUES,
+  WORKSPACE_SHAPE_VALUES,
   PAYMENTS_VALUES,
   VERSION_CHANNEL_VALUES,
   PYTHON_AI_VALUES,
@@ -176,6 +178,7 @@ export type OptionCategory =
   | "documentation"
   | "appPlatforms"
   | "packageManager"
+  | "workspaceShape"
   | "versionChannel"
   | "examples"
   | "ai"
@@ -230,6 +233,7 @@ export type OptionCategory =
   | "goCaching"
   | "goConfig"
   | "goObservability"
+  | "javaLanguage"
   | "javaWebFramework"
   | "javaBuildTool"
   | "javaOrm"
@@ -291,7 +295,6 @@ export const TYPESCRIPT_CATEGORY_ORDER = [
   "shadcnFont",
   "shadcnRadius",
   "backend",
-  "backendLibraries",
   "runtime",
   "api",
   "database",
@@ -311,6 +314,7 @@ export const TYPESCRIPT_CATEGORY_ORDER = [
   "stateManagement",
   "forms",
   "validation",
+  "backendLibraries",
   "testing",
   "realtime",
   "jobQueue",
@@ -325,6 +329,7 @@ export const TYPESCRIPT_CATEGORY_ORDER = [
   "codeQuality",
   "documentation",
   "appPlatforms",
+  "workspaceShape",
   "packageManager",
   "examples",
   "aiDocs",
@@ -343,6 +348,7 @@ export const REACT_NATIVE_CATEGORY_ORDER = [
   "mobileOTA",
   "mobileDeepLinking",
   "auth",
+  "payments",
   "packageManager",
   "aiDocs",
   "git",
@@ -422,6 +428,7 @@ export const GO_CATEGORY_ORDER = [
 
 export const JAVA_CATEGORY_ORDER = [
   "javaWebFramework",
+  "javaLanguage",
   "javaBuildTool",
   "javaOrm",
   "javaAuth",
@@ -523,6 +530,7 @@ export function getCategoryDisplayName(categoryKey: string): string {
     mobilePush: "Mobile Push",
     mobileOTA: "Mobile OTA",
     mobileDeepLinking: "Mobile Deep Linking",
+    backendLibraries: "Effect Services",
     rustWebFramework: "Rust Web Framework",
     rustFrontend: "Rust Frontend (WASM)",
     rustOrm: "Rust ORM / Database",
@@ -563,6 +571,7 @@ export function getCategoryDisplayName(categoryKey: string): string {
     goCaching: "Go Caching",
     goConfig: "Go Config",
     goObservability: "Go Observability",
+    javaLanguage: "Java Language",
     javaWebFramework: "Java Web Framework",
     javaBuildTool: "Java Build Tool",
     javaOrm: "Java ORM / Database",
@@ -651,6 +660,7 @@ const BACKEND_BUILDER_VALUES = [
   "fastify",
   "elysia",
   "fets",
+  "effect",
   "nestjs",
   "adonisjs",
   "nitro",
@@ -771,6 +781,7 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   documentation: DOCUMENTATION_VALUES,
   appPlatforms: APP_PLATFORM_VALUES,
   packageManager: PACKAGE_MANAGER_VALUES,
+  workspaceShape: WORKSPACE_SHAPE_VALUES,
   versionChannel: VERSION_CHANNEL_VALUES,
   examples: EXAMPLE_VALUES,
   ai: AI_VALUES,
@@ -825,6 +836,7 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   goCaching: GO_CACHING_VALUES,
   goConfig: GO_CONFIG_VALUES,
   goObservability: GO_OBSERVABILITY_VALUES,
+  javaLanguage: JAVA_LANGUAGE_VALUES,
   javaWebFramework: JAVA_WEB_FRAMEWORK_VALUES,
   javaBuildTool: JAVA_BUILD_TOOL_VALUES,
   javaOrm: JAVA_ORM_VALUES,
@@ -884,6 +896,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   },
   runtime: { node: "Node.js", workers: "Cloudflare Workers" },
   backend: {
+    effect: "Effect",
     fets: "feTS",
     nestjs: "NestJS",
     encore: "Encore.ts",
@@ -959,8 +972,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     "upstash-ratelimit": "Upstash Ratelimit",
   },
   backendLibraries: {
-    effect: "Effect (Core)",
-    "effect-full": "Effect Full",
+    effect: "Effect Core",
+    "effect-full": "Effect Platform + SQL",
   },
   stateManagement: {
     "redux-toolkit": "Redux Toolkit",
@@ -1000,6 +1013,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     elasticsearch: "Elasticsearch",
     opensearch: "OpenSearch",
     algolia: "Algolia",
+    bleve: "Bleve",
   },
   vectorDb: {
     pgvector: "pgvector",
@@ -1126,8 +1140,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   git: { true: "Git", false: "No Git" },
   install: { true: "Install Dependencies", false: "Skip Install" },
   effect: {
-    effect: "Effect (Core)",
-    "effect-full": "Effect Full",
+    effect: "Effect Core",
+    "effect-full": "Effect Platform + SQL",
   },
   shadcnBase: {
     radix: "Radix UI",
@@ -1178,6 +1192,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     axum: "Axum",
     "actix-web": "Actix-web",
     rocket: "Rocket",
+    poem: "Poem",
+    loco: "Loco",
   },
   rustFrontend: {
     leptos: "Leptos",
@@ -1322,11 +1338,13 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     echo: "Echo",
     fiber: "Fiber",
     chi: "Chi",
+    stdlib: "net/http",
   },
   goOrm: {
     gorm: "GORM",
     sqlc: "sqlc",
     ent: "Ent",
+    bun: "Bun",
   },
   goApi: {
     "grpc-go": "gRPC-Go",
@@ -1371,9 +1389,14 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   goObservability: {
     opentelemetry: "OpenTelemetry",
   },
+  javaLanguage: {
+    java: "Java",
+    kotlin: "Kotlin",
+  },
   javaWebFramework: {
     "spring-boot": "Spring Boot",
     quarkus: "Quarkus",
+    micronaut: "Micronaut",
   },
   javaBuildTool: {
     maven: "Maven",
@@ -1389,9 +1412,12 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   },
   javaApi: {
     "spring-graphql": "Spring for GraphQL",
+    "openapi-generator": "OpenAPI Generator",
+    grpc: "gRPC",
   },
   javaLogging: {
     logback: "Logback",
+    log4j2: "Log4j2",
   },
   javaLibraries: {
     "spring-actuator": "Spring Boot Actuator",
@@ -1678,6 +1704,7 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   documentation: buildCategoryMetadata("documentation"),
   appPlatforms: buildCategoryMetadata("appPlatforms"),
   packageManager: buildCategoryMetadata("packageManager"),
+  workspaceShape: buildCategoryMetadata("workspaceShape"),
   versionChannel: buildCategoryMetadata("versionChannel"),
   examples: buildCategoryMetadata("examples"),
   ai: buildCategoryMetadata("ai"),
@@ -1732,6 +1759,7 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   goCaching: buildCategoryMetadata("goCaching"),
   goConfig: buildCategoryMetadata("goConfig"),
   goObservability: buildCategoryMetadata("goObservability"),
+  javaLanguage: buildCategoryMetadata("javaLanguage"),
   javaWebFramework: buildCategoryMetadata("javaWebFramework"),
   javaBuildTool: buildCategoryMetadata("javaBuildTool"),
   javaOrm: buildCategoryMetadata("javaOrm"),

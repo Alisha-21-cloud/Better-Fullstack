@@ -13,9 +13,11 @@ export {
   telemetry,
   doctor,
   check,
+  update,
 } from "./run";
 
 import type { ProjectConfig } from "./types";
+import { applyEffectBackendDefaults } from "./utils/config-processing";
 
 // Re-export virtual filesystem types for programmatic usage
 export {
@@ -62,6 +64,7 @@ export async function createVirtual(
     const ecosystem = options.ecosystem || "typescript";
     const isReactNative = ecosystem === "react-native";
     const frontend = options.frontend || (isReactNative ? ["native-bare"] : ["tanstack-router"]);
+    const backend = options.backend || (isReactNative ? "none" : "hono");
     const hasNativeFrontend = frontend.some(
       (item) => item === "native-bare" || item === "native-uniwind" || item === "native-unistyles",
     );
@@ -72,7 +75,7 @@ export async function createVirtual(
       relativePath: "./virtual",
       database: options.database || "none",
       orm: options.orm || "none",
-      backend: options.backend || (isReactNative ? "none" : "hono"),
+      backend,
       runtime: options.runtime || (isReactNative ? "none" : "bun"),
       frontend,
       addons: options.addons || [],
@@ -84,6 +87,7 @@ export async function createVirtual(
       effect: options.effect || "none",
       git: options.git ?? false,
       packageManager: options.packageManager || "bun",
+      workspaceShape: options.workspaceShape || "monorepo",
       versionChannel: options.versionChannel || "stable",
       install: false,
       dbSetup: options.dbSetup || "none",
@@ -172,6 +176,7 @@ export async function createVirtual(
       goObservability: options.goObservability || "none",
       javaWebFramework:
         options.javaWebFramework || (options.ecosystem === "java" ? "spring-boot" : "none"),
+      javaLanguage: options.javaLanguage || "java",
       javaBuildTool: options.javaBuildTool || (options.ecosystem === "java" ? "maven" : "none"),
       javaOrm: options.javaOrm || "none",
       javaAuth: options.javaAuth || "none",
@@ -222,6 +227,7 @@ export async function createVirtual(
     if (options.stackParts) {
       config.stackParts = options.stackParts;
     }
+    applyEffectBackendDefaults(config, new Set(Object.keys(options)));
 
     const { generateVirtualProject: generate, EMBEDDED_TEMPLATES } = await import(
       "@better-fullstack/template-generator"

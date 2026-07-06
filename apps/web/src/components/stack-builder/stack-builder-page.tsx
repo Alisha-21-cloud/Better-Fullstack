@@ -1,5 +1,6 @@
 import { Suspense, lazy } from "react";
 
+import { BuilderShareModal } from "@/components/stack-builder/builder-share-modal";
 import type { StackState } from "@/lib/stack-defaults";
 import { m } from "@/paraglide/messages.js";
 
@@ -21,6 +22,7 @@ export function StackBuilderPage({ initialStack }: { initialStack?: StackState }
           <StackBuilder initialStack={initialStack} />
         </div>
       </Suspense>
+      <BuilderShareModal />
     </>
   );
 }

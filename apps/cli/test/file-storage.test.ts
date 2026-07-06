@@ -26,6 +26,29 @@ describe("File Storage Options", () => {
     });
   });
 
+  describe("Supabase Storage", () => {
+    test("supabase-storage with Hono backend", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "supabase-storage-hono",
+          frontend: ["tanstack-router"],
+          backend: "hono",
+          fileStorage: "supabase-storage",
+        }),
+      );
+
+      expectSuccess(result);
+      const storage = await readFile(`${result.projectDir}/apps/server/src/lib/storage.ts`, "utf-8");
+      const pkg = await readFile(`${result.projectDir}/apps/server/package.json`, "utf-8");
+      const env = await readFile(`${result.projectDir}/apps/server/.env`, "utf-8");
+
+      expect(storage).toContain("@supabase/supabase-js");
+      expect(pkg).toContain('"@supabase/supabase-js"');
+      expect(env).toContain("SUPABASE_URL");
+      expect(env).toContain("SUPABASE_SERVICE_ROLE_KEY");
+    });
+  });
+
   describe("AWS S3 with different backends", () => {
     test("s3 with Hono backend", async () => {
       const result = await runTRPCTest(
@@ -451,6 +474,14 @@ describe("File Storage Options", () => {
         }),
       );
       expectSuccess(result);
+
+      const storage = await readFile(`${result.projectDir}/apps/web/src/lib/storage.ts`, "utf-8");
+      const pkg = await readFile(`${result.projectDir}/apps/web/package.json`, "utf-8");
+      const env = await readFile(`${result.projectDir}/apps/web/.env`, "utf-8");
+
+      expect(storage).toContain("@aws-sdk/client-s3");
+      expect(pkg).toContain('"@aws-sdk/client-s3"');
+      expect(env).toContain("R2_BUCKET_NAME");
     });
   });
 

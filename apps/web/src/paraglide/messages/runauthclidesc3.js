@@ -10,11 +10,11 @@ const en_runauthclidesc3 = /** @type {(inputs: Runauthclidesc3Inputs) => Localiz
 };
 
 const es_runauthclidesc3 = /** @type {(inputs: Runauthclidesc3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Utilice una interfaz de línea de comandos (CLI) de agente a la que ya haya accedido (suscripción/OAuth). Inicie sesión una sola vez y, a partir de ahí, el sistema se encargará del resto; no se requieren claves en su entorno.`)
+	return /** @type {LocalizedString} */ (`Usa una CLI de agente en la que ya tengas sesión iniciada (suscripción/OAuth). Inicia sesión una vez y el harness se encarga del resto; sin claves en tu entorno.`)
 };
 
 const zh_runauthclidesc3 = /** @type {(inputs: Runauthclidesc3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`使用您已登录的代理 CLI（订阅/OAuth）。只需登录一次，然后该框架即可驱动它——您的环境中无需任何密钥。`)
+	return /** @type {LocalizedString} */ (`使用你已登录的代理 CLI（订阅/OAuth）。只需登录一次，然后该框架即可驱动它——你的环境中无需任何密钥。`)
 };
 
 const ja_runauthclidesc3 = /** @type {(inputs: Runauthclidesc3Inputs) => LocalizedString} */ () => {
@@ -26,7 +26,7 @@ const ko_runauthclidesc3 = /** @type {(inputs: Runauthclidesc3Inputs) => Localiz
 };
 
 const zh_hant1_runauthclidesc3 = /** @type {(inputs: Runauthclidesc3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`使用您已登入的代理程式 CLI（訂閱/OAuth）。只需登入一次，然後該框架即可驅動它——您的環境中無需任何密鑰。`)
+	return /** @type {LocalizedString} */ (`使用你已登入的代理程式 CLI（訂閱/OAuth）。只需登入一次，然後該框架即可驅動它——你的環境中無需任何金鑰。`)
 };
 
 const de_runauthclidesc3 = /** @type {(inputs: Runauthclidesc3Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_runauthclidesc3 = /** @type {(inputs: Runauthclidesc3Inputs) => Localiz
 	return /** @type {LocalizedString} */ (`Utilisez l'interface de ligne de commande d'un agent auquel vous êtes déjà connecté (abonnement/OAuth). Connectez-vous une seule fois, puis le système prend le relais ; aucune clé n'est requise dans votre environnement.`)
 };
 
+const uk_runauthclidesc3 = /** @type {(inputs: Runauthclidesc3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Використовуйте agent CLI, у який ви вже ввійшли (підписка / OAuth). Увійдіть один раз, а далі harness керує запуском — без ключів у середовищі.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Use an agent CLI you're already signed into (subscription / OAuth). Log in once, then the harness drives it — no keys in your environment." |
 *
 * @param {Runauthclidesc3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runauthclidesc3 = /** @type {((inputs?: Runauthclidesc3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runauthclidesc3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runauthclidesc3 = /** @type {((inputs?: Runauthclidesc3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runauthclidesc3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runauthclidesc3(inputs)
 	if (locale === "es") return es_runauthclidesc3(inputs)
@@ -55,6 +59,7 @@ const runauthclidesc3 = /** @type {((inputs?: Runauthclidesc3Inputs, options?: {
 	if (locale === "ko") return ko_runauthclidesc3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runauthclidesc3(inputs)
 	if (locale === "de") return de_runauthclidesc3(inputs)
-	return fr_runauthclidesc3(inputs)
+	if (locale === "fr") return fr_runauthclidesc3(inputs)
+	return uk_runauthclidesc3(inputs)
 });
 export { runauthclidesc3 as "runAuthCliDesc" }

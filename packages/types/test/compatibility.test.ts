@@ -282,6 +282,31 @@ describe("compatibility issue helpers", () => {
     );
   });
 
+  it("disables Intlayer i18n for frontend templates that are not wired", () => {
+    const baseStack = {
+      ...DEFAULT_STACK_SELECTION,
+      nativeFrontend: [],
+      backend: "hono",
+    };
+
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["tanstack-router"] }, "i18n", "intlayer"),
+    ).toBeNull();
+    expect(getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "intlayer")).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["react-vite"] }, "i18n", "intlayer"),
+    ).toBeNull();
+    expect(getDisabledReason({ ...baseStack, webFrontend: ["svelte"] }, "i18n", "intlayer")).toBe(
+      "Intlayer is not yet wired for the 'svelte' frontend",
+    );
+    expect(getDisabledReason({ ...baseStack, webFrontend: ["angular"] }, "i18n", "intlayer")).toBe(
+      "Intlayer is not yet wired for the 'angular' frontend",
+    );
+    expect(getDisabledReason({ ...baseStack, webFrontend: [] }, "i18n", "intlayer")).toBe(
+      "i18n requires a web frontend",
+    );
+  });
+
   it("disables Netlify server deploy outside the supported Hono Node path", () => {
     const baseStack = {
       ...DEFAULT_STACK_SELECTION,
@@ -457,6 +482,30 @@ describe("compatibility issue helpers", () => {
         "expo-linking",
       ),
     ).toBeNull();
+  });
+
+  it("allows RevenueCat payments for React Native stacks without enabling web payment providers", () => {
+    const reactNativeStack = {
+      ...DEFAULT_STACK_SELECTION,
+      ecosystem: "react-native",
+      webFrontend: ["none"],
+      nativeFrontend: ["native-bare"],
+      backend: "none",
+      payments: "revenuecat",
+    };
+
+    expect(getDisabledReason(reactNativeStack, "payments", "revenuecat")).toBeNull();
+    expect(getDisabledReason(reactNativeStack, "payments", "stripe")).toBe(
+      "React Native payments currently support RevenueCat only",
+    );
+
+    const result = analyzeStackCompatibility({
+      ...reactNativeStack,
+      nativeFrontend: ["none"],
+    });
+
+    expect(result.adjustedStack.payments).toBe("revenuecat");
+    expect(result.adjustedStack.nativeFrontend).toEqual(["native-bare"]);
   });
 
   it("routes promoted backend library disabled reasons through graph checks", () => {
@@ -949,5 +998,46 @@ describe("compatibility issue helpers", () => {
       elixirHttp: "req",
       elixirObservability: "none",
     });
+  });
+
+  it("locks Effect backend services and validation without blocking compatible tools", () => {
+    const result = analyzeStackCompatibility({
+      ...DEFAULT_STACK_SELECTION,
+      backend: "effect",
+      backendLibraries: "none",
+      validation: "zod",
+      forms: "tanstack-form",
+    });
+
+    expect(result.adjustedStack).toMatchObject({
+      backend: "effect",
+      backendLibraries: "effect-full",
+      validation: "effect-schema",
+      forms: "tanstack-form",
+    });
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "effect",
+          backendLibraries: "effect-full",
+          validation: "effect-schema",
+        },
+        "backendLibraries",
+        "effect",
+      ),
+    ).toBe("Effect backend requires Effect Platform + SQL services");
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "effect",
+          backendLibraries: "effect-full",
+          validation: "effect-schema",
+        },
+        "forms",
+        "tanstack-form",
+      ),
+    ).toBeNull();
   });
 });

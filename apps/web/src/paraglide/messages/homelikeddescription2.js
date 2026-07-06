@@ -30,11 +30,15 @@ const zh_hant1_homelikeddescription2 = /** @type {(inputs: Homelikeddescription2
 };
 
 const de_homelikeddescription2 = /** @type {(inputs: Homelikeddescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Bauherren, die den Start mit Begeisterung begleitet haben.`)
+	return /** @type {LocalizedString} */ (`Entwickler, die den Launch geliked haben.`)
 };
 
 const fr_homelikeddescription2 = /** @type {(inputs: Homelikeddescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Des constructeurs qui ont pris à coeur le lancement.`)
+	return /** @type {LocalizedString} */ (`Des créateurs qui ont adoré le lancement.`)
+};
+
+const uk_homelikeddescription2 = /** @type {(inputs: Homelikeddescription2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Розробники, які підтримали запуск.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_homelikeddescription2 = /** @type {(inputs: Homelikeddescription2Inputs
 * | "Builders who hearted the launch." |
 *
 * @param {Homelikeddescription2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const homelikeddescription2 = /** @type {((inputs?: Homelikeddescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homelikeddescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const homelikeddescription2 = /** @type {((inputs?: Homelikeddescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homelikeddescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_homelikeddescription2(inputs)
 	if (locale === "es") return es_homelikeddescription2(inputs)
@@ -55,6 +59,7 @@ const homelikeddescription2 = /** @type {((inputs?: Homelikeddescription2Inputs,
 	if (locale === "ko") return ko_homelikeddescription2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_homelikeddescription2(inputs)
 	if (locale === "de") return de_homelikeddescription2(inputs)
-	return fr_homelikeddescription2(inputs)
+	if (locale === "fr") return fr_homelikeddescription2(inputs)
+	return uk_homelikeddescription2(inputs)
 });
 export { homelikeddescription2 as "homeLikedDescription" }

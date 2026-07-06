@@ -34,7 +34,11 @@ const de_navblog1 = /** @type {(inputs: Navblog1Inputs) => LocalizedString} */ (
 };
 
 const fr_navblog1 = /** @type {(inputs: Navblog1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Blogue`)
+	return /** @type {LocalizedString} */ (`Blog`)
+};
+
+const uk_navblog1 = /** @type {(inputs: Navblog1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Блог`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_navblog1 = /** @type {(inputs: Navblog1Inputs) => LocalizedString} */ (
 * | "Blog" |
 *
 * @param {Navblog1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const navblog1 = /** @type {((inputs?: Navblog1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Navblog1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const navblog1 = /** @type {((inputs?: Navblog1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Navblog1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_navblog1(inputs)
 	if (locale === "es") return es_navblog1(inputs)
@@ -55,6 +59,7 @@ const navblog1 = /** @type {((inputs?: Navblog1Inputs, options?: { locale?: "en"
 	if (locale === "ko") return ko_navblog1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_navblog1(inputs)
 	if (locale === "de") return de_navblog1(inputs)
-	return fr_navblog1(inputs)
+	if (locale === "fr") return fr_navblog1(inputs)
+	return uk_navblog1(inputs)
 });
 export { navblog1 as "navBlog" }

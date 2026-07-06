@@ -127,6 +127,7 @@ export type CompatibilityInput = {
   documentation: string[];
   appPlatforms: string[];
   packageManager: string;
+  workspaceShape: string;
   versionChannel: string;
   examples: string[];
   aiSdk: string;
@@ -177,6 +178,7 @@ export type CompatibilityInput = {
   goCaching: string;
   goConfig: string;
   goObservability: string;
+  javaLanguage: string;
   javaWebFramework: string;
   javaBuildTool: string;
   javaOrm: string;
@@ -215,6 +217,11 @@ export type CompatibilityInput = {
 };
 
 const DEFAULT_RUNTIME = "bun";
+const REVENUECAT_NATIVE_FRONTENDS = new Set<Frontend>([
+  "native-bare",
+  "native-uniwind",
+  "native-unistyles",
+]);
 const PARAGLIDE_COMPATIBLE_FRONTENDS = new Set<Frontend>([
   "next",
   "nuxt",
@@ -228,6 +235,17 @@ const PARAGLIDE_COMPATIBLE_FRONTENDS = new Set<Frontend>([
   "solid-start",
   "astro",
 ]);
+const INTLAYER_COMPATIBLE_FRONTENDS = new Set<Frontend>([
+  "next",
+  "vinext",
+  "tanstack-router",
+  "tanstack-start",
+  "react-router",
+  "react-vite",
+]);
+
+const hasRevenueCatCompatibleNativeFrontend = (frontends: readonly string[]) =>
+  frontends.some((frontend) => REVENUECAT_NATIVE_FRONTENDS.has(frontend as Frontend));
 
 export function validateProjectName(name: string): string | undefined {
   const INVALID_CHARS = ["<", ">", ":", '"', "|", "?", "*", "/", "\\"];
@@ -288,6 +306,70 @@ export type CompatibilityAnalysisResult = {
  * This follows the CLI approach: when you make a selection, dependent items adjust automatically.
  * The flow is: frontend -> backend -> runtime -> database -> orm -> api -> auth -> etc.
  */
+/**
+ * Backends that can collapse into a flat single-app layout (no separate
+ * apps/server or packages/* workspace). These are the "thin self" fullstack
+ * frameworks whose web app already owns the server via route handlers AND that
+ * expose a `@/*` -> ./src path alias so the inlined env module resolves cleanly.
+ * Nuxt is intentionally excluded from the MVP (different alias convention).
+ */
+const SINGLE_APP_SELF_BACKENDS = new Set(["self-next", "self-tanstack-start"]);
+const SINGLE_APP_WEB_FRONTEND_BY_BACKEND: Record<string, string> = {
+  "self-next": "next",
+  "self-tanstack-start": "tanstack-start",
+};
+
+/**
+ * A single-app (flat) layout is only safe for a "thin self" stack that emits no
+ * sibling workspace package (database/orm, better-auth server, trpc/orpc
+ * packages/api, payments, email, etc.) and no separate native/server app. For
+ * anything else, `single-app` is normalized back to `monorepo` so we never emit
+ * a broken flat layout. appPlatforms (turborepo/nx) are ignored here — the
+ * generator drops the workspace tooling when it flattens.
+ */
+export function stackQualifiesForSingleApp(stack: CompatibilityInput): boolean {
+  if (!SINGLE_APP_SELF_BACKENDS.has(stack.backend)) return false;
+
+  const nativeFrontends = (stack.nativeFrontend ?? []).filter((f) => f && f !== "none");
+  if (nativeFrontends.length > 0) return false;
+
+  const webFrontends = (stack.webFrontend ?? []).filter((f) => f && f !== "none");
+  if (webFrontends.length !== 1) return false;
+  if (webFrontends[0] !== SINGLE_APP_WEB_FRONTEND_BY_BACKEND[stack.backend]) return false;
+
+  const siblingPackageScalars = [
+    stack.api,
+    stack.database,
+    stack.orm,
+    stack.auth,
+    stack.payments,
+    stack.email,
+    stack.fileUpload,
+    stack.realtime,
+    stack.jobQueue,
+    stack.caching,
+    stack.rateLimit,
+    stack.i18n,
+    stack.search,
+    stack.vectorDb,
+    stack.fileStorage,
+    stack.cms,
+    stack.aiSdk,
+    stack.analytics,
+    stack.featureFlags,
+    stack.observability,
+    stack.logging,
+    stack.webDeploy,
+    stack.serverDeploy,
+  ];
+  if (siblingPackageScalars.some((value) => value && value !== "none")) return false;
+
+  const nonNoneExamples = (stack.examples ?? []).filter((e) => e && e !== "none");
+  if (nonNoneExamples.length > 0) return false;
+
+  return true;
+}
+
 export const analyzeStackCompatibility = (
   stack: CompatibilityInput,
 ): CompatibilityAnalysisResult => {
@@ -390,6 +472,10 @@ export const analyzeStackCompatibility = (
 
   if (nextStack.backend === "none") {
     // No backend means no runtime, database, orm, api, auth, dbSetup, serverDeploy
+    const shouldKeepRevenueCatPayments =
+      nextStack.payments === "revenuecat" &&
+      (nextStack.ecosystem === "react-native" ||
+        hasRevenueCatCompatibleNativeFrontend(nextStack.nativeFrontend));
     const noneOverrides: Partial<CompatibilityInput> = {
       runtime: "none",
       database: "none",
@@ -397,7 +483,6 @@ export const analyzeStackCompatibility = (
       api: "none",
       dbSetup: "none",
       serverDeploy: "none",
-      payments: "none",
       search: "none",
       vectorDb: "none",
       rateLimit: "none",
@@ -418,6 +503,15 @@ export const analyzeStackCompatibility = (
           message: `${getCategoryDisplayName(catKey)} set to '${value}' (no backend)`,
         });
       }
+    }
+
+    if (!shouldKeepRevenueCatPayments && nextStack.payments !== "none") {
+      nextStack.payments = "none";
+      changed = true;
+      changes.push({
+        category: "backend",
+        message: "Payments set to 'none' (no backend)",
+      });
     }
 
     // Clear examples
@@ -523,6 +617,25 @@ export const analyzeStackCompatibility = (
       changes.push({
         category: "backend",
         message: "Frontend set to 'SolidStart' (required for SolidStart fullstack)",
+      });
+    }
+  }
+
+  if (nextStack.backend === "effect") {
+    if (nextStack.backendLibraries !== "effect-full") {
+      nextStack.backendLibraries = "effect-full";
+      changed = true;
+      changes.push({
+        category: "backendLibraries",
+        message: "Effect services set to 'Effect Platform + SQL' (required for Effect backend)",
+      });
+    }
+    if (nextStack.validation !== "effect-schema") {
+      nextStack.validation = "effect-schema";
+      changed = true;
+      changes.push({
+        category: "validation",
+        message: "Validation set to 'Effect Schema' (required for Effect backend)",
       });
     }
   }
@@ -868,6 +981,36 @@ export const analyzeStackCompatibility = (
   }
 
   // ============================================
+  // CACHING CONSTRAINTS
+  // ============================================
+
+  // Self-hosted Redis caching (ioredis) is TypeScript-only; other ecosystems
+  // have their own native caching fields (goCaching/rustCaching/pythonCaching).
+  if (nextStack.caching === "redis" && nextStack.ecosystem !== "typescript") {
+    nextStack.caching = "none";
+    changed = true;
+    changes.push({
+      category: "caching",
+      message:
+        "Caching set to 'None' (self-hosted Redis is only available for the TypeScript ecosystem)",
+    });
+  }
+
+  // ============================================
+  // SEARCH CONSTRAINTS
+  // ============================================
+
+  // Bleve is a Go-only embedded search engine; drop it for non-Go ecosystems.
+  if (nextStack.search === "bleve" && nextStack.ecosystem !== "go") {
+    nextStack.search = "none";
+    changed = true;
+    changes.push({
+      category: "search",
+      message: "Search set to 'None' (Bleve is only available for the Go ecosystem)",
+    });
+  }
+
+  // ============================================
   // PAYMENTS CONSTRAINTS
   // ============================================
 
@@ -897,6 +1040,20 @@ export const analyzeStackCompatibility = (
       changes.push({
         category: "payments",
         message: "Payments set to 'None' (Polar requires web frontend)",
+      });
+    }
+  }
+
+  if (nextStack.payments === "revenuecat") {
+    const hasNativeFrontend =
+      nextStack.ecosystem === "react-native" ||
+      hasRevenueCatCompatibleNativeFrontend(nextStack.nativeFrontend);
+    if (!hasNativeFrontend) {
+      nextStack.payments = "none";
+      changed = true;
+      changes.push({
+        category: "payments",
+        message: "Payments set to 'None' (RevenueCat requires a native frontend)",
       });
     }
   }
@@ -970,7 +1127,6 @@ export const analyzeStackCompatibility = (
       ["realtime", "none", "Realtime set to 'None' (React Native ecosystem)"],
       ["jobQueue", "none", "Job queue set to 'None' (React Native ecosystem)"],
       ["fileUpload", "none", "File upload set to 'None' (React Native ecosystem)"],
-      ["payments", "none", "Payments set to 'None' (React Native ecosystem)"],
       ["email", "none", "Email set to 'None' (React Native ecosystem)"],
       ["search", "none", "Search set to 'None' (React Native ecosystem)"],
       ["vectorDb", "none", "Vector database set to 'None' (React Native ecosystem)"],
@@ -1000,6 +1156,15 @@ export const analyzeStackCompatibility = (
         changed = true;
         changes.push({ category, message });
       }
+    }
+
+    if (nextStack.payments !== "none" && nextStack.payments !== "revenuecat") {
+      nextStack.payments = "none";
+      changed = true;
+      changes.push({
+        category: "payments",
+        message: "Payments set to 'None' (React Native payments currently support RevenueCat only)",
+      });
     }
 
     if (!hasNativeFrontend) {
@@ -1365,6 +1530,15 @@ export const analyzeStackCompatibility = (
         });
       }
 
+      if (nextStack.javaApi !== "none") {
+        nextStack.javaApi = "none";
+        changed = true;
+        changes.push({
+          category: "javaWebFramework",
+          message: "Java API set to 'None' (current scaffold only supports it with Spring Boot)",
+        });
+      }
+
       if (nextStack.javaLibraries.some((library) => library !== "none")) {
         nextStack.javaLibraries = [];
         changed = true;
@@ -1404,6 +1578,66 @@ export const analyzeStackCompatibility = (
           message: "Liquibase cleared (Flyway and Liquibase cannot be combined)",
         });
       }
+    }
+
+    // Kotlin is only wired for the Spring Boot scaffold (with Maven or Gradle)
+    // and its common option surface. For every other Java combination we
+    // normalize the language back to `java` so the generator never emits a
+    // half-built Kotlin project. The uncovered surface is: non-Spring-Boot
+    // frameworks, source-only scaffolds, jOOQ/MyBatis ORMs, the gRPC/OpenAPI
+    // API layers (protoc/codegen paths), and the Java-only third-party service
+    // integrations (Resend email, Meilisearch, Upstash Redis, Sentry).
+    if (nextStack.javaLanguage === "kotlin") {
+      const kotlinUnsupportedTestingLibraries = new Set([
+        "testcontainers",
+        "rest-assured",
+        "wiremock",
+        "awaitility",
+        "archunit",
+        "jqwik",
+      ]);
+      const kotlinSupported =
+        nextStack.javaWebFramework === "spring-boot" &&
+        nextStack.javaBuildTool !== "none" &&
+        nextStack.javaOrm !== "jooq" &&
+        nextStack.javaOrm !== "mybatis" &&
+        nextStack.javaApi !== "grpc" &&
+        nextStack.javaApi !== "openapi-generator" &&
+        nextStack.email !== "resend" &&
+        nextStack.search !== "meilisearch" &&
+        nextStack.caching !== "upstash-redis" &&
+        nextStack.observability !== "sentry" &&
+        !nextStack.javaTestingLibraries.some((library) =>
+          kotlinUnsupportedTestingLibraries.has(library),
+        );
+
+      if (!kotlinSupported) {
+        nextStack.javaLanguage = "java";
+        changed = true;
+        changes.push({
+          category: "javaLanguage",
+          message:
+            "Java language set to 'Java' (Kotlin currently targets the Spring Boot scaffold with Spring Data JPA/none, Spring GraphQL/none, and no jOOQ/MyBatis/gRPC/OpenAPI or Java-only service integrations)",
+        });
+      }
+    }
+  }
+
+  if (nextStack.i18n === "intlayer") {
+    const hasWebFrontend = nextStack.webFrontend.some((frontend) => frontend !== "none");
+    const unsupportedFrontend = nextStack.webFrontend.find(
+      (frontend) => frontend !== "none" && !INTLAYER_COMPATIBLE_FRONTENDS.has(frontend as Frontend),
+    );
+
+    if (!hasWebFrontend || unsupportedFrontend) {
+      nextStack.i18n = "none";
+      changed = true;
+      changes.push({
+        category: "i18n",
+        message: unsupportedFrontend
+          ? `i18n set to 'None' (Intlayer is not wired for the '${unsupportedFrontend}' frontend)`
+          : "i18n set to 'None' (Intlayer requires a web frontend)",
+      });
     }
   }
 
@@ -1536,6 +1770,19 @@ export const analyzeStackCompatibility = (
     });
   }
 
+  // Workspace shape: single-app (flat) only applies to a qualifying thin self
+  // app; normalize back to monorepo for anything else so we never emit a broken
+  // flat layout.
+  if (nextStack.workspaceShape === "single-app" && !stackQualifiesForSingleApp(nextStack)) {
+    nextStack.workspaceShape = "monorepo";
+    changed = true;
+    changes.push({
+      category: "workspaceShape",
+      message:
+        "Workspace shape set to 'Monorepo' (single-app only supports a thin self app: Next.js or TanStack Start fullstack with no separate database/auth/api/server packages)",
+    });
+  }
+
   return {
     adjustedStack: changed ? nextStack : null,
     notes,
@@ -1620,11 +1867,16 @@ export const getDisabledReason = (
       "mobileOTA",
       "mobileDeepLinking",
       "auth",
+      "payments",
       "packageManager",
       "aiDocs",
       "git",
       "install",
     ]);
+
+    if (category === "payments" && optionId !== "none" && optionId !== "revenuecat") {
+      return "React Native payments currently support RevenueCat only";
+    }
 
     if (!reactNativeCategories.has(category) && optionId !== "none" && optionId !== "false") {
       return "React Native ecosystem only supports native mobile options";
@@ -1653,7 +1905,7 @@ export const getDisabledReason = (
     if (category === "serverDeploy" && optionId !== "none") {
       return "No backend selected";
     }
-    if (category === "payments" && optionId !== "none") {
+    if (category === "payments" && optionId !== "none" && optionId !== "revenuecat") {
       return "No backend selected";
     }
     if (category === "search" && optionId !== "none") {
@@ -1673,7 +1925,20 @@ export const getDisabledReason = (
     }
   }
 
-  const graphDisabledReason = getGraphDisabledReason(currentStack, category, optionId);
+  if (currentStack.backend === "effect") {
+    if (category === "backendLibraries" && optionId !== "effect-full") {
+      return "Effect backend requires Effect Platform + SQL services";
+    }
+    if (category === "validation" && optionId !== "effect-schema") {
+      return "Effect backend requires Effect Schema validation";
+    }
+  }
+
+  const graphDisabledReason =
+    (category === "payments" && optionId === "revenuecat") ||
+    (category === "i18n" && optionId === "intlayer")
+      ? { handled: false, authoritative: false, reason: null }
+      : getGraphDisabledReason(currentStack, category, optionId);
   if (graphDisabledReason.reason) {
     return graphDisabledReason.reason;
   }
@@ -1947,8 +2212,8 @@ export const getDisabledReason = (
     if (currentStack.nativeFrontend.length > 0) {
       return "OpenAPI is currently available for web frontends, not React Native";
     }
-    if (!["hono", "express", "fastify", "elysia"].includes(currentStack.backend)) {
-      return "OpenAPI currently supports Hono, Express, Fastify, and Elysia backends";
+    if (!["hono", "effect", "express", "fastify", "elysia"].includes(currentStack.backend)) {
+      return "OpenAPI currently supports Hono, Effect, Express, Fastify, and Elysia backends";
     }
   }
 
@@ -1971,8 +2236,8 @@ export const getDisabledReason = (
     if (currentStack.nativeFrontend.length > 0) {
       return "Apollo Server is currently available for web frontends, not React Native";
     }
-    if (!["hono", "express", "fastify", "elysia"].includes(currentStack.backend)) {
-      return "Apollo Server currently supports Hono, Express, Fastify, and Elysia backends";
+    if (!["hono", "effect", "express", "fastify", "elysia"].includes(currentStack.backend)) {
+      return "Apollo Server currently supports Hono, Effect, Express, Fastify, and Elysia backends";
     }
   }
 
@@ -2063,6 +2328,13 @@ export const getDisabledReason = (
     return "Dodo Payments are not yet supported for React + Vite projects";
   }
 
+  if (category === "payments" && optionId === "revenuecat") {
+    const hasNativeFrontend = hasRevenueCatCompatibleNativeFrontend(currentStack.nativeFrontend);
+    if (!hasNativeFrontend) {
+      return "RevenueCat payments requires a native frontend (native-bare, native-uniwind, or native-unistyles)";
+    }
+  }
+
   // ============================================
   // CMS CONSTRAINTS
   // ============================================
@@ -2104,6 +2376,9 @@ export const getDisabledReason = (
   // ============================================
   // CACHING CONSTRAINTS
   // ============================================
+  if (category === "caching" && optionId === "redis" && currentStack.ecosystem !== "typescript") {
+    return "Self-hosted Redis caching (ioredis) is only available for the TypeScript ecosystem";
+  }
   if (category === "caching" && optionId !== "none") {
     if (currentStack.ecosystem !== "typescript") {
       return null;
@@ -2128,6 +2403,9 @@ export const getDisabledReason = (
   // ============================================
   // SEARCH CONSTRAINTS
   // ============================================
+  if (category === "search" && optionId === "bleve" && currentStack.ecosystem !== "go") {
+    return "Bleve is an embedded Go search engine, only available for the Go ecosystem";
+  }
   if (category === "search" && optionId !== "none") {
     if (currentStack.ecosystem !== "typescript") {
       return null;
@@ -2455,6 +2733,17 @@ export const getDisabledReason = (
         return "next-intl requires Next.js";
       }
     }
+
+    if (optionId === "intlayer") {
+      const unsupportedFrontend = currentStack.webFrontend.find(
+        (frontend) =>
+          frontend !== "none" && !INTLAYER_COMPATIBLE_FRONTENDS.has(frontend as Frontend),
+      );
+
+      if (unsupportedFrontend) {
+        return `Intlayer is not yet wired for the '${unsupportedFrontend}' frontend`;
+      }
+    }
   }
 
   // ============================================
@@ -2486,6 +2775,9 @@ export const getDisabledReason = (
       if (currentStack.javaAuth !== "none") {
         return "Java auth support requires Maven or Gradle";
       }
+      if (currentStack.javaApi !== "none") {
+        return "Java API support requires Maven or Gradle";
+      }
       if (currentStack.javaLibraries.some((library) => library !== "none")) {
         return "Java libraries require Maven or Gradle";
       }
@@ -2510,6 +2802,15 @@ export const getDisabledReason = (
     }
     if (optionId !== "none" && currentStack.javaBuildTool === "none") {
       return "Java auth support requires Maven or Gradle";
+    }
+  }
+
+  if (category === "javaApi") {
+    if (optionId !== "none" && currentStack.javaWebFramework !== "spring-boot") {
+      return "Java API support currently requires Spring Boot";
+    }
+    if (optionId !== "none" && currentStack.javaBuildTool === "none") {
+      return "Java API support requires Maven or Gradle";
     }
   }
 

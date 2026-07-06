@@ -18,11 +18,11 @@ const zh_homepickyourstack3 = /** @type {(inputs: Homepickyourstack3Inputs) => L
 };
 
 const ja_homepickyourstack3 = /** @type {(inputs: Homepickyourstack3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`あなたのものを選んでください`)
+	return /** @type {LocalizedString} */ (`選ぼう、あなたの`)
 };
 
 const ko_homepickyourstack3 = /** @type {(inputs: Homepickyourstack3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`당신의 선택`)
+	return /** @type {LocalizedString} */ (`당신의 스택을`)
 };
 
 const zh_hant1_homepickyourstack3 = /** @type {(inputs: Homepickyourstack3Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_homepickyourstack3 = /** @type {(inputs: Homepickyourstack3Inputs
 };
 
 const de_homepickyourstack3 = /** @type {(inputs: Homepickyourstack3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Wählen Sie Ihr aus`)
+	return /** @type {LocalizedString} */ (`Wählen Sie Ihren`)
 };
 
 const fr_homepickyourstack3 = /** @type {(inputs: Homepickyourstack3Inputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`Choisissez votre`)
+};
+
+const uk_homepickyourstack3 = /** @type {(inputs: Homepickyourstack3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Оберіть свій`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_homepickyourstack3 = /** @type {(inputs: Homepickyourstack3Inputs) => L
 * | "Pick your" |
 *
 * @param {Homepickyourstack3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const homepickyourstack3 = /** @type {((inputs?: Homepickyourstack3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homepickyourstack3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const homepickyourstack3 = /** @type {((inputs?: Homepickyourstack3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homepickyourstack3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_homepickyourstack3(inputs)
 	if (locale === "es") return es_homepickyourstack3(inputs)
@@ -55,6 +59,7 @@ const homepickyourstack3 = /** @type {((inputs?: Homepickyourstack3Inputs, optio
 	if (locale === "ko") return ko_homepickyourstack3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_homepickyourstack3(inputs)
 	if (locale === "de") return de_homepickyourstack3(inputs)
-	return fr_homepickyourstack3(inputs)
+	if (locale === "fr") return fr_homepickyourstack3(inputs)
+	return uk_homepickyourstack3(inputs)
 });
 export { homepickyourstack3 as "homePickYourStack" }

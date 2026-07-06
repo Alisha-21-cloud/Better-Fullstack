@@ -1,7 +1,7 @@
 import consola from "consola";
 import pc from "picocolors";
 
-import type { CLIInput, Database, DatabaseSetup, ProjectConfig, Runtime } from "../types";
+import type { CLIInput, Database, DatabaseSetup, Frontend, ProjectConfig, Runtime } from "../types";
 
 import { normalizeCapabilitySelection, validateStackParts } from "../types";
 import {
@@ -13,6 +13,7 @@ import {
   validatePaymentsCompatibility,
   validateSelfBackendCompatibility,
   validateServerDeployRequiresBackend,
+  splitFrontends,
   validateUILibraryCSSFrameworkCompatibility,
   validateUILibraryFrontendCompatibility,
   validateWebDeployFrontendTemplates,
@@ -24,6 +25,15 @@ import { isSilent } from "./context";
 import { constraintError, incompatibilityError, missingRequirementError } from "./error-formatter";
 import { exitWithError } from "./errors";
 import { validatePeerDependencies } from "./peer-dependency-validator";
+
+const INTLAYER_COMPATIBLE_FRONTENDS = new Set<Frontend>([
+  "next",
+  "vinext",
+  "tanstack-router",
+  "tanstack-start",
+  "react-router",
+  "react-vite",
+]);
 
 function validateDatabaseOrmAuth(cfg: Partial<ProjectConfig>, flags?: Set<string>) {
   const db = cfg.database;
@@ -381,10 +391,7 @@ export function validateEcosystemAuthCompatibility(
   }
 }
 
-function validateConvexConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateConvexConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const { backend } = config;
 
   if (backend !== "convex") {
@@ -488,7 +495,9 @@ function validateBackendNoneConstraints(
     );
   }
 
-  if (has("payments") && config.payments !== "none") {
+  const isNativeRevenueCat =
+    config.payments === "revenuecat" && splitFrontends(config.frontend ?? []).native.length > 0;
+  if (has("payments") && config.payments !== "none" && !isNativeRevenueCat) {
     exitWithError(
       "Backend 'none' requires '--payments none'. Please remove the --payments flag or set it to 'none'.",
     );
@@ -526,10 +535,7 @@ function validateSelfBackendConstraints(
   }
 }
 
-function validateEncoreConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateEncoreConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const { backend } = config;
 
   if (backend !== "encore") {
@@ -575,10 +581,7 @@ function validateEncoreConstraints(
   }
 }
 
-function validateAdonisJSConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateAdonisJSConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const { backend } = config;
 
   if (backend !== "adonisjs") {
@@ -628,10 +631,7 @@ function validateBackendConstraints(
   }
 }
 
-function validateFrontendConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateFrontendConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const { frontend } = config;
 
   if (frontend && frontend.length > 0) {
@@ -678,17 +678,38 @@ function validateApiConstraints(config: Partial<ProjectConfig>, _options: CLIInp
     });
   }
 
-  const supportedBackends = ["hono", "express", "fastify", "elysia"];
+  const supportedBackends = ["hono", "effect", "express", "fastify", "elysia"];
   if (!config.backend || !supportedBackends.includes(config.backend)) {
     incompatibilityError({
-      message: `${apiDisplayName} currently supports Hono, Express, Fastify, and Elysia backends.`,
+      message: `${apiDisplayName} currently supports Hono, Effect, Express, Fastify, and Elysia backends.`,
       provided: { api: config.api, backend: config.backend ?? "none" },
       suggestions: [
         "Use --backend hono",
+        "Use --backend effect",
         "Use --backend express",
         "Use --backend fastify",
         "Use --backend elysia",
       ],
+    });
+  }
+}
+
+function validateEffectBackendConstraints(config: Partial<ProjectConfig>) {
+  if (config.backend !== "effect") return;
+
+  if (config.effect !== "effect-full") {
+    missingRequirementError({
+      message: "Effect backend requires Effect Platform + SQL services.",
+      provided: { backend: "effect", effect: config.effect ?? "none" },
+      suggestions: ["Use --effect effect-full"],
+    });
+  }
+
+  if (config.validation !== "effect-schema") {
+    missingRequirementError({
+      message: "Effect backend requires Effect Schema validation.",
+      provided: { backend: "effect", validation: config.validation ?? "none" },
+      suggestions: ["Use --validation effect-schema"],
     });
   }
 }
@@ -706,8 +727,9 @@ function validateJavaConstraints(
   const hasJavaTestingLibraries = (config.javaTestingLibraries ?? []).some(
     (library) => library !== "none",
   );
+  const hasJavaApi = (config.javaApi ?? "none") !== "none";
   const hasSpringOnlyFeatures =
-    config.javaOrm !== "none" || config.javaAuth !== "none" || hasJavaLibraries;
+    config.javaOrm !== "none" || config.javaAuth !== "none" || hasJavaLibraries || hasJavaApi;
 
   if (hasNoBuildTool && hasJavaWebFramework) {
     incompatibilityError({
@@ -731,11 +753,12 @@ function validateJavaConstraints(
         "java-build-tool": config.javaBuildTool ?? "none",
         "java-orm": config.javaOrm ?? "none",
         "java-auth": config.javaAuth ?? "none",
+        "java-api": config.javaApi ?? "none",
         "java-libraries": (config.javaLibraries ?? []).join(" ") || "none",
       },
       suggestions: [
         "Use --java-web-framework spring-boot and a real build tool for Spring features",
-        "Clear --java-orm, --java-auth, and --java-libraries when using plain Java or Quarkus",
+        "Clear --java-orm, --java-auth, --java-api, and --java-libraries when using plain Java or Quarkus",
       ],
     });
   }
@@ -958,7 +981,14 @@ function validateRateLimitConstraints(config: Partial<ProjectConfig>) {
 function validateSearchConstraints(config: Partial<ProjectConfig>) {
   if (!config.search || config.search === "none") return;
   const ecosystem = config.ecosystem ?? "typescript";
-  if (ecosystem !== "typescript" && config.search !== "meilisearch") {
+  // Non-TypeScript ecosystems default to Meilisearch, but a few have native
+  // options: Go adds Bleve (embedded) and Python adds Elasticsearch.
+  const nonTsSearchAllowlist: Record<string, string[]> = {
+    go: ["meilisearch", "bleve"],
+    python: ["meilisearch", "elasticsearch"],
+  };
+  const allowedSearch = nonTsSearchAllowlist[ecosystem] ?? ["meilisearch"];
+  if (ecosystem !== "typescript" && !allowedSearch.includes(config.search)) {
     incompatibilityError({
       message: "Only Meilisearch search is available for non-TypeScript ecosystems.",
       provided: { ecosystem, search: config.search },
@@ -978,10 +1008,7 @@ function validateSearchConstraints(config: Partial<ProjectConfig>) {
   }
 }
 
-function validateShadcnConstraints(
-  config: Partial<ProjectConfig>,
-  providedFlags: Set<string>,
-) {
+function validateShadcnConstraints(config: Partial<ProjectConfig>, providedFlags: Set<string>) {
   const shadcnFlagMap: Record<string, string> = {
     shadcnBase: "--shadcn-base",
     shadcnStyle: "--shadcn-style",
@@ -1035,6 +1062,30 @@ export function validatePythonApiConstraints(config: Partial<ProjectConfig>) {
   }
 }
 
+function validateI18nConstraints(config: Partial<ProjectConfig>) {
+  if (config.i18n !== "intlayer") return;
+
+  const { web } = splitFrontends(config.frontend ?? []);
+  const unsupportedFrontend = web.find(
+    (frontend) => !INTLAYER_COMPATIBLE_FRONTENDS.has(frontend),
+  );
+
+  if (web.length === 0 || unsupportedFrontend) {
+    incompatibilityError({
+      message:
+        "Intlayer i18n is currently wired only for Next.js, Vinext, TanStack Router/Start, React Router, and React + Vite frontends.",
+      provided: {
+        frontend: web.join(" ") || "none",
+        i18n: "intlayer",
+      },
+      suggestions: [
+        "Use --frontend next, vinext, tanstack-router, tanstack-start, react-router, or react-vite",
+        "Set --i18n none or choose another i18n provider for this frontend",
+      ],
+    });
+  }
+}
+
 export function validateFullConfig(
   config: Partial<ProjectConfig>,
   providedFlags: Set<string>,
@@ -1057,6 +1108,7 @@ export function validateFullConfig(
   validateEncoreConstraints(config, providedFlags);
   validateAdonisJSConstraints(config, providedFlags);
   validateBackendConstraints(config, providedFlags, options);
+  validateEffectBackendConstraints(config);
 
   validateFrontendConstraints(config, providedFlags);
 
@@ -1069,6 +1121,7 @@ export function validateFullConfig(
   validateSearchConstraints(config);
   validateJavaConstraints(config, providedFlags);
   validateElixirConstraints(config);
+  validateI18nConstraints(config);
 
   const hasGraphBackend = config.stackParts?.some(
     (part) =>
@@ -1205,6 +1258,7 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
 
     validateEcosystemAuthCompatibility(config);
     validateDatabaseOrmAuth(config);
+    validateEffectBackendConstraints(config);
 
     if (config.frontend && config.frontend.length > 0) {
       ensureSingleWebAndNative(config.frontend);
@@ -1219,6 +1273,7 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
     validateSearchConstraints(config);
     validateJavaConstraints(config);
     validateElixirConstraints(config);
+    validateI18nConstraints(config);
 
     validatePaymentsCompatibility(config.payments, config.auth, config.backend, config.frontend);
 

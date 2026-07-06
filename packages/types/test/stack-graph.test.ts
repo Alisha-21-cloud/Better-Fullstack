@@ -1,16 +1,7 @@
 import { describe, expect, it } from "bun:test";
 
-import {
-  ELIXIR_UNSUPPORTED_GRAPH_TOOLS,
-  getAddonStackPartBinding,
-  getStackPartCompatibilityIssueForPart,
-  getStackPartOptions,
-  legacyProjectConfigToStackParts,
-  parseStackPartSpecs,
-  stackGraphToLegacyProjectConfigForEcosystem,
-  stackPartsToLegacyProjectConfigPartial,
-  validateStackParts,
-} from "../src/stack-graph";
+import type { ProjectConfig } from "../src/types";
+
 import { createCliDefaultProjectConfigBase } from "../src/defaults";
 import {
   AI_VALUES,
@@ -124,12 +115,24 @@ import {
   I18N_VALUES,
   ANALYTICS_VALUES,
   ANIMATION_VALUES,
+  ASTRO_INTEGRATION_VALUES,
   STATE_MANAGEMENT_VALUES,
+  TESTING_VALUES,
   UI_LIBRARY_VALUES,
   VALIDATION_VALUES,
   WEB_DEPLOY_VALUES,
 } from "../src/schemas";
-import type { ProjectConfig } from "../src/types";
+import {
+  ELIXIR_UNSUPPORTED_GRAPH_TOOLS,
+  getAddonStackPartBinding,
+  getStackPartCompatibilityIssueForPart,
+  getStackPartOptions,
+  legacyProjectConfigToStackParts,
+  parseStackPartSpecs,
+  stackGraphToLegacyProjectConfigForEcosystem,
+  stackPartsToLegacyProjectConfigPartial,
+  validateStackParts,
+} from "../src/stack-graph";
 
 function compareLegacyConfigToStackParts(
   config: Partial<ProjectConfig>,
@@ -680,9 +683,9 @@ describe("stack graph", () => {
     expect(validateStackParts(d1WithoutWorkersParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_GRAPH_SELECTION",
     );
-    expect(validateStackParts(unsupportedWebDeployParts).issues.map((issue) => issue.code)).toContain(
-      "INCOMPATIBLE_OWNER_TOOL",
-    );
+    expect(
+      validateStackParts(unsupportedWebDeployParts).issues.map((issue) => issue.code),
+    ).toContain("INCOMPATIBLE_OWNER_TOOL");
   });
 
   it("rejects incompatible addon and example graph selections", () => {
@@ -1028,6 +1031,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
       cms: CMS_VALUES,
       validation: VALIDATION_VALUES,
       effect: EFFECT_VALUES,
+      testing: TESTING_VALUES,
     } as const;
 
     for (const [field, values] of Object.entries(cases)) {
@@ -1053,7 +1057,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
     }
   });
 
-  it("keeps validation and effect flat-only without a TypeScript backend", () => {
+  it("keeps validation, effect, and testing flat-only without a TypeScript backend", () => {
     const config: Partial<ProjectConfig> = {
       ecosystem: "typescript",
       frontend: ["tanstack-router"],
@@ -1064,10 +1068,48 @@ describe("stack graph structural round-trip (phase 0)", () => {
       auth: "none",
       validation: "valibot",
       effect: "effect",
+      testing: "playwright",
     };
     const parts = legacyProjectConfigToStackParts(config);
-    expect(parts.some((part) => part.role === "validation" || part.role === "effect")).toBe(false);
+    expect(
+      parts.some(
+        (part) => part.role === "validation" || part.role === "effect" || part.role === "testing",
+      ),
+    ).toBe(false);
     expectNoDrift(config);
+  });
+
+  it("owns the TypeScript test runner on the backend without colliding with testing addons", () => {
+    // The framework testing part (backend-owned) and the msw/storybook testing addons
+    // (frontend-owned) share the `testing` role but live in different owner scopes, so
+    // both round-trip cleanly and validateStackParts raises no DUPLICATE_ROLE_SCOPE issue.
+    const config: Partial<ProjectConfig> = {
+      ...TS_BASE,
+      testing: "vitest",
+      addons: ["msw", "storybook"],
+    };
+    const parts = legacyProjectConfigToStackParts(config);
+    const backend = parts.find(
+      (part) => part.role === "backend" && part.ecosystem === "typescript",
+    );
+    const frontend = parts.find(
+      (part) => part.role === "frontend" && part.ecosystem === "typescript",
+    );
+    const frameworkPart = parts.find(
+      (part) => part.role === "testing" && part.toolId === "vitest",
+    );
+    const addonTestingParts = parts.filter(
+      (part) => part.role === "testing" && part.toolId !== "vitest",
+    );
+
+    expect(frameworkPart?.ownerPartId).toBe(backend?.id);
+    expect(addonTestingParts.map((part) => part.toolId).sort()).toEqual(["msw", "storybook"]);
+    expect(addonTestingParts.every((part) => part.ownerPartId === frontend?.id)).toBe(true);
+    expect(validateStackParts(parts).issues).toEqual([]);
+
+    const derived = expectNoDrift(config);
+    expect(derived.testing).toBe("vitest");
+    expect([...(derived.addons ?? [])].sort()).toEqual(["msw", "storybook"]);
   });
 
   it("round-trips every frontend-owned TypeScript single value as a scoped graph part", () => {
@@ -1114,6 +1156,59 @@ describe("stack graph structural round-trip (phase 0)", () => {
         expect(validateStackParts(parts).issues).toEqual([]);
       }
     }
+  });
+
+  it("carries the Astro integration as a frontend-part setting and round-trips it", () => {
+    for (const astroIntegration of ASTRO_INTEGRATION_VALUES.filter((value) => value !== "none")) {
+      const config: Partial<ProjectConfig> = {
+        ecosystem: "typescript",
+        frontend: ["astro"],
+        backend: "none",
+        database: "none",
+        orm: "none",
+        api: "none",
+        auth: "none",
+        astroIntegration,
+      };
+      const parts = legacyProjectConfigToStackParts(config);
+      const frontendPart = parts.find(
+        (part) => part.role === "frontend" && part.ecosystem === "typescript",
+      );
+
+      // legacy -> parts: the choice rides on the Astro frontend part's settings,
+      // not a flat side channel or a scoped capability part.
+      expect(frontendPart?.toolId).toBe("astro");
+      expect(frontendPart?.settings?.astroIntegration).toBe(astroIntegration);
+
+      // parts -> legacy: the graph restores the same integration with no drift.
+      const diagnostics = compareLegacyConfigToStackParts(config, parts);
+      expect(diagnostics).toEqual([]);
+
+      const derived = stackPartsToLegacyProjectConfigPartial(parts);
+      expect(derived.astroIntegration).toBe(astroIntegration);
+      expect(validateStackParts(parts).issues).toEqual([]);
+    }
+
+    // Without a carried setting the projection leaves astroIntegration unset so a
+    // flat field (e.g. a stack-update whose spec-derived parts drop the setting)
+    // is preserved instead of being clobbered to "none".
+    const noIntegrationParts = legacyProjectConfigToStackParts({
+      ecosystem: "typescript",
+      frontend: ["astro"],
+      backend: "none",
+      database: "none",
+      orm: "none",
+      api: "none",
+      auth: "none",
+    });
+    expect(
+      noIntegrationParts.find(
+        (part) => part.role === "frontend" && part.ecosystem === "typescript",
+      )?.settings,
+    ).toBeUndefined();
+    expect(
+      stackPartsToLegacyProjectConfigPartial(noIntegrationParts).astroIntegration,
+    ).toBeUndefined();
   });
 
   it("round-trips every deploy, runtime, and db setup value as a scoped graph part", () => {
@@ -1268,9 +1363,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
         examples: [example],
       };
       const parts = legacyProjectConfigToStackParts(config);
-      const graphPart = parts.find(
-        (part) => part.role === "examples" && part.toolId === example,
-      );
+      const graphPart = parts.find((part) => part.role === "examples" && part.toolId === example);
       const derived = expectNoDrift(config);
 
       if (example === "none") {
@@ -1617,6 +1710,25 @@ describe("stack graph structural round-trip (phase 0)", () => {
     const reimported = legacyProjectConfigToStackParts(lowered);
 
     expect(reimported.map(structuralTuple).sort()).toEqual(parts.map(structuralTuple).sort());
+  });
+
+  it("defaults and validates Effect backend graph-owned services", () => {
+    const parts = parseStackPartSpecs(["backend:typescript:effect"]);
+    const lowered = stackPartsToLegacyProjectConfigPartial(parts);
+    const invalidParts = parseStackPartSpecs([
+      "backend:typescript:effect",
+      "backend.effect:typescript:effect",
+      "backend.validation:typescript:zod",
+    ]);
+
+    expect(lowered.backend).toBe("effect");
+    expect(lowered.effect).toBe("effect-full");
+    expect(lowered.validation).toBe("effect-schema");
+    expect(validateStackParts(parts).issues).toEqual([]);
+    expect(validateStackParts(invalidParts).issues.map((issue) => issue.message)).toEqual([
+      "Effect backend requires Effect Platform + SQL services.",
+      "Effect backend requires Effect Schema validation.",
+    ]);
   });
 
   it("imports Python GraphQL selections into the graphql role", () => {

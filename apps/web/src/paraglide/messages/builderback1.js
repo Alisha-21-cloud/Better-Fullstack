@@ -22,7 +22,7 @@ const ja_builderback1 = /** @type {(inputs: Builderback1Inputs) => LocalizedStri
 };
 
 const ko_builderback1 = /** @type {(inputs: Builderback1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`뒤쪽에`)
+	return /** @type {LocalizedString} */ (`뒤로`)
 };
 
 const zh_hant1_builderback1 = /** @type {(inputs: Builderback1Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_builderback1 = /** @type {(inputs: Builderback1Inputs) => LocalizedStri
 };
 
 const fr_builderback1 = /** @type {(inputs: Builderback1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Dos`)
+	return /** @type {LocalizedString} */ (`Retour`)
+};
+
+const uk_builderback1 = /** @type {(inputs: Builderback1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Назад`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_builderback1 = /** @type {(inputs: Builderback1Inputs) => LocalizedStri
 * | "Back" |
 *
 * @param {Builderback1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const builderback1 = /** @type {((inputs?: Builderback1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Builderback1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const builderback1 = /** @type {((inputs?: Builderback1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Builderback1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_builderback1(inputs)
 	if (locale === "es") return es_builderback1(inputs)
@@ -55,6 +59,7 @@ const builderback1 = /** @type {((inputs?: Builderback1Inputs, options?: { local
 	if (locale === "ko") return ko_builderback1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_builderback1(inputs)
 	if (locale === "de") return de_builderback1(inputs)
-	return fr_builderback1(inputs)
+	if (locale === "fr") return fr_builderback1(inputs)
+	return uk_builderback1(inputs)
 });
 export { builderback1 as "builderBack" }

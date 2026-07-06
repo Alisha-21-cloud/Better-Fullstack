@@ -18,7 +18,7 @@ const zh_navtrynow2 = /** @type {(inputs: Navtrynow2Inputs) => LocalizedString} 
 };
 
 const ja_navtrynow2 = /** @type {(inputs: Navtrynow2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`今すぐ試してください`)
+	return /** @type {LocalizedString} */ (`今すぐ試す`)
 };
 
 const ko_navtrynow2 = /** @type {(inputs: Navtrynow2Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_navtrynow2 = /** @type {(inputs: Navtrynow2Inputs) => LocalizedSt
 };
 
 const de_navtrynow2 = /** @type {(inputs: Navtrynow2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Versuchen Sie es jetzt`)
+	return /** @type {LocalizedString} */ (`Jetzt ausprobieren`)
 };
 
 const fr_navtrynow2 = /** @type {(inputs: Navtrynow2Inputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`Essayez maintenant`)
+};
+
+const uk_navtrynow2 = /** @type {(inputs: Navtrynow2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Спробувати`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_navtrynow2 = /** @type {(inputs: Navtrynow2Inputs) => LocalizedString} 
 * | "Try now" |
 *
 * @param {Navtrynow2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const navtrynow2 = /** @type {((inputs?: Navtrynow2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Navtrynow2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const navtrynow2 = /** @type {((inputs?: Navtrynow2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Navtrynow2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_navtrynow2(inputs)
 	if (locale === "es") return es_navtrynow2(inputs)
@@ -55,6 +59,7 @@ const navtrynow2 = /** @type {((inputs?: Navtrynow2Inputs, options?: { locale?: 
 	if (locale === "ko") return ko_navtrynow2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_navtrynow2(inputs)
 	if (locale === "de") return de_navtrynow2(inputs)
-	return fr_navtrynow2(inputs)
+	if (locale === "fr") return fr_navtrynow2(inputs)
+	return uk_navtrynow2(inputs)
 });
 export { navtrynow2 as "navTryNow" }

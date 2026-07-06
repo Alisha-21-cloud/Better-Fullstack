@@ -30,11 +30,15 @@ const zh_hant1_stackloaded1 = /** @type {(inputs: Stackloaded1Inputs) => Localiz
 };
 
 const de_stackloaded1 = /** @type {(inputs: Stackloaded1Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Stapel erfolgreich geladen`)
+	return /** @type {LocalizedString} */ (`Stack erfolgreich geladen`)
 };
 
 const fr_stackloaded1 = /** @type {(inputs: Stackloaded1Inputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`Pile chargée avec succès`)
+};
+
+const uk_stackloaded1 = /** @type {(inputs: Stackloaded1Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Стек завантажено`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_stackloaded1 = /** @type {(inputs: Stackloaded1Inputs) => LocalizedStri
 * | "Stack loaded successfully" |
 *
 * @param {Stackloaded1Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const stackloaded1 = /** @type {((inputs?: Stackloaded1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Stackloaded1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const stackloaded1 = /** @type {((inputs?: Stackloaded1Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Stackloaded1Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_stackloaded1(inputs)
 	if (locale === "es") return es_stackloaded1(inputs)
@@ -55,6 +59,7 @@ const stackloaded1 = /** @type {((inputs?: Stackloaded1Inputs, options?: { local
 	if (locale === "ko") return ko_stackloaded1(inputs)
 	if (locale === "zh-Hant") return zh_hant1_stackloaded1(inputs)
 	if (locale === "de") return de_stackloaded1(inputs)
-	return fr_stackloaded1(inputs)
+	if (locale === "fr") return fr_stackloaded1(inputs)
+	return uk_stackloaded1(inputs)
 });
 export { stackloaded1 as "stackLoaded" }

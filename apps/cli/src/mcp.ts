@@ -75,6 +75,7 @@ import {
   GoWebFrameworkSchema,
   JavaAuthSchema,
   JavaApiSchema,
+  JavaLanguageSchema,
   JavaLoggingSchema,
   JavaBuildToolSchema,
   JavaLibrariesSchema,
@@ -153,12 +154,13 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import z from "zod";
 
+import { applyStackUpdate, planStackUpdate } from "./helpers/core/stack-update";
 import { previewBtsConfigUpdate, readBtsConfig, writeBtsConfig } from "./utils/bts-config";
+import { applyEffectBackendDefaults } from "./utils/config-processing";
 import { generateReproducibleCommand } from "./utils/generate-reproducible-command";
 import { getLatestCLIVersion } from "./utils/get-latest-cli-version";
 import { getEffectiveStack, getGraphSummary } from "./utils/graph-summary";
 import { getTemplateConfig, getTemplateDescription } from "./utils/templates";
-import { applyStackUpdate, planStackUpdate } from "./helpers/core/stack-update";
 
 const OPTION_ENTRY_COUNT = Object.values(OPTION_CATEGORY_METADATA).reduce(
   (sum, metadata) => sum + metadata.options.length,
@@ -485,6 +487,7 @@ const MCP_COMPATIBILITY_DEFAULTS = {
   mobilePush: "none",
   mobileOTA: "none",
   packageManager: "bun",
+  workspaceShape: "monorepo",
   versionChannel: "stable",
   examples: [],
   aiSdk: "none",
@@ -535,6 +538,7 @@ const MCP_COMPATIBILITY_DEFAULTS = {
   goCaching: "none",
   goConfig: "none",
   goObservability: "none",
+  javaLanguage: "java",
   javaWebFramework: "spring-boot",
   javaBuildTool: "maven",
   javaOrm: "none",
@@ -659,10 +663,8 @@ function buildProjectConfig(
       (hasMobileProject ? "expo-linking" : "none"),
     shadcnBase: (input.shadcnBase as ProjectConfig["shadcnBase"]) ?? "radix",
     shadcnStyle: (input.shadcnStyle as ProjectConfig["shadcnStyle"]) ?? "nova",
-    shadcnIconLibrary:
-      (input.shadcnIconLibrary as ProjectConfig["shadcnIconLibrary"]) ?? "lucide",
-    shadcnColorTheme:
-      (input.shadcnColorTheme as ProjectConfig["shadcnColorTheme"]) ?? "neutral",
+    shadcnIconLibrary: (input.shadcnIconLibrary as ProjectConfig["shadcnIconLibrary"]) ?? "lucide",
+    shadcnColorTheme: (input.shadcnColorTheme as ProjectConfig["shadcnColorTheme"]) ?? "neutral",
     shadcnBaseColor: (input.shadcnBaseColor as ProjectConfig["shadcnBaseColor"]) ?? "neutral",
     shadcnFont: (input.shadcnFont as ProjectConfig["shadcnFont"]) ?? "inter",
     shadcnRadius: (input.shadcnRadius as ProjectConfig["shadcnRadius"]) ?? "default",
@@ -678,6 +680,8 @@ function buildProjectConfig(
     );
     Object.assign(config, stackPartsToLegacyProjectConfigPartial(stackParts), { stackParts });
   }
+
+  applyEffectBackendDefaults(config, new Set(Object.keys(input)));
 
   return config;
 }
@@ -709,7 +713,7 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
     (a) => ![...codeQuality, ...documentation, "none"].includes(a),
   );
 
-  return {
+  const result: CompatibilityInput = {
     ecosystem,
     projectName: (input.projectName as string) ?? null,
     webFrontend,
@@ -724,6 +728,17 @@ function buildCompatibilityInput(input: Record<string, unknown>): CompatibilityI
     appPlatforms,
     aiSdk: (input.ai as string) ?? defaults.aiSdk,
   };
+
+  if (result.backend === "effect") {
+    if (input.effect === undefined) {
+      result.backendLibraries = "effect-full";
+    }
+    if (input.validation === undefined) {
+      result.validation = "effect-schema";
+    }
+  }
+
+  return result;
 }
 
 function summarizeTree(tree: {
@@ -774,6 +789,7 @@ const COMPATIBILITY_RULES_MD = `# Better-Fullstack Compatibility Rules
 
 ## Backend Constraints
 - **Convex**: Forces runtime=none, database=none, orm=none, api=none, dbSetup=none, serverDeploy=none. Removes incompatible frontends (Solid, SolidStart, Astro).
+- **Effect backend**: Requires effect=effect-full and validation=effect-schema. Other compatible frontend/backend-adjacent tools can still be selected.
 - **No backend (none)**: Clears auth, payments, database, orm, api, serverDeploy, search, fileStorage.
 - **Fullstack (backend='self')**: Sets runtime=none, serverDeploy=none. Only works with: next, vinext, tanstack-start, astro, nuxt, svelte, solid-start.
 
@@ -994,6 +1010,11 @@ const stackUpdateOutputSchema = {
   scriptChanges: z.record(z.string(), z.array(z.string())).optional(),
   envChanges: z.record(z.string(), z.array(z.string())).optional(),
   manualReviewBlockers: z.array(z.string()).optional(),
+  architectureChanges: z
+    .array(z.object({ key: z.string(), from: z.string(), to: z.string() }))
+    .optional(),
+  migrationSteps: z.array(z.string()).optional(),
+  requiresArchitectureAck: z.boolean().optional(),
   compatibilityAdjustments: z.array(z.string()).optional(),
   compatibilityWarnings: z.array(z.string()).optional(),
   installCommand: z.string().optional(),
@@ -1073,7 +1094,7 @@ function matchNearestPreset(input: Record<string, unknown>): Template | null {
   return best && best.score >= 3 ? best.id : null;
 }
 
-function recommendStackFromBrief(
+export function recommendStackFromBrief(
   brief: string,
   ecosystemHint?: ProjectConfig["ecosystem"],
 ): { input: Record<string, unknown>; rationale: string[]; matchedPreset: Template | null } {
@@ -1322,6 +1343,7 @@ const crossEcosystemInputSchema = {
   goCaching: GoCachingSchema.optional().describe("Go caching library"),
   goConfig: GoConfigSchema.optional().describe("Go config management"),
   goObservability: GoObservabilitySchema.optional().describe("Go observability"),
+  javaLanguage: JavaLanguageSchema.optional().describe("JVM language (java, kotlin)"),
   javaWebFramework: JavaWebFrameworkSchema.optional().describe("Java web framework"),
   javaBuildTool: JavaBuildToolSchema.optional().describe("Java build tool"),
   javaOrm: JavaOrmSchema.optional().describe("Java ORM"),
@@ -1414,7 +1436,7 @@ export const MCP_PLAN_CREATE_SCHEMA = {
   ...mobileInputSchema,
   fileUpload: FileUploadSchema.optional().describe("File upload"),
   ...deploymentInputSchema,
-  effect: EffectSchema.optional().describe("Effect ecosystem (effect, effect-full)"),
+  effect: EffectSchema.optional().describe("Effect services (effect, effect-full)"),
   analytics: AnalyticsSchema.optional().describe("Privacy-focused analytics provider"),
   astroIntegration: AstroIntegrationSchema.optional().describe(
     "Astro UI framework integration (react, vue, svelte, solid)",
@@ -1432,6 +1454,12 @@ export const MCP_PLAN_CREATE_SCHEMA = {
 export const MCP_STACK_UPDATE_SCHEMA = {
   ...MCP_PLAN_CREATE_SCHEMA,
   projectDir: z.string().describe("Absolute path to the existing Better-Fullstack project"),
+  acknowledgeArchitectureChange: z
+    .boolean()
+    .optional()
+    .describe(
+      "Acknowledge that this update replaces an existing database/orm/auth/api/backend/runtime choice. Required to apply architecture-changing updates; data and schema are NOT migrated automatically.",
+    ),
 };
 
 export async function startMcpServer() {
@@ -1959,7 +1987,13 @@ export async function startMcpServer() {
           message:
             plan.manualReviewBlockers.length > 0
               ? "Plan created, but manual review is required before applying."
-              : `Plan created. If approved, call bfs_apply_stack_update, then run: ${plan.installCommand}`,
+              : plan.requiresArchitectureAck
+                ? `Plan created. This is an architecture change (${plan.architectureChanges
+                    .map((change) => `${change.key}: ${change.from} -> ${change.to}`)
+                    .join(
+                      "; ",
+                    )}); data and schema are NOT migrated automatically. Review migrationSteps, then call bfs_apply_stack_update with acknowledgeArchitectureChange: true, then run: ${plan.installCommand}`
+                : `Plan created. If approved, call bfs_apply_stack_update, then run: ${plan.installCommand}`,
         };
         return {
           content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],

@@ -18,11 +18,11 @@ const zh_presettrackjavaapiintent4 = /** @type {(inputs: Presettrackjavaapiinten
 };
 
 const ja_presettrackjavaapiintent4 = /** @type {(inputs: Presettrackjavaapiintent4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`シップスプリングサービス`)
+	return /** @type {LocalizedString} */ (`Spring サービスを出荷する`)
 };
 
 const ko_presettrackjavaapiintent4 = /** @type {(inputs: Presettrackjavaapiintent4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`선박 스프링 서비스`)
+	return /** @type {LocalizedString} */ (`Spring 서비스 출시`)
 };
 
 const zh_hant1_presettrackjavaapiintent4 = /** @type {(inputs: Presettrackjavaapiintent4Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_presettrackjavaapiintent4 = /** @type {(inputs: Presettrackjavaap
 };
 
 const de_presettrackjavaapiintent4 = /** @type {(inputs: Presettrackjavaapiintent4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Schiffsfrühlingsdienste`)
+	return /** @type {LocalizedString} */ (`Spring-Services ausliefern`)
 };
 
 const fr_presettrackjavaapiintent4 = /** @type {(inputs: Presettrackjavaapiintent4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Services de ressort de navire`)
+	return /** @type {LocalizedString} */ (`Livrer des services Spring`)
+};
+
+const uk_presettrackjavaapiintent4 = /** @type {(inputs: Presettrackjavaapiintent4Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Шипити Spring-сервіси`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_presettrackjavaapiintent4 = /** @type {(inputs: Presettrackjavaapiinten
 * | "Ship Spring services" |
 *
 * @param {Presettrackjavaapiintent4Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const presettrackjavaapiintent4 = /** @type {((inputs?: Presettrackjavaapiintent4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Presettrackjavaapiintent4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const presettrackjavaapiintent4 = /** @type {((inputs?: Presettrackjavaapiintent4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Presettrackjavaapiintent4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_presettrackjavaapiintent4(inputs)
 	if (locale === "es") return es_presettrackjavaapiintent4(inputs)
@@ -55,6 +59,7 @@ const presettrackjavaapiintent4 = /** @type {((inputs?: Presettrackjavaapiintent
 	if (locale === "ko") return ko_presettrackjavaapiintent4(inputs)
 	if (locale === "zh-Hant") return zh_hant1_presettrackjavaapiintent4(inputs)
 	if (locale === "de") return de_presettrackjavaapiintent4(inputs)
-	return fr_presettrackjavaapiintent4(inputs)
+	if (locale === "fr") return fr_presettrackjavaapiintent4(inputs)
+	return uk_presettrackjavaapiintent4(inputs)
 });
 export { presettrackjavaapiintent4 as "presetTrackJavaApiIntent" }

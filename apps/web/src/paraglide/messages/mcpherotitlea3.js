@@ -22,11 +22,11 @@ const ja_mcpherotitlea3 = /** @type {(inputs: Mcpherotitlea3Inputs) => Localized
 };
 
 const ko_mcpherotitlea3 = /** @type {(inputs: Mcpherotitlea3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`귀하의 대리인.`)
+	return /** @type {LocalizedString} */ (`당신의 에이전트.`)
 };
 
 const zh_hant1_mcpherotitlea3 = /** @type {(inputs: Mcpherotitlea3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`你的代理商。`)
+	return /** @type {LocalizedString} */ (`你的代理程式。`)
 };
 
 const de_mcpherotitlea3 = /** @type {(inputs: Mcpherotitlea3Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_mcpherotitlea3 = /** @type {(inputs: Mcpherotitlea3Inputs) => Localized
 };
 
 const fr_mcpherotitlea3 = /** @type {(inputs: Mcpherotitlea3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Votre mandataire.`)
+	return /** @type {LocalizedString} */ (`Votre agent.`)
+};
+
+const uk_mcpherotitlea3 = /** @type {(inputs: Mcpherotitlea3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Ваш агент.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_mcpherotitlea3 = /** @type {(inputs: Mcpherotitlea3Inputs) => Localized
 * | "Your agent." |
 *
 * @param {Mcpherotitlea3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const mcpherotitlea3 = /** @type {((inputs?: Mcpherotitlea3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mcpherotitlea3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const mcpherotitlea3 = /** @type {((inputs?: Mcpherotitlea3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mcpherotitlea3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_mcpherotitlea3(inputs)
 	if (locale === "es") return es_mcpherotitlea3(inputs)
@@ -55,6 +59,7 @@ const mcpherotitlea3 = /** @type {((inputs?: Mcpherotitlea3Inputs, options?: { l
 	if (locale === "ko") return ko_mcpherotitlea3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_mcpherotitlea3(inputs)
 	if (locale === "de") return de_mcpherotitlea3(inputs)
-	return fr_mcpherotitlea3(inputs)
+	if (locale === "fr") return fr_mcpherotitlea3(inputs)
+	return uk_mcpherotitlea3(inputs)
 });
 export { mcpherotitlea3 as "mcpHeroTitleA" }

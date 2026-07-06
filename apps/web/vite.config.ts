@@ -38,6 +38,10 @@ const ssrMdxLoaderAliases = new Map([
     "@/lib/blog/mdx-loaders",
     fileURLToPath(new URL("./src/lib/blog/mdx-loaders.ssr.ts", import.meta.url)),
   ],
+  [
+    "virtual:localized-content",
+    fileURLToPath(new URL("./src/lib/i18n/localized-content.ssr.ts", import.meta.url)),
+  ],
 ]);
 
 function ssrMdxLoaderAliasPlugin(): PluginOption {
@@ -45,7 +49,10 @@ function ssrMdxLoaderAliasPlugin(): PluginOption {
     name: "better-fullstack:ssr-mdx-loader-alias",
     enforce: "pre",
     resolveId(source, _importer, options) {
-      return options.ssr ? ssrMdxLoaderAliases.get(source) : undefined;
+      const environmentName = (this as { environment?: { name?: string } }).environment?.name;
+      const isServerEnvironment =
+        options.ssr || environmentName === "ssr" || environmentName === "nitro";
+      return isServerEnvironment ? ssrMdxLoaderAliases.get(source) : undefined;
     },
   };
 }
@@ -67,6 +74,31 @@ export default defineConfig({
       // The browser dynamic imports gracefully catch the failure, so exclude it
       // from the client bundle entirely (~1.4MB gzip savings).
       external: ["ts-morph"],
+      output: {
+        // Localized MDX bodies are lazy-loaded per locale. Stamp those chunks
+        // with a stable localized-content prefix so the performance-budget check
+        // can exclude this non-critical-path content from initial-load JS.
+        chunkFileNames(chunkInfo) {
+          const id = chunkInfo.facadeModuleId;
+          if (id) {
+            const bundle =
+              /virtual:localized-content-mdx-bundle\/(docs|guides|blog)\/([^/]+)/.exec(id);
+            if (bundle) {
+              return `assets/localized-content-${bundle[1]}-${bundle[2]}-[hash].js`;
+            }
+            const mdx =
+              /virtual:localized-content-mdx\/(?:docs|guides|blog)\/([^/]+)\//.exec(id);
+            if (mdx) {
+              return `assets/localized-content-${mdx[1]}-[name]-[hash].js`;
+            }
+            const raw = /virtual:localized-content-raw\/([^/]+)/.exec(id);
+            if (raw) {
+              return `assets/localized-content-raw-${raw[1]}-[hash].js`;
+            }
+          }
+          return "assets/[name]-[hash].js";
+        },
+      },
     },
   },
   plugins: [

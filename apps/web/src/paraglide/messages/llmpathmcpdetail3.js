@@ -22,7 +22,7 @@ const ja_llmpathmcpdetail3 = /** @type {(inputs: Llmpathmcpdetail3Inputs) => Loc
 };
 
 const ko_llmpathmcpdetail3 = /** @type {(inputs: Llmpathmcpdetail3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`MCP 도구를 통한 비계`)
+	return /** @type {LocalizedString} */ (`MCP 도구를 통해 스캐폴딩합니다.`)
 };
 
 const zh_hant1_llmpathmcpdetail3 = /** @type {(inputs: Llmpathmcpdetail3Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_llmpathmcpdetail3 = /** @type {(inputs: Llmpathmcpdetail3Inputs) 
 };
 
 const de_llmpathmcpdetail3 = /** @type {(inputs: Llmpathmcpdetail3Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Gerüste durch unsere MCP-Tools`)
+	return /** @type {LocalizedString} */ (`erstellt Gerüste über unsere MCP-Tools`)
 };
 
 const fr_llmpathmcpdetail3 = /** @type {(inputs: Llmpathmcpdetail3Inputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`échafaudages grâce à nos outils MCP`)
+};
+
+const uk_llmpathmcpdetail3 = /** @type {(inputs: Llmpathmcpdetail3Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`генерує через наші MCP-інструменти`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_llmpathmcpdetail3 = /** @type {(inputs: Llmpathmcpdetail3Inputs) => Loc
 * | "scaffolds through our MCP tools" |
 *
 * @param {Llmpathmcpdetail3Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const llmpathmcpdetail3 = /** @type {((inputs?: Llmpathmcpdetail3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Llmpathmcpdetail3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const llmpathmcpdetail3 = /** @type {((inputs?: Llmpathmcpdetail3Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Llmpathmcpdetail3Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_llmpathmcpdetail3(inputs)
 	if (locale === "es") return es_llmpathmcpdetail3(inputs)
@@ -55,6 +59,7 @@ const llmpathmcpdetail3 = /** @type {((inputs?: Llmpathmcpdetail3Inputs, options
 	if (locale === "ko") return ko_llmpathmcpdetail3(inputs)
 	if (locale === "zh-Hant") return zh_hant1_llmpathmcpdetail3(inputs)
 	if (locale === "de") return de_llmpathmcpdetail3(inputs)
-	return fr_llmpathmcpdetail3(inputs)
+	if (locale === "fr") return fr_llmpathmcpdetail3(inputs)
+	return uk_llmpathmcpdetail3(inputs)
 });
 export { llmpathmcpdetail3 as "llmPathMcpDetail" }

@@ -34,7 +34,11 @@ const de_builderastrointegration2 = /** @type {(inputs: Builderastrointegration2
 };
 
 const fr_builderastrointegration2 = /** @type {(inputs: Builderastrointegration2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Astro Intégration`)
+	return /** @type {LocalizedString} */ (`Intégration Astro`)
+};
+
+const uk_builderastrointegration2 = /** @type {(inputs: Builderastrointegration2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Інтеграція Astro`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_builderastrointegration2 = /** @type {(inputs: Builderastrointegration2
 * | "Astro Integration" |
 *
 * @param {Builderastrointegration2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const builderastrointegration2 = /** @type {((inputs?: Builderastrointegration2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Builderastrointegration2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const builderastrointegration2 = /** @type {((inputs?: Builderastrointegration2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Builderastrointegration2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_builderastrointegration2(inputs)
 	if (locale === "es") return es_builderastrointegration2(inputs)
@@ -55,6 +59,7 @@ const builderastrointegration2 = /** @type {((inputs?: Builderastrointegration2I
 	if (locale === "ko") return ko_builderastrointegration2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_builderastrointegration2(inputs)
 	if (locale === "de") return de_builderastrointegration2(inputs)
-	return fr_builderastrointegration2(inputs)
+	if (locale === "fr") return fr_builderastrointegration2(inputs)
+	return uk_builderastrointegration2(inputs)
 });
 export { builderastrointegration2 as "builderAstroIntegration" }
