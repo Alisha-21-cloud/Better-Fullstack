@@ -18,15 +18,15 @@ const zh_homefeaturesdescription2 = /** @type {(inputs: Homefeaturesdescription2
 };
 
 const ja_homefeaturesdescription2 = /** @type {(inputs: Homefeaturesdescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`TypeScript、React Native、Rust、Python、Go、Java、Elixir — 1 つの CLI が、7 つすべてにわたって実稼働対応のアプリを足場にします。エコシステムとスタックを選択してください。`)
+	return /** @type {LocalizedString} */ (`TypeScript、React Native、Rust、Python、Go、Java、Elixir — 1 つの CLI が、7 つすべてで実稼働対応のアプリをスキャフォールドします。エコシステムを選び、スタックを選ぶ。`)
 };
 
 const ko_homefeaturesdescription2 = /** @type {(inputs: Homefeaturesdescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`TypeScript, React Native, Rust, Python, Go, Java, Elixir — 하나의 CLI는 7개 전체에 걸쳐 프로덕션 지원 앱을 스캐폴드합니다. 생태계를 선택하고 스택을 선택하세요.`)
+	return /** @type {LocalizedString} */ (`TypeScript, React Native, Rust, Python, Go, Java, Elixir — 하나의 CLI로 7개 생태계 전체에 걸쳐 프로덕션 준비가 완료된 앱을 스캐폴드합니다. 생태계를 선택하고 스택을 선택하세요.`)
 };
 
 const zh_hant1_homefeaturesdescription2 = /** @type {(inputs: Homefeaturesdescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`TypeScript、React Native、Rust、Python、Go、Java、Elixir：一個 CLI 涵蓋七個生態，產生可用於生產的應用。`)
+	return /** @type {LocalizedString} */ (`TypeScript、React Native、Rust、Python、Go、Java、Elixir：一個 CLI 就能在這七個生態中產生可用於生產的應用。選好生態，選好你的 stack。`)
 };
 
 const de_homefeaturesdescription2 = /** @type {(inputs: Homefeaturesdescription2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_homefeaturesdescription2 = /** @type {(inputs: Homefeaturesdescription2
 	return /** @type {LocalizedString} */ (`TypeScript, React Native, Rust, Python, Go, Java, Elixir — un CLI échafaude des applications prêtes pour la production sur les sept. Choisissez votre écosystème, choisissez votre pile.`)
 };
 
+const uk_homefeaturesdescription2 = /** @type {(inputs: Homefeaturesdescription2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`TypeScript, React Native, Rust, Python, Go, Java, Elixir — один CLI генерує продакшен-готові застосунки для всіх семи екосистем. Оберіть екосистему, оберіть стек.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "TypeScript, React Native, Rust, Python, Go, Java, Elixir — one CLI scaffolds production-ready apps across all seven. Pick your ecosystem, pick your stack." |
 *
 * @param {Homefeaturesdescription2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const homefeaturesdescription2 = /** @type {((inputs?: Homefeaturesdescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homefeaturesdescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const homefeaturesdescription2 = /** @type {((inputs?: Homefeaturesdescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Homefeaturesdescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_homefeaturesdescription2(inputs)
 	if (locale === "es") return es_homefeaturesdescription2(inputs)
@@ -55,6 +59,7 @@ const homefeaturesdescription2 = /** @type {((inputs?: Homefeaturesdescription2I
 	if (locale === "ko") return ko_homefeaturesdescription2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_homefeaturesdescription2(inputs)
 	if (locale === "de") return de_homefeaturesdescription2(inputs)
-	return fr_homefeaturesdescription2(inputs)
+	if (locale === "fr") return fr_homefeaturesdescription2(inputs)
+	return uk_homefeaturesdescription2(inputs)
 });
 export { homefeaturesdescription2 as "homeFeaturesDescription" }

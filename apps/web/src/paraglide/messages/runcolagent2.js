@@ -14,7 +14,7 @@ const es_runcolagent2 = /** @type {(inputs: Runcolagent2Inputs) => LocalizedStri
 };
 
 const zh_runcolagent2 = /** @type {(inputs: Runcolagent2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`代理人`)
+	return /** @type {LocalizedString} */ (`代理`)
 };
 
 const ja_runcolagent2 = /** @type {(inputs: Runcolagent2Inputs) => LocalizedString} */ () => {
@@ -22,7 +22,7 @@ const ja_runcolagent2 = /** @type {(inputs: Runcolagent2Inputs) => LocalizedStri
 };
 
 const ko_runcolagent2 = /** @type {(inputs: Runcolagent2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`대리인`)
+	return /** @type {LocalizedString} */ (`에이전트`)
 };
 
 const zh_hant1_runcolagent2 = /** @type {(inputs: Runcolagent2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_runcolagent2 = /** @type {(inputs: Runcolagent2Inputs) => LocalizedStri
 	return /** @type {LocalizedString} */ (`Agent`)
 };
 
+const uk_runcolagent2 = /** @type {(inputs: Runcolagent2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Агент`)
+};
+
 /**
 * | output |
 * | --- |
 * | "Agent" |
 *
 * @param {Runcolagent2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runcolagent2 = /** @type {((inputs?: Runcolagent2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runcolagent2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runcolagent2 = /** @type {((inputs?: Runcolagent2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runcolagent2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runcolagent2(inputs)
 	if (locale === "es") return es_runcolagent2(inputs)
@@ -55,6 +59,7 @@ const runcolagent2 = /** @type {((inputs?: Runcolagent2Inputs, options?: { local
 	if (locale === "ko") return ko_runcolagent2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runcolagent2(inputs)
 	if (locale === "de") return de_runcolagent2(inputs)
-	return fr_runcolagent2(inputs)
+	if (locale === "fr") return fr_runcolagent2(inputs)
+	return uk_runcolagent2(inputs)
 });
 export { runcolagent2 as "runColAgent" }

@@ -34,7 +34,11 @@ const de_presettrackinternaltoolintent4 = /** @type {(inputs: Presettrackinterna
 };
 
 const fr_presettrackinternaltoolintent4 = /** @type {(inputs: Presettrackinternaltoolintent4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Déplacez-vous rapidement avec CRUD`)
+	return /** @type {LocalizedString} */ (`Avancez vite avec le CRUD`)
+};
+
+const uk_presettrackinternaltoolintent4 = /** @type {(inputs: Presettrackinternaltoolintent4Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Швидко зібрати CRUD`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_presettrackinternaltoolintent4 = /** @type {(inputs: Presettrackinterna
 * | "Move fast with CRUD" |
 *
 * @param {Presettrackinternaltoolintent4Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const presettrackinternaltoolintent4 = /** @type {((inputs?: Presettrackinternaltoolintent4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Presettrackinternaltoolintent4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const presettrackinternaltoolintent4 = /** @type {((inputs?: Presettrackinternaltoolintent4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Presettrackinternaltoolintent4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_presettrackinternaltoolintent4(inputs)
 	if (locale === "es") return es_presettrackinternaltoolintent4(inputs)
@@ -55,6 +59,7 @@ const presettrackinternaltoolintent4 = /** @type {((inputs?: Presettrackinternal
 	if (locale === "ko") return ko_presettrackinternaltoolintent4(inputs)
 	if (locale === "zh-Hant") return zh_hant1_presettrackinternaltoolintent4(inputs)
 	if (locale === "de") return de_presettrackinternaltoolintent4(inputs)
-	return fr_presettrackinternaltoolintent4(inputs)
+	if (locale === "fr") return fr_presettrackinternaltoolintent4(inputs)
+	return uk_presettrackinternaltoolintent4(inputs)
 });
 export { presettrackinternaltoolintent4 as "presetTrackInternalToolIntent" }

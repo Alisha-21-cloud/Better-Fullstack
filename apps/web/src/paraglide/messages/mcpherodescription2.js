@@ -18,11 +18,11 @@ const zh_mcpherodescription2 = /** @type {(inputs: Mcpherodescription2Inputs) =>
 };
 
 const ja_mcpherodescription2 = /** @type {(inputs: Mcpherodescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`コーディング エージェントに Better Fullstack への構造化されたアクセスを許可します。 CLI フラグを推測することなく、オプションの検査、組み合わせの検証、ファイル ツリーのプレビュー、およびプロジェクトの足場を構築できます。`)
+	return /** @type {LocalizedString} */ (`コーディングエージェントに Better Fullstack への構造化されたアクセスを提供します。CLI フラグを推測することなく、オプションの確認、組み合わせの検証、ファイルツリーのプレビュー、プロジェクトのスキャフォールドまで行えます。`)
 };
 
 const ko_mcpherodescription2 = /** @type {(inputs: Mcpherodescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`코딩 에이전트에 Better Fullstack에 대한 구조화된 액세스 권한을 부여하세요. CLI 플래그를 추측하지 않고도 옵션을 검사하고, 조합을 검증하고, 파일 트리를 미리 보고, 스캐폴드 프로젝트를 실행할 수 있습니다.`)
+	return /** @type {LocalizedString} */ (`코딩 에이전트에 Better Fullstack에 대한 구조화된 액세스 권한을 부여하세요. CLI 플래그를 추측하지 않고도 옵션을 검사하고, 조합을 검증하고, 파일 트리를 미리 보고, 프로젝트를 스캐폴딩할 수 있습니다.`)
 };
 
 const zh_hant1_mcpherodescription2 = /** @type {(inputs: Mcpherodescription2Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_mcpherodescription2 = /** @type {(inputs: Mcpherodescription2Inputs) =>
 };
 
 const fr_mcpherodescription2 = /** @type {(inputs: Mcpherodescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Accordez aux agents de codage un accès structuré à Better Fullstack. Ils peuvent inspecter les options, valider les combinaisons, prévisualiser les arborescences de fichiers et les projets d'échafaudage sans deviner les indicateurs CLI.`)
+	return /** @type {LocalizedString} */ (`Accordez aux agents de codage un accès structuré à Better Fullstack. Ils peuvent inspecter les options, valider les combinaisons, prévisualiser les arborescences de fichiers et échafauder des projets sans deviner les indicateurs CLI.`)
+};
+
+const uk_mcpherodescription2 = /** @type {(inputs: Mcpherodescription2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Дайте агентам для коду структурований доступ до Better Fullstack. Вони можуть переглядати опції, перевіряти комбінації, попередньо бачити дерево файлів і генерувати проєкти без вгадування CLI-прапорців.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_mcpherodescription2 = /** @type {(inputs: Mcpherodescription2Inputs) =>
 * | "Give coding agents structured access to Better Fullstack. They can inspect options, validate combinations, preview file trees, and scaffold projects without ..." |
 *
 * @param {Mcpherodescription2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const mcpherodescription2 = /** @type {((inputs?: Mcpherodescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mcpherodescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const mcpherodescription2 = /** @type {((inputs?: Mcpherodescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mcpherodescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_mcpherodescription2(inputs)
 	if (locale === "es") return es_mcpherodescription2(inputs)
@@ -55,6 +59,7 @@ const mcpherodescription2 = /** @type {((inputs?: Mcpherodescription2Inputs, opt
 	if (locale === "ko") return ko_mcpherodescription2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_mcpherodescription2(inputs)
 	if (locale === "de") return de_mcpherodescription2(inputs)
-	return fr_mcpherodescription2(inputs)
+	if (locale === "fr") return fr_mcpherodescription2(inputs)
+	return uk_mcpherodescription2(inputs)
 });
 export { mcpherodescription2 as "mcpHeroDescription" }

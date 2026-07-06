@@ -18,11 +18,11 @@ const zh_presettrackrestapiintent4 = /** @type {(inputs: Presettrackrestapiinten
 };
 
 const ja_presettrackrestapiintent4 = /** @type {(inputs: Presettrackrestapiintent4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Expoサービスを選択してください`)
+	return /** @type {LocalizedString} */ (`サービスを公開する`)
 };
 
 const ko_presettrackrestapiintent4 = /** @type {(inputs: Presettrackrestapiintent4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Expo서비스`)
+	return /** @type {LocalizedString} */ (`서비스 공개`)
 };
 
 const zh_hant1_presettrackrestapiintent4 = /** @type {(inputs: Presettrackrestapiintent4Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_presettrackrestapiintent4 = /** @type {(inputs: Presettrackrestap
 };
 
 const de_presettrackrestapiintent4 = /** @type {(inputs: Presettrackrestapiintent4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Expose einen Dienst`)
+	return /** @type {LocalizedString} */ (`Einen Dienst bereitstellen`)
 };
 
 const fr_presettrackrestapiintent4 = /** @type {(inputs: Presettrackrestapiintent4Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Expovoir un service`)
+	return /** @type {LocalizedString} */ (`Exposer un service`)
+};
+
+const uk_presettrackrestapiintent4 = /** @type {(inputs: Presettrackrestapiintent4Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Відкрити сервіс назовні`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_presettrackrestapiintent4 = /** @type {(inputs: Presettrackrestapiinten
 * | "Expose a service" |
 *
 * @param {Presettrackrestapiintent4Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const presettrackrestapiintent4 = /** @type {((inputs?: Presettrackrestapiintent4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Presettrackrestapiintent4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const presettrackrestapiintent4 = /** @type {((inputs?: Presettrackrestapiintent4Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Presettrackrestapiintent4Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_presettrackrestapiintent4(inputs)
 	if (locale === "es") return es_presettrackrestapiintent4(inputs)
@@ -55,6 +59,7 @@ const presettrackrestapiintent4 = /** @type {((inputs?: Presettrackrestapiintent
 	if (locale === "ko") return ko_presettrackrestapiintent4(inputs)
 	if (locale === "zh-Hant") return zh_hant1_presettrackrestapiintent4(inputs)
 	if (locale === "de") return de_presettrackrestapiintent4(inputs)
-	return fr_presettrackrestapiintent4(inputs)
+	if (locale === "fr") return fr_presettrackrestapiintent4(inputs)
+	return uk_presettrackrestapiintent4(inputs)
 });
 export { presettrackrestapiintent4 as "presetTrackRestApiIntent" }

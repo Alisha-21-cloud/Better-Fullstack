@@ -10,7 +10,7 @@ const en_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => Localized
 };
 
 const es_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Ajusta la carrera`)
+	return /** @type {LocalizedString} */ (`Ajusta la ejecución`)
 };
 
 const zh_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => LocalizedString} */ () => {
@@ -18,11 +18,11 @@ const zh_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => Localized
 };
 
 const ja_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`ランニングの調整`)
+	return /** @type {LocalizedString} */ (`実行の調整`)
 };
 
 const ko_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`달리기를 조정하세요`)
+	return /** @type {LocalizedString} */ (`실행을 조정하세요`)
 };
 
 const zh_hant1_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => Localized
 };
 
 const fr_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Accordez la course`)
+	return /** @type {LocalizedString} */ (`Ajustez l'exécution`)
+};
+
+const uk_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Налаштуйте запуск`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_runflagstitle2 = /** @type {(inputs: Runflagstitle2Inputs) => Localized
 * | "Tune the run" |
 *
 * @param {Runflagstitle2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runflagstitle2 = /** @type {((inputs?: Runflagstitle2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runflagstitle2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runflagstitle2 = /** @type {((inputs?: Runflagstitle2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runflagstitle2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runflagstitle2(inputs)
 	if (locale === "es") return es_runflagstitle2(inputs)
@@ -55,6 +59,7 @@ const runflagstitle2 = /** @type {((inputs?: Runflagstitle2Inputs, options?: { l
 	if (locale === "ko") return ko_runflagstitle2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runflagstitle2(inputs)
 	if (locale === "de") return de_runflagstitle2(inputs)
-	return fr_runflagstitle2(inputs)
+	if (locale === "fr") return fr_runflagstitle2(inputs)
+	return uk_runflagstitle2(inputs)
 });
 export { runflagstitle2 as "runFlagsTitle" }

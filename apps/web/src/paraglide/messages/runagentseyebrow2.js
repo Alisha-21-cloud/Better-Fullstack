@@ -14,7 +14,7 @@ const es_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => Loc
 };
 
 const zh_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`经纪人和模特`)
+	return /** @type {LocalizedString} */ (`代理与模型`)
 };
 
 const ja_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => LocalizedString} */ () => {
@@ -26,7 +26,7 @@ const ko_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => Loc
 };
 
 const zh_hant1_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`經紀人和模特兒`)
+	return /** @type {LocalizedString} */ (`代理與模型`)
 };
 
 const de_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => LocalizedString} */ () => {
@@ -34,7 +34,11 @@ const de_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => Loc
 };
 
 const fr_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Agents et mannequins`)
+	return /** @type {LocalizedString} */ (`Agents et modèles`)
+};
+
+const uk_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Агенти та моделі`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_runagentseyebrow2 = /** @type {(inputs: Runagentseyebrow2Inputs) => Loc
 * | "Agents & models" |
 *
 * @param {Runagentseyebrow2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runagentseyebrow2 = /** @type {((inputs?: Runagentseyebrow2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runagentseyebrow2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runagentseyebrow2 = /** @type {((inputs?: Runagentseyebrow2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runagentseyebrow2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runagentseyebrow2(inputs)
 	if (locale === "es") return es_runagentseyebrow2(inputs)
@@ -55,6 +59,7 @@ const runagentseyebrow2 = /** @type {((inputs?: Runagentseyebrow2Inputs, options
 	if (locale === "ko") return ko_runagentseyebrow2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runagentseyebrow2(inputs)
 	if (locale === "de") return de_runagentseyebrow2(inputs)
-	return fr_runagentseyebrow2(inputs)
+	if (locale === "fr") return fr_runagentseyebrow2(inputs)
+	return uk_runagentseyebrow2(inputs)
 });
 export { runagentseyebrow2 as "runAgentsEyebrow" }

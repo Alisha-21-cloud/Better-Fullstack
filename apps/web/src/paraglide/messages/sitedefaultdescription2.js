@@ -18,7 +18,7 @@ const zh_sitedefaultdescription2 = /** @type {(inputs: Sitedefaultdescription2In
 };
 
 const ja_sitedefaultdescription2 = /** @type {(inputs: Sitedefaultdescription2Inputs) => LocalizedString} */ (i) => {
-	return /** @type {LocalizedString} */ (`本番環境に対応したフルスタック アプリを数秒で足場に構築します。 ${i?.ecosystems} にわたる ${i?.optionCount} オプションからスタックを選択します。フレームワーク、データベース、認証、支払い、AI、デプロイメントはすべて 1 つの CLI によって接続されています。`)
+	return /** @type {LocalizedString} */ (`本番環境に対応したフルスタックアプリを数秒でスキャフォールド。${i?.ecosystems} にわたる ${i?.optionCount} 個のオプションからスタックを選択。フレームワーク、データベース、認証、支払い、AI、デプロイメントまで、すべてを 1 つの CLI が連携させます。`)
 };
 
 const ko_sitedefaultdescription2 = /** @type {(inputs: Sitedefaultdescription2Inputs) => LocalizedString} */ (i) => {
@@ -30,11 +30,15 @@ const zh_hant1_sitedefaultdescription2 = /** @type {(inputs: Sitedefaultdescript
 };
 
 const de_sitedefaultdescription2 = /** @type {(inputs: Sitedefaultdescription2Inputs) => LocalizedString} */ (i) => {
-	return /** @type {LocalizedString} */ (`Erstellen Sie in Sekundenschnelle produktionsbereite Full-Stack-Apps. Wählen Sie Ihren Stack aus ${i?.optionCount}-Optionen in ${i?.ecosystems} – Frameworks, Datenbanken, Authentifizierung, Zahlungen, AI und Bereitstellung – alle miteinander verbunden durch ein CLI.`)
+	return /** @type {LocalizedString} */ (`Erstellen Sie in Sekundenschnelle produktionsbereite Fullstack-Apps. Wählen Sie Ihren Stack aus ${i?.optionCount} Optionen in ${i?.ecosystems} – Frameworks, Datenbanken, Authentifizierung, Zahlungen, AI und Bereitstellung – alle über ein CLI miteinander verbunden.`)
 };
 
 const fr_sitedefaultdescription2 = /** @type {(inputs: Sitedefaultdescription2Inputs) => LocalizedString} */ (i) => {
 	return /** @type {LocalizedString} */ (`Échafaudez des applications fullstack prêtes pour la production en quelques secondes. Choisissez votre pile parmi les options ${i?.optionCount} sur ${i?.ecosystems} — frameworks, bases de données, authentification, paiements, AI et déploiement — le tout relié par un seul CLI.`)
+};
+
+const uk_sitedefaultdescription2 = /** @type {(inputs: Sitedefaultdescription2Inputs) => LocalizedString} */ (i) => {
+	return /** @type {LocalizedString} */ (`За кілька секунд згенеруйте фулстек-застосунок, готовий до продакшену. Оберіть стек із ${i?.optionCount} опцій у ${i?.ecosystems}: фреймворки, бази даних, автентифікація, платежі, ШІ та деплой — усе зібрано одним CLI.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_sitedefaultdescription2 = /** @type {(inputs: Sitedefaultdescription2In
 * | "Scaffold production-ready fullstack apps in seconds. Pick your stack from {optionCount} options across {ecosystems} — frameworks, databases, auth, payments, ..." |
 *
 * @param {Sitedefaultdescription2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const sitedefaultdescription2 = /** @type {((inputs: Sitedefaultdescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Sitedefaultdescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs, options = {}) => {
+const sitedefaultdescription2 = /** @type {((inputs: Sitedefaultdescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Sitedefaultdescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_sitedefaultdescription2(inputs)
 	if (locale === "es") return es_sitedefaultdescription2(inputs)
@@ -55,6 +59,7 @@ const sitedefaultdescription2 = /** @type {((inputs: Sitedefaultdescription2Inpu
 	if (locale === "ko") return ko_sitedefaultdescription2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_sitedefaultdescription2(inputs)
 	if (locale === "de") return de_sitedefaultdescription2(inputs)
-	return fr_sitedefaultdescription2(inputs)
+	if (locale === "fr") return fr_sitedefaultdescription2(inputs)
+	return uk_sitedefaultdescription2(inputs)
 });
 export { sitedefaultdescription2 as "siteDefaultDescription" }

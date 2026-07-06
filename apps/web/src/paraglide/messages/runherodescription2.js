@@ -10,7 +10,7 @@ const en_runherodescription2 = /** @type {(inputs: Runherodescription2Inputs) =>
 };
 
 const es_runherodescription2 = /** @type {(inputs: Runherodescription2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`El arnés es de código abierto. Clónalo, configúralo con cualquier agente (Claude Code, Codex, opencode, Kilo o Antigravity para Gemini) y generará la estructura de cada especificación, luego verificará si el proyecto generado se instala y compila correctamente. Se puede ejecutar con una interfaz de línea de comandos (CLI) con sesión iniciada o con una clave API simple.`)
+	return /** @type {LocalizedString} */ (`El harness es de código abierto. Clónalo, apúntalo a cualquier agente (Claude Code, Codex, opencode, Kilo o Antigravity para Gemini) y generará la estructura de cada especificación, luego verificará si el proyecto generado realmente se instala y compila. Las ejecuciones funcionan con una CLI con sesión iniciada o con una simple clave API.`)
 };
 
 const zh_runherodescription2 = /** @type {(inputs: Runherodescription2Inputs) => LocalizedString} */ () => {
@@ -37,16 +37,20 @@ const fr_runherodescription2 = /** @type {(inputs: Runherodescription2Inputs) =>
 	return /** @type {LocalizedString} */ (`Ce framework est open source. Clonez-le, configurez-le avec n'importe quel agent (Claude Code, Codex, opencode, Kilo ou Antigravity pour Gemini) et il générera la structure de chaque spécification, puis vérifiera si le projet généré s'installe et se compile correctement. Il fonctionne avec une interface de ligne de commande (CLI) ou une simple clé API.`)
 };
 
+const uk_runherodescription2 = /** @type {(inputs: Runherodescription2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Harness має відкритий код. Клонуйте його, підключіть будь-якого агента — Claude Code, Codex, opencode, Kilo або Antigravity для Gemini — і він згенерує кожну специфікацію, а потім перевірить, чи встановлюється та збирається проєкт. Працює з авторизованим CLI або звичайним API-ключем.`)
+};
+
 /**
 * | output |
 * | --- |
 * | "The harness is open source. Clone it, point it at any agent — Claude Code, Codex, opencode, Kilo, or Antigravity for Gemini — and it scaffolds each spec, the..." |
 *
 * @param {Runherodescription2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runherodescription2 = /** @type {((inputs?: Runherodescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runherodescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runherodescription2 = /** @type {((inputs?: Runherodescription2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runherodescription2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runherodescription2(inputs)
 	if (locale === "es") return es_runherodescription2(inputs)
@@ -55,6 +59,7 @@ const runherodescription2 = /** @type {((inputs?: Runherodescription2Inputs, opt
 	if (locale === "ko") return ko_runherodescription2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runherodescription2(inputs)
 	if (locale === "de") return de_runherodescription2(inputs)
-	return fr_runherodescription2(inputs)
+	if (locale === "fr") return fr_runherodescription2(inputs)
+	return uk_runherodescription2(inputs)
 });
 export { runherodescription2 as "runHeroDescription" }

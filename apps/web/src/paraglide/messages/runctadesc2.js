@@ -10,7 +10,7 @@ const en_runctadesc2 = /** @type {(inputs: Runctadesc2Inputs) => LocalizedString
 };
 
 const es_runctadesc2 = /** @type {(inputs: Runctadesc2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Tus resultados se mostrarán en el mismo formato que la tabla de clasificación. ¿Obtuviste algún resultado interesante? Envía tu informe mediante una solicitud de extracción.`)
+	return /** @type {LocalizedString} */ (`Tus resultados se mostrarán en el mismo formato que la tabla de clasificación. ¿Obtuviste algo interesante? Abre un pull request con tu informe.`)
 };
 
 const zh_runctadesc2 = /** @type {(inputs: Runctadesc2Inputs) => LocalizedString} */ () => {
@@ -30,11 +30,15 @@ const zh_hant1_runctadesc2 = /** @type {(inputs: Runctadesc2Inputs) => Localized
 };
 
 const de_runctadesc2 = /** @type {(inputs: Runctadesc2Inputs) => LocalizedString} */ () => {
-	return /** @type {LocalizedString} */ (`Deine Zahlen werden im gleichen Format wie die Rangliste angezeigt. Hast du etwas Interessantes ausprobiert? Erstelle einen Pull Request mit deinem Bericht.`)
+	return /** @type {LocalizedString} */ (`Ihre Zahlen werden im gleichen Format wie die Rangliste angezeigt. Haben Sie etwas Interessantes ausprobiert? Erstellen Sie einen Pull Request mit Ihrem Bericht.`)
 };
 
 const fr_runctadesc2 = /** @type {(inputs: Runctadesc2Inputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`Vos résultats s'affichent au même format que le classement. Vous avez réalisé une expérience intéressante ? Soumettez une pull request avec votre rapport.`)
+};
+
+const uk_runctadesc2 = /** @type {(inputs: Runctadesc2Inputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Ваші числа мають той самий формат, що й leaderboard. Запустили щось цікаве? Відкрийте PR зі звітом.`)
 };
 
 /**
@@ -43,10 +47,10 @@ const fr_runctadesc2 = /** @type {(inputs: Runctadesc2Inputs) => LocalizedString
 * | "Your numbers land in the same format as the leaderboard. Ran something interesting? Open a pull request with your report." |
 *
 * @param {Runctadesc2Inputs} inputs
-* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }} options
+* @param {{ locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }} options
 * @returns {LocalizedString}
 */
-const runctadesc2 = /** @type {((inputs?: Runctadesc2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runctadesc2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" }, {}>} */ ((inputs = {}, options = {}) => {
+const runctadesc2 = /** @type {((inputs?: Runctadesc2Inputs, options?: { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Runctadesc2Inputs, { locale?: "en" | "es" | "zh" | "ja" | "ko" | "zh-Hant" | "de" | "fr" | "uk" }, {}>} */ ((inputs = {}, options = {}) => {
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return en_runctadesc2(inputs)
 	if (locale === "es") return es_runctadesc2(inputs)
@@ -55,6 +59,7 @@ const runctadesc2 = /** @type {((inputs?: Runctadesc2Inputs, options?: { locale?
 	if (locale === "ko") return ko_runctadesc2(inputs)
 	if (locale === "zh-Hant") return zh_hant1_runctadesc2(inputs)
 	if (locale === "de") return de_runctadesc2(inputs)
-	return fr_runctadesc2(inputs)
+	if (locale === "fr") return fr_runctadesc2(inputs)
+	return uk_runctadesc2(inputs)
 });
 export { runctadesc2 as "runCtaDesc" }
