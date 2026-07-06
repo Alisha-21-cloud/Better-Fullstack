@@ -233,6 +233,27 @@ describe("CLI add command", () => {
   }, CLI_COMMAND_TEST_TIMEOUT_MS * 2);
 });
 
+describe("CLI update command", () => {
+  it("rejects write/read-only flag conflicts before touching the project", async () => {
+    const root = await makeTempRoot("bfs-update-flags-test-");
+
+    const dryRunApply = await runCli(["update", "--dry-run", "--apply", "--json"], { cwd: root });
+    expect(dryRunApply.exitCode).toBe(1);
+    expect(JSON.parse(dryRunApply.stdout)).toMatchObject({
+      ok: false,
+      error: "`--dry-run` cannot be combined with `--apply`.",
+    });
+    expect(existsSync(join(root, "bts.lock.json"))).toBe(false);
+
+    const checkApply = await runCli(["update", "--check", "--apply", "--json"], { cwd: root });
+    expect(checkApply.exitCode).toBe(1);
+    expect(JSON.parse(checkApply.stdout)).toMatchObject({
+      ok: false,
+      error: "`--check` cannot be combined with `--apply`.",
+    });
+  }, CLI_COMMAND_TEST_TIMEOUT_MS);
+});
+
 describe("CLI history command", () => {
   it("prints JSON history and supports clear", async () => {
     const root = await makeTempRoot("bfs-history-test-");

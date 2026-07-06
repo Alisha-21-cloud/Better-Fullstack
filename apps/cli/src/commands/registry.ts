@@ -52,6 +52,15 @@ function reportAddResult(result: RegistryAddResult): void {
   }
 }
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function reportJsonError(error: unknown): void {
+  console.log(JSON.stringify({ ok: false, error: errorMessage(error) }, null, 2));
+  process.exitCode = 1;
+}
+
 export async function registryHandler(input: RegistryCommandInput): Promise<void> {
   const projectDir = path.resolve(input.projectDir || process.cwd());
 
@@ -82,13 +91,27 @@ export async function registryHandler(input: RegistryCommandInput): Promise<void
 
   // action === "add"
   if (!input.source) {
-    throw new CLIError(
+    const error = new CLIError(
       "registry add requires a <source> (a local path or file:// URL to a capability pack).",
     );
+    if (input.json) {
+      reportJsonError(error);
+      return;
+    }
+    throw error;
   }
 
   const dryRun = input.dryRun ?? false;
-  const result = await addPack({ projectDir, source: input.source, dryRun });
+  let result: RegistryAddResult;
+  try {
+    result = await addPack({ projectDir, source: input.source, dryRun });
+  } catch (error) {
+    if (input.json) {
+      reportJsonError(error);
+      return;
+    }
+    throw error;
+  }
 
   if (input.json) {
     console.log(JSON.stringify(result, null, 2));

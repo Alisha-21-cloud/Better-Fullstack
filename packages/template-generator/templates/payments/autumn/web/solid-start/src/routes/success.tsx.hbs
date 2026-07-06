@@ -1,0 +1,27 @@
+import Header from "@/components/header";
+import { useSearchParams } from "@solidjs/router";
+import { Show } from "solid-js";
+
+export default function SuccessPage() {
+  const [searchParams] = useSearchParams();
+  const paymentId = () => searchParams.payment_id;
+  const subscriptionId = () => searchParams.subscription_id;
+
+  return (
+    <>
+      <Header />
+      <div class="container mx-auto px-4 py-8">
+        <h1 class="mb-4 text-2xl font-bold">Payment Successful!</h1>
+        <p class="mb-4 text-gray-600">
+          Thank you for your purchase. Your Autumn checkout has completed successfully.
+        </p>
+        <Show when={paymentId()}>
+          <p class="text-sm text-gray-500">Payment ID: {paymentId()}</p>
+        </Show>
+        <Show when={subscriptionId()}>
+          <p class="text-sm text-gray-500">Subscription ID: {subscriptionId()}</p>
+        </Show>
+      </div>
+    </>
+  );
+}

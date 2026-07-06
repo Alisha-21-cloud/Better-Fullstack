@@ -383,19 +383,31 @@ describe("stack selection translation", () => {
     expect(pythonCommand).not.toContain("--python-ai");
     expect(pythonCommand).not.toContain("--python-graphql strawberry");
 
+    const goCommand = generateStackSelectionCommand({
+      ...DEFAULT_SELECTION,
+      stackMode: "multi",
+      projectName: "go-graph-app",
+      stackPartSpecs: ["backend:go:gin"],
+      search: "bleve",
+    });
+    expect(goCommand).toContain("--part backend.search:go:bleve");
+
     const javaCommand = generateStackSelectionCommand({
       ...DEFAULT_SELECTION,
       stackMode: "multi",
       projectName: "java-graph-app",
       stackPartSpecs: ["backend:java:spring-boot"],
+      javaLanguage: "kotlin",
       javaBuildTool: "gradle",
       javaLibraries: ["spring-actuator"],
       javaTestingLibraries: ["junit5", "mockito"],
     });
+    expect(javaCommand).toContain("--part backend.language:java:kotlin");
     expect(javaCommand).toContain("--part backend.buildTool:java:gradle");
     expect(javaCommand).toContain("--part backend.libraries:java:spring-actuator");
     expect(javaCommand).toContain("--part backend.testing:java:junit5");
     expect(javaCommand).toContain("--part backend.testing:java:mockito");
+    expect(javaCommand).not.toContain("--java-language kotlin");
     expect(javaCommand).not.toContain("--java-build-tool gradle");
     expect(javaCommand).not.toContain("--java-libraries");
     expect(javaCommand).not.toContain("--java-testing-libraries");

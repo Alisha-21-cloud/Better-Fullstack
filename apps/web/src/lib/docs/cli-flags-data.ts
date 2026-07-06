@@ -1650,6 +1650,17 @@ export const CLI_FLAG_GROUPS: CliFlagGroup[] = [
         "multiple": false
       },
       {
+        "flag": "--java-language",
+        "summary": "JVM language (java or kotlin).",
+        "values": [
+          "java",
+          "kotlin"
+        ],
+        "valueHint": null,
+        "defaultValue": null,
+        "multiple": false
+      },
+      {
         "flag": "--java-build-tool",
         "summary": "Build tool.",
         "values": [

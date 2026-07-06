@@ -3,6 +3,7 @@ import fs from "fs-extra";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { registryHandler } from "../src/commands/registry";
 import { addPack, listInstalledPacks } from "../src/helpers/core/registry-handler";
@@ -13,6 +14,7 @@ const INVALID_PACK = join(FIXTURES, "invalid-pack");
 const TRAVERSAL_FILE_PACK = join(FIXTURES, "traversal-file-pack");
 const TRAVERSAL_DEP_PACK = join(FIXTURES, "traversal-dep-pack");
 const TEMP_ROOTS: string[] = [];
+const originalLog = console.log;
 
 async function stageProject(): Promise<string> {
   const dir = await mkdtemp(join(tmpdir(), "bfs-registry-"));
@@ -35,6 +37,45 @@ async function readServerPackageJson(dir: string): Promise<{
 afterAll(async () => {
   await Promise.all(TEMP_ROOTS.map((dir) => rm(dir, { recursive: true, force: true })));
 });
+
+afterEach(() => {
+  console.log = originalLog;
+  process.exitCode = undefined;
+});
+
+async function captureJsonOutput(action: () => Promise<void>): Promise<unknown> {
+  let captured = "";
+  console.log = (...args: unknown[]) => {
+    captured += args.map(String).join(" ");
+  };
+  await action();
+  return JSON.parse(captured);
+}
+
+async function runRegistryJsonAdd(input: { projectDir: string; source?: string }): Promise<{
+  exitCode: number;
+  output: { ok: boolean; error: string };
+}> {
+  const registryModule = pathToFileURL(join(import.meta.dir, "../src/commands/registry.ts")).href;
+  const script = `
+    import { registryHandler } from ${JSON.stringify(registryModule)};
+    await registryHandler(${JSON.stringify({
+      action: "add",
+      json: true,
+      projectDir: input.projectDir,
+      source: input.source,
+    })});
+  `;
+  const proc = Bun.spawn([process.execPath, "-e", script], {
+    stdout: "pipe",
+    stderr: "pipe",
+  });
+  const [stdout] = await Promise.all([new Response(proc.stdout).text(), proc.exited]);
+  return {
+    exitCode: proc.exitCode ?? 0,
+    output: JSON.parse(stdout),
+  };
+}
 
 describe("registry add", () => {
   it("installs a pack: writes files, merges deps, appends env, records the install", async () => {
@@ -143,15 +184,23 @@ describe("registry add", () => {
       /No Better Fullstack project found/,
     );
   });
+
+  it("prints parseable JSON errors in command JSON mode", async () => {
+    const dir = await stageProject();
+
+    const missingSource = await runRegistryJsonAdd({ projectDir: dir });
+    expect(missingSource.exitCode).toBe(1);
+    expect(missingSource.output.ok).toBe(false);
+    expect(missingSource.output.error).toContain("registry add requires a <source>");
+
+    const invalidManifest = await runRegistryJsonAdd({ projectDir: dir, source: INVALID_PACK });
+    expect(invalidManifest.exitCode).toBe(1);
+    expect(invalidManifest.output.ok).toBe(false);
+    expect(invalidManifest.output.error).toContain("Invalid capability pack manifest");
+  });
 });
 
 describe("registry list", () => {
-  const originalLog = console.log;
-
-  afterEach(() => {
-    console.log = originalLog;
-  });
-
   it("reflects installed packs and prints JSON via the command handler", async () => {
     const dir = await stageProject();
     await addPack({ projectDir: dir, source: SAMPLE_PACK });
@@ -160,14 +209,9 @@ describe("registry list", () => {
     expect(packs).toHaveLength(1);
     expect(packs[0]?.name).toBe("@acme/rate-limit");
 
-    let captured = "";
-    console.log = (...args: unknown[]) => {
-      captured += args.map(String).join(" ");
-    };
-    await registryHandler({ action: "list", projectDir: dir, json: true });
-    console.log = originalLog;
-
-    const parsed = JSON.parse(captured) as Array<{ name: string; version: string }>;
+    const parsed = (await captureJsonOutput(() =>
+      registryHandler({ action: "list", projectDir: dir, json: true }),
+    )) as Array<{ name: string; version: string }>;
     expect(parsed).toHaveLength(1);
     expect(parsed[0]?.name).toBe("@acme/rate-limit");
     expect(parsed[0]?.version).toBe("1.0.0");
@@ -175,12 +219,9 @@ describe("registry list", () => {
 
   it("prints an empty JSON array when nothing is installed", async () => {
     const dir = await stageProject();
-    let captured = "";
-    console.log = (...args: unknown[]) => {
-      captured += args.map(String).join(" ");
-    };
-    await registryHandler({ action: "list", projectDir: dir, json: true });
-    console.log = originalLog;
-    expect(JSON.parse(captured)).toEqual([]);
+    const parsed = await captureJsonOutput(() =>
+      registryHandler({ action: "list", projectDir: dir, json: true }),
+    );
+    expect(parsed).toEqual([]);
   });
 });

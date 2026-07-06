@@ -301,6 +301,8 @@ function buildClientVars(
 
   // Autumn backend handler URL for client-side (<AutumnProvider>)
   if (payments === "autumn") {
+    const autumnBackendUrl =
+      backend === "self" ? "http://localhost:3001/api/autumn" : "http://localhost:3000/api/autumn";
     vars.push({
       key: hasNextJs
         ? "NEXT_PUBLIC_AUTUMN_BACKEND_URL"
@@ -309,7 +311,7 @@ function buildClientVars(
           : hasSvelte
             ? "PUBLIC_AUTUMN_BACKEND_URL"
             : "VITE_AUTUMN_BACKEND_URL",
-      value: "http://localhost:3000/api/autumn",
+      value: autumnBackendUrl,
       condition: true,
       comment: "URL/path where the Autumn backend handler is mounted; the client SDK calls this",
     });
@@ -635,6 +637,11 @@ function buildNativeVars(
       {
         key: "EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID",
         value: "pro",
+        condition: true,
+      },
+      {
+        key: "EXPO_PUBLIC_REVENUECAT_OFFERING_ID",
+        value: "",
         condition: true,
       },
     );

@@ -753,6 +753,9 @@ describe("Payments Options", () => {
       );
 
       expectSuccess(result);
+
+      const env = await readFile(join(result.projectDir!, "apps/native/.env"), "utf-8");
+      expect(env).toContain("EXPO_PUBLIC_REVENUECAT_OFFERING_ID");
     });
   });
 
@@ -828,6 +831,32 @@ describe("Payments Options", () => {
         }),
       );
       expectSuccess(result);
+    });
+
+    test("autumn with SolidStart fullstack", async () => {
+      const result = await runTRPCTest(
+        createCustomConfig({
+          projectName: "autumn-solid-start",
+          frontend: ["solid-start"],
+          backend: "self",
+          runtime: "none",
+          api: "none",
+          payments: "autumn",
+        }),
+      );
+      expectSuccess(result);
+
+      const pkg = await readFile(join(result.projectDir!, "apps/web/package.json"), "utf-8");
+      expect(pkg).toContain("autumn-js");
+
+      const route = await readFile(
+        join(result.projectDir!, "apps/web/src/routes/success.tsx"),
+        "utf-8",
+      );
+      expect(route).toContain('from "@solidjs/router"');
+
+      const env = await readFile(join(result.projectDir!, "apps/web/.env"), "utf-8");
+      expect(env).toContain("VITE_AUTUMN_BACKEND_URL=http://localhost:3001/api/autumn");
     });
   });
 

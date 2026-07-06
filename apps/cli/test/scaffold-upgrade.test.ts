@@ -2,7 +2,7 @@ import { EMBEDDED_TEMPLATES, generateVirtualProject } from "@better-fullstack/te
 import { writeTreeToFilesystem } from "@better-fullstack/template-generator/fs-writer";
 import { createCliDefaultProjectConfigBase, type ProjectConfig } from "@better-fullstack/types";
 import { afterAll, describe, expect, it } from "bun:test";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -205,6 +205,29 @@ describe("scaffold-upgrade engine", () => {
     expect(applied.applied.patched).not.toContain(target);
     // Left exactly as the user wrote it.
     expect(await readFile(targetPath, "utf-8")).toBe(edited);
+  });
+
+  it("treats a deleted baseline file as a local edit instead of a new template file", async () => {
+    const dir = await makeTempDir();
+    await scaffoldWithBaseline(dir, makeConfig(dir));
+
+    const baselinePlan = await planScaffoldUpgrade(dir);
+    assertSuccess(baselinePlan);
+    const target = pickSourceFile(baselinePlan.unchanged);
+    const targetPath = join(dir, target);
+
+    await unlink(targetPath);
+
+    const plan = await planScaffoldUpgrade(dir);
+    assertSuccess(plan);
+    expect(plan.userEdited).toContain(target);
+    expect(plan.newFiles).not.toContain(target);
+    expect(plan.actionable).not.toContain(target);
+
+    const applied = await applyScaffoldUpgrade(dir);
+    assertSuccess(applied);
+    expect(applied.applied.added).not.toContain(target);
+    await expect(readFile(targetPath, "utf-8")).rejects.toThrow();
   });
 
   it("flags a conflict when both the template and the local copy changed", async () => {

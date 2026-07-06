@@ -27,11 +27,20 @@ const VIRTUAL_ID = "virtual:content-meta";
 const RESOLVED_ID = "\0" + VIRTUAL_ID;
 const LOCALIZED_CONTENT_ID = "virtual:localized-content";
 const RESOLVED_LOCALIZED_CONTENT_ID = "\0" + LOCALIZED_CONTENT_ID;
+const LOCALIZED_MDX_BUNDLE_PREFIX = "virtual:localized-content-mdx-bundle/";
 const LOCALIZED_MDX_PREFIX = "virtual:localized-content-mdx/";
 const LOCALIZED_RAW_PREFIX = "virtual:localized-content-raw/";
 
 function rawImporterName(locale: LocalizedContentLocale): string {
   return `__raw_${locale.replace(/[^a-zA-Z0-9]/g, "_")}`;
+}
+
+function isServerEnvironment(
+  context: { environment?: { name?: string } },
+  options: { ssr?: boolean },
+): boolean {
+  const environmentName = context.environment?.name;
+  return options.ssr === true || environmentName === "ssr" || environmentName === "nitro";
 }
 
 type ContentSubdir = "docs" | "guides" | "blog";
@@ -124,6 +133,38 @@ function localizedMdxModuleId(
   return `${LOCALIZED_MDX_PREFIX}${contentSubdir}/${locale}/${relativePath}`;
 }
 
+function localizedMdxBundleModuleId(
+  contentSubdir: ContentSubdir,
+  locale: LocalizedContentLocale,
+): string {
+  return `${LOCALIZED_MDX_BUNDLE_PREFIX}${contentSubdir}/${locale}`;
+}
+
+function parseLocalizedMdxBundleId(id: string):
+  | {
+      contentSubdir: ContentSubdir;
+      locale: LocalizedContentLocale;
+    }
+  | undefined {
+  if (!id.startsWith(LOCALIZED_MDX_BUNDLE_PREFIX)) return undefined;
+  const rest = id.slice(LOCALIZED_MDX_BUNDLE_PREFIX.length);
+  const [contentSubdir, locale] = rest.split("/");
+  if (
+    contentSubdir !== "docs" &&
+    contentSubdir !== "guides" &&
+    contentSubdir !== "blog"
+  ) {
+    return undefined;
+  }
+  if (!LOCALIZED_CONTENT_LOCALES.includes(locale as LocalizedContentLocale)) {
+    return undefined;
+  }
+  return {
+    contentSubdir,
+    locale: locale as LocalizedContentLocale,
+  };
+}
+
 function parseLocalizedMdxId(id: string):
   | {
       contentSubdir: ContentSubdir;
@@ -207,9 +248,9 @@ export function contentMetaPlugin(): Plugin {
         )) {
           if (!entry.body) continue;
           const key = localizedLoaderKey(locale, contentSubdir, relativePath);
-          const moduleId = localizedMdxModuleId(contentSubdir, locale, relativePath);
+          const bundleId = localizedMdxBundleModuleId(contentSubdir, locale);
           maps[contentSubdir].mdxLoaders.push(
-            `${JSON.stringify(key)}: () => import(${JSON.stringify(moduleId)})`,
+            `${JSON.stringify(key)}: () => import(${JSON.stringify(bundleId)}).then((m) => m.default[${JSON.stringify(key)}])`,
           );
           // Raw MDX source is only consumed by the search index (opened on
           // demand). Load it lazily from a per-locale bundle so the source text
@@ -259,20 +300,49 @@ export function contentMetaPlugin(): Plugin {
     return `export default {${entriesOut.join(",")}};`;
   }
 
+  function buildLocalizedMdxBundleModule(
+    bundles: LocalizedJsonBundles,
+    contentSubdir: ContentSubdir,
+    locale: LocalizedContentLocale,
+  ): string {
+    const entries = bundles[locale]?.[contentSubdir] ?? {};
+    const imports: string[] = [];
+    const exports: string[] = [];
+    let index = 0;
+
+    for (const [relativePath, entry] of Object.entries(entries).sort(([a], [b]) =>
+      a.localeCompare(b),
+    )) {
+      if (!entry.body) continue;
+      const key = localizedLoaderKey(locale, contentSubdir, relativePath);
+      const moduleId = localizedMdxModuleId(contentSubdir, locale, relativePath);
+      const binding = `__localized_mdx_${index++}`;
+      imports.push(`import * as ${binding} from ${JSON.stringify(moduleId)};`);
+      exports.push(`${JSON.stringify(key)}: ${binding}`);
+    }
+
+    return `${imports.join("\n")}\nexport default {${exports.join(",")}};`;
+  }
+
   return {
     name: "better-fullstack:content-meta",
     configResolved(config) {
       rootDir = config.root;
     },
     resolveId(id, _importer, options) {
+      const serverEnvironment = isServerEnvironment(this, options);
       if (id === VIRTUAL_ID) return RESOLVED_ID;
-      if (options.ssr && id === LOCALIZED_CONTENT_ID) return undefined;
+      if (serverEnvironment && id === LOCALIZED_CONTENT_ID) return undefined;
       if (id === LOCALIZED_CONTENT_ID) return RESOLVED_LOCALIZED_CONTENT_ID;
-      if (options.ssr && id.startsWith(LOCALIZED_MDX_PREFIX)) return undefined;
+      if (serverEnvironment && id.startsWith(LOCALIZED_MDX_BUNDLE_PREFIX)) return undefined;
+      if (id.startsWith(LOCALIZED_MDX_BUNDLE_PREFIX)) {
+        return id;
+      }
+      if (serverEnvironment && id.startsWith(LOCALIZED_MDX_PREFIX)) return undefined;
       if (id.startsWith(LOCALIZED_MDX_PREFIX)) {
         return id;
       }
-      if (options.ssr && id.startsWith(LOCALIZED_RAW_PREFIX)) return undefined;
+      if (serverEnvironment && id.startsWith(LOCALIZED_RAW_PREFIX)) return undefined;
       if (id.startsWith(LOCALIZED_RAW_PREFIX)) {
         return id;
       }
@@ -294,6 +364,16 @@ export function contentMetaPlugin(): Plugin {
           ];
         if (!entry) return undefined;
         return localizedEntryToMdxSource(entry);
+      }
+
+      const localizedMdxBundle = parseLocalizedMdxBundleId(id);
+      if (localizedMdxBundle) {
+        for (const filePath of localizedWatchFiles) this.addWatchFile(filePath);
+        return buildLocalizedMdxBundleModule(
+          bundles,
+          localizedMdxBundle.contentSubdir,
+          localizedMdxBundle.locale,
+        );
       }
 
       if (id.startsWith(LOCALIZED_RAW_PREFIX)) {

@@ -118,6 +118,36 @@ export async function updateCommand(input: UpdateCommandInput): Promise<void> {
   const json = input.json ?? false;
   const apply = input.apply ?? false;
   const check = input.check ?? false;
+  const dryRun = input.dryRun ?? false;
+  const recordBaseline = input.recordBaseline ?? false;
+
+  if (dryRun && apply) {
+    return failUpdate(projectDir, "`--dry-run` cannot be combined with `--apply`.", json);
+  }
+  if (dryRun && recordBaseline) {
+    return failUpdate(
+      projectDir,
+      "`--dry-run` cannot be combined with `--record-baseline`.",
+      json,
+    );
+  }
+  if (check && apply) {
+    return failUpdate(projectDir, "`--check` cannot be combined with `--apply`.", json);
+  }
+  if (check && recordBaseline) {
+    return failUpdate(
+      projectDir,
+      "`--check` cannot be combined with `--record-baseline`.",
+      json,
+    );
+  }
+  if (apply && recordBaseline) {
+    return failUpdate(
+      projectDir,
+      "`--apply` cannot be combined with `--record-baseline`.",
+      json,
+    );
+  }
 
   const btsConfig = await readBtsConfig(projectDir);
   if (!btsConfig) {
@@ -131,7 +161,7 @@ export async function updateCommand(input: UpdateCommandInput): Promise<void> {
     handleError(message);
   }
 
-  if (input.recordBaseline) {
+  if (recordBaseline) {
     const manifest = await recordScaffoldManifest(projectDir);
     if (json) {
       console.log(

@@ -20,6 +20,7 @@ const CLIENT_CHECKOUT_WEB_FRONTENDS: Frontend[] = [
   "nuxt",
   "svelte",
   "solid",
+  "solid-start",
 ];
 
 export function processPaymentsDeps(vfs: VirtualFileSystem, config: ProjectConfig): void {

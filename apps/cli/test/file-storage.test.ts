@@ -474,6 +474,14 @@ describe("File Storage Options", () => {
         }),
       );
       expectSuccess(result);
+
+      const storage = await readFile(`${result.projectDir}/apps/web/src/lib/storage.ts`, "utf-8");
+      const pkg = await readFile(`${result.projectDir}/apps/web/package.json`, "utf-8");
+      const env = await readFile(`${result.projectDir}/apps/web/.env`, "utf-8");
+
+      expect(storage).toContain("@aws-sdk/client-s3");
+      expect(pkg).toContain('"@aws-sdk/client-s3"');
+      expect(env).toContain("R2_BUCKET_NAME");
     });
   });
 

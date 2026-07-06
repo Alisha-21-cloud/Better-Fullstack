@@ -49,7 +49,10 @@ function ssrMdxLoaderAliasPlugin(): PluginOption {
     name: "better-fullstack:ssr-mdx-loader-alias",
     enforce: "pre",
     resolveId(source, _importer, options) {
-      return options.ssr ? ssrMdxLoaderAliases.get(source) : undefined;
+      const environmentName = (this as { environment?: { name?: string } }).environment?.name;
+      const isServerEnvironment =
+        options.ssr || environmentName === "ssr" || environmentName === "nitro";
+      return isServerEnvironment ? ssrMdxLoaderAliases.get(source) : undefined;
     },
   };
 }

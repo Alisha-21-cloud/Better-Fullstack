@@ -59,6 +59,7 @@ export const StackPartRoleSchema = z
     "dataFetching",
     "workspaceTooling",
     "examples",
+    "language",
     "buildTool",
     "cli",
     "errorHandling",

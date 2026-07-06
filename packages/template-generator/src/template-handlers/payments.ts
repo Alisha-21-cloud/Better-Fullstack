@@ -17,6 +17,7 @@ export async function processPaymentsTemplates(
   const hasNuxtWeb = config.frontend.includes("nuxt");
   const hasSvelteWeb = config.frontend.includes("svelte");
   const hasSolidWeb = config.frontend.includes("solid");
+  const hasSolidStartWeb = config.frontend.includes("solid-start");
 
   const nativeVariant = config.frontend.includes("native-bare")
     ? "bare"
@@ -112,11 +113,12 @@ export async function processPaymentsTemplates(
       "apps/web",
       config,
     );
-  } else if (hasSolidWeb) {
+  } else if (hasSolidWeb || hasSolidStartWeb) {
+    const solidFramework = hasSolidStartWeb ? "solid-start" : "solid";
     processTemplatesFromPrefix(
       vfs,
       templates,
-      `payments/${config.payments}/web/solid`,
+      `payments/${config.payments}/web/${solidFramework}`,
       "apps/web",
       config,
     );

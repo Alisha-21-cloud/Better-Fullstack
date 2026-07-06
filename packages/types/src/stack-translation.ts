@@ -1176,6 +1176,7 @@ const GRAPH_GO_BACKEND_PART_SELECTION_KEYS = [
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
 const GRAPH_JAVA_BACKEND_PART_SELECTION_KEYS = [
+  ["javaLanguage", "language"],
   ["javaBuildTool", "buildTool"],
   ["caching", "caching"],
   ["search", "search"],
@@ -2190,6 +2191,7 @@ function generateTypeScriptCommand(selection: StackSelectionInput, projectName: 
     `--database ${selection.database}`,
     `--orm ${selection.orm}`,
     `--db-setup ${selection.dbSetup}`,
+    `--workspace-shape ${selection.workspaceShape}`,
     `--package-manager ${selection.packageManager}`,
     ...(selection.versionChannel !== "stable"
       ? [`--version-channel ${selection.versionChannel}`]
@@ -2219,6 +2221,7 @@ function generateReactNativeCommand(selection: StackSelectionInput, projectName:
         .join(" ") || "native-bare"
     }`,
     `--auth ${selection.auth}`,
+    `--payments ${selection.payments}`,
     `--mobile-navigation ${selection.mobileNavigation}`,
     `--mobile-ui ${selection.mobileUI}`,
     `--mobile-storage ${selection.mobileStorage}`,

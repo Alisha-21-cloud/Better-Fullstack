@@ -211,6 +211,14 @@ export async function planScaffoldUpgrade(projectDirInput: string): Promise<Upgr
     const fullPath = path.join(projectDir, filePath);
 
     if (!(await fs.pathExists(fullPath))) {
+      if (baseline[filePath] !== undefined) {
+        files.push({
+          path: filePath,
+          category: "user-edited",
+          reason: "deleted locally",
+        });
+        continue;
+      }
       files.push({ path: filePath, category: "new-file" });
       continue;
     }

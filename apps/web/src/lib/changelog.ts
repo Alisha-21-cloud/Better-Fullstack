@@ -19,10 +19,34 @@ const RELEASE_BASE_URL = "https://github.com/Marve10s/Better-Fullstack/releases/
 
 export const changelogReleases: ChangelogRelease[] = [
   {
+    version: "v2.1.6",
+    publishedAt: "2026-07-06T18:32:26Z",
+    displayDate: "July 6, 2026",
+    isLatest: true,
+    href: `${RELEASE_BASE_URL}/v2.1.6`,
+    title: "Safer updates, steadier stack commands, and template fixes",
+    summary:
+      "This patch hardens the project update flow, tightens CLI and builder parity for multi-ecosystem stacks, and fixes the generator paths found during release review. SolidStart Autumn, self-backend file storage, RevenueCat native env output, Go Bleve, Java Kotlin, and web build stability all get sharper edges for users.",
+    highlights: [
+      "Made `bfs update` safer by preserving intentionally deleted baseline files and rejecting conflicting dry-run, check, apply, and baseline-recording flag combinations before they can write lock data.",
+      "Aligned generated commands across the web builder and CLI for React Native RevenueCat payments, single-app TypeScript workspace shape, Go Bleve search, and Java Kotlin language selections.",
+      "Fixed payment and storage templates so SolidStart Autumn emits its success route and dependency, self-backend file storage lands in the web app, Autumn self-hosted URLs target the app API, and RevenueCat native projects receive an offering ID env key.",
+      "Improved JSON error handling for registry add failures so automation receives structured `ok: false` responses instead of raw thrown errors.",
+      "Reduced localized-content pressure in the web build by splitting generated MDX bundles by locale and section, then aligning local builds with the Vercel memory setting.",
+      "Verified the changes with targeted CLI, types, template-generator, web builder, app build, and full `test:release` coverage before release.",
+    ],
+    image: {
+      src: "https://images.unsplash.com/photo-1777711391050-7e0cefd4b33b?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      alt: "Abstract colorful gradient artwork",
+      credit: "Unsplash",
+      creditHref:
+        "https://images.unsplash.com/photo-1777711391050-7e0cefd4b33b?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+  },
+  {
     version: "v2.1.5",
     publishedAt: "2026-07-03T13:38:36Z",
     displayDate: "July 3, 2026",
-    isLatest: true,
     href: `${RELEASE_BASE_URL}/v2.1.5`,
     title: "Patch release for Astro TinaCMS and Elysia AI smoke fixes",
     summary:
