@@ -459,5 +459,11 @@
   "runCtaDesc": "Ваші числа мають той самий формат, що й leaderboard. Запустили щось цікаве? Відкрийте PR зі звітом.",
   "runCtaLeaderboard": "Переглянути leaderboard",
   "runCtaWriteup": "Читати розбір",
-  "llmRunItYourself": "Запустіть самостійно"
+  "llmRunItYourself": "Запустіть самостійно",
+  "navBenchmark": "Бенчмарк",
+  "benchmarkTeaserTitle": "Наскільки добре моделі ШІ створюють ваші проєкти?",
+  "benchmarkTeaserTopModels": "Найкращі моделі",
+  "benchmarkTeaserCta": "Переглянути повний бенчмарк",
+  "benchmarkSeoTitle": "ScaffBench — Наскільки добре моделі ШІ створюють ваші проєкти?",
+  "benchmarkTeaserMcpBody": "Різниця — у нашому MCP. Спрямуйте будь-якого агента для коду на інструменти Better-Fullstack, і навіть маленька безкоштовна модель збудує майже все — з часткою токенів і кроків."
 }
