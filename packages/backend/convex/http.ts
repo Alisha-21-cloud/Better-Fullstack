@@ -30,7 +30,7 @@ const BLOCKED_KEYS = new Set([
   "workspaceRoot",
 ]);
 
-const MAX_STACK_KEYS = 120;
+const MAX_STACK_KEYS = 256;
 const KEY_PATTERN = /^[A-Za-z0-9_.-]{1,64}$/;
 const MAX_VALUE_LENGTH = 200;
 const MAX_ARRAY_ITEMS = 32;

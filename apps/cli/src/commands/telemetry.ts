@@ -15,6 +15,7 @@ export type TelemetryCommandInput = {
 const COLLECTED = [
   "Selected stack options (frontend, backend, database, ORM, auth, API, etc.)",
   "CLI version, Node.js version, and OS platform",
+  "A random anonymous install ID used to count unique and returning installs",
 ];
 
 const NOT_COLLECTED = [

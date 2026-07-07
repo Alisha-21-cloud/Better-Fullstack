@@ -9,7 +9,7 @@ import type { ProjectConfig } from "../../types";
 import { writeBtsConfig } from "../../utils/bts-config";
 import { isSilent } from "../../utils/context";
 import { applyDependencyVersionChannel } from "../../utils/dependency-version-channel";
-import { exitWithError } from "../../utils/errors";
+import { CLIError } from "../../utils/errors";
 import { formatProject } from "../../utils/file-formatter";
 import { recordScaffoldManifest } from "../../utils/scaffold-manifest";
 import { setupAddons } from "../addons/addons-setup";
@@ -147,11 +147,10 @@ export async function createProject(options: ProjectConfig, cliInput: CreateProj
     await rollbackPartialProject(projectDir, dirHadContentBefore);
     if (error instanceof Error) {
       if (!isSilent()) console.error(error.stack);
-      exitWithError(`Error during project creation: ${error.message}`);
-    } else {
-      if (!isSilent()) console.error(error);
-      exitWithError(`An unexpected error occurred: ${String(error)}`);
+      throw new CLIError(`Error during project creation: ${error.message}`);
     }
+    if (!isSilent()) console.error(error);
+    throw new CLIError(`An unexpected error occurred: ${String(error)}`);
   }
 }
 

@@ -2055,9 +2055,9 @@ export async function startMcpServer() {
     },
     async (input: Record<string, unknown> & { projectDir: string }) => {
       const startTime = Date.now();
+      const { projectDir: _projectDir, projectName: _projectName, ...requestedChanges } = input;
       try {
         const safePath = sanitizePath(input.projectDir);
-        const { projectDir: _projectDir, projectName: _projectName, ...requestedChanges } = input;
         const result = await applyStackUpdate(safePath, requestedChanges);
         await trackEvent("stack_updated", requestedChanges, {
           source: "mcp",
@@ -2086,6 +2086,12 @@ export async function startMcpServer() {
           structuredContent: payload,
         };
       } catch (error) {
+        await trackEvent("stack_updated", requestedChanges, {
+          source: "mcp",
+          success: false,
+          errorName: error instanceof Error ? error.name : "UnknownError",
+          durationMs: Date.now() - startTime,
+        });
         const payload = {
           success: false as const,
           projectDir: input.projectDir,
