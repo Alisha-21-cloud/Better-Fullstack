@@ -3,64 +3,82 @@ import { httpRouter } from "convex/server";
 import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
 
-interface AnalyticsBody {
-  // Core
-  ecosystem?: string;
-  database?: string;
-  orm?: string;
-  backend?: string;
-  runtime?: string;
-  frontend?: string[];
-  api?: string;
-  auth?: string;
-  // Deployment
-  dbSetup?: string;
-  webDeploy?: string;
-  serverDeploy?: string;
-  // Addons & Examples
-  addons?: string[];
-  examples?: string[];
-  // Integrations
-  payments?: string;
-  email?: string;
-  fileUpload?: string;
-  // Frontend extras
-  astroIntegration?: string;
-  cssFramework?: string;
-  uiLibrary?: string;
-  stateManagement?: string;
-  forms?: string;
-  animation?: string;
-  validation?: string;
-  // Backend extras
-  realtime?: string;
-  jobQueue?: string;
-  caching?: string;
-  logging?: string;
-  observability?: string;
-  // AI & CMS
-  ai?: string;
-  cms?: string;
-  // Testing
-  testing?: string;
-  // Effect
-  effect?: string;
-  // Rust ecosystem
-  rustWebFramework?: string;
-  rustFrontend?: string;
-  rustOrm?: string;
-  rustApi?: string;
-  rustCli?: string;
-  rustLibraries?: string[];
-  // Setup options
-  git?: boolean;
-  packageManager?: string;
-  install?: boolean;
-  // Meta
-  cli_version?: string;
-  node_version?: string;
-  platform?: string;
+type StackValue = string | boolean | string[];
+
+// Envelope fields handled explicitly (not part of the stack config).
+const META_KEYS = new Set([
+  "eventType",
+  "source",
+  "machineId",
+  "success",
+  "errorName",
+  "setupFailures",
+  "durationMs",
+  "fileCount",
+  "cli_version",
+  "node_version",
+  "platform",
+  "options",
+]);
+
+// Never store these even if a client sends them (potential PII / paths).
+const BLOCKED_KEYS = new Set([
+  "projectName",
+  "projectDir",
+  "relativePath",
+  "targetDir",
+  "workspaceRoot",
+]);
+
+const MAX_STACK_KEYS = 120;
+const KEY_PATTERN = /^[A-Za-z0-9_.-]{1,64}$/;
+const MAX_VALUE_LENGTH = 200;
+const MAX_ARRAY_ITEMS = 32;
+
+function sanitizeString(value: string): string | undefined {
+  const trimmed = value.trim().slice(0, MAX_VALUE_LENGTH);
+  return trimmed.length > 0 ? trimmed : undefined;
 }
+
+/**
+ * Build the generic stack record from an arbitrary payload: every
+ * non-envelope key with a string / boolean / string[] value. New CLI
+ * options are captured automatically — no server change needed.
+ */
+function extractStack(body: Record<string, unknown>): Record<string, StackValue> {
+  const stack: Record<string, StackValue> = {};
+  for (const [key, value] of Object.entries(body)) {
+    if (Object.keys(stack).length >= MAX_STACK_KEYS) break;
+    if (META_KEYS.has(key) || BLOCKED_KEYS.has(key) || !KEY_PATTERN.test(key)) continue;
+    if (typeof value === "boolean") {
+      stack[key] = value;
+    } else if (typeof value === "string") {
+      const clean = sanitizeString(value);
+      if (clean !== undefined) stack[key] = clean;
+    } else if (Array.isArray(value) && value.every((item) => typeof item === "string")) {
+      const items = value
+        .slice(0, MAX_ARRAY_ITEMS)
+        .map((item) => sanitizeString(item))
+        .filter((item): item is string => item !== undefined);
+      if (items.length > 0) stack[key] = items;
+    }
+  }
+  return stack;
+}
+
+const str = (value: unknown): string | undefined =>
+  typeof value === "string" ? sanitizeString(value) : undefined;
+const bool = (value: unknown): boolean | undefined =>
+  typeof value === "boolean" ? value : undefined;
+const num = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : undefined;
+const strArray = (value: unknown): string[] | undefined =>
+  Array.isArray(value) && value.every((item) => typeof item === "string")
+    ? value
+        .slice(0, MAX_ARRAY_ITEMS)
+        .map((item) => sanitizeString(item))
+        .filter((item): item is string => item !== undefined)
+    : undefined;
 
 const http = httpRouter();
 
@@ -68,183 +86,80 @@ http.route({
   path: "/api/analytics/ingest",
   method: "POST",
   handler: httpAction(async (ctx, req) => {
-    const body = (await req.json()) as AnalyticsBody;
-    if (!body) {
+    let body: Record<string, unknown>;
+    try {
+      body = (await req.json()) as Record<string, unknown>;
+    } catch {
+      return new Response("Bad Request", { status: 400 });
+    }
+    if (!body || typeof body !== "object") {
       return new Response("Bad Request", { status: 400 });
     }
 
-    const EXTRA_OPTIONS_BY_ECOSYSTEM: Record<string, readonly string[]> = {
-      typescript: ["vectorDb", "search", "i18n", "featureFlags", "rateLimit", "fileStorage", "analytics"],
-      "react-native": [
-        "mobileNavigation",
-        "mobileUI",
-        "mobileStorage",
-        "mobileTesting",
-        "mobilePush",
-        "mobileOTA",
-        "mobileDeepLinking",
-      ],
-      rust: [
-        "rustLogging",
-        "rustErrorHandling",
-        "rustCaching",
-        "rustAuth",
-        "rustRealtime",
-        "rustMessageQueue",
-        "rustObservability",
-        "rustTemplating",
-      ],
-      python: [
-        "pythonWebFramework",
-        "pythonOrm",
-        "pythonValidation",
-        "pythonAi",
-        "pythonAuth",
-        "pythonApi",
-        "pythonTaskQueue",
-        "pythonGraphql",
-        "pythonQuality",
-        "pythonTesting",
-        "pythonCaching",
-        "pythonRealtime",
-        "pythonObservability",
-        "pythonCli",
-      ],
-      go: [
-        "goWebFramework",
-        "goOrm",
-        "goApi",
-        "goCli",
-        "goLogging",
-        "goAuth",
-        "goTesting",
-        "goRealtime",
-        "goMessageQueue",
-        "goCaching",
-        "goConfig",
-        "goObservability",
-      ],
-      java: [
-        "javaWebFramework",
-        "javaBuildTool",
-        "javaOrm",
-        "javaAuth",
-        "javaApi",
-        "javaLogging",
-        "javaLibraries",
-        "javaTestingLibraries",
-      ],
-      dotnet: [
-        "dotnetWebFramework",
-        "dotnetOrm",
-        "dotnetAuth",
-        "dotnetApi",
-        "dotnetTesting",
-        "dotnetJobQueue",
-        "dotnetRealtime",
-        "dotnetObservability",
-        "dotnetValidation",
-        "dotnetCaching",
-        "dotnetDeploy",
-      ],
-      elixir: [
-        "elixirWebFramework",
-        "elixirOrm",
-        "elixirAuth",
-        "elixirApi",
-        "elixirRealtime",
-        "elixirJobs",
-        "elixirValidation",
-        "elixirHttp",
-        "elixirJson",
-        "elixirEmail",
-        "elixirCaching",
-        "elixirObservability",
-        "elixirTesting",
-        "elixirQuality",
-        "elixirDeploy",
-        "elixirLibraries",
-      ],
-    };
-    const raw = body as Record<string, unknown>;
-    const relevantKeys =
-      EXTRA_OPTIONS_BY_ECOSYSTEM[typeof body.ecosystem === "string" ? body.ecosystem : ""] ?? [];
-    const options: Record<string, string | string[]> = {};
-    for (const key of relevantKeys) {
-      const value = raw[key];
-      if (typeof value === "string") {
-        if (value) options[key] = value;
-      } else if (Array.isArray(value) && value.every((item) => typeof item === "string")) {
-        if (value.length > 0) options[key] = value as string[];
-      }
-    }
+    const stack = extractStack(body);
 
-    const ingest = internal.analytics?.ingestEvent;
-    if (ingest) {
-      try {
-        await ctx.runMutation(ingest, {
-          // Core
-          ecosystem: body.ecosystem,
-          database: body.database,
-          orm: body.orm,
-          backend: body.backend,
-          runtime: body.runtime,
-          frontend: body.frontend,
-          api: body.api,
-          auth: body.auth,
-          // Deployment
-          dbSetup: body.dbSetup,
-          webDeploy: body.webDeploy,
-          serverDeploy: body.serverDeploy,
-          // Addons & Examples
-          addons: body.addons,
-          examples: body.examples,
-          // Integrations
-          payments: body.payments,
-          email: body.email,
-          fileUpload: body.fileUpload,
-          // Frontend extras
-          astroIntegration: body.astroIntegration,
-          cssFramework: body.cssFramework,
-          uiLibrary: body.uiLibrary,
-          stateManagement: body.stateManagement,
-          forms: body.forms,
-          animation: body.animation,
-          validation: body.validation,
-          // Backend extras
-          realtime: body.realtime,
-          jobQueue: body.jobQueue,
-          caching: body.caching,
-          logging: body.logging,
-          observability: body.observability,
-          // AI & CMS
-          ai: body.ai,
-          cms: body.cms,
-          // Testing
-          testing: body.testing,
-          // Effect
-          effect: body.effect,
-          // Rust ecosystem
-          rustWebFramework: body.rustWebFramework,
-          rustFrontend: body.rustFrontend,
-          rustOrm: body.rustOrm,
-          rustApi: body.rustApi,
-          rustCli: body.rustCli,
-          rustLibraries: body.rustLibraries,
-          // Setup options
-          git: body.git,
-          packageManager: body.packageManager,
-          install: body.install,
-          // Meta
-          cli_version: body.cli_version,
-          node_version: body.node_version,
-          platform: body.platform,
-          options,
-        });
-      } catch (error) {
-        console.error("Failed to ingest analytics:", error);
-        return new Response("Internal Server Error", { status: 500 });
-      }
+    try {
+      await ctx.runMutation(internal.analytics.ingestEvent, {
+        // Envelope
+        eventType: str(body.eventType),
+        source: str(body.source),
+        machineId: str(body.machineId),
+        success: bool(body.success),
+        errorName: str(body.errorName),
+        setupFailures: strArray(body.setupFailures),
+        durationMs: num(body.durationMs),
+        fileCount: num(body.fileCount),
+        stack: Object.keys(stack).length > 0 ? stack : undefined,
+        // Legacy named fields, kept so the per-field aggregates and old
+        // payload shapes keep working.
+        ecosystem: str(body.ecosystem),
+        database: str(body.database),
+        orm: str(body.orm),
+        backend: str(body.backend),
+        runtime: str(body.runtime),
+        frontend: strArray(body.frontend),
+        api: str(body.api),
+        auth: str(body.auth),
+        dbSetup: str(body.dbSetup),
+        webDeploy: str(body.webDeploy),
+        serverDeploy: str(body.serverDeploy),
+        addons: strArray(body.addons),
+        examples: strArray(body.examples),
+        payments: str(body.payments),
+        email: str(body.email),
+        fileUpload: str(body.fileUpload),
+        astroIntegration: str(body.astroIntegration),
+        cssFramework: str(body.cssFramework),
+        uiLibrary: str(body.uiLibrary),
+        stateManagement: str(body.stateManagement),
+        forms: str(body.forms),
+        animation: str(body.animation),
+        validation: str(body.validation),
+        realtime: str(body.realtime),
+        jobQueue: str(body.jobQueue),
+        caching: str(body.caching),
+        logging: str(body.logging),
+        observability: str(body.observability),
+        ai: str(body.ai),
+        cms: str(body.cms),
+        testing: str(body.testing),
+        effect: str(body.effect),
+        rustWebFramework: str(body.rustWebFramework),
+        rustFrontend: str(body.rustFrontend),
+        rustOrm: str(body.rustOrm),
+        rustApi: str(body.rustApi),
+        rustCli: str(body.rustCli),
+        rustLibraries: strArray(body.rustLibraries),
+        git: bool(body.git),
+        packageManager: str(body.packageManager),
+        install: bool(body.install),
+        cli_version: str(body.cli_version),
+        node_version: str(body.node_version),
+        platform: str(body.platform),
+      });
+    } catch (error) {
+      console.error("Failed to ingest analytics:", error);
+      return new Response("Internal Server Error", { status: 500 });
     }
     return new Response("ok");
   }),

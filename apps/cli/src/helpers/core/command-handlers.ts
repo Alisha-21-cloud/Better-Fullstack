@@ -10,7 +10,12 @@ import { getDefaultConfig } from "../../constants";
 import { gatherConfig } from "../../prompts/config-prompts";
 import { getProjectName } from "../../prompts/project-name";
 import { getVersionChannelChoice } from "../../prompts/version-channel";
-import { maybeShowTelemetryNotice, trackProjectCreation } from "../../utils/analytics";
+import {
+  maybeShowTelemetryNotice,
+  type TelemetrySource,
+  trackEvent,
+  trackProjectCreation,
+} from "../../utils/analytics";
 import { resolveCreateConfigBase } from "../../utils/config-source";
 import { isSilent, runWithContextAsync } from "../../utils/context";
 import { displayConfig } from "../../utils/display-config";
@@ -113,6 +118,7 @@ export async function createProjectHandler(
   return runWithContextAsync({ silent }, async () => {
     const startTime = Date.now();
     const timeScaffolded = new Date().toISOString();
+    let telemetrySource: TelemetrySource = silent ? "programmatic" : "cli-interactive";
 
     try {
       if (!isSilent() && input.renderTitle !== false) {
@@ -392,6 +398,7 @@ export async function createProjectHandler(
 
       let config: ProjectConfig;
       if (cliInput.yes || cliInput.part?.length || hasConfigBase) {
+        if (!silent) telemetrySource = "cli-flags";
         const flagConfig = processProvidedFlagsWithoutValidation(cliInput, finalBaseName);
 
         config = {
@@ -530,7 +537,12 @@ export async function createProjectHandler(
         );
       }
 
-      await trackProjectCreation(config, input.disableAnalytics);
+      await trackProjectCreation(config, input.disableAnalytics, {
+        source: telemetrySource,
+        success: true,
+        setupFailures: setupFailures.map((failure) => failure.step),
+        durationMs: Date.now() - startTime,
+      });
       try {
         await addToHistory(config, reproducibleCommand);
       } catch (historyError) {
@@ -594,6 +606,18 @@ export async function createProjectHandler(
         }
         return;
       }
+      // Only the error class name is sent — messages can contain paths.
+      await trackEvent(
+        "project_created",
+        {},
+        {
+          source: telemetrySource,
+          success: false,
+          errorName: error instanceof Error ? error.name : "UnknownError",
+          durationMs: Date.now() - startTime,
+        },
+        input.disableAnalytics,
+      );
       if (error instanceof CLIError) {
         if (isSilent()) {
           return {

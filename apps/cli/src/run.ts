@@ -5,6 +5,7 @@ import { createCli } from "trpc-cli";
 import z from "zod";
 
 import type { AddResult } from "./helpers/core/add-handler";
+import type { TelemetrySource } from "./utils/analytics";
 
 import { historyHandler } from "./commands/history";
 import { telemetryHandler } from "./commands/telemetry";
@@ -586,9 +587,15 @@ export async function builder() {
   return caller.builder();
 }
 
-export async function add(input: AddInput): Promise<AddResult | undefined> {
+export async function add(
+  input: AddInput,
+  options?: { telemetrySource?: TelemetrySource },
+): Promise<AddResult | undefined> {
   const { addHandler } = await import("./helpers/core/add-handler.js");
-  return addHandler(input, { silent: true });
+  return addHandler(input, {
+    silent: true,
+    telemetrySource: options?.telemetrySource ?? "programmatic",
+  });
 }
 
 export async function history(options?: { limit?: number; clear?: boolean; json?: boolean }) {

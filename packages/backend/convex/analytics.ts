@@ -2,33 +2,87 @@ import { v } from "convex/values";
 
 import { internalMutation, mutation, query } from "./_generated/server";
 
-function incrementKey(
-  dist: Record<string, number>,
-  key: string | undefined,
-): Record<string, number> {
-  if (!key) return dist;
-  return { ...dist, [key]: (dist[key] || 0) + 1 };
+type Dist = Record<string, number>;
+type StackValue = string | boolean | string[];
+type StackRecord = Record<string, StackValue>;
+
+// Legacy per-field aggregates kept for the existing getStats consumers.
+// New stack options do NOT need to be added here: they are covered
+// generically by `dimensions` (built from the event's `stack` record).
+const SINGLE_FIELDS = [
+  "ecosystem",
+  "backend",
+  "database",
+  "orm",
+  "api",
+  "auth",
+  "runtime",
+  "dbSetup",
+  "webDeploy",
+  "serverDeploy",
+  "payments",
+  "email",
+  "fileUpload",
+  "astroIntegration",
+  "cssFramework",
+  "uiLibrary",
+  "stateManagement",
+  "forms",
+  "animation",
+  "validation",
+  "realtime",
+  "jobQueue",
+  "caching",
+  "logging",
+  "observability",
+  "ai",
+  "cms",
+  "testing",
+  "effect",
+  "rustWebFramework",
+  "rustFrontend",
+  "rustOrm",
+  "rustApi",
+  "rustCli",
+  "packageManager",
+  "platform",
+] as const;
+const MULTI_FIELDS = ["frontend", "addons", "examples", "rustLibraries"] as const;
+const BOOL_FIELDS = ["git", "install"] as const;
+
+type AnalyticsEvent = {
+  creationTime: number;
+  eventType?: string;
+  source?: string;
+  machineId?: string;
+  success?: boolean;
+  errorName?: string;
+  setupFailures?: string[];
+  durationMs?: number;
+  fileCount?: number;
+  stack?: StackRecord;
+  options?: Record<string, string | string[]>;
+  cli_version?: string;
+  node_version?: string;
+  git?: boolean;
+  install?: boolean;
+  frontend?: string[];
+  addons?: string[];
+  examples?: string[];
+  rustLibraries?: string[];
+} & { [K in (typeof SINGLE_FIELDS)[number]]?: string };
+
+function inc(dist: Dist, key: string | undefined, by = 1): void {
+  if (!key) return;
+  dist[key] = (dist[key] ?? 0) + by;
 }
 
-function incrementKeys(
-  dist: Record<string, number>,
-  keys: string[] | undefined,
-): Record<string, number> {
-  if (!keys) return dist;
-  const result = { ...dist };
-  for (const key of keys) {
-    result[key] = (result[key] || 0) + 1;
-  }
-  return result;
+function incAll(dist: Dist, keys: string[] | undefined): void {
+  for (const key of keys ?? []) inc(dist, key);
 }
 
-function incrementBool(
-  dist: Record<string, number>,
-  val: boolean | undefined,
-): Record<string, number> {
-  if (val === undefined) return dist;
-  const key = val ? "Yes" : "No";
-  return { ...dist, [key]: (dist[key] || 0) + 1 };
+function incBool(dist: Dist, val: boolean | undefined): void {
+  if (val !== undefined) inc(dist, val ? "Yes" : "No");
 }
 
 function getMajorVersion(version: string | undefined): string | undefined {
@@ -37,245 +91,260 @@ function getMajorVersion(version: string | undefined): string | undefined {
   return `v${clean.split(".")[0]}`;
 }
 
-function mergeOptionStats(
-  current: Record<string, Record<string, number>> | undefined,
-  options: Record<string, string | string[]> | undefined,
-): Record<string, Record<string, number>> {
-  const result: Record<string, Record<string, number>> = { ...current };
-  if (!options) return result;
-  for (const [category, value] of Object.entries(options)) {
-    const values = Array.isArray(value) ? value : [value];
-    const dist = { ...result[category] };
-    for (const item of values) {
-      if (!item) continue;
-      dist[item] = (dist[item] ?? 0) + 1;
-    }
-    result[category] = dist;
-  }
-  return result;
+function durationBucket(ms: number): string {
+  if (ms < 5_000) return "<5s";
+  if (ms < 15_000) return "5-15s";
+  if (ms < 30_000) return "15-30s";
+  if (ms < 60_000) return "30-60s";
+  if (ms < 180_000) return "1-3m";
+  return ">3m";
 }
 
+function isCreation(ev: { eventType?: string }): boolean {
+  return ev.eventType === undefined || ev.eventType === "project_created";
+}
+
+/**
+ * The full stack record for an event. New events carry it explicitly;
+ * for rows from older CLI versions it is synthesized from the legacy
+ * columns and the per-ecosystem `options` record so `dimensions` covers
+ * history too.
+ */
+function eventStack(ev: AnalyticsEvent): StackRecord {
+  if (ev.stack) return ev.stack;
+  const s: StackRecord = {};
+  for (const k of SINGLE_FIELDS) if (ev[k]) s[k] = ev[k] as string;
+  for (const k of MULTI_FIELDS) if (ev[k]?.length) s[k] = ev[k] as string[];
+  for (const k of BOOL_FIELDS) if (ev[k] !== undefined) s[k] = ev[k] as boolean;
+  if (ev.options) Object.assign(s, ev.options);
+  return s;
+}
+
+type StatsShape = {
+  totalProjects: number;
+  lastEventTime: number;
+  nodeVersion: Dist;
+  cliVersion: Dist;
+  hourlyDistribution: Dist;
+  stackCombinations: Dist;
+  dbOrmCombinations: Dist;
+  optionStats: Record<string, Dist>;
+  dimensions: Record<string, Dist>;
+  totalEvents: number;
+  eventTypes: Dist;
+  sources: Dist;
+  outcomes: Dist;
+  errorNames: Dist;
+  setupFailureStats: Dist;
+  durationBuckets: Dist;
+  uniqueMachines: number;
+} & { [K in (typeof SINGLE_FIELDS)[number]]: Dist } & {
+  [K in (typeof MULTI_FIELDS)[number]]: Dist;
+} & { [K in (typeof BOOL_FIELDS)[number]]: Dist };
+
+function emptyStats(): StatsShape {
+  const stats = {
+    totalProjects: 0,
+    lastEventTime: 0,
+    nodeVersion: {},
+    cliVersion: {},
+    hourlyDistribution: {},
+    stackCombinations: {},
+    dbOrmCombinations: {},
+    optionStats: {},
+    dimensions: {},
+    totalEvents: 0,
+    eventTypes: {},
+    sources: {},
+    outcomes: {},
+    errorNames: {},
+    setupFailureStats: {},
+    durationBuckets: {},
+    uniqueMachines: 0,
+  } as StatsShape;
+  for (const k of [...SINGLE_FIELDS, ...MULTI_FIELDS, ...BOOL_FIELDS]) stats[k] = {};
+  return stats;
+}
+
+/** Apply one event to the running aggregates (mutates `stats`). */
+function applyEvent(stats: StatsShape, ev: AnalyticsEvent): void {
+  const now = ev.creationTime;
+  if (now > stats.lastEventTime) stats.lastEventTime = now;
+
+  // Envelope aggregates: every event type.
+  stats.totalEvents += 1;
+  inc(stats.eventTypes, ev.eventType ?? "project_created");
+  inc(stats.sources, ev.source ?? "unknown");
+  inc(stats.outcomes, ev.success === undefined ? "unknown" : ev.success ? "success" : "failure");
+  inc(stats.errorNames, ev.errorName);
+  incAll(stats.setupFailureStats, ev.setupFailures);
+  if (ev.durationMs !== undefined) inc(stats.durationBuckets, durationBucket(ev.durationMs));
+
+  // Generic full-coverage dimensions. Creation events use bare category
+  // names; add/update events are namespaced so they never skew stack stats.
+  const prefix = isCreation(ev)
+    ? ""
+    : ev.eventType === "feature_added"
+      ? "add."
+      : ev.eventType === "stack_updated"
+        ? "update."
+        : `${ev.eventType}.`;
+  for (const [key, value] of Object.entries(eventStack(ev))) {
+    const dist = (stats.dimensions[prefix + key] ??= {});
+    if (typeof value === "boolean") incBool(dist, value);
+    else if (Array.isArray(value)) incAll(dist, value);
+    else inc(dist, value);
+  }
+
+  if (!isCreation(ev)) return;
+
+  // Legacy aggregates: creations only (matches historical semantics).
+  stats.totalProjects += 1;
+  for (const k of SINGLE_FIELDS) inc(stats[k], ev[k]);
+  for (const k of MULTI_FIELDS) incAll(stats[k], ev[k]);
+  for (const k of BOOL_FIELDS) incBool(stats[k], ev[k]);
+  inc(stats.nodeVersion, getMajorVersion(ev.node_version));
+  inc(stats.cliVersion, ev.cli_version);
+  inc(stats.hourlyDistribution, String(new Date(now).getUTCHours()).padStart(2, "0"));
+  inc(stats.stackCombinations, `${ev.backend || "none"} + ${ev.frontend?.[0] || "none"}`);
+  inc(stats.dbOrmCombinations, `${ev.database || "none"} + ${ev.orm || "none"}`);
+  for (const [category, value] of Object.entries(ev.options ?? {})) {
+    const dist = (stats.optionStats[category] ??= {});
+    incAll(dist, Array.isArray(value) ? value : [value]);
+  }
+}
+
+const stackValidator = v.record(v.string(), v.union(v.string(), v.boolean(), v.array(v.string())));
+
+const eventArgs = {
+  // Envelope
+  eventType: v.optional(v.string()),
+  source: v.optional(v.string()),
+  machineId: v.optional(v.string()),
+  success: v.optional(v.boolean()),
+  errorName: v.optional(v.string()),
+  setupFailures: v.optional(v.array(v.string())),
+  durationMs: v.optional(v.number()),
+  fileCount: v.optional(v.number()),
+  // Full generic stack config
+  stack: v.optional(stackValidator),
+  // Legacy named fields (still sent by older CLI versions)
+  ecosystem: v.optional(v.string()),
+  database: v.optional(v.string()),
+  orm: v.optional(v.string()),
+  backend: v.optional(v.string()),
+  runtime: v.optional(v.string()),
+  frontend: v.optional(v.array(v.string())),
+  api: v.optional(v.string()),
+  auth: v.optional(v.string()),
+  dbSetup: v.optional(v.string()),
+  webDeploy: v.optional(v.string()),
+  serverDeploy: v.optional(v.string()),
+  addons: v.optional(v.array(v.string())),
+  examples: v.optional(v.array(v.string())),
+  payments: v.optional(v.string()),
+  email: v.optional(v.string()),
+  fileUpload: v.optional(v.string()),
+  astroIntegration: v.optional(v.string()),
+  cssFramework: v.optional(v.string()),
+  uiLibrary: v.optional(v.string()),
+  stateManagement: v.optional(v.string()),
+  forms: v.optional(v.string()),
+  animation: v.optional(v.string()),
+  validation: v.optional(v.string()),
+  realtime: v.optional(v.string()),
+  jobQueue: v.optional(v.string()),
+  caching: v.optional(v.string()),
+  logging: v.optional(v.string()),
+  observability: v.optional(v.string()),
+  ai: v.optional(v.string()),
+  cms: v.optional(v.string()),
+  testing: v.optional(v.string()),
+  effect: v.optional(v.string()),
+  rustWebFramework: v.optional(v.string()),
+  rustFrontend: v.optional(v.string()),
+  rustOrm: v.optional(v.string()),
+  rustApi: v.optional(v.string()),
+  rustCli: v.optional(v.string()),
+  rustLibraries: v.optional(v.array(v.string())),
+  git: v.optional(v.boolean()),
+  packageManager: v.optional(v.string()),
+  install: v.optional(v.boolean()),
+  cli_version: v.optional(v.string()),
+  node_version: v.optional(v.string()),
+  platform: v.optional(v.string()),
+  options: v.optional(v.record(v.string(), v.union(v.string(), v.array(v.string())))),
+};
+
 export const ingestEvent = internalMutation({
-  args: {
-    // Core
-    ecosystem: v.optional(v.string()),
-    database: v.optional(v.string()),
-    orm: v.optional(v.string()),
-    backend: v.optional(v.string()),
-    runtime: v.optional(v.string()),
-    frontend: v.optional(v.array(v.string())),
-    api: v.optional(v.string()),
-    auth: v.optional(v.string()),
-    // Deployment
-    dbSetup: v.optional(v.string()),
-    webDeploy: v.optional(v.string()),
-    serverDeploy: v.optional(v.string()),
-    // Addons & Examples
-    addons: v.optional(v.array(v.string())),
-    examples: v.optional(v.array(v.string())),
-    // Integrations
-    payments: v.optional(v.string()),
-    email: v.optional(v.string()),
-    fileUpload: v.optional(v.string()),
-    // Frontend extras
-    astroIntegration: v.optional(v.string()),
-    cssFramework: v.optional(v.string()),
-    uiLibrary: v.optional(v.string()),
-    stateManagement: v.optional(v.string()),
-    forms: v.optional(v.string()),
-    animation: v.optional(v.string()),
-    validation: v.optional(v.string()),
-    // Backend extras
-    realtime: v.optional(v.string()),
-    jobQueue: v.optional(v.string()),
-    caching: v.optional(v.string()),
-    logging: v.optional(v.string()),
-    observability: v.optional(v.string()),
-    // AI & CMS
-    ai: v.optional(v.string()),
-    cms: v.optional(v.string()),
-    // Testing
-    testing: v.optional(v.string()),
-    // Effect
-    effect: v.optional(v.string()),
-    // Rust ecosystem
-    rustWebFramework: v.optional(v.string()),
-    rustFrontend: v.optional(v.string()),
-    rustOrm: v.optional(v.string()),
-    rustApi: v.optional(v.string()),
-    rustCli: v.optional(v.string()),
-    rustLibraries: v.optional(v.array(v.string())),
-    // Setup options
-    git: v.optional(v.boolean()),
-    packageManager: v.optional(v.string()),
-    install: v.optional(v.boolean()),
-    // Meta
-    cli_version: v.optional(v.string()),
-    node_version: v.optional(v.string()),
-    platform: v.optional(v.string()),
-    options: v.optional(v.record(v.string(), v.union(v.string(), v.array(v.string())))),
-  },
+  args: eventArgs,
   returns: v.null(),
   handler: async (ctx, args) => {
     const id = await ctx.db.insert("analyticsEvents", args);
     const event = await ctx.db.get(id);
     const now = event!._creationTime;
 
-    const hourKey = String(new Date(now).getUTCHours()).padStart(2, "0");
-    const fe = args.frontend?.[0] || "none";
-    const be = args.backend || "none";
-    const stackKey = `${be} + ${fe}`;
-    const db = args.database || "none";
-    const o = args.orm || "none";
-    const dbOrmKey = `${db} + ${o}`;
-
-    const existingStats = await ctx.db.query("analyticsStats").first();
-
-    if (existingStats) {
-      await ctx.db.patch("analyticsStats", existingStats._id, {
-        totalProjects: existingStats.totalProjects + 1,
-        lastEventTime: now,
-        // Core
-        ecosystem: incrementKey(existingStats.ecosystem, args.ecosystem),
-        backend: incrementKey(existingStats.backend, args.backend),
-        frontend: incrementKeys(existingStats.frontend, args.frontend),
-        database: incrementKey(existingStats.database, args.database),
-        orm: incrementKey(existingStats.orm, args.orm),
-        api: incrementKey(existingStats.api, args.api),
-        auth: incrementKey(existingStats.auth, args.auth),
-        runtime: incrementKey(existingStats.runtime, args.runtime),
-        // Deployment
-        dbSetup: incrementKey(existingStats.dbSetup, args.dbSetup),
-        webDeploy: incrementKey(existingStats.webDeploy, args.webDeploy),
-        serverDeploy: incrementKey(existingStats.serverDeploy, args.serverDeploy),
-        // Addons & Examples
-        addons: incrementKeys(existingStats.addons, args.addons),
-        examples: incrementKeys(existingStats.examples, args.examples),
-        // Integrations
-        payments: incrementKey(existingStats.payments, args.payments),
-        email: incrementKey(existingStats.email, args.email),
-        fileUpload: incrementKey(existingStats.fileUpload, args.fileUpload),
-        // Frontend extras
-        astroIntegration: incrementKey(existingStats.astroIntegration, args.astroIntegration),
-        cssFramework: incrementKey(existingStats.cssFramework, args.cssFramework),
-        uiLibrary: incrementKey(existingStats.uiLibrary, args.uiLibrary),
-        stateManagement: incrementKey(existingStats.stateManagement, args.stateManagement),
-        forms: incrementKey(existingStats.forms, args.forms),
-        animation: incrementKey(existingStats.animation, args.animation),
-        validation: incrementKey(existingStats.validation, args.validation),
-        // Backend extras
-        realtime: incrementKey(existingStats.realtime, args.realtime),
-        jobQueue: incrementKey(existingStats.jobQueue, args.jobQueue),
-        caching: incrementKey(existingStats.caching, args.caching),
-        logging: incrementKey(existingStats.logging, args.logging),
-        observability: incrementKey(existingStats.observability, args.observability),
-        // AI & CMS
-        ai: incrementKey(existingStats.ai, args.ai),
-        cms: incrementKey(existingStats.cms, args.cms),
-        // Testing
-        testing: incrementKey(existingStats.testing, args.testing),
-        // Effect
-        effect: incrementKey(existingStats.effect, args.effect),
-        // Rust ecosystem
-        rustWebFramework: incrementKey(existingStats.rustWebFramework, args.rustWebFramework),
-        rustFrontend: incrementKey(existingStats.rustFrontend, args.rustFrontend),
-        rustOrm: incrementKey(existingStats.rustOrm, args.rustOrm),
-        rustApi: incrementKey(existingStats.rustApi, args.rustApi),
-        rustCli: incrementKey(existingStats.rustCli, args.rustCli),
-        rustLibraries: incrementKeys(existingStats.rustLibraries, args.rustLibraries),
-        // Setup options
-        packageManager: incrementKey(existingStats.packageManager, args.packageManager),
-        platform: incrementKey(existingStats.platform, args.platform),
-        git: incrementBool(existingStats.git, args.git),
-        install: incrementBool(existingStats.install, args.install),
-        // Meta
-        nodeVersion: incrementKey(existingStats.nodeVersion, getMajorVersion(args.node_version)),
-        cliVersion: incrementKey(existingStats.cliVersion, args.cli_version),
-        // Aggregations
-        hourlyDistribution: incrementKey(existingStats.hourlyDistribution || {}, hourKey),
-        stackCombinations: incrementKey(existingStats.stackCombinations || {}, stackKey),
-        dbOrmCombinations: incrementKey(existingStats.dbOrmCombinations || {}, dbOrmKey),
-        optionStats: mergeOptionStats(existingStats.optionStats, args.options),
-      });
+    const existing = await ctx.db.query("analyticsStats").first();
+    let stats: StatsShape;
+    if (existing) {
+      const { _id, _creationTime, ...plain } = existing;
+      stats = { ...emptyStats(), ...plain } as StatsShape;
     } else {
-      const emptyDist: Record<string, number> = {};
-      await ctx.db.insert("analyticsStats", {
-        totalProjects: 1,
-        lastEventTime: now,
-        // Core
-        ecosystem: incrementKey(emptyDist, args.ecosystem),
-        backend: incrementKey(emptyDist, args.backend),
-        frontend: incrementKeys(emptyDist, args.frontend),
-        database: incrementKey(emptyDist, args.database),
-        orm: incrementKey(emptyDist, args.orm),
-        api: incrementKey(emptyDist, args.api),
-        auth: incrementKey(emptyDist, args.auth),
-        runtime: incrementKey(emptyDist, args.runtime),
-        // Deployment
-        dbSetup: incrementKey(emptyDist, args.dbSetup),
-        webDeploy: incrementKey(emptyDist, args.webDeploy),
-        serverDeploy: incrementKey(emptyDist, args.serverDeploy),
-        // Addons & Examples
-        addons: incrementKeys(emptyDist, args.addons),
-        examples: incrementKeys(emptyDist, args.examples),
-        // Integrations
-        payments: incrementKey(emptyDist, args.payments),
-        email: incrementKey(emptyDist, args.email),
-        fileUpload: incrementKey(emptyDist, args.fileUpload),
-        // Frontend extras
-        astroIntegration: incrementKey(emptyDist, args.astroIntegration),
-        cssFramework: incrementKey(emptyDist, args.cssFramework),
-        uiLibrary: incrementKey(emptyDist, args.uiLibrary),
-        stateManagement: incrementKey(emptyDist, args.stateManagement),
-        forms: incrementKey(emptyDist, args.forms),
-        animation: incrementKey(emptyDist, args.animation),
-        validation: incrementKey(emptyDist, args.validation),
-        // Backend extras
-        realtime: incrementKey(emptyDist, args.realtime),
-        jobQueue: incrementKey(emptyDist, args.jobQueue),
-        caching: incrementKey(emptyDist, args.caching),
-        logging: incrementKey(emptyDist, args.logging),
-        observability: incrementKey(emptyDist, args.observability),
-        // AI & CMS
-        ai: incrementKey(emptyDist, args.ai),
-        cms: incrementKey(emptyDist, args.cms),
-        // Testing
-        testing: incrementKey(emptyDist, args.testing),
-        // Effect
-        effect: incrementKey(emptyDist, args.effect),
-        // Rust ecosystem
-        rustWebFramework: incrementKey(emptyDist, args.rustWebFramework),
-        rustFrontend: incrementKey(emptyDist, args.rustFrontend),
-        rustOrm: incrementKey(emptyDist, args.rustOrm),
-        rustApi: incrementKey(emptyDist, args.rustApi),
-        rustCli: incrementKey(emptyDist, args.rustCli),
-        rustLibraries: incrementKeys(emptyDist, args.rustLibraries),
-        // Setup options
-        packageManager: incrementKey(emptyDist, args.packageManager),
-        platform: incrementKey(emptyDist, args.platform),
-        git: incrementBool(emptyDist, args.git),
-        install: incrementBool(emptyDist, args.install),
-        // Meta
-        nodeVersion: incrementKey(emptyDist, getMajorVersion(args.node_version)),
-        cliVersion: incrementKey(emptyDist, args.cli_version),
-        // Aggregations
-        hourlyDistribution: incrementKey(emptyDist, hourKey),
-        stackCombinations: incrementKey(emptyDist, stackKey),
-        dbOrmCombinations: incrementKey(emptyDist, dbOrmKey),
-        optionStats: mergeOptionStats(undefined, args.options),
-      });
+      stats = emptyStats();
+    }
+    applyEvent(stats, { ...args, creationTime: now });
+
+    // Machine tracking (anonymous random ID → uniques, new vs returning).
+    let newMachine = false;
+    if (args.machineId) {
+      const machine = await ctx.db
+        .query("analyticsMachines")
+        .withIndex("by_machine_id", (q) => q.eq("machineId", args.machineId!))
+        .first();
+      if (machine) {
+        await ctx.db.patch("analyticsMachines", machine._id, {
+          lastSeen: now,
+          eventCount: machine.eventCount + 1,
+          platform: args.platform ?? machine.platform,
+          lastCliVersion: args.cli_version ?? machine.lastCliVersion,
+        });
+      } else {
+        newMachine = true;
+        stats.uniqueMachines += 1;
+        await ctx.db.insert("analyticsMachines", {
+          machineId: args.machineId,
+          firstSeen: now,
+          lastSeen: now,
+          eventCount: 1,
+          platform: args.platform,
+          lastCliVersion: args.cli_version,
+        });
+      }
+    }
+
+    if (existing) {
+      await ctx.db.patch("analyticsStats", existing._id, stats);
+    } else {
+      await ctx.db.insert("analyticsStats", stats);
     }
 
     const today = new Date(now).toISOString().slice(0, 10);
-    const dailyStats = await ctx.db
+    const creation = isCreation(args);
+    const daily = await ctx.db
       .query("analyticsDailyStats")
       .withIndex("by_date", (q) => q.eq("date", today))
       .first();
-
-    if (dailyStats) {
-      await ctx.db.patch("analyticsDailyStats", dailyStats._id, { count: dailyStats.count + 1 });
+    if (daily) {
+      await ctx.db.patch("analyticsDailyStats", daily._id, {
+        count: daily.count + (creation ? 1 : 0),
+        newMachines: (daily.newMachines ?? 0) + (newMachine ? 1 : 0),
+      });
     } else {
-      await ctx.db.insert("analyticsDailyStats", { date: today, count: 1 });
+      await ctx.db.insert("analyticsDailyStats", {
+        date: today,
+        count: creation ? 1 : 0,
+        newMachines: newMachine ? 1 : 0,
+      });
     }
 
     return null;
@@ -286,139 +355,18 @@ const distributionValidator = v.record(v.string(), v.number());
 
 export const getStats = query({
   args: {},
-  returns: v.union(
-    v.object({
-      totalProjects: v.number(),
-      lastEventTime: v.number(),
-      // Core
-      ecosystem: distributionValidator,
-      backend: distributionValidator,
-      frontend: distributionValidator,
-      database: distributionValidator,
-      orm: distributionValidator,
-      api: distributionValidator,
-      auth: distributionValidator,
-      runtime: distributionValidator,
-      // Deployment
-      dbSetup: distributionValidator,
-      webDeploy: distributionValidator,
-      serverDeploy: distributionValidator,
-      // Addons & Examples
-      addons: distributionValidator,
-      examples: distributionValidator,
-      // Integrations
-      payments: distributionValidator,
-      email: distributionValidator,
-      fileUpload: distributionValidator,
-      // Frontend extras
-      astroIntegration: distributionValidator,
-      cssFramework: distributionValidator,
-      uiLibrary: distributionValidator,
-      stateManagement: distributionValidator,
-      forms: distributionValidator,
-      animation: distributionValidator,
-      validation: distributionValidator,
-      // Backend extras
-      realtime: distributionValidator,
-      jobQueue: distributionValidator,
-      caching: distributionValidator,
-      logging: distributionValidator,
-      observability: distributionValidator,
-      // AI & CMS
-      ai: distributionValidator,
-      cms: distributionValidator,
-      // Testing
-      testing: distributionValidator,
-      // Effect
-      effect: distributionValidator,
-      // Rust ecosystem
-      rustWebFramework: distributionValidator,
-      rustFrontend: distributionValidator,
-      rustOrm: distributionValidator,
-      rustApi: distributionValidator,
-      rustCli: distributionValidator,
-      rustLibraries: distributionValidator,
-      // Setup options
-      packageManager: distributionValidator,
-      platform: distributionValidator,
-      git: distributionValidator,
-      install: distributionValidator,
-      // Meta
-      nodeVersion: distributionValidator,
-      cliVersion: distributionValidator,
-      // Aggregations
-      hourlyDistribution: distributionValidator,
-      stackCombinations: distributionValidator,
-      dbOrmCombinations: distributionValidator,
-      optionStats: v.record(v.string(), distributionValidator),
-    }),
-    v.null(),
-  ),
   handler: async (ctx) => {
     const stats = await ctx.db.query("analyticsStats").first();
     if (!stats) return null;
+    const { _id, _creationTime, ...plain } = stats;
     return {
-      totalProjects: stats.totalProjects,
-      lastEventTime: stats.lastEventTime,
-      // Core
-      ecosystem: stats.ecosystem,
-      backend: stats.backend,
-      frontend: stats.frontend,
-      database: stats.database,
-      orm: stats.orm,
-      api: stats.api,
-      auth: stats.auth,
-      runtime: stats.runtime,
-      // Deployment
-      dbSetup: stats.dbSetup,
-      webDeploy: stats.webDeploy,
-      serverDeploy: stats.serverDeploy,
-      // Addons & Examples
-      addons: stats.addons,
-      examples: stats.examples,
-      // Integrations
-      payments: stats.payments,
-      email: stats.email,
-      fileUpload: stats.fileUpload,
-      // Frontend extras
-      astroIntegration: stats.astroIntegration,
-      cssFramework: stats.cssFramework,
-      uiLibrary: stats.uiLibrary,
-      stateManagement: stats.stateManagement,
-      forms: stats.forms,
-      animation: stats.animation,
-      validation: stats.validation,
-      // Backend extras
-      realtime: stats.realtime,
-      jobQueue: stats.jobQueue,
-      caching: stats.caching,
-      logging: stats.logging,
-      observability: stats.observability,
-      // AI & CMS
-      ai: stats.ai,
-      cms: stats.cms,
-      // Testing
-      testing: stats.testing,
-      // Effect
-      effect: stats.effect,
-      // Rust ecosystem
-      rustWebFramework: stats.rustWebFramework,
-      rustFrontend: stats.rustFrontend,
-      rustOrm: stats.rustOrm,
-      rustApi: stats.rustApi,
-      rustCli: stats.rustCli,
-      rustLibraries: stats.rustLibraries,
-      // Setup options
-      packageManager: stats.packageManager,
-      platform: stats.platform,
-      git: stats.git,
-      install: stats.install,
-      nodeVersion: stats.nodeVersion,
-      cliVersion: stats.cliVersion,
-      hourlyDistribution: stats.hourlyDistribution || {},
-      stackCombinations: stats.stackCombinations || {},
-      dbOrmCombinations: stats.dbOrmCombinations || {},
+      ...emptyStats(),
+      ...plain,
+      hourlyDistribution: stats.hourlyDistribution ?? {},
+      stackCombinations: stats.stackCombinations ?? {},
+      dbOrmCombinations: stats.dbOrmCombinations ?? {},
       optionStats: stats.optionStats ?? {},
+      dimensions: stats.dimensions ?? {},
     };
   },
 });
@@ -431,6 +379,7 @@ export const getDailyStats = query({
     v.object({
       date: v.string(),
       count: v.number(),
+      newMachines: v.optional(v.number()),
     }),
   ),
   handler: async (ctx, args) => {
@@ -447,7 +396,29 @@ export const getDailyStats = query({
 
     return allDaily
       .filter((d) => d.date >= cutoffDate && d.date <= today)
-      .map((d) => ({ date: d.date, count: d.count }));
+      .map((d) => ({ date: d.date, count: d.count, newMachines: d.newMachines }));
+  },
+});
+
+export const getEngagement = query({
+  args: {},
+  returns: v.object({
+    uniqueMachines: v.number(),
+    returningMachines: v.number(),
+    trackedEvents: v.number(),
+    newMachinesLast30d: v.number(),
+    activeMachinesLast30d: v.number(),
+  }),
+  handler: async (ctx) => {
+    const machines = await ctx.db.query("analyticsMachines").collect();
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    return {
+      uniqueMachines: machines.length,
+      returningMachines: machines.filter((m) => m.eventCount > 1).length,
+      trackedEvents: machines.reduce((sum, m) => sum + m.eventCount, 0),
+      newMachinesLast30d: machines.filter((m) => m.firstSeen >= cutoff).length,
+      activeMachinesLast30d: machines.filter((m) => m.lastSeen >= cutoff).length,
+    };
   },
 });
 
@@ -468,180 +439,80 @@ export const backfillStats = mutation({
   returns: v.object({
     totalProcessed: v.number(),
     dailyDates: v.number(),
+    uniqueMachines: v.number(),
   }),
   handler: async (ctx) => {
     const existing = await ctx.db.query("analyticsStats").first();
     if (existing) {
       await ctx.db.delete("analyticsStats", existing._id);
     }
-
-    const existingDaily = await ctx.db.query("analyticsDailyStats").collect();
-    for (const d of existingDaily) {
+    for (const d of await ctx.db.query("analyticsDailyStats").collect()) {
       await ctx.db.delete("analyticsDailyStats", d._id);
+    }
+    for (const m of await ctx.db.query("analyticsMachines").collect()) {
+      await ctx.db.delete("analyticsMachines", m._id);
     }
 
     const events = await ctx.db.query("analyticsEvents").collect();
+    events.sort((a, b) => a._creationTime - b._creationTime);
 
-    const emptyDist: Record<string, number> = {};
-    const stats = {
-      totalProjects: 0,
-      lastEventTime: 0,
-      // Core
-      ecosystem: { ...emptyDist },
-      backend: { ...emptyDist },
-      frontend: { ...emptyDist },
-      database: { ...emptyDist },
-      orm: { ...emptyDist },
-      api: { ...emptyDist },
-      auth: { ...emptyDist },
-      runtime: { ...emptyDist },
-      // Deployment
-      dbSetup: { ...emptyDist },
-      webDeploy: { ...emptyDist },
-      serverDeploy: { ...emptyDist },
-      // Addons & Examples
-      addons: { ...emptyDist },
-      examples: { ...emptyDist },
-      // Integrations
-      payments: { ...emptyDist },
-      email: { ...emptyDist },
-      fileUpload: { ...emptyDist },
-      // Frontend extras
-      astroIntegration: { ...emptyDist },
-      cssFramework: { ...emptyDist },
-      uiLibrary: { ...emptyDist },
-      stateManagement: { ...emptyDist },
-      forms: { ...emptyDist },
-      animation: { ...emptyDist },
-      validation: { ...emptyDist },
-      // Backend extras
-      realtime: { ...emptyDist },
-      jobQueue: { ...emptyDist },
-      caching: { ...emptyDist },
-      logging: { ...emptyDist },
-      observability: { ...emptyDist },
-      // AI & CMS
-      ai: { ...emptyDist },
-      cms: { ...emptyDist },
-      // Testing
-      testing: { ...emptyDist },
-      // Effect
-      effect: { ...emptyDist },
-      // Rust ecosystem
-      rustWebFramework: { ...emptyDist },
-      rustFrontend: { ...emptyDist },
-      rustOrm: { ...emptyDist },
-      rustApi: { ...emptyDist },
-      rustCli: { ...emptyDist },
-      rustLibraries: { ...emptyDist },
-      // Setup options
-      packageManager: { ...emptyDist },
-      platform: { ...emptyDist },
-      git: { ...emptyDist },
-      install: { ...emptyDist },
-      // Meta
-      nodeVersion: { ...emptyDist },
-      cliVersion: { ...emptyDist },
-      // Aggregations
-      hourlyDistribution: { ...emptyDist },
-      stackCombinations: { ...emptyDist },
-      dbOrmCombinations: { ...emptyDist },
-      optionStats: {} as Record<string, Record<string, number>>,
-    };
-
-    const dailyCounts = new Map<string, number>();
+    const stats = emptyStats();
+    const dailyCounts = new Map<string, { count: number; newMachines: number }>();
+    const machines = new Map<
+      string,
+      {
+        firstSeen: number;
+        lastSeen: number;
+        eventCount: number;
+        platform?: string;
+        lastCliVersion?: string;
+      }
+    >();
 
     for (const ev of events) {
-      stats.totalProjects++;
-      if (ev._creationTime > stats.lastEventTime) {
-        stats.lastEventTime = ev._creationTime;
+      const now = ev._creationTime;
+      applyEvent(stats, { ...ev, creationTime: now } as AnalyticsEvent);
+
+      const date = new Date(now).toISOString().slice(0, 10);
+      const daily = dailyCounts.get(date) ?? { count: 0, newMachines: 0 };
+      if (isCreation(ev)) daily.count += 1;
+
+      if (ev.machineId) {
+        const machine = machines.get(ev.machineId);
+        if (machine) {
+          machine.lastSeen = now;
+          machine.eventCount += 1;
+          machine.platform = ev.platform ?? machine.platform;
+          machine.lastCliVersion = ev.cli_version ?? machine.lastCliVersion;
+        } else {
+          daily.newMachines += 1;
+          machines.set(ev.machineId, {
+            firstSeen: now,
+            lastSeen: now,
+            eventCount: 1,
+            platform: ev.platform,
+            lastCliVersion: ev.cli_version,
+          });
+        }
       }
-
-      const hourKey = String(new Date(ev._creationTime).getUTCHours()).padStart(2, "0");
-      const fe = ev.frontend?.[0] || "none";
-      const be = ev.backend || "none";
-      const stackKey = `${be} + ${fe}`;
-      const db = ev.database || "none";
-      const o = ev.orm || "none";
-      const dbOrmKey = `${db} + ${o}`;
-
-      // Core
-      stats.ecosystem = incrementKey(stats.ecosystem, ev.ecosystem);
-      stats.backend = incrementKey(stats.backend, ev.backend);
-      stats.frontend = incrementKeys(stats.frontend, ev.frontend);
-      stats.database = incrementKey(stats.database, ev.database);
-      stats.orm = incrementKey(stats.orm, ev.orm);
-      stats.api = incrementKey(stats.api, ev.api);
-      stats.auth = incrementKey(stats.auth, ev.auth);
-      stats.runtime = incrementKey(stats.runtime, ev.runtime);
-      // Deployment
-      stats.dbSetup = incrementKey(stats.dbSetup, ev.dbSetup);
-      stats.webDeploy = incrementKey(stats.webDeploy, ev.webDeploy);
-      stats.serverDeploy = incrementKey(stats.serverDeploy, ev.serverDeploy);
-      // Addons & Examples
-      stats.addons = incrementKeys(stats.addons, ev.addons);
-      stats.examples = incrementKeys(stats.examples, ev.examples);
-      // Integrations
-      stats.payments = incrementKey(stats.payments, ev.payments);
-      stats.email = incrementKey(stats.email, ev.email);
-      stats.fileUpload = incrementKey(stats.fileUpload, ev.fileUpload);
-      // Frontend extras
-      stats.astroIntegration = incrementKey(stats.astroIntegration, ev.astroIntegration);
-      stats.cssFramework = incrementKey(stats.cssFramework, ev.cssFramework);
-      stats.uiLibrary = incrementKey(stats.uiLibrary, ev.uiLibrary);
-      stats.stateManagement = incrementKey(stats.stateManagement, ev.stateManagement);
-      stats.forms = incrementKey(stats.forms, ev.forms);
-      stats.animation = incrementKey(stats.animation, ev.animation);
-      stats.validation = incrementKey(stats.validation, ev.validation);
-      // Backend extras
-      stats.realtime = incrementKey(stats.realtime, ev.realtime);
-      stats.jobQueue = incrementKey(stats.jobQueue, ev.jobQueue);
-      stats.caching = incrementKey(stats.caching, ev.caching);
-      stats.logging = incrementKey(stats.logging, ev.logging);
-      stats.observability = incrementKey(stats.observability, ev.observability);
-      // AI & CMS
-      stats.ai = incrementKey(stats.ai, ev.ai);
-      stats.cms = incrementKey(stats.cms, ev.cms);
-      // Testing
-      stats.testing = incrementKey(stats.testing, ev.testing);
-      // Effect
-      stats.effect = incrementKey(stats.effect, ev.effect);
-      // Rust ecosystem
-      stats.rustWebFramework = incrementKey(stats.rustWebFramework, ev.rustWebFramework);
-      stats.rustFrontend = incrementKey(stats.rustFrontend, ev.rustFrontend);
-      stats.rustOrm = incrementKey(stats.rustOrm, ev.rustOrm);
-      stats.rustApi = incrementKey(stats.rustApi, ev.rustApi);
-      stats.rustCli = incrementKey(stats.rustCli, ev.rustCli);
-      stats.rustLibraries = incrementKeys(stats.rustLibraries, ev.rustLibraries);
-      // Setup options
-      stats.packageManager = incrementKey(stats.packageManager, ev.packageManager);
-      stats.platform = incrementKey(stats.platform, ev.platform);
-      stats.git = incrementBool(stats.git, ev.git);
-      stats.install = incrementBool(stats.install, ev.install);
-      // Meta
-      stats.nodeVersion = incrementKey(stats.nodeVersion, getMajorVersion(ev.node_version));
-      stats.cliVersion = incrementKey(stats.cliVersion, ev.cli_version);
-      // Aggregations
-      stats.hourlyDistribution = incrementKey(stats.hourlyDistribution, hourKey);
-      stats.stackCombinations = incrementKey(stats.stackCombinations, stackKey);
-      stats.dbOrmCombinations = incrementKey(stats.dbOrmCombinations, dbOrmKey);
-      stats.optionStats = mergeOptionStats(stats.optionStats, ev.options);
-
-      const date = new Date(ev._creationTime).toISOString().slice(0, 10);
-      dailyCounts.set(date, (dailyCounts.get(date) || 0) + 1);
+      dailyCounts.set(date, daily);
     }
 
-    if (stats.totalProjects > 0) {
+    stats.uniqueMachines = machines.size;
+    if (stats.totalEvents > 0) {
       await ctx.db.insert("analyticsStats", stats);
     }
-
-    for (const [date, count] of dailyCounts) {
-      await ctx.db.insert("analyticsDailyStats", { date, count });
+    for (const [date, { count, newMachines }] of dailyCounts) {
+      await ctx.db.insert("analyticsDailyStats", { date, count, newMachines });
+    }
+    for (const [machineId, machine] of machines) {
+      await ctx.db.insert("analyticsMachines", { machineId, ...machine });
     }
 
     return {
-      totalProcessed: stats.totalProjects,
+      totalProcessed: stats.totalEvents,
       dailyDates: dailyCounts.size,
+      uniqueMachines: machines.size,
     };
   },
 });

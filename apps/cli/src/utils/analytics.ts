@@ -6,6 +6,7 @@ import type { ProjectConfig } from "../types";
 import { getLatestCLIVersion } from "./get-latest-cli-version";
 import { canPromptInteractively } from "./prompt-environment";
 import {
+  getOrCreateMachineId,
   getPersistedTelemetryPreference,
   hasTelemetryNoticeBeenShown,
   markTelemetryNoticeShown,
@@ -75,8 +76,9 @@ export async function maybeShowTelemetryNotice(): Promise<void> {
   log.info(
     `${pc.bold("Anonymous usage telemetry is enabled.")}\n` +
       `${pc.dim("We collect your selected stack options (e.g. frontend, backend, database),")}\n` +
-      `${pc.dim("plus CLI version, Node.js version, and OS platform — never project names,")}\n` +
-      `${pc.dim("file paths, or any personal data.")}\n` +
+      `${pc.dim("scaffold outcome (success, duration), CLI version, Node.js version, OS")}\n` +
+      `${pc.dim("platform, and a random anonymous install ID — never project names, file")}\n` +
+      `${pc.dim("paths, or any personal data.")}\n` +
       `Opt out anytime with ${pc.cyan("create-better-fullstack telemetry disable")} ` +
       `or ${pc.cyan("BTS_TELEMETRY_DISABLED=1")}.`,
   );
@@ -100,7 +102,30 @@ async function sendConvexEvent(payload: Record<string, unknown>) {
   } catch {}
 }
 
-export async function trackProjectCreation(config: ProjectConfig, disableAnalytics = false) {
+export type TelemetryEventType = "project_created" | "feature_added" | "stack_updated";
+
+export type TelemetrySource = "cli-interactive" | "cli-flags" | "mcp" | "programmatic";
+
+export type TelemetryOutcome = {
+  source?: TelemetrySource;
+  success?: boolean;
+  errorName?: string;
+  setupFailures?: string[];
+  durationMs?: number;
+  fileCount?: number;
+};
+
+/**
+ * Send one telemetry event. `config` may be a full ProjectConfig or any
+ * partial stack snapshot (e.g. the parts added by `add`); PII-ish fields
+ * are always stripped before sending.
+ */
+export async function trackEvent(
+  eventType: TelemetryEventType,
+  config: Partial<ProjectConfig> | Record<string, unknown>,
+  outcome: TelemetryOutcome = {},
+  disableAnalytics = false,
+) {
   if (disableAnalytics || !(await isTelemetryEnabled())) return;
 
   const {
@@ -113,9 +138,20 @@ export async function trackProjectCreation(config: ProjectConfig, disableAnalyti
   try {
     await sendConvexEvent({
       ...safeConfig,
+      eventType,
+      ...outcome,
+      machineId: await getOrCreateMachineId(),
       cli_version: getLatestCLIVersion(),
       node_version: typeof process !== "undefined" ? process.version : "",
       platform: typeof process !== "undefined" ? process.platform : "",
     });
   } catch {}
+}
+
+export async function trackProjectCreation(
+  config: ProjectConfig,
+  disableAnalytics = false,
+  outcome: TelemetryOutcome = {},
+) {
+  await trackEvent("project_created", config, outcome, disableAnalytics);
 }

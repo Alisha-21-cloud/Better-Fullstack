@@ -23,6 +23,18 @@ export default defineSchema({
   }),
 
   analyticsEvents: defineTable({
+    // Event envelope (all optional: rows from older CLI versions lack them)
+    eventType: v.optional(v.string()), // project_created | feature_added | stack_updated
+    source: v.optional(v.string()), // cli-interactive | cli-flags | mcp | programmatic
+    machineId: v.optional(v.string()), // random anonymous UUID, no PII
+    success: v.optional(v.boolean()),
+    errorName: v.optional(v.string()),
+    setupFailures: v.optional(v.array(v.string())),
+    durationMs: v.optional(v.number()),
+    fileCount: v.optional(v.number()),
+    // Full stack config, captured generically so new CLI options never
+    // require a schema change here.
+    stack: v.optional(v.record(v.string(), v.union(v.string(), v.boolean(), v.array(v.string())))),
     // Core
     ecosystem: v.optional(v.string()),
     database: v.optional(v.string()),
@@ -146,10 +158,31 @@ export default defineSchema({
     stackCombinations: v.optional(distributionValidator),
     dbOrmCombinations: v.optional(distributionValidator),
     optionStats: v.optional(v.record(v.string(), distributionValidator)),
+    // Generic full coverage: one distribution per stack field, built from
+    // analyticsEvents.stack. `add.`/`update.` prefixes namespace non-create events.
+    dimensions: v.optional(v.record(v.string(), distributionValidator)),
+    totalEvents: v.optional(v.number()),
+    eventTypes: v.optional(distributionValidator),
+    sources: v.optional(distributionValidator),
+    outcomes: v.optional(distributionValidator), // success | failure | unknown
+    errorNames: v.optional(distributionValidator),
+    setupFailureStats: v.optional(distributionValidator),
+    durationBuckets: v.optional(distributionValidator),
+    uniqueMachines: v.optional(v.number()),
   }),
 
   analyticsDailyStats: defineTable({
     date: v.string(),
     count: v.number(),
+    newMachines: v.optional(v.number()),
   }).index("by_date", ["date"]),
+
+  analyticsMachines: defineTable({
+    machineId: v.string(),
+    firstSeen: v.number(),
+    lastSeen: v.number(),
+    eventCount: v.number(),
+    platform: v.optional(v.string()),
+    lastCliVersion: v.optional(v.string()),
+  }).index("by_machine_id", ["machineId"]),
 });

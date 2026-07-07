@@ -1,5 +1,6 @@
 import envPaths from "env-paths";
 import fs from "fs-extra";
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 
 // Reuses the same config dir as project-history.ts so all CLI state lives together.
@@ -12,6 +13,9 @@ export type TelemetrySettings = {
   enabled?: boolean;
   // Whether the one-time first-run notice has already been displayed.
   noticeShown: boolean;
+  // Random anonymous ID used to count unique installs. Carries no PII and is
+  // never derived from the machine; deleting this file rotates it.
+  machineId?: string;
 };
 
 function getSettingsPath(): string {
@@ -38,6 +42,7 @@ export async function readTelemetrySettings(): Promise<TelemetrySettings> {
       version: typeof data.version === "number" ? data.version : 1,
       enabled: typeof data.enabled === "boolean" ? data.enabled : undefined,
       noticeShown: data.noticeShown === true,
+      machineId: typeof data.machineId === "string" ? data.machineId : undefined,
     };
   } catch {
     return emptySettings();
@@ -77,4 +82,20 @@ export async function markTelemetryNoticeShown(): Promise<void> {
   const settings = await readTelemetrySettings();
   settings.noticeShown = true;
   await writeTelemetrySettings(settings);
+}
+
+/**
+ * The persisted anonymous machine ID, created on first use. Returns
+ * `undefined` if it cannot be persisted (telemetry then simply omits it).
+ */
+export async function getOrCreateMachineId(): Promise<string | undefined> {
+  try {
+    const settings = await readTelemetrySettings();
+    if (settings.machineId) return settings.machineId;
+    settings.machineId = randomUUID();
+    await writeTelemetrySettings(settings);
+    return settings.machineId;
+  } catch {
+    return undefined;
+  }
 }
