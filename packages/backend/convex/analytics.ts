@@ -5,6 +5,7 @@ import { internalMutation, mutation, query } from "./_generated/server";
 type Dist = Record<string, number>;
 type StackValue = string | boolean | string[];
 type StackRecord = Record<string, StackValue>;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Legacy per-field aggregates kept for the existing getStats consumers.
 // New stack options do NOT need to be added here: they are covered
@@ -113,6 +114,10 @@ function isCountedProject(ev: { eventType?: string; success?: boolean }): boolea
   return isCreation(ev) && ev.success !== false;
 }
 
+function utcDate(ms: number): string {
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
 /**
  * The full stack record for an event. New events carry it explicitly;
  * for rows from older CLI versions it is synthesized from the legacy
@@ -164,6 +169,8 @@ type StatsShape = {
   setupFailureStats: Dist;
   durationBuckets: Dist;
   uniqueMachines: number;
+  returningMachines: number;
+  trackedMachineEvents: number;
 } & { [K in (typeof SINGLE_FIELDS)[number]]: Dist } & {
   [K in (typeof MULTI_FIELDS)[number]]: Dist;
 } & { [K in (typeof BOOL_FIELDS)[number]]: Dist };
@@ -187,6 +194,8 @@ function emptyStats(): StatsShape {
     setupFailureStats: {},
     durationBuckets: {},
     uniqueMachines: 0,
+    returningMachines: 0,
+    trackedMachineEvents: 0,
   } as StatsShape;
   for (const k of [...SINGLE_FIELDS, ...MULTI_FIELDS, ...BOOL_FIELDS]) stats[k] = {};
   return stats;
@@ -206,8 +215,8 @@ function applyEvent(stats: StatsShape, ev: AnalyticsEvent): void {
   incAll(stats.setupFailureStats, ev.setupFailures);
   if (ev.durationMs !== undefined) inc(stats.durationBuckets, durationBucket(ev.durationMs));
 
-  // Failed create attempts stop here: no project or stack aggregates.
-  if (isCreation(ev) && !isCountedProject(ev)) return;
+  // Failed attempts stop here: no project or requested stack aggregates.
+  if (ev.success === false) return;
 
   // Generic full-coverage dimensions. Creation events use bare category
   // names; add/update events are namespaced so they never skew stack stats.
@@ -312,6 +321,7 @@ export const ingestEvent = internalMutation({
     const id = await ctx.db.insert("analyticsEvents", args);
     const event = await ctx.db.get(id);
     const now = event!._creationTime;
+    const today = utcDate(now);
 
     const existing = await ctx.db.query("analyticsStats").first();
     let stats: StatsShape;
@@ -326,11 +336,13 @@ export const ingestEvent = internalMutation({
     // Machine tracking (anonymous random ID → uniques, new vs returning).
     let newMachine = false;
     if (args.machineId) {
+      stats.trackedMachineEvents += 1;
       const machine = await ctx.db
         .query("analyticsMachines")
         .withIndex("by_machine_id", (q) => q.eq("machineId", args.machineId!))
         .first();
       if (machine) {
+        if (machine.eventCount === 1) stats.returningMachines += 1;
         await ctx.db.patch("analyticsMachines", machine._id, {
           lastSeen: now,
           eventCount: machine.eventCount + 1,
@@ -349,6 +361,24 @@ export const ingestEvent = internalMutation({
           lastCliVersion: args.cli_version,
         });
       }
+      const activity = await ctx.db
+        .query("analyticsMachineDailyActivity")
+        .withIndex("by_date_machine", (q) => q.eq("date", today).eq("machineId", args.machineId!))
+        .first();
+      if (activity) {
+        await ctx.db.patch("analyticsMachineDailyActivity", activity._id, {
+          eventCount: activity.eventCount + 1,
+          lastSeen: now,
+        });
+      } else {
+        await ctx.db.insert("analyticsMachineDailyActivity", {
+          date: today,
+          machineId: args.machineId,
+          eventCount: 1,
+          firstSeen: now,
+          lastSeen: now,
+        });
+      }
     }
 
     if (existing) {
@@ -357,7 +387,6 @@ export const ingestEvent = internalMutation({
       await ctx.db.insert("analyticsStats", stats);
     }
 
-    const today = new Date(now).toISOString().slice(0, 10);
     const creation = isCountedProject(args);
     const daily = await ctx.db
       .query("analyticsDailyStats")
@@ -414,12 +443,12 @@ export const getDailyStats = query({
   handler: async (ctx, args) => {
     const days = args.days ?? 30;
     const now = Date.now();
-    const today = new Date(now).toISOString().slice(0, 10);
-    const cutoffDate = new Date(now - (days - 1) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const today = utcDate(now);
+    const cutoffDate = utcDate(now - (days - 1) * DAY_MS);
 
     const allDaily = await ctx.db
       .query("analyticsDailyStats")
-      .withIndex("by_date")
+      .withIndex("by_date", (q) => q.gte("date", cutoffDate))
       .order("asc")
       .collect();
 
@@ -439,14 +468,29 @@ export const getEngagement = query({
     activeMachinesLast30d: v.number(),
   }),
   handler: async (ctx) => {
-    const machines = await ctx.db.query("analyticsMachines").collect();
-    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    const stats = await ctx.db.query("analyticsStats").first();
+    const now = Date.now();
+    const today = utcDate(now);
+    const cutoffDate = utcDate(now - 29 * DAY_MS);
+    const daily = await ctx.db
+      .query("analyticsDailyStats")
+      .withIndex("by_date", (q) => q.gte("date", cutoffDate))
+      .collect();
+    const activity = await ctx.db
+      .query("analyticsMachineDailyActivity")
+      .withIndex("by_date", (q) => q.gte("date", cutoffDate))
+      .collect();
+    const activeMachines = new Set(
+      activity.filter((event) => event.date <= today).map((event) => event.machineId),
+    );
     return {
-      uniqueMachines: machines.length,
-      returningMachines: machines.filter((m) => m.eventCount > 1).length,
-      trackedEvents: machines.reduce((sum, m) => sum + m.eventCount, 0),
-      newMachinesLast30d: machines.filter((m) => m.firstSeen >= cutoff).length,
-      activeMachinesLast30d: machines.filter((m) => m.lastSeen >= cutoff).length,
+      uniqueMachines: stats?.uniqueMachines ?? 0,
+      returningMachines: stats?.returningMachines ?? 0,
+      trackedEvents: stats?.trackedMachineEvents ?? 0,
+      newMachinesLast30d: daily
+        .filter((event) => event.date <= today)
+        .reduce((sum, event) => sum + (event.newMachines ?? 0), 0),
+      activeMachinesLast30d: activeMachines.size,
     };
   },
 });
@@ -455,11 +499,12 @@ export const getRecentEvents = query({
   args: {},
   handler: async (ctx) => {
     const cutoff = Date.now() - 30 * 60 * 1000;
-    return await ctx.db
+    const events = await ctx.db
       .query("analyticsEvents")
       .order("desc")
       .filter((q) => q.gte(q.field("_creationTime"), cutoff))
       .collect();
+    return events.map(({ machineId: _machineId, ...event }) => event);
   },
 });
 
@@ -481,6 +526,9 @@ export const backfillStats = mutation({
     for (const m of await ctx.db.query("analyticsMachines").collect()) {
       await ctx.db.delete("analyticsMachines", m._id);
     }
+    for (const a of await ctx.db.query("analyticsMachineDailyActivity").collect()) {
+      await ctx.db.delete("analyticsMachineDailyActivity", a._id);
+    }
 
     const events = await ctx.db.query("analyticsEvents").collect();
     events.sort((a, b) => a._creationTime - b._creationTime);
@@ -497,16 +545,35 @@ export const backfillStats = mutation({
         lastCliVersion?: string;
       }
     >();
+    const machineActivity = new Map<
+      string,
+      { date: string; machineId: string; eventCount: number; firstSeen: number; lastSeen: number }
+    >();
 
     for (const ev of events) {
       const now = ev._creationTime;
       applyEvent(stats, { ...ev, creationTime: now } as AnalyticsEvent);
 
-      const date = new Date(now).toISOString().slice(0, 10);
+      const date = utcDate(now);
       const daily = dailyCounts.get(date) ?? { count: 0, newMachines: 0 };
       if (isCountedProject(ev)) daily.count += 1;
 
       if (ev.machineId) {
+        const activityKey = `${date}:${ev.machineId}`;
+        const activity = machineActivity.get(activityKey);
+        if (activity) {
+          activity.eventCount += 1;
+          activity.lastSeen = now;
+        } else {
+          machineActivity.set(activityKey, {
+            date,
+            machineId: ev.machineId,
+            eventCount: 1,
+            firstSeen: now,
+            lastSeen: now,
+          });
+        }
+
         const machine = machines.get(ev.machineId);
         if (machine) {
           machine.lastSeen = now;
@@ -528,6 +595,8 @@ export const backfillStats = mutation({
     }
 
     stats.uniqueMachines = machines.size;
+    stats.returningMachines = [...machines.values()].filter((m) => m.eventCount > 1).length;
+    stats.trackedMachineEvents = [...machines.values()].reduce((sum, m) => sum + m.eventCount, 0);
     if (stats.totalEvents > 0) {
       await ctx.db.insert("analyticsStats", stats);
     }
@@ -536,6 +605,9 @@ export const backfillStats = mutation({
     }
     for (const [machineId, machine] of machines) {
       await ctx.db.insert("analyticsMachines", { machineId, ...machine });
+    }
+    for (const activity of machineActivity.values()) {
+      await ctx.db.insert("analyticsMachineDailyActivity", activity);
     }
 
     return {

@@ -169,6 +169,8 @@ export default defineSchema({
     setupFailureStats: v.optional(distributionValidator),
     durationBuckets: v.optional(distributionValidator),
     uniqueMachines: v.optional(v.number()),
+    returningMachines: v.optional(v.number()),
+    trackedMachineEvents: v.optional(v.number()),
   }),
 
   analyticsDailyStats: defineTable({
@@ -185,4 +187,14 @@ export default defineSchema({
     platform: v.optional(v.string()),
     lastCliVersion: v.optional(v.string()),
   }).index("by_machine_id", ["machineId"]),
+
+  analyticsMachineDailyActivity: defineTable({
+    date: v.string(),
+    machineId: v.string(),
+    eventCount: v.number(),
+    firstSeen: v.number(),
+    lastSeen: v.number(),
+  })
+    .index("by_date", ["date"])
+    .index("by_date_machine", ["date", "machineId"]),
 });

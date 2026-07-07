@@ -14,7 +14,7 @@ import type { AddInput, Addons, BetterTStackConfig, ProjectConfig } from "../../
 
 import { getDefaultConfig } from "../../constants";
 import { getAddonsToAdd } from "../../prompts/addons";
-import { type TelemetrySource, trackEvent } from "../../utils/analytics";
+import { maybeShowTelemetryNotice, type TelemetrySource, trackEvent } from "../../utils/analytics";
 import { readBtsConfig, updateBtsConfig } from "../../utils/bts-config";
 import { isSilent, runWithContextAsync } from "../../utils/context";
 import { applyDependencyVersionChannel } from "../../utils/dependency-version-channel";
@@ -264,6 +264,14 @@ async function trackAddEvent(
 ): Promise<void> {
   if (input.dryRun) return;
   const request = buildStackUpdateRequest(input);
+  const stackPayload = { ...(request as Partial<ProjectConfig>) };
+  if (outcome.addedAddons !== undefined) {
+    if (outcome.addedAddons.length > 0) {
+      stackPayload.addons = outcome.addedAddons;
+    } else {
+      delete stackPayload.addons;
+    }
+  }
   const eventType = Object.keys(request).some((key) => !ADD_FEATURE_KEYS.has(key))
     ? ("stack_updated" as const)
     : ("feature_added" as const);
@@ -276,10 +284,7 @@ async function trackAddEvent(
         : "cli-interactive");
   await trackEvent(
     eventType,
-    {
-      ...(request as Partial<ProjectConfig>),
-      ...(outcome.addedAddons?.length ? { addons: outcome.addedAddons } : {}),
-    },
+    stackPayload,
     {
       source,
       success: outcome.success,
@@ -299,6 +304,7 @@ export async function addHandler(
   return runWithContextAsync({ silent }, async () => {
     try {
       const result = await addHandlerInternal(input);
+      await maybeShowTelemetryNotice();
       await trackAddEvent(input, options, {
         success: result.success,
         durationMs: Date.now() - startTime,
@@ -308,6 +314,7 @@ export async function addHandler(
     } catch (error) {
       if (!(error instanceof UserCancelledError)) {
         // Only the error class name is sent — messages can contain paths.
+        await maybeShowTelemetryNotice();
         await trackAddEvent(input, options, {
           success: false,
           errorName: error instanceof Error ? error.name : "UnknownError",
