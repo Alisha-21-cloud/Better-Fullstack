@@ -28,6 +28,9 @@ const RUN_SOURCES: { dir: string; specs?: string[] }[] = [
   // Fable 5 low — full 13-spec prompt-only run; every spec measurable (no
   // inconclusive), 6/13 CORE pass, the strongest prompt-path result to date.
   { dir: "testing/llm-benchmarks/v2/fable5-low-prompt-2026-07-06" },
+  // Fable 5 high — same 6/13, index 66, at 2.3x the cost: reasoning effort
+  // reshuffled which specs build (gained frontier-effect, lost java), not how many.
+  { dir: "testing/llm-benchmarks/v2/fable5-high-prompt-2026-07-06" },
   { dir: "testing/llm-benchmarks/v2/opus48-low-prompt-2026-06-30" },
   // Opus max is a COMPLETE 13-spec run — publish all of it (full low-vs-max).
   { dir: "testing/llm-benchmarks/v2/opus48-max-prompt-2026-06-30" },
