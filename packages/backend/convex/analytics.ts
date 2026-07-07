@@ -105,6 +105,15 @@ function isCreation(ev: { eventType?: string }): boolean {
 }
 
 /**
+ * Whether the event counts as a real scaffolded project. Failed create
+ * attempts only feed the envelope aggregates (outcomes, errorNames, …).
+ * Historical rows predate `success` and stay counted.
+ */
+function isCountedProject(ev: { eventType?: string; success?: boolean }): boolean {
+  return isCreation(ev) && ev.success !== false;
+}
+
+/**
  * The full stack record for an event. New events carry it explicitly;
  * for rows from older CLI versions it is synthesized from the legacy
  * columns and the per-ecosystem `options` record so `dimensions` covers
@@ -118,6 +127,23 @@ function eventStack(ev: AnalyticsEvent): StackRecord {
   for (const k of BOOL_FIELDS) if (ev[k] !== undefined) s[k] = ev[k] as boolean;
   if (ev.options) Object.assign(s, ev.options);
   return s;
+}
+
+const LEGACY_KEYS: Set<string> = new Set([...SINGLE_FIELDS, ...MULTI_FIELDS, ...BOOL_FIELDS]);
+
+/**
+ * The per-ecosystem extras that feed the legacy `optionStats` aggregate.
+ * Old events carry them in `options`; new events only send the generic
+ * `stack`, so the non-legacy string fields are derived from it.
+ */
+function legacyOptions(ev: AnalyticsEvent): Record<string, string | string[]> {
+  if (ev.options) return ev.options;
+  const extras: Record<string, string | string[]> = {};
+  for (const [key, value] of Object.entries(ev.stack ?? {})) {
+    if (LEGACY_KEYS.has(key) || typeof value === "boolean") continue;
+    extras[key] = value;
+  }
+  return extras;
 }
 
 type StatsShape = {
@@ -180,6 +206,9 @@ function applyEvent(stats: StatsShape, ev: AnalyticsEvent): void {
   incAll(stats.setupFailureStats, ev.setupFailures);
   if (ev.durationMs !== undefined) inc(stats.durationBuckets, durationBucket(ev.durationMs));
 
+  // Failed create attempts stop here: no project or stack aggregates.
+  if (isCreation(ev) && !isCountedProject(ev)) return;
+
   // Generic full-coverage dimensions. Creation events use bare category
   // names; add/update events are namespaced so they never skew stack stats.
   const prefix = isCreation(ev)
@@ -198,7 +227,7 @@ function applyEvent(stats: StatsShape, ev: AnalyticsEvent): void {
 
   if (!isCreation(ev)) return;
 
-  // Legacy aggregates: creations only (matches historical semantics).
+  // Legacy aggregates: successful creations only (matches historical semantics).
   stats.totalProjects += 1;
   for (const k of SINGLE_FIELDS) inc(stats[k], ev[k]);
   for (const k of MULTI_FIELDS) incAll(stats[k], ev[k]);
@@ -208,7 +237,7 @@ function applyEvent(stats: StatsShape, ev: AnalyticsEvent): void {
   inc(stats.hourlyDistribution, String(new Date(now).getUTCHours()).padStart(2, "0"));
   inc(stats.stackCombinations, `${ev.backend || "none"} + ${ev.frontend?.[0] || "none"}`);
   inc(stats.dbOrmCombinations, `${ev.database || "none"} + ${ev.orm || "none"}`);
-  for (const [category, value] of Object.entries(ev.options ?? {})) {
+  for (const [category, value] of Object.entries(legacyOptions(ev))) {
     const dist = (stats.optionStats[category] ??= {});
     incAll(dist, Array.isArray(value) ? value : [value]);
   }
@@ -329,7 +358,7 @@ export const ingestEvent = internalMutation({
     }
 
     const today = new Date(now).toISOString().slice(0, 10);
-    const creation = isCreation(args);
+    const creation = isCountedProject(args);
     const daily = await ctx.db
       .query("analyticsDailyStats")
       .withIndex("by_date", (q) => q.eq("date", today))
@@ -475,7 +504,7 @@ export const backfillStats = mutation({
 
       const date = new Date(now).toISOString().slice(0, 10);
       const daily = dailyCounts.get(date) ?? { count: 0, newMachines: 0 };
-      if (isCreation(ev)) daily.count += 1;
+      if (isCountedProject(ev)) daily.count += 1;
 
       if (ev.machineId) {
         const machine = machines.get(ev.machineId);
