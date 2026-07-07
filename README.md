@@ -1,4 +1,5 @@
-```
+<!--
+```text
 ██████╗ ███████╗████████╗████████╗███████╗██████╗
 ██╔══██╗██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗
 ██████╔╝█████╗     ██║      ██║   █████╗  ██████╔╝
@@ -13,6 +14,7 @@
 ██║     ╚██████╔╝███████╗███████╗███████║   ██║   ██║  ██║╚██████╗██║  ██╗
 ╚═╝      ╚═════╝ ╚══════╝╚══════╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
 ```
+-->
 
 <div align="center">
 
@@ -346,14 +348,6 @@ Databases and hosting providers are shared across all ecosystems.
 | **CLI** | Cobra · BubbleTea |
 
 </details>
-
-<br>
-
-## 📊 ScaffBench
-
-How good are AI coding agents at actually building your stack? [ScaffBench](https://better-fullstack.dev/benchmark) measures them on real fullstack scaffolding tasks — pass rate, tokens, cost, and whether the result actually builds.
-
-<img src="https://raw.githubusercontent.com/Marve10s/Better-Fullstack/main/.github/media/benchmark.gif" alt="ScaffBench leaderboard" width="100%" />
 
 <br>
 
