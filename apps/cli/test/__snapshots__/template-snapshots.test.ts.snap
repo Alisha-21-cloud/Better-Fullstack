@@ -2146,11 +2146,22 @@ exports[`Template Snapshots Key File Content Snapshots key files: next-self-full
     {
       "content": 
 "import "@snapshot-next-self-fullstack/env/web";
+import { existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import type { NextConfig } from "next";
+
+const appDir = dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = resolve(appDir, "../..");
+const turbopackRoot = existsSync(join(workspaceRoot, "packages")) ? workspaceRoot : appDir;
 
 const nextConfig: NextConfig = {
 	typedRoutes: true,
 	reactCompiler: true,
+	turbopack: {
+		root: turbopackRoot,
+	},
 };
 
 export default nextConfig;
@@ -9365,11 +9376,22 @@ exports[`Template Snapshots Key File Content Snapshots key files: self-next-cler
     {
       "content": 
 "import "@snapshot-self-next-clerk/env/web";
+import { existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import type { NextConfig } from "next";
+
+const appDir = dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = resolve(appDir, "../..");
+const turbopackRoot = existsSync(join(workspaceRoot, "packages")) ? workspaceRoot : appDir;
 
 const nextConfig: NextConfig = {
 	typedRoutes: true,
 	reactCompiler: true,
+	turbopack: {
+		root: turbopackRoot,
+	},
 };
 
 export default nextConfig;
@@ -13728,11 +13750,22 @@ exports[`Template Snapshots Key File Content Snapshots key files: cms-keystatic-
     {
       "content": 
 "import "@snapshot-cms-keystatic-next/env/web";
+import { existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import type { NextConfig } from "next";
+
+const appDir = dirname(fileURLToPath(import.meta.url));
+const workspaceRoot = resolve(appDir, "../..");
+const turbopackRoot = existsSync(join(workspaceRoot, "packages")) ? workspaceRoot : appDir;
 
 const nextConfig: NextConfig = {
 	typedRoutes: true,
 	reactCompiler: true,
+	turbopack: {
+		root: turbopackRoot,
+	},
 };
 
 export default nextConfig;
