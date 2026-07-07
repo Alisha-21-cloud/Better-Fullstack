@@ -113,10 +113,6 @@ yarn create better-fullstack@latest
 
 Configure your whole stack visually — every option surfaces with live compatibility, and you get a ready-to-run command. **[Open the App Builder →](https://better-fullstack.dev/new)**
 
-<img src="https://raw.githubusercontent.com/Marve10s/Better-Fullstack/main/.github/media/web-builder.gif" alt="Web Builder demo" width="100%" />
-
-<br>
-
 ### 💻 The CLI
 
 `bun create better-fullstack@latest` walks you through a guided prompt flow, then scaffolds a runnable project with every integration pre-wired.
@@ -141,25 +137,6 @@ claude plugin install better-fullstack@better-fullstack
 <br>
 
 Ask any agent to build your stack — the **skill** runs the scaffold workflow, and the **MCP** exposes `bfs_*` tools (check compatibility, plan, create) to any client.
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**Claude Code plugin** — the skill in action
-
-<img src="https://raw.githubusercontent.com/Marve10s/Better-Fullstack/main/.github/media/skill.gif" alt="Claude Code skill demo" width="100%" />
-
-</td>
-<td width="50%" valign="top">
-
-**MCP** — `bfs_*` tools in any client
-
-<img src="https://raw.githubusercontent.com/Marve10s/Better-Fullstack/main/.github/media/mcp.gif" alt="MCP tool-call demo" width="100%" />
-
-</td>
-</tr>
-</table>
 
 <br>
 
