@@ -67,7 +67,9 @@ jobs:
         run: bun test apps/cli/test/template-snapshots.test.ts --update-snapshots
 
       - name: Verify Dependency Channel Resolution
-        run: bun test apps/cli/test/dependency-version-channel.test.ts
+        run: |
+          bun test apps/cli/test/dependency-version-channel.test.ts
+          bun test apps/cli/test/generated-command-contract.test.ts
 
       - name: Check For Changes
         id: changes
