@@ -125,6 +125,7 @@ jobs:
           bun run --cwd packages/template-generator build
           bun test apps/cli/test/template-snapshots.test.ts -u
           bun test apps/cli/test/cli-builder-sync.test.ts
+          bun test apps/cli/test/dependency-version-channel.test.ts
           bun test apps/web/test/preview-config.test.ts
 
       - name: Regenerate Dependency Report
