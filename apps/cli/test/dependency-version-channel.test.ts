@@ -360,6 +360,67 @@ describe("applyDependencyVersionChannel", () => {
     expect(packageJson.dependencies.react).toBe("^19.3.0");
   });
 
+  it("does not downgrade stable dependencies to older prereleases for beta channel", async () => {
+    const projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "bfs-version-channel-beta-floor-"));
+
+    await fs.writeJson(
+      path.join(projectDir, "package.json"),
+      {
+        name: "beta-floor-test",
+        devDependencies: {
+          turbo: "^2.10.0",
+          vite: "^7.2.0",
+        },
+      },
+      { spaces: 2 },
+    );
+
+    global.fetch = mock(async (input: string | URL | Request) => {
+      const url = String(input);
+      const packageName = decodeURIComponent(url.split("/").pop() ?? "");
+
+      const versionsByPackage: Record<
+        string,
+        { latest: string; versions: string[]; tags?: Record<string, string> }
+      > = {
+        turbo: {
+          latest: "2.10.0",
+          versions: ["0.9.0-next.22", "2.10.0"],
+          tags: { next: "0.9.0-next.22" },
+        },
+        vite: {
+          latest: "7.2.0",
+          versions: ["7.2.0", "8.0.0-beta.1"],
+          tags: { beta: "8.0.0-beta.1" },
+        },
+      };
+      const packageVersions = versionsByPackage[packageName];
+
+      return new Response(
+        JSON.stringify({
+          "dist-tags": {
+            latest: packageVersions?.latest,
+            ...packageVersions?.tags,
+          },
+          versions: Object.fromEntries(
+            (packageVersions?.versions ?? []).map((version) => [version, {}]),
+          ),
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }) as unknown as typeof fetch;
+
+    await applyDependencyVersionChannel(projectDir, "beta");
+
+    const packageJson = await fs.readJson(path.join(projectDir, "package.json"));
+
+    expect(packageJson.devDependencies.turbo).toBe("^2.10.0");
+    expect(packageJson.devDependencies.vite).toBe("^8.0.0-beta.1");
+  });
+
   it("resolves latest channel from real npm registry",
     async () => {
       const projectDir = await fs.mkdtemp(path.join(os.tmpdir(), "bfs-version-channel-real-"));
