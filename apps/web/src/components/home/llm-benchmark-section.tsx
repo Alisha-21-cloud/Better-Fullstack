@@ -9,7 +9,6 @@ import {
   useReducedMotion,
 } from "motion/react";
 import {
-  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -929,8 +928,6 @@ interface ModelLeaderRow {
   label: string;
   /** reasoning-effort tag (e.g. "max"), or "" for the v1 cross-vendor models. */
   effort: string;
-  /** "free" pins the row below the paid tier, under a divider, in every view. */
-  tier: "paid" | "free";
   /** bar fill color. */
   color: string;
   /** brand logo shown to the left of the model name (undefined = no logo). */
@@ -965,14 +962,11 @@ function mean(values: readonly number[]): number {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-// Paid tier first, then free tier (free never outranks a paid config, even when
-// the scaffolder hands a weak free model an easy MCP pass). Within a tier: best
-// pass-rate first, cheaper as the tiebreak.
-const TIER_RANK: Record<ModelLeaderRow["tier"], number> = { paid: 0, free: 1 };
+// One unified ranking across every model: best pass-rate first, cheaper as the
+// tiebreak. Free and subscription ($0-reported) models rank on merit alongside
+// paid ones — no separate tier.
 function sortLeaderRows(rows: ModelLeaderRow[]): ModelLeaderRow[] {
-  return [...rows].sort(
-    (a, b) => TIER_RANK[a.tier] - TIER_RANK[b.tier] || b.pass - a.pass || a.costNum - b.costNum,
-  );
+  return [...rows].sort((a, b) => b.pass - a.pass || a.costNum - b.costNum);
 }
 
 // Brand logos shown left of the model name. Only Anthropic + OpenAI marks are
@@ -1026,7 +1020,6 @@ function computeV2ModelRows(
       key: model.key,
       label: model.label,
       effort: model.effort,
-      tier: isFreeProvider(model.provider) ? ("free" as const) : ("paid" as const),
       color: PROVIDER_BAR_COLOR[model.provider],
       logo: PROVIDER_LOGO[model.provider],
       pass: formatPercent(passing, scored.length),
@@ -1053,7 +1046,6 @@ function computeV1ModelRows(leaderPath: LeaderPath): ModelLeaderRow[] {
       key: m,
       label: getModelLabel(m),
       effort: "",
-      tier: "paid" as const,
       color: CHART_PALETTE.models[m],
       logo: V1_MODEL_LOGO[m],
       pass: combos.length > 0 ? Math.round(mean(combos.map((combo) => combo.pass))) : 0,
@@ -1865,9 +1857,8 @@ function ModelMenuItem({
   );
 }
 
-// V2-family model picker (mirrors the v1 ModelFilter dropdown). Free-tier runs
-// sit in their own group and start unchecked — mirroring the leaderboard's
-// paid/free divider — so weak free dots don't clutter the default scatter.
+// V2-family model picker (mirrors the v1 ModelFilter dropdown). One flat list —
+// every model, ranked together, with no paid/free grouping.
 function V2ModelFilter({
   points,
   selected,
@@ -1877,9 +1868,6 @@ function V2ModelFilter({
   selected: readonly string[];
   onToggle: (key: string) => void;
 }) {
-  const paid = points.filter((point) => !point.free);
-  const free = points.filter((point) => point.free);
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -1897,7 +1885,7 @@ function V2ModelFilter({
         className={cn("w-80 max-w-[calc(100vw-2rem)]", CHART_THEME_VARS)}
       >
         <DropdownMenuGroup>
-          {paid.map((point) => (
+          {points.map((point) => (
             <V2ModelMenuItem
               key={point.key}
               point={point}
@@ -1906,22 +1894,6 @@ function V2ModelFilter({
             />
           ))}
         </DropdownMenuGroup>
-        {free.length > 0 ? (
-          <DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-[0.14em]">
-              Free tier
-            </DropdownMenuLabel>
-            {free.map((point) => (
-              <V2ModelMenuItem
-                key={point.key}
-                point={point}
-                checked={selected.includes(point.key)}
-                onToggle={onToggle}
-              />
-            ))}
-          </DropdownMenuGroup>
-        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -2716,16 +2688,9 @@ function ScaffbenchLeaderboardCard() {
                 exit={leaderFadeHidden}
                 transition={leaderFadeTransition}
               >
-                {rows.map((row, index) => {
-                  const startsFreeTier =
-                    row.tier === "free" && (index === 0 || rows[index - 1]?.tier !== "free");
-                  return (
-                    <Fragment key={row.key}>
-                      {startsFreeTier ? <LeaderTierDivider /> : null}
-                      <ModelLeaderRow row={row} />
-                    </Fragment>
-                  );
-                })}
+                {rows.map((row) => (
+                  <ModelLeaderRow key={row.key} row={row} />
+                ))}
               </motion.div>
             </AnimatePresence>
 
@@ -2803,23 +2768,6 @@ function VersionLegacyTag() {
     <span className="ml-1 select-none font-mono text-[9px] font-medium uppercase tracking-[0.12em] opacity-60">
       legacy
     </span>
-  );
-}
-
-// Separates the free-tier rows from the paid configs above them. The label sits
-// in the model column; a hairline runs across the bar column.
-function LeaderTierDivider() {
-  return (
-    <div className={cn(LEADERBOARD_GRID, "mt-2.5 mb-1")} aria-hidden>
-      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[#9c9a93] dark:text-[#6c6a61]">
-        Free tier
-      </span>
-      <span className="h-px w-full self-center bg-[#e1e0d8] dark:bg-[rgba(237,235,228,0.10)]" />
-      <span />
-      <span />
-      <span />
-      <span />
-    </div>
   );
 }
 

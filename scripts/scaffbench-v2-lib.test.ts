@@ -99,7 +99,8 @@ describe("ScaffBench 2 harness config", () => {
 
     expect(options.model).toBe("opus");
     expect(options.efforts).toEqual(["default"]);
-    expect(options.paths).toEqual(["mcp", "cli", "prompt"]);
+    // Prompt-only by default (V2.1+); mcp is opt-in, cli is legacy.
+    expect(options.paths).toEqual(["prompt"]);
     expect(options.specs).toEqual([
       "ai-search-workbench",
       "rust-leptos-axum",
@@ -1095,6 +1096,15 @@ describe("opencode / Kilo Code agent adapter", () => {
     // Bare provider/model strings that aren't opencode/kilo fall through normally.
     expect(providerForModel("gpt-5.5")).toBe("codex");
     expect(providerForModel("claude-opus-4-8")).toBe("claude");
+  });
+
+  it("routes the paid Go subscription and Cloudflare gateway tiers to opencode", () => {
+    // opencode-go/* is the paid "Go" plan — a distinct prefix that must NOT fall
+    // through to Claude (it starts with "opencode-", not "opencode/").
+    expect(providerForModel("opencode-go/deepseek-v4-pro")).toBe("opencode");
+    expect(providerForModel("opencode-go/glm-5.2")).toBe("opencode");
+    expect(providerForModel("cloudflare-ai-gateway/anthropic/claude-opus-4-8")).toBe("opencode");
+    expect(agentLabelForModel("opencode-go/deepseek-v4-pro")).toBe("opencode");
   });
 
   it("labels the driving agent from the model (no more hardcoded 'Claude Code')", () => {

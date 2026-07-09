@@ -5,7 +5,12 @@ import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promi
 import os from "node:os";
 import path from "node:path";
 
-export type CreationPath = "mcp" | "cli" | "prompt";
+// Creation path = HOW the agent is asked to build each project.
+// - "prompt": hand-write from scratch, no Better-Fullstack tooling. THE DEFAULT —
+//   the only path we run by default (raw model capability).
+// - "mcp": drive the Better-Fullstack MCP server. Opt-in via `--paths mcp`.
+// - "cli": map requirements to CLI flags. LEGACY — kept working, not default.
+export type CreationPath = "prompt" | "mcp" | "cli";
 export type Effort = "default" | "low" | "medium" | "high" | "xhigh" | "max";
 export type PromptStyle = "explicit" | "natural";
 export type CommandStatus = "pass" | "fail" | "unknown" | "skipped";
@@ -308,7 +313,10 @@ async function resolveBfVersion() {
   return version && /^\d+\.\d+\.\d+/.test(version) ? version : "latest";
 }
 const DEFAULT_EFFORTS: readonly Effort[] = ["default"];
-const DEFAULT_PATHS: readonly CreationPath[] = ["mcp", "cli", "prompt"];
+// Prompt-only is the current methodology (V2.1+): the committed leaderboard is
+// all `prompt`. The assisted paths (mcp opt-in, cli legacy) still work when passed
+// explicitly via `--paths`, but are no longer part of a default run.
+const DEFAULT_PATHS: readonly CreationPath[] = ["prompt"];
 
 // The creation paths a spec actually runs on, always intersected with the run's
 // requested `--paths`. A supported spec runs on every requested path; a frontier
@@ -1800,7 +1808,7 @@ export function parseArgs(argv: string[]): ScaffbenchOptions {
       ["default", "low", "medium", "high", "xhigh", "max"],
       DEFAULT_EFFORTS,
     ),
-    paths: parseList(args.get("paths"), ["mcp", "cli", "prompt"], DEFAULT_PATHS),
+    paths: parseList(args.get("paths"), ["prompt", "mcp", "cli"], DEFAULT_PATHS),
     specs,
     repeats,
     outDir: requestedOutDir
@@ -2394,8 +2402,11 @@ export type AgentProvider = "claude" | "codex" | "opencode" | "kilo" | "agy";
  *  by Google's Antigravity `agy` CLI (the standalone gemini CLI is sunset for
  *  individual tiers). */
 export function providerForModel(model: string): AgentProvider {
-  if (/^opencode\//i.test(model)) return "opencode";
   if (/^kilo\//i.test(model)) return "kilo";
+  // The opencode CLI serves several tiers: free (`opencode/*`), the paid "Go"
+  // subscription (`opencode-go/*`), and the Cloudflare AI Gateway passthrough —
+  // all route to the opencode adapter with the full id passed through unchanged.
+  if (/^(opencode(-go)?|cloudflare-ai-gateway)\//i.test(model)) return "opencode";
   if (/gemini/i.test(model)) return "agy";
   if (/^(gpt|o\d|codex)/i.test(model)) return "codex";
   return "claude";
