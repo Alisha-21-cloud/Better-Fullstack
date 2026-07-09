@@ -140,6 +140,14 @@ import { getAuthChoice } from "./auth";
 import { getBackendFrameworkChoice } from "./backend";
 import { getCachingChoice } from "./caching";
 import { getCMSChoice } from "./cms";
+import {
+  type ConfigPromptKey,
+  type ConfigScope,
+  getConfigScopeChoice,
+  getConfigSectionsChoice,
+  getDefaultPromptValue,
+  shouldAskConfigPromptKey,
+} from "./config-scope";
 import { getCSSFrameworkChoice } from "./css-framework";
 import { getDatabaseChoice } from "./database";
 import { getDBSetupChoice } from "./database-setup";
@@ -225,13 +233,14 @@ import {
   gatherMultiEcosystemConfig,
   getCompositionModeChoice,
 } from "./multi-ecosystem-composer";
-import { navigableGroup } from "./navigable-group";
+import { navigableGroup, type NavigablePromptGroup } from "./navigable-group";
 import { getObservabilityChoice } from "./observability";
 import { getORMChoice } from "./orm";
 import { getPackageManagerChoice } from "./package-manager";
 import { getWorkspaceShapeChoice } from "./workspace-shape";
 import { getPaymentsChoice } from "./payments";
 import { getRateLimitChoice } from "./rate-limit";
+import { PROMPT_RESOLVER_REGISTRY } from "./prompt-resolver-registry";
 import {
   getPythonAiChoice,
   getPythonApiChoice,
@@ -279,6 +288,8 @@ import { getDeploymentChoice } from "./web-deploy";
 type PromptGroupResults = {
   // Ecosystem choice first
   ecosystem: Ecosystem;
+  configScope: ConfigScope;
+  configSections: string[];
   // TypeScript ecosystem
   frontend: Frontend[];
   astroIntegration: AstroIntegration | undefined;
@@ -416,6 +427,290 @@ type PromptGroupResults = {
   install: boolean;
 };
 
+type PromptGroupKey = keyof PromptGroupResults;
+
+const CONFIG_SCOPE_META_KEYS = new Set<PromptGroupKey>([
+  "ecosystem",
+  "configScope",
+  "configSections",
+]);
+
+const SHADCN_FLAG_KEYS = new Set([
+  "shadcnBase",
+  "shadcnStyle",
+  "shadcnIconLibrary",
+  "shadcnColorTheme",
+  "shadcnBaseColor",
+  "shadcnFont",
+  "shadcnRadius",
+]);
+
+// Record form so the compiler enforces completeness: adding a prompt to
+// PromptGroupResults without listing it here is a type error, which in turn
+// forces classifying it in CONFIG_SCOPE_REGISTRY via the coverage test.
+const CONFIG_PROMPT_ENTRY_KEY_MAP = {
+  ecosystem: true,
+  configScope: true,
+  configSections: true,
+  frontend: true,
+  astroIntegration: true,
+  uiLibrary: true,
+  shadcnOptions: true,
+  cssFramework: true,
+  backend: true,
+  runtime: true,
+  database: true,
+  orm: true,
+  api: true,
+  auth: true,
+  payments: true,
+  email: true,
+  effect: true,
+  addons: true,
+  examples: true,
+  dbSetup: true,
+  webDeploy: true,
+  serverDeploy: true,
+  ai: true,
+  validation: true,
+  forms: true,
+  stateManagement: true,
+  animation: true,
+  testing: true,
+  realtime: true,
+  jobQueue: true,
+  fileUpload: true,
+  logging: true,
+  observability: true,
+  featureFlags: true,
+  analytics: true,
+  cms: true,
+  caching: true,
+  rateLimit: true,
+  i18n: true,
+  search: true,
+  vectorDb: true,
+  fileStorage: true,
+  mobileNavigation: true,
+  mobileUI: true,
+  mobileStorage: true,
+  mobileTesting: true,
+  mobilePush: true,
+  mobileOTA: true,
+  mobileDeepLinking: true,
+  rustWebFramework: true,
+  rustFrontend: true,
+  rustOrm: true,
+  rustApi: true,
+  rustCli: true,
+  rustLibraries: true,
+  rustLogging: true,
+  rustErrorHandling: true,
+  rustCaching: true,
+  rustAuth: true,
+  rustRealtime: true,
+  rustMessageQueue: true,
+  rustObservability: true,
+  rustTemplating: true,
+  pythonWebFramework: true,
+  pythonOrm: true,
+  pythonValidation: true,
+  pythonAi: true,
+  pythonAuth: true,
+  pythonApi: true,
+  pythonTaskQueue: true,
+  pythonGraphql: true,
+  pythonQuality: true,
+  pythonTesting: true,
+  pythonCaching: true,
+  pythonRealtime: true,
+  pythonObservability: true,
+  pythonCli: true,
+  goWebFramework: true,
+  goOrm: true,
+  goApi: true,
+  goCli: true,
+  goLogging: true,
+  goAuth: true,
+  goTesting: true,
+  goRealtime: true,
+  goMessageQueue: true,
+  goCaching: true,
+  goConfig: true,
+  goObservability: true,
+  javaWebFramework: true,
+  javaLanguage: true,
+  javaBuildTool: true,
+  javaOrm: true,
+  javaAuth: true,
+  javaApi: true,
+  javaLogging: true,
+  javaLibraries: true,
+  javaTestingLibraries: true,
+  dotnetWebFramework: true,
+  dotnetOrm: true,
+  dotnetAuth: true,
+  dotnetApi: true,
+  dotnetTesting: true,
+  dotnetJobQueue: true,
+  dotnetRealtime: true,
+  dotnetObservability: true,
+  dotnetValidation: true,
+  dotnetCaching: true,
+  dotnetDeploy: true,
+  elixirWebFramework: true,
+  elixirOrm: true,
+  elixirAuth: true,
+  elixirApi: true,
+  elixirRealtime: true,
+  elixirJobs: true,
+  elixirValidation: true,
+  elixirHttp: true,
+  elixirJson: true,
+  elixirEmail: true,
+  elixirCaching: true,
+  elixirObservability: true,
+  elixirTesting: true,
+  elixirQuality: true,
+  elixirDeploy: true,
+  elixirLibraries: true,
+  aiDocs: true,
+  git: true,
+  workspaceShape: true,
+  packageManager: true,
+  install: true,
+} as const satisfies Record<PromptGroupKey, true>;
+
+export const CONFIG_PROMPT_ENTRY_KEYS = Object.keys(
+  CONFIG_PROMPT_ENTRY_KEY_MAP,
+) as PromptGroupKey[];
+
+export function hasStackPromptFlags(flags: Partial<ProjectConfig>) {
+  return Object.keys(flags).some((key) => {
+    if (key === "projectName" || key === "projectDir" || key === "relativePath") return false;
+    if (SHADCN_FLAG_KEYS.has(key)) return true;
+    return CONFIG_PROMPT_ENTRY_KEYS.includes(key as PromptGroupKey);
+  });
+}
+
+function getPromptResolutionValue(key: ConfigPromptKey, results: Partial<PromptGroupResults>, flags: Partial<ProjectConfig>) {
+  const resolver = PROMPT_RESOLVER_REGISTRY[key];
+  if (!resolver) return undefined;
+
+  const frontends = results.frontend ?? flags.frontend;
+  const contextByKey: Record<string, Record<string, unknown>> = {
+    frontend: { frontend: flags.frontend, backend: flags.backend, auth: flags.auth },
+    backend: { backendFramework: flags.backend, frontends },
+    runtime: { runtime: flags.runtime, backend: results.backend },
+    database: { database: flags.database, backend: results.backend, runtime: results.runtime },
+    orm: {
+      orm: flags.orm,
+      hasDatabase: results.database !== undefined && results.database !== "none",
+      database: results.database,
+      backend: results.backend,
+      runtime: results.runtime,
+    },
+    api: {
+      api: flags.api,
+      frontend: frontends,
+      backend: results.backend,
+      astroIntegration: results.astroIntegration,
+    },
+    auth: {
+      auth: flags.auth,
+      backend: results.backend,
+      frontend: frontends,
+      ecosystem: results.ecosystem,
+    },
+    payments: {
+      payments: flags.payments,
+      auth: results.auth,
+      backend: results.backend,
+      frontends,
+    },
+    email: { email: flags.email, backend: results.backend, ecosystem: results.ecosystem },
+    uiLibrary: {
+      uiLibrary: flags.uiLibrary,
+      frontends,
+      astroIntegration: results.astroIntegration,
+    },
+    cssFramework: { cssFramework: flags.cssFramework, uiLibrary: results.uiLibrary },
+    forms: { forms: flags.forms, frontends },
+    stateManagement: { stateManagement: flags.stateManagement, frontends },
+    animation: { animation: flags.animation, frontends },
+    caching: { caching: flags.caching, backend: results.backend, ecosystem: results.ecosystem },
+    search: { search: flags.search, backend: results.backend, ecosystem: results.ecosystem },
+    observability: {
+      observability: flags.observability,
+      backend: results.backend,
+      ecosystem: results.ecosystem,
+    },
+    realtime: { realtime: flags.realtime, backend: results.backend },
+    jobQueue: { jobQueue: flags.jobQueue, backend: results.backend },
+    fileUpload: { fileUpload: flags.fileUpload, backend: results.backend },
+    logging: { logging: flags.logging, backend: results.backend },
+    rateLimit: { rateLimit: flags.rateLimit, backend: results.backend },
+    cms: { cms: flags.cms, backend: results.backend },
+    vectorDb: { vectorDb: flags.vectorDb, backend: results.backend, ecosystem: results.ecosystem },
+    fileStorage: { fileStorage: flags.fileStorage, backend: results.backend },
+  };
+  const selectedValue = flags[key as keyof ProjectConfig];
+  const context = contextByKey[key] ?? { value: selectedValue };
+  const resolution = resolver.resolve(context);
+
+  return resolution.autoValue ?? resolution.initialValue;
+}
+
+export async function getScopedDefaultPromptValue<K extends PromptGroupKey>(
+  key: K,
+  results: Partial<PromptGroupResults>,
+  flags: Partial<ProjectConfig>,
+): Promise<PromptGroupResults[K]> {
+  if (key === "serverDeploy" && results.ecosystem === "typescript") {
+    if (flags.serverDeploy !== undefined) return flags.serverDeploy as PromptGroupResults[K];
+    if (results.backend !== "hono") return "none" as PromptGroupResults[K];
+    if (results.runtime === "workers") return "cloudflare" as PromptGroupResults[K];
+    return "none" as PromptGroupResults[K];
+  }
+
+  if (key === "effect" && results.ecosystem === "typescript") {
+    return (flags.effect ?? (results.backend === "effect" ? "effect-full" : "none")) as PromptGroupResults[K];
+  }
+
+  if (key === "validation" && results.ecosystem === "typescript" && results.backend === "effect") {
+    return (flags.validation ?? "effect-schema") as PromptGroupResults[K];
+  }
+
+  const resolvedValue = getPromptResolutionValue(key as ConfigPromptKey, results, flags);
+  if (resolvedValue !== undefined) return resolvedValue as PromptGroupResults[K];
+
+  return getDefaultPromptValue(key as ConfigPromptKey) as PromptGroupResults[K];
+}
+
+function scopedPrompt<K extends PromptGroupKey>(
+  key: K,
+  flags: Partial<ProjectConfig>,
+  prompt: (opts: {
+    results: Partial<PromptGroupResults>;
+  }) => Promise<PromptGroupResults[K] | symbol | undefined> | undefined,
+) {
+  return (opts: { results: Partial<PromptGroupResults> }) => {
+    if (
+      !CONFIG_SCOPE_META_KEYS.has(key) &&
+      !shouldAskConfigPromptKey(
+        opts.results.ecosystem,
+        key as ConfigPromptKey,
+        opts.results.configScope,
+        opts.results.configSections,
+      )
+    ) {
+      return getScopedDefaultPromptValue(key, opts.results, flags);
+    }
+
+    return prompt(opts);
+  };
+}
+
 export async function gatherConfig(
   flags: Partial<ProjectConfig>,
   projectName: string,
@@ -429,10 +724,17 @@ export async function gatherConfig(
     }
   }
 
-  const result = await navigableGroup<PromptGroupResults>(
-    {
+  const shouldPromptForScope = !hasStackPromptFlags(flags);
+  const promptEntries = {
       // Ecosystem choice first
       ecosystem: () => getEcosystemChoice(flags.ecosystem),
+      configScope: () => (shouldPromptForScope ? getConfigScopeChoice() : Promise.resolve("full")),
+      configSections: ({ results }) => {
+        if (!shouldPromptForScope || results.configScope !== "custom") {
+          return Promise.resolve([] as string[]);
+        }
+        return getConfigSectionsChoice(results.ecosystem ?? "typescript");
+      },
       // TypeScript ecosystem prompts (skip if Rust or Python)
       frontend: ({ results }) => {
         if (results.ecosystem === "react-native") {
@@ -1143,7 +1445,17 @@ export async function gatherConfig(
       },
       install: ({ results }) =>
         getinstallChoice(flags.install, results.ecosystem, results.javaBuildTool),
-    },
+    } satisfies NavigablePromptGroup<PromptGroupResults>;
+
+  const scopedPromptEntries = Object.fromEntries(
+    Object.entries(promptEntries).map(([key, prompt]) => [
+      key,
+      scopedPrompt(key as PromptGroupKey, flags, prompt as never),
+    ]),
+  ) as NavigablePromptGroup<PromptGroupResults>;
+
+  const result = await navigableGroup<PromptGroupResults>(
+    scopedPromptEntries,
     {
       onCancel: () => exitCancelled("Operation cancelled"),
     },
