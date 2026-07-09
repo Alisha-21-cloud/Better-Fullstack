@@ -140,6 +140,16 @@ function applyVersionPrefix(currentVersion: string, resolvedVersion: string): st
   return `${getVersionPrefix(currentVersion)}${resolvedVersion}`;
 }
 
+function shouldApplyResolvedVersion(
+  currentVersion: string,
+  resolvedVersion: string,
+  channel: Exclude<VersionChannel, "stable">,
+): boolean {
+  if (channel !== "beta") return true;
+
+  return compareVersions(resolvedVersion, currentVersion) >= 0;
+}
+
 function isRegistrySemverSpec(version: string): boolean {
   return /^[~^]?\d/.test(version);
 }
@@ -342,6 +352,7 @@ export async function applyDependencyVersionChannel(
 
         const resolvedVersion = resolvedVersions.get(packageName);
         if (!resolvedVersion) continue;
+        if (!shouldApplyResolvedVersion(currentVersion, resolvedVersion, channel)) continue;
 
         const nextVersion = applyVersionPrefix(currentVersion, resolvedVersion);
         if (nextVersion !== currentVersion) {

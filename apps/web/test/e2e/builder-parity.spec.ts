@@ -85,6 +85,17 @@ test.describe("Builder parity", () => {
     await expect(commandOutput(page)).toContainText("--auth go-better-auth");
   });
 
+  test("Kotlin is a first-class solo ecosystem choice backed by the Java generator", async ({
+    page,
+  }) => {
+    await clickVisibleTestId(page, "ecosystem-kotlin");
+
+    await expect(commandOutput(page)).toContainText("--ecosystem java");
+    await expect(commandOutput(page)).toContainText("--java-language kotlin");
+    await expect(page).toHaveURL(/eco=java/);
+    await expect(page).toHaveURL(/jlang=kotlin/);
+  });
+
   test("multi-ecosystem mode emits scoped --part flags", async ({ page }) => {
     await clickVisibleTestId(page, "stack-mode-multi");
     await clickVisibleTestId(page, "multi-frontend-tool-next");
@@ -103,6 +114,16 @@ test.describe("Builder parity", () => {
     await expect(command).not.toContainText("--backend hono");
     await expect(page).toHaveURL(/mode=multi/);
     await expect(page).toHaveURL(/part=/);
+  });
+
+  test("multi-ecosystem mode exposes Kotlin as a separate backend language", async ({ page }) => {
+    await clickVisibleTestId(page, "stack-mode-multi");
+    await clickVisibleTestId(page, "multi-step-next");
+    await clickVisibleTestId(page, "multi-backend-language-kotlin");
+
+    const command = commandOutput(page);
+    await expect(command).toContainText("--part backend:java:spring-boot");
+    await expect(command).toContainText("--part backend.language:java:kotlin");
   });
 
   test("disabled options do not mutate the command output", async ({ page }) => {

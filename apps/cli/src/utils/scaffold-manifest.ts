@@ -148,3 +148,24 @@ export async function readScaffoldManifest(projectDir: string): Promise<Scaffold
     return null;
   }
 }
+
+/** Refresh only files deliberately written by an in-place stack update. */
+export async function refreshScaffoldManifestFiles(
+  projectDir: string,
+  relativePaths: Iterable<string>,
+): Promise<void> {
+  const manifest = await readScaffoldManifest(projectDir);
+  if (!manifest) return;
+
+  for (const relativePath of new Set(relativePaths)) {
+    const fullPath = path.join(projectDir, relativePath);
+    if (!(await fs.pathExists(fullPath))) continue;
+    const stats = await fs.stat(fullPath).catch(() => null);
+    if (!stats?.isFile()) continue;
+    manifest.hashes[relativePath.split(path.sep).join("/")] = hashContent(
+      await fs.readFile(fullPath),
+    );
+  }
+
+  await writeScaffoldManifest(projectDir, manifest);
+}

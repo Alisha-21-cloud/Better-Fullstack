@@ -56,9 +56,11 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function reportJsonError(error: unknown): void {
+function reportJsonError(error: unknown): never {
   console.log(JSON.stringify({ ok: false, error: errorMessage(error) }, null, 2));
-  process.exitCode = 1;
+  // trpc-cli exits 0 after a successful handler return, so JSON failures must
+  // terminate synchronously instead of relying on process.exitCode.
+  process.exit(1);
 }
 
 export async function registryHandler(input: RegistryCommandInput): Promise<void> {
@@ -96,7 +98,6 @@ export async function registryHandler(input: RegistryCommandInput): Promise<void
     );
     if (input.json) {
       reportJsonError(error);
-      return;
     }
     throw error;
   }
@@ -108,7 +109,6 @@ export async function registryHandler(input: RegistryCommandInput): Promise<void
   } catch (error) {
     if (input.json) {
       reportJsonError(error);
-      return;
     }
     throw error;
   }

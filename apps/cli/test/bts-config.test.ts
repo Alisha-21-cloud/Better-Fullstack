@@ -1,15 +1,14 @@
-import { afterAll, describe, expect, it } from "bun:test";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import * as JSONC from "jsonc-parser";
-
 import {
   createCliDefaultProjectConfigBase,
   parseStackPartSpecs,
   type BetterTStackConfig,
   type ProjectConfig,
 } from "@better-fullstack/types";
+import { afterAll, describe, expect, it } from "bun:test";
+import * as JSONC from "jsonc-parser";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
   readBtsConfig,
@@ -20,9 +19,7 @@ import {
 
 const TEMP_ROOTS: string[] = [];
 
-async function makeProjectConfig(
-  overrides: Partial<ProjectConfig> = {},
-): Promise<ProjectConfig> {
+async function makeProjectConfig(overrides: Partial<ProjectConfig> = {}): Promise<ProjectConfig> {
   const projectDir = await mkdtemp(join(tmpdir(), "bfs-bts-config-"));
   TEMP_ROOTS.push(projectDir);
 
@@ -94,6 +91,22 @@ describe("bts.jsonc graph persistence", () => {
     // Without this, bfs update / stack-update would reconstruct workspaceShape as
     // the monorepo default and re-render the flat app with apps/*+packages/* files.
     expect(readBack?.workspaceShape).toBe("single-app");
+  });
+
+  it("persists Kotlin as the selected JVM language", async () => {
+    const config = await makeProjectConfig({
+      ecosystem: "java",
+      javaLanguage: "kotlin",
+      javaWebFramework: "spring-boot",
+      javaBuildTool: "maven",
+    });
+
+    await writeBtsConfig(config);
+
+    const { parsed } = await readJsonc(config.projectDir);
+    expect(parsed.javaLanguage).toBe("kotlin");
+    const readBack = await readBtsConfig(config.projectDir);
+    expect(readBack?.javaLanguage).toBe("kotlin");
   });
 
   it("lets stackParts win over stale top-level cache fields", async () => {

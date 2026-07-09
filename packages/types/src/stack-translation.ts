@@ -2191,7 +2191,9 @@ function generateTypeScriptCommand(selection: StackSelectionInput, projectName: 
     `--database ${selection.database}`,
     `--orm ${selection.orm}`,
     `--db-setup ${selection.dbSetup}`,
-    `--workspace-shape ${selection.workspaceShape}`,
+    ...(selection.workspaceShape !== "monorepo"
+      ? [`--workspace-shape ${selection.workspaceShape}`]
+      : []),
     `--package-manager ${selection.packageManager}`,
     ...(selection.versionChannel !== "stable"
       ? [`--version-channel ${selection.versionChannel}`]

@@ -2,10 +2,8 @@ import { describe, expect, it } from "bun:test";
 
 import { createVirtual } from "../src/index";
 import { validateConfigForProgrammaticUse } from "../src/utils/config-validation";
-import {
-  expectError,
-  runTRPCTest,
-} from "./test-utils";
+import { runWithContext } from "../src/utils/context";
+import { expectError, runTRPCTest } from "./test-utils";
 import { readVirtualFileContent as getFileContent } from "./virtual-tree-utils";
 
 describe("Cross-ecosystem search services", () => {
@@ -121,6 +119,27 @@ describe("Cross-ecosystem search services", () => {
         search: "opensearch",
       }),
     ).not.toThrow();
+  });
+
+  it("rejects Bleve for explicit and default TypeScript ecosystems", async () => {
+    const result = await runTRPCTest({
+      projectName: "typescript-bleve",
+      ecosystem: "typescript",
+      backend: "hono",
+      frontend: ["tanstack-router"],
+      search: "bleve",
+    });
+
+    expectError(result, "Bleve search is available for Go projects only");
+    expect(() =>
+      runWithContext({ silent: true }, () =>
+        validateConfigForProgrammaticUse({
+          backend: "hono",
+          frontend: ["tanstack-router"],
+          search: "bleve",
+        }),
+      ),
+    ).toThrow("Bleve search is available for Go projects only");
   });
 
   it("rejects non-TypeScript search providers that are not implemented cross-ecosystem", async () => {

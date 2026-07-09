@@ -1,13 +1,10 @@
+import type { Plugin } from "vite";
+
 import fs from "node:fs";
 import path from "node:path";
-
-import type { Plugin } from "vite";
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
-import {
-  LOCALIZED_CONTENT_LOCALES,
-  type LocalizedContentLocale,
-} from "../src/lib/i18n/locales";
+import { LOCALIZED_CONTENT_LOCALES, type LocalizedContentLocale } from "../src/lib/i18n/locales";
 
 /**
  * Build-time frontmatter extraction for docs/guides MDX content.
@@ -35,14 +32,6 @@ function rawImporterName(locale: LocalizedContentLocale): string {
   return `__raw_${locale.replace(/[^a-zA-Z0-9]/g, "_")}`;
 }
 
-function isServerEnvironment(
-  context: { environment?: { name?: string } },
-  options: { ssr?: boolean },
-): boolean {
-  const environmentName = context.environment?.name;
-  return options.ssr === true || environmentName === "ssr" || environmentName === "nitro";
-}
-
 type ContentSubdir = "docs" | "guides" | "blog";
 
 type MetaEntry = {
@@ -55,9 +44,7 @@ type LocalizedJsonEntry = {
   frontmatter?: Record<string, unknown>;
   body?: string;
 };
-type LocalizedJsonBundle = Partial<
-  Record<ContentSubdir, Record<string, LocalizedJsonEntry>>
->;
+type LocalizedJsonBundle = Partial<Record<ContentSubdir, Record<string, LocalizedJsonEntry>>>;
 type LocalizedJsonBundles = Partial<Record<LocalizedContentLocale, LocalizedJsonBundle>>;
 
 function extractFrontmatter(source: string): Record<string, unknown> {
@@ -149,11 +136,7 @@ function parseLocalizedMdxBundleId(id: string):
   if (!id.startsWith(LOCALIZED_MDX_BUNDLE_PREFIX)) return undefined;
   const rest = id.slice(LOCALIZED_MDX_BUNDLE_PREFIX.length);
   const [contentSubdir, locale] = rest.split("/");
-  if (
-    contentSubdir !== "docs" &&
-    contentSubdir !== "guides" &&
-    contentSubdir !== "blog"
-  ) {
+  if (contentSubdir !== "docs" && contentSubdir !== "guides" && contentSubdir !== "blog") {
     return undefined;
   }
   if (!LOCALIZED_CONTENT_LOCALES.includes(locale as LocalizedContentLocale)) {
@@ -175,11 +158,7 @@ function parseLocalizedMdxId(id: string):
   if (!id.startsWith(LOCALIZED_MDX_PREFIX)) return undefined;
   const rest = id.slice(LOCALIZED_MDX_PREFIX.length);
   const [contentSubdir, locale, ...relativeParts] = rest.split("/");
-  if (
-    contentSubdir !== "docs" &&
-    contentSubdir !== "guides" &&
-    contentSubdir !== "blog"
-  ) {
+  if (contentSubdir !== "docs" && contentSubdir !== "guides" && contentSubdir !== "blog") {
     return undefined;
   }
   if (!LOCALIZED_CONTENT_LOCALES.includes(locale as LocalizedContentLocale)) {
@@ -294,7 +273,9 @@ export function contentMetaPlugin(): Plugin {
       )) {
         if (!entry.body) continue;
         const key = localizedLoaderKey(locale, "docs", relativePath);
-        entriesOut.push(`${JSON.stringify(key)}: ${JSON.stringify(localizedEntryToMdxSource(entry))}`);
+        entriesOut.push(
+          `${JSON.stringify(key)}: ${JSON.stringify(localizedEntryToMdxSource(entry))}`,
+        );
       }
     }
     return `export default {${entriesOut.join(",")}};`;
@@ -329,20 +310,15 @@ export function contentMetaPlugin(): Plugin {
     configResolved(config) {
       rootDir = config.root;
     },
-    resolveId(id, _importer, options) {
-      const serverEnvironment = isServerEnvironment(this, options);
+    resolveId(id) {
       if (id === VIRTUAL_ID) return RESOLVED_ID;
-      if (serverEnvironment && id === LOCALIZED_CONTENT_ID) return undefined;
       if (id === LOCALIZED_CONTENT_ID) return RESOLVED_LOCALIZED_CONTENT_ID;
-      if (serverEnvironment && id.startsWith(LOCALIZED_MDX_BUNDLE_PREFIX)) return undefined;
       if (id.startsWith(LOCALIZED_MDX_BUNDLE_PREFIX)) {
         return id;
       }
-      if (serverEnvironment && id.startsWith(LOCALIZED_MDX_PREFIX)) return undefined;
       if (id.startsWith(LOCALIZED_MDX_PREFIX)) {
         return id;
       }
-      if (serverEnvironment && id.startsWith(LOCALIZED_RAW_PREFIX)) return undefined;
       if (id.startsWith(LOCALIZED_RAW_PREFIX)) {
         return id;
       }
@@ -359,9 +335,7 @@ export function contentMetaPlugin(): Plugin {
       const localizedMdx = parseLocalizedMdxId(id);
       if (localizedMdx) {
         const entry =
-          bundles[localizedMdx.locale]?.[localizedMdx.contentSubdir]?.[
-            localizedMdx.relativePath
-          ];
+          bundles[localizedMdx.locale]?.[localizedMdx.contentSubdir]?.[localizedMdx.relativePath];
         if (!entry) return undefined;
         return localizedEntryToMdxSource(entry);
       }

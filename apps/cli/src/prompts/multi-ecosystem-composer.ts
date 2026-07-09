@@ -1,21 +1,20 @@
-import type {
-  Database,
-  Ecosystem,
-  Frontend,
-  ProjectConfig,
-  ServerDeploy,
-} from "../types";
+import type { Database, Ecosystem, Frontend, ProjectConfig, ServerDeploy } from "../types";
 
 import { getDefaultConfig } from "../constants";
-import {
-  parseStackPartSpecs,
-  stackPartsToLegacyProjectConfigPartial,
-} from "../types";
+import { parseStackPartSpecs, stackPartsToLegacyProjectConfigPartial } from "../types";
 import { hasWebStyling } from "../utils/compatibility-rules";
 import { exitCancelled } from "../utils/errors";
 import { getAddonsChoice } from "./addons";
 import { getAiDocsChoice } from "./ai-docs";
 import { getAstroIntegrationChoice } from "./astro-integration";
+import {
+  type ConfigPromptKey,
+  type ConfigScope,
+  getConfigScopeChoice,
+  getConfigSectionsChoice,
+  getDefaultPromptValue,
+  shouldAskConfigPromptKey,
+} from "./config-scope";
 import { getCSSFrameworkChoice } from "./css-framework";
 import { getDatabaseChoice } from "./database";
 import { getDBSetupChoice } from "./database-setup";
@@ -71,6 +70,7 @@ import {
   getJavaAuthChoice,
   getJavaApiChoice,
   getJavaLoggingChoice,
+  getJavaLanguageChoice,
   getJavaBuildToolChoice,
   getJavaLibrariesChoice,
   getJavaOrmChoice,
@@ -110,7 +110,7 @@ import {
   getRustOrmChoice,
   getRustWebFrameworkChoice,
 } from "./rust-ecosystem";
-import { getShadcnOptions } from "./shadcn-options";
+import { getShadcnOptions, type ShadcnOptions } from "./shadcn-options";
 import { getUILibraryChoice } from "./ui-library";
 import { getDeploymentChoice } from "./web-deploy";
 
@@ -181,6 +181,26 @@ function promptValue<T>(value: T | symbol): T {
   return value;
 }
 
+function hasMultiStackPromptFlags(flags: Partial<ProjectConfig>) {
+  return Object.keys(flags).some(
+    (key) => key !== "projectName" && key !== "projectDir" && key !== "relativePath",
+  );
+}
+
+async function scopedPromptValue<T>(
+  ecosystem: Ecosystem,
+  key: ConfigPromptKey,
+  scope: ConfigScope,
+  selectedSectionIds: string[],
+  prompt: () => Promise<T | symbol>,
+): Promise<T> {
+  if (!shouldAskConfigPromptKey(ecosystem, key, scope, selectedSectionIds)) {
+    return getDefaultPromptValue(key) as T;
+  }
+
+  return promptValue(await prompt());
+}
+
 async function selectDatabaseConfig(flags: Partial<ProjectConfig>) {
   const database = promptValue(await getDatabaseChoice(flags.database, "hono", "bun"));
   const dbSetup = promptValue(
@@ -197,6 +217,19 @@ export async function gatherMultiEcosystemConfig(
   relativePath: string,
 ): Promise<ProjectConfig> {
   const baseConfig = getDefaultConfig();
+  const shouldPromptForScope = !hasMultiStackPromptFlags(flags);
+  const configScope = shouldPromptForScope ? promptValue(await getConfigScopeChoice()) : "full";
+  // Offer only the TypeScript sections whose prompts this composer actually asks.
+  const typeScriptSections =
+    configScope === "custom"
+      ? promptValue(
+          await getConfigSectionsChoice(
+            "typescript",
+            [],
+            ["ui-styling", "deploy", "addons-examples"],
+          ),
+        )
+      : [];
 
   const frontend = promptValue(
     await navigableSelect<Frontend>({
@@ -211,27 +244,35 @@ export async function gatherMultiEcosystemConfig(
       ? promptValue(await getAstroIntegrationChoice(flags.astroIntegration))
       : undefined;
   const uiLibrary = hasWebStyling(frontendList)
-    ? promptValue(await getUILibraryChoice(flags.uiLibrary, frontendList, astroIntegration))
+    ? await scopedPromptValue("typescript", "uiLibrary", configScope, typeScriptSections, () =>
+        getUILibraryChoice(flags.uiLibrary, frontendList, astroIntegration),
+      )
     : "none";
   const shadcnOptions =
     uiLibrary === "shadcn-ui"
-      ? promptValue(
-          await getShadcnOptions({
-            shadcnBase: flags.shadcnBase,
-            shadcnStyle: flags.shadcnStyle,
-            shadcnIconLibrary: flags.shadcnIconLibrary,
-            shadcnColorTheme: flags.shadcnColorTheme,
-            shadcnBaseColor: flags.shadcnBaseColor,
-            shadcnFont: flags.shadcnFont,
-            shadcnRadius: flags.shadcnRadius,
-          }),
-        )
+      ? shouldAskConfigPromptKey("typescript", "shadcnOptions", configScope, typeScriptSections)
+        ? promptValue(
+            await getShadcnOptions({
+              shadcnBase: flags.shadcnBase,
+              shadcnStyle: flags.shadcnStyle,
+              shadcnIconLibrary: flags.shadcnIconLibrary,
+              shadcnColorTheme: flags.shadcnColorTheme,
+              shadcnBaseColor: flags.shadcnBaseColor,
+              shadcnFont: flags.shadcnFont,
+              shadcnRadius: flags.shadcnRadius,
+            }),
+          )
+        : (getDefaultPromptValue("shadcnOptions") as ShadcnOptions)
       : undefined;
   const cssFramework = hasWebStyling(frontendList)
-    ? promptValue(await getCSSFrameworkChoice(flags.cssFramework, uiLibrary))
+    ? await scopedPromptValue("typescript", "cssFramework", configScope, typeScriptSections, () =>
+        getCSSFrameworkChoice(flags.cssFramework, uiLibrary),
+      )
     : "none";
 
   const backendEcosystem = await selectBackendEcosystem();
+  const backendSections =
+    configScope === "custom" ? promptValue(await getConfigSectionsChoice(backendEcosystem)) : [];
   const stackPartSpecs = [`frontend:typescript:${frontend}`];
   const backendChoices: Partial<ProjectConfig> = {};
   let database: Database = "none";
@@ -253,27 +294,53 @@ export async function gatherMultiEcosystemConfig(
     const goAuth =
       goWebFramework === "none" ? "none" : promptValue(await getGoAuthChoice(flags.goAuth));
     const goCli =
-      goWebFramework === "none" ? "none" : promptValue(await getGoCliChoice(flags.goCli));
+      goWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("go", "goCli", configScope, backendSections, () =>
+            getGoCliChoice(flags.goCli),
+          );
     const goLogging =
-      goWebFramework === "none" ? "none" : promptValue(await getGoLoggingChoice(flags.goLogging));
+      goWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("go", "goLogging", configScope, backendSections, () =>
+            getGoLoggingChoice(flags.goLogging),
+          );
     const goTesting =
-      goWebFramework === "none" ? [] : promptValue(await getGoTestingChoice(flags.goTesting));
+      goWebFramework === "none"
+        ? []
+        : await scopedPromptValue("go", "goTesting", configScope, backendSections, () =>
+            getGoTestingChoice(flags.goTesting),
+          );
     const goRealtime =
       goWebFramework === "none"
         ? "none"
-        : promptValue(await getGoRealtimeChoice(flags.goRealtime));
+        : await scopedPromptValue("go", "goRealtime", configScope, backendSections, () =>
+            getGoRealtimeChoice(flags.goRealtime),
+          );
     const goMessageQueue =
       goWebFramework === "none"
         ? "none"
-        : promptValue(await getGoMessageQueueChoice(flags.goMessageQueue));
+        : await scopedPromptValue("go", "goMessageQueue", configScope, backendSections, () =>
+            getGoMessageQueueChoice(flags.goMessageQueue),
+          );
     const goCaching =
-      goWebFramework === "none" ? "none" : promptValue(await getGoCachingChoice(flags.goCaching));
+      goWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("go", "goCaching", configScope, backendSections, () =>
+            getGoCachingChoice(flags.goCaching),
+          );
     const goConfig =
-      goWebFramework === "none" ? "none" : promptValue(await getGoConfigChoice(flags.goConfig));
+      goWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("go", "goConfig", configScope, backendSections, () =>
+            getGoConfigChoice(flags.goConfig),
+          );
     const goObservability =
       goWebFramework === "none"
         ? "none"
-        : promptValue(await getGoObservabilityChoice(flags.goObservability));
+        : await scopedPromptValue("go", "goObservability", configScope, backendSections, () =>
+            getGoObservabilityChoice(flags.goObservability),
+          );
     Object.assign(backendChoices, {
       goWebFramework,
       goOrm,
@@ -323,36 +390,60 @@ export async function gatherMultiEcosystemConfig(
       rustWebFramework === "none" ? "none" : promptValue(await getRustAuthChoice(flags.rustAuth));
     const rustFrontend = "none";
     const rustCli =
-      rustWebFramework === "none" ? "none" : promptValue(await getRustCliChoice(flags.rustCli));
+      rustWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("rust", "rustCli", configScope, backendSections, () =>
+            getRustCliChoice(flags.rustCli),
+          );
     const rustLibraries =
-      rustWebFramework === "none" ? [] : promptValue(await getRustLibrariesChoice(flags.rustLibraries));
+      rustWebFramework === "none"
+        ? []
+        : await scopedPromptValue("rust", "rustLibraries", configScope, backendSections, () =>
+            getRustLibrariesChoice(flags.rustLibraries),
+          );
     const rustLogging =
       rustWebFramework === "none"
         ? "none"
-        : promptValue(await getRustLoggingChoice(flags.rustLogging));
-    const rustErrorHandling = promptValue(
-      await getRustErrorHandlingChoice(flags.rustErrorHandling),
+        : await scopedPromptValue("rust", "rustLogging", configScope, backendSections, () =>
+            getRustLoggingChoice(flags.rustLogging),
+          );
+    const rustErrorHandling = await scopedPromptValue(
+      "rust",
+      "rustErrorHandling",
+      configScope,
+      backendSections,
+      () => getRustErrorHandlingChoice(flags.rustErrorHandling),
     );
     const rustCaching =
       rustWebFramework === "none"
         ? "none"
-        : promptValue(await getRustCachingChoice(flags.rustCaching));
+        : await scopedPromptValue("rust", "rustCaching", configScope, backendSections, () =>
+            getRustCachingChoice(flags.rustCaching),
+          );
     const rustRealtime =
       rustWebFramework === "none"
         ? "none"
-        : promptValue(await getRustRealtimeChoice(flags.rustRealtime));
+        : await scopedPromptValue("rust", "rustRealtime", configScope, backendSections, () =>
+            getRustRealtimeChoice(flags.rustRealtime),
+          );
     const rustMessageQueue =
       rustWebFramework === "none"
         ? "none"
-        : promptValue(await getRustMessageQueueChoice(flags.rustMessageQueue));
+        : await scopedPromptValue("rust", "rustMessageQueue", configScope, backendSections, () =>
+            getRustMessageQueueChoice(flags.rustMessageQueue),
+          );
     const rustObservability =
       rustWebFramework === "none"
         ? "none"
-        : promptValue(await getRustObservabilityChoice(flags.rustObservability));
+        : await scopedPromptValue("rust", "rustObservability", configScope, backendSections, () =>
+            getRustObservabilityChoice(flags.rustObservability),
+          );
     const rustTemplating =
       rustWebFramework === "none"
         ? "none"
-        : promptValue(await getRustTemplatingChoice(flags.rustTemplating));
+        : await scopedPromptValue("rust", "rustTemplating", configScope, backendSections, () =>
+            getRustTemplatingChoice(flags.rustTemplating),
+          );
     Object.assign(backendChoices, {
       rustWebFramework,
       rustOrm,
@@ -401,9 +492,15 @@ export async function gatherMultiEcosystemConfig(
     const pythonValidation =
       pythonWebFramework === "none"
         ? "none"
-        : promptValue(await getPythonValidationChoice(flags.pythonValidation));
+        : await scopedPromptValue("python", "pythonValidation", configScope, backendSections, () =>
+            getPythonValidationChoice(flags.pythonValidation),
+          );
     const pythonAi =
-      pythonWebFramework === "none" ? [] : promptValue(await getPythonAiChoice(flags.pythonAi));
+      pythonWebFramework === "none"
+        ? []
+        : await scopedPromptValue("python", "pythonAi", configScope, backendSections, () =>
+            getPythonAiChoice(flags.pythonAi),
+          );
     const pythonAuth =
       pythonWebFramework === "none"
         ? "none"
@@ -411,33 +508,55 @@ export async function gatherMultiEcosystemConfig(
     const pythonTaskQueue =
       pythonWebFramework === "none"
         ? "none"
-        : promptValue(await getPythonTaskQueueChoice(flags.pythonTaskQueue));
+        : await scopedPromptValue("python", "pythonTaskQueue", configScope, backendSections, () =>
+            getPythonTaskQueueChoice(flags.pythonTaskQueue),
+          );
     const pythonGraphql =
       pythonWebFramework === "none"
         ? "none"
-        : promptValue(await getPythonGraphqlChoice(flags.pythonGraphql));
+        : await scopedPromptValue("python", "pythonGraphql", configScope, backendSections, () =>
+            getPythonGraphqlChoice(flags.pythonGraphql),
+          );
     const pythonQuality =
       pythonWebFramework === "none"
         ? "none"
-        : promptValue(await getPythonQualityChoice(flags.pythonQuality));
+        : await scopedPromptValue("python", "pythonQuality", configScope, backendSections, () =>
+            getPythonQualityChoice(flags.pythonQuality),
+          );
     const pythonTesting =
       pythonWebFramework === "none"
         ? []
-        : promptValue(await getPythonTestingChoice(flags.pythonTesting));
+        : await scopedPromptValue("python", "pythonTesting", configScope, backendSections, () =>
+            getPythonTestingChoice(flags.pythonTesting),
+          );
     const pythonCaching =
       pythonWebFramework === "none"
         ? "none"
-        : promptValue(await getPythonCachingChoice(flags.pythonCaching));
+        : await scopedPromptValue("python", "pythonCaching", configScope, backendSections, () =>
+            getPythonCachingChoice(flags.pythonCaching),
+          );
     const pythonRealtime =
       pythonWebFramework === "none"
         ? "none"
-        : promptValue(await getPythonRealtimeChoice(flags.pythonRealtime));
+        : await scopedPromptValue("python", "pythonRealtime", configScope, backendSections, () =>
+            getPythonRealtimeChoice(flags.pythonRealtime),
+          );
     const pythonObservability =
       pythonWebFramework === "none"
         ? "none"
-        : promptValue(await getPythonObservabilityChoice(flags.pythonObservability));
+        : await scopedPromptValue(
+            "python",
+            "pythonObservability",
+            configScope,
+            backendSections,
+            () => getPythonObservabilityChoice(flags.pythonObservability),
+          );
     const pythonCli =
-      pythonWebFramework === "none" ? [] : promptValue(await getPythonCliChoice(flags.pythonCli));
+      pythonWebFramework === "none"
+        ? []
+        : await scopedPromptValue("python", "pythonCli", configScope, backendSections, () =>
+            getPythonCliChoice(flags.pythonCli),
+          );
     Object.assign(backendChoices, {
       pythonWebFramework,
       pythonOrm,
@@ -456,7 +575,8 @@ export async function gatherMultiEcosystemConfig(
     if (pythonWebFramework !== "none") stackPartSpecs.push(`backend:python:${pythonWebFramework}`);
     if (pythonOrm !== "none") stackPartSpecs.push(`backend.orm:python:${pythonOrm}`);
     if (pythonAuth !== "none") stackPartSpecs.push(`backend.auth:python:${pythonAuth}`);
-    if (pythonTaskQueue !== "none") stackPartSpecs.push(`backend.jobQueue:python:${pythonTaskQueue}`);
+    if (pythonTaskQueue !== "none")
+      stackPartSpecs.push(`backend.jobQueue:python:${pythonTaskQueue}`);
     if (pythonGraphql !== "none") stackPartSpecs.push(`backend.graphql:python:${pythonGraphql}`);
     for (const testing of pythonTesting) {
       if (testing !== "none") stackPartSpecs.push(`backend.testing:python:${testing}`);
@@ -475,6 +595,14 @@ export async function gatherMultiEcosystemConfig(
 
   if (backendEcosystem === "java") {
     const javaWebFramework = promptValue(await getJavaWebFrameworkChoice(flags.javaWebFramework));
+    const javaLanguage =
+      javaWebFramework !== "spring-boot"
+        ? "java"
+        : flags.javaLanguage !== undefined
+          ? promptValue(await getJavaLanguageChoice(flags.javaLanguage))
+          : flags.javaWebFramework !== undefined
+            ? "java"
+            : promptValue(await getJavaLanguageChoice(flags.javaLanguage));
     const javaBuildTool = promptValue(await getJavaBuildToolChoice(flags.javaBuildTool));
     if (javaWebFramework !== "none" && javaBuildTool !== "none") {
       const databaseConfig = await selectDatabaseConfig(flags);
@@ -492,9 +620,15 @@ export async function gatherMultiEcosystemConfig(
     const javaLibraries =
       javaWebFramework !== "spring-boot" || javaBuildTool === "none"
         ? []
-        : promptValue(await getJavaLibrariesChoice(flags.javaLibraries));
-    const javaTestingLibraries = promptValue(
-      await getJavaTestingLibrariesChoice(flags.javaTestingLibraries),
+        : await scopedPromptValue("java", "javaLibraries", configScope, backendSections, () =>
+            getJavaLibrariesChoice(flags.javaLibraries),
+          );
+    const javaTestingLibraries = await scopedPromptValue(
+      "java",
+      "javaTestingLibraries",
+      configScope,
+      backendSections,
+      () => getJavaTestingLibrariesChoice(flags.javaTestingLibraries),
     );
     const javaApi =
       javaWebFramework !== "spring-boot" || javaBuildTool === "none"
@@ -503,8 +637,11 @@ export async function gatherMultiEcosystemConfig(
     const javaLogging =
       javaWebFramework !== "spring-boot" || javaBuildTool === "none"
         ? "none"
-        : promptValue(await getJavaLoggingChoice(flags.javaLogging));
+        : await scopedPromptValue("java", "javaLogging", configScope, backendSections, () =>
+            getJavaLoggingChoice(flags.javaLogging),
+          );
     Object.assign(backendChoices, {
+      javaLanguage,
       javaWebFramework,
       javaBuildTool,
       javaOrm,
@@ -515,6 +652,7 @@ export async function gatherMultiEcosystemConfig(
       javaTestingLibraries,
     });
     if (javaWebFramework !== "none") stackPartSpecs.push(`backend:java:${javaWebFramework}`);
+    if (javaWebFramework !== "none") stackPartSpecs.push(`backend.language:java:${javaLanguage}`);
     if (javaOrm !== "none") stackPartSpecs.push(`backend.orm:java:${javaOrm}`);
     if (javaAuth !== "none") stackPartSpecs.push(`backend.auth:java:${javaAuth}`);
     if (javaApi !== "none") stackPartSpecs.push(`backend.api:java:${javaApi}`);
@@ -545,31 +683,49 @@ export async function gatherMultiEcosystemConfig(
     const dotnetTesting =
       dotnetWebFramework === "none"
         ? []
-        : promptValue(await getDotnetTestingChoice(flags.dotnetTesting));
+        : await scopedPromptValue("dotnet", "dotnetTesting", configScope, backendSections, () =>
+            getDotnetTestingChoice(flags.dotnetTesting),
+          );
     const dotnetJobQueue =
       dotnetWebFramework === "none"
         ? "none"
-        : promptValue(await getDotnetJobQueueChoice(flags.dotnetJobQueue));
+        : await scopedPromptValue("dotnet", "dotnetJobQueue", configScope, backendSections, () =>
+            getDotnetJobQueueChoice(flags.dotnetJobQueue),
+          );
     const dotnetRealtime =
       dotnetWebFramework === "none"
         ? "none"
-        : promptValue(await getDotnetRealtimeChoice(flags.dotnetRealtime));
+        : await scopedPromptValue("dotnet", "dotnetRealtime", configScope, backendSections, () =>
+            getDotnetRealtimeChoice(flags.dotnetRealtime),
+          );
     const dotnetObservability =
       dotnetWebFramework === "none"
         ? []
-        : promptValue(await getDotnetObservabilityChoice(flags.dotnetObservability));
+        : await scopedPromptValue(
+            "dotnet",
+            "dotnetObservability",
+            configScope,
+            backendSections,
+            () => getDotnetObservabilityChoice(flags.dotnetObservability),
+          );
     const dotnetValidation =
       dotnetWebFramework === "none"
         ? "none"
-        : promptValue(await getDotnetValidationChoice(flags.dotnetValidation));
+        : await scopedPromptValue("dotnet", "dotnetValidation", configScope, backendSections, () =>
+            getDotnetValidationChoice(flags.dotnetValidation),
+          );
     const dotnetCaching =
       dotnetWebFramework === "none"
         ? "none"
-        : promptValue(await getDotnetCachingChoice(flags.dotnetCaching));
+        : await scopedPromptValue("dotnet", "dotnetCaching", configScope, backendSections, () =>
+            getDotnetCachingChoice(flags.dotnetCaching),
+          );
     const dotnetDeploy =
       dotnetWebFramework === "none"
         ? "none"
-        : promptValue(await getDotnetDeployChoice(flags.dotnetDeploy));
+        : await scopedPromptValue("dotnet", "dotnetDeploy", configScope, backendSections, () =>
+            getDotnetDeployChoice(flags.dotnetDeploy),
+          );
     Object.assign(backendChoices, {
       dotnetWebFramework,
       dotnetOrm,
@@ -636,51 +792,79 @@ export async function gatherMultiEcosystemConfig(
     const elixirRealtime =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirRealtimeChoice(flags.elixirRealtime));
+        : await scopedPromptValue("elixir", "elixirRealtime", configScope, backendSections, () =>
+            getElixirRealtimeChoice(flags.elixirRealtime),
+          );
     const elixirJobs =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirJobsChoice(flags.elixirJobs));
+        : await scopedPromptValue("elixir", "elixirJobs", configScope, backendSections, () =>
+            getElixirJobsChoice(flags.elixirJobs),
+          );
     const elixirValidation =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirValidationChoice(flags.elixirValidation));
+        : await scopedPromptValue("elixir", "elixirValidation", configScope, backendSections, () =>
+            getElixirValidationChoice(flags.elixirValidation),
+          );
     const elixirHttp =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirHttpChoice(flags.elixirHttp));
+        : await scopedPromptValue("elixir", "elixirHttp", configScope, backendSections, () =>
+            getElixirHttpChoice(flags.elixirHttp),
+          );
     const elixirJson =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirJsonChoice(flags.elixirJson));
+        : await scopedPromptValue("elixir", "elixirJson", configScope, backendSections, () =>
+            getElixirJsonChoice(flags.elixirJson),
+          );
     const elixirEmail =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirEmailChoice(flags.elixirEmail));
+        : await scopedPromptValue("elixir", "elixirEmail", configScope, backendSections, () =>
+            getElixirEmailChoice(flags.elixirEmail),
+          );
     const elixirCaching =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirCachingChoice(flags.elixirCaching));
+        : await scopedPromptValue("elixir", "elixirCaching", configScope, backendSections, () =>
+            getElixirCachingChoice(flags.elixirCaching),
+          );
     const elixirObservability =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirObservabilityChoice(flags.elixirObservability));
+        : await scopedPromptValue(
+            "elixir",
+            "elixirObservability",
+            configScope,
+            backendSections,
+            () => getElixirObservabilityChoice(flags.elixirObservability),
+          );
     const elixirTesting =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirTestingChoice(flags.elixirTesting));
+        : await scopedPromptValue("elixir", "elixirTesting", configScope, backendSections, () =>
+            getElixirTestingChoice(flags.elixirTesting),
+          );
     const elixirQuality =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirQualityChoice(flags.elixirQuality));
+        : await scopedPromptValue("elixir", "elixirQuality", configScope, backendSections, () =>
+            getElixirQualityChoice(flags.elixirQuality),
+          );
     const elixirDeploy =
       elixirWebFramework === "none"
         ? "none"
-        : promptValue(await getElixirDeployChoice(flags.elixirDeploy));
+        : await scopedPromptValue("elixir", "elixirDeploy", configScope, backendSections, () =>
+            getElixirDeployChoice(flags.elixirDeploy),
+          );
     const elixirLibraries =
       elixirWebFramework === "none"
         ? []
-        : promptValue(await getElixirLibrariesChoice(flags.elixirLibraries));
+        : await scopedPromptValue("elixir", "elixirLibraries", configScope, backendSections, () =>
+            getElixirLibrariesChoice(flags.elixirLibraries),
+          );
     Object.assign(backendChoices, {
       elixirWebFramework,
       elixirOrm,
@@ -725,13 +909,28 @@ export async function gatherMultiEcosystemConfig(
 
   const stackParts = parseStackPartSpecs(stackPartSpecs, "selected");
   const graphPartial = stackPartsToLegacyProjectConfigPartial(stackParts);
-  const addons = promptValue(
-    await getAddonsChoice(flags.addons, frontendList, "none", "none", "bun"),
+  const addons = await scopedPromptValue(
+    "typescript",
+    "addons",
+    configScope,
+    typeScriptSections,
+    () => getAddonsChoice(flags.addons, frontendList, "none", "none", "bun"),
   );
-  const webDeploy = promptValue(
-    await getDeploymentChoice(flags.webDeploy, "bun", "none", frontendList),
+  const webDeploy = await scopedPromptValue(
+    "typescript",
+    "webDeploy",
+    configScope,
+    typeScriptSections,
+    () => getDeploymentChoice(flags.webDeploy, "bun", "none", frontendList),
   );
-  const serverDeploy = await selectServerDeployment(flags.serverDeploy);
+  const serverDeploy = shouldAskConfigPromptKey(
+    "typescript",
+    "serverDeploy",
+    configScope,
+    typeScriptSections,
+  )
+    ? await selectServerDeployment(flags.serverDeploy)
+    : (getDefaultPromptValue("serverDeploy") as ServerDeploy);
   const aiDocs = promptValue(await getAiDocsChoice(flags.aiDocs));
   const git = promptValue(await getGitChoice(flags.git));
   const packageManager = promptValue(await getPackageManagerChoice(flags.packageManager));

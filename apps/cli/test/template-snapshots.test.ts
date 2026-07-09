@@ -4,6 +4,7 @@ import type { ProjectConfig } from "../src/types";
 
 import { createVirtual } from "../src/index";
 import { treeToSnapshot, treeToFileList } from "./snapshot-utils";
+import { getVirtualTreeFileContent } from "./virtual-tree-utils";
 
 /**
  * Minimal configs representing key template combinations
@@ -377,6 +378,35 @@ const DEFAULT_CONFIG: Partial<ProjectConfig> = {
 };
 
 describe("Template Snapshots", () => {
+  it("pins Next Turbopack root to the generated workspace root", async () => {
+    const result = await createVirtual({
+      projectName: "snapshot-next-root",
+      ...DEFAULT_CONFIG,
+      frontend: ["next"],
+      backend: "self",
+      api: "none",
+      database: "none",
+      orm: "none",
+      auth: "none",
+      uiLibrary: "shadcn-ui",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.tree).toBeDefined();
+
+    const nextConfig = getVirtualTreeFileContent(result.tree!, "apps/web/next.config.ts");
+    expect(nextConfig).toContain('import { existsSync } from "node:fs";');
+    expect(nextConfig).toContain('import { dirname, join, resolve } from "node:path";');
+    expect(nextConfig).toContain('import { fileURLToPath } from "node:url";');
+    expect(nextConfig).toContain("const appDir = dirname(fileURLToPath(import.meta.url));");
+    expect(nextConfig).toContain('const workspaceRoot = resolve(appDir, "../..");');
+    expect(nextConfig).toContain(
+      'const turbopackRoot = existsSync(join(workspaceRoot, "packages")) ? workspaceRoot : appDir;',
+    );
+    expect(nextConfig).toContain("turbopack: {");
+    expect(nextConfig).toContain("root: turbopackRoot,");
+  });
+
   describe("File Structure Snapshots", () => {
     for (const { name, config } of SNAPSHOT_CONFIGS) {
       it(`file structure: ${name}`, async () => {

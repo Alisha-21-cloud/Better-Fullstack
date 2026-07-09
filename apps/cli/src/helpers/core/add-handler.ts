@@ -14,6 +14,7 @@ import type { AddInput, Addons, BetterTStackConfig, ProjectConfig } from "../../
 
 import { getDefaultConfig } from "../../constants";
 import { getAddonsToAdd } from "../../prompts/addons";
+import { maybeShowTelemetryNotice, type TelemetrySource, trackEvent } from "../../utils/analytics";
 import { readBtsConfig, updateBtsConfig } from "../../utils/bts-config";
 import { isSilent, runWithContextAsync } from "../../utils/context";
 import { applyDependencyVersionChannel } from "../../utils/dependency-version-channel";
@@ -25,6 +26,7 @@ import { applyStackUpdate, planStackUpdate, type StackUpdatePlan } from "./stack
 
 export interface AddHandlerOptions {
   silent?: boolean;
+  telemetrySource?: TelemetrySource;
 }
 
 export interface AddResult {
@@ -149,7 +151,9 @@ function buildAddonSetupConfig(
     projectDir,
     relativePath: ".",
     packageManager:
-      plan.proposedConfig.packageManager || currentConfig.packageManager || baseConfig.packageManager,
+      plan.proposedConfig.packageManager ||
+      currentConfig.packageManager ||
+      baseConfig.packageManager,
     addons: addonsToSetup,
     frontend: plan.proposedConfig.frontend || currentConfig.frontend || baseConfig.frontend,
     examples: plan.proposedConfig.examples || currentConfig.examples || [],
@@ -201,7 +205,10 @@ async function runStackUpdateAdd(
 
   let installFailed = false;
   if (input.install) {
-    if (result.proposedConfig.ecosystem === "typescript" || result.proposedConfig.ecosystem === "react-native") {
+    if (
+      result.proposedConfig.ecosystem === "typescript" ||
+      result.proposedConfig.ecosystem === "react-native"
+    ) {
       const installResult = await installDependencies({
         projectDir,
         packageManager: setupConfig.packageManager,
@@ -246,16 +253,74 @@ async function runStackUpdateAdd(
   };
 }
 
+// Keys that describe an addon/deploy-only `add` — anything else in the
+// request means the project's stack itself is being updated.
+const ADD_FEATURE_KEYS = new Set(["addons", "webDeploy", "serverDeploy", "packageManager"]);
+
+async function trackAddEvent(
+  input: AddInput,
+  options: AddHandlerOptions,
+  outcome: { success: boolean; errorName?: string; durationMs: number; addedAddons?: Addons[] },
+): Promise<void> {
+  if (input.dryRun) return;
+  const request = buildStackUpdateRequest(input);
+  const stackPayload = { ...(request as Partial<ProjectConfig>) };
+  if (outcome.addedAddons !== undefined) {
+    if (outcome.addedAddons.length > 0) {
+      stackPayload.addons = outcome.addedAddons;
+    } else {
+      delete stackPayload.addons;
+    }
+  }
+  const eventType = Object.keys(request).some((key) => !ADD_FEATURE_KEYS.has(key))
+    ? ("stack_updated" as const)
+    : ("feature_added" as const);
+  const source =
+    options.telemetrySource ??
+    (options.silent
+      ? "programmatic"
+      : Object.keys(request).length > 0
+        ? "cli-flags"
+        : "cli-interactive");
+  await trackEvent(
+    eventType,
+    stackPayload,
+    {
+      source,
+      success: outcome.success,
+      errorName: outcome.errorName,
+      durationMs: outcome.durationMs,
+    },
+  );
+}
+
 export async function addHandler(
   input: AddInput,
   options: AddHandlerOptions = {},
 ): Promise<AddResult | undefined> {
   const { silent = false } = options;
+  const startTime = Date.now();
 
   return runWithContextAsync({ silent }, async () => {
     try {
-      return await addHandlerInternal(input);
+      const result = await addHandlerInternal(input);
+      await maybeShowTelemetryNotice();
+      await trackAddEvent(input, options, {
+        success: result.success,
+        durationMs: Date.now() - startTime,
+        addedAddons: result.addedAddons,
+      });
+      return result;
     } catch (error) {
+      if (!(error instanceof UserCancelledError)) {
+        // Only the error class name is sent — messages can contain paths.
+        await maybeShowTelemetryNotice();
+        await trackAddEvent(input, options, {
+          success: false,
+          errorName: error instanceof Error ? error.name : "UnknownError",
+          durationMs: Date.now() - startTime,
+        });
+      }
       if (error instanceof UserCancelledError) {
         if (isSilent()) {
           return {

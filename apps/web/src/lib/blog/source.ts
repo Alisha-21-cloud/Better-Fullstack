@@ -1,9 +1,9 @@
 import { blogMeta } from "virtual:content-meta";
 import { localizedBlogMdxLoaders } from "virtual:localized-content";
 
-import { blogMdxLoaders as mdxLoaders, type BlogMdxModule } from "@/lib/blog/mdx-loaders";
 import type { TocEntry } from "@/lib/docs/remark-extract-toc";
 
+import { blogMdxLoaders as mdxLoaders, type BlogMdxModule } from "@/lib/blog/mdx-loaders";
 import {
   type LocalizedContentLocale,
   type SupportedLocale,
@@ -52,7 +52,7 @@ function currentContentLocale(): SupportedLocale {
 }
 
 export function canRenderBlogPostContent(): boolean {
-  return !import.meta.env.SSR || currentContentLocale() === "en";
+  return true;
 }
 
 function localizedFilePath(filePath: string, locale: SupportedLocale): string {
@@ -117,7 +117,9 @@ async function loadBlogContent(post: BlogPost): Promise<BlogPostContent> {
  * chunk loads. Callers must render inside a `<Suspense>` boundary.
  */
 export function useBlogPostContent(post: BlogPost): BlogPostContent {
-  return contentCache.read(contentCacheKey(post, currentContentLocale()), () => loadBlogContent(post));
+  return contentCache.read(contentCacheKey(post, currentContentLocale()), () =>
+    loadBlogContent(post),
+  );
 }
 
 /** Start fetching a post's content chunk early (e.g. from a route loader). */

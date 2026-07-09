@@ -223,12 +223,43 @@ async function resolveEnvExamplePath(projectDir: string): Promise<string> {
  * manifest). Applied to both file writes and dependency-map target dirs so a
  * pack can never write outside / mutate sibling projects.
  */
-function assertPathInsideProject(projectDir: string, targetAbs: string, label: string): void {
+function isPathInside(rootDir: string, candidate: string): boolean {
+  const rel = path.relative(rootDir, candidate);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+}
+
+async function assertPathInsideProject(
+  projectDir: string,
+  targetAbs: string,
+  label: string,
+): Promise<void> {
   const rel = path.relative(projectDir, targetAbs);
   if (rel === "" || rel.startsWith("..") || path.isAbsolute(rel)) {
     throw new CLIError(
       `Capability pack ${label} escapes the project directory and was rejected: ${targetAbs}`,
     );
+  }
+
+  const realProjectDir = await fs.realpath(projectDir);
+  let current = projectDir;
+  for (const segment of rel.split(path.sep)) {
+    current = path.join(current, segment);
+    const stats = await fs.lstat(current).catch(() => null);
+    if (!stats) break;
+
+    let realCurrent: string;
+    try {
+      realCurrent = await fs.realpath(current);
+    } catch {
+      throw new CLIError(
+        `Capability pack ${label} resolves through an invalid symlink and was rejected: ${current}`,
+      );
+    }
+    if (!isPathInside(realProjectDir, realCurrent)) {
+      throw new CLIError(
+        `Capability pack ${label} escapes the project directory through a symlink and was rejected: ${targetAbs}`,
+      );
+    }
   }
 }
 
@@ -256,7 +287,7 @@ async function planDependencyChanges(
       if (Object.keys(deps).length === 0) continue;
       const pkgRelPath = path.join(dir === "." ? "" : dir, "package.json");
       const pkgAbsPath = path.join(projectDir, pkgRelPath);
-      assertPathInsideProject(projectDir, pkgAbsPath, `dependency target "${dir}"`);
+      await assertPathInsideProject(projectDir, pkgAbsPath, `dependency target "${dir}"`);
       if (!(await fs.pathExists(pkgAbsPath))) {
         throw new CLIError(
           `Pack targets ${pkgRelPath} which does not exist in this project. Cannot merge dependencies.`,
@@ -312,7 +343,7 @@ export async function addPack(options: RegistryAddOptions): Promise<RegistryAddR
   for (const file of manifest.files) {
     const normalized = file.path.replaceAll("\\", "/").replace(/^\.\//, "");
     const targetAbs = path.join(projectDir, normalized);
-    assertPathInsideProject(projectDir, targetAbs, `file path "${file.path}"`);
+    await assertPathInsideProject(projectDir, targetAbs, `file path "${file.path}"`);
     if (!file.overwrite && (await fs.pathExists(targetAbs))) {
       filesSkipped.push(normalized);
       continue;
@@ -336,6 +367,7 @@ export async function addPack(options: RegistryAddOptions): Promise<RegistryAddR
   if (manifest.env.length > 0) {
     envFile = await resolveEnvExamplePath(projectDir);
     const envAbs = path.join(projectDir, envFile);
+    await assertPathInsideProject(projectDir, envAbs, `environment target "${envFile}"`);
     const existing = (await fs.pathExists(envAbs)) ? await fs.readFile(envAbs, "utf-8") : "";
     const merged = appendEnvVars(existing, manifest.env);
     envKeys = merged.keys;
@@ -358,6 +390,13 @@ export async function addPack(options: RegistryAddOptions): Promise<RegistryAddR
       dryRun: true,
     };
   }
+
+  await assertPathInsideProject(
+    projectDir,
+    path.join(projectDir, LOCK_DIR, LOCK_FILE),
+    "registry lock target",
+  );
+  await assertPathInsideProject(projectDir, path.join(projectDir, "bts.jsonc"), "config target");
 
   // Write staged pack files.
   if (filesWritten.length > 0) {

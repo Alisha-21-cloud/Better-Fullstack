@@ -155,6 +155,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import z from "zod";
 
 import { applyStackUpdate, planStackUpdate } from "./helpers/core/stack-update";
+import { trackEvent, trackProjectCreation } from "./utils/analytics";
 import { previewBtsConfigUpdate, readBtsConfig, writeBtsConfig } from "./utils/bts-config";
 import { applyEffectBackendDefaults } from "./utils/config-processing";
 import { generateReproducibleCommand } from "./utils/generate-reproducible-command";
@@ -1865,6 +1866,7 @@ export async function startMcpServer() {
       },
     },
     async (input: Record<string, unknown> & { projectName: string }) => {
+      const startTime = Date.now();
       try {
         const { generateVirtualProject, EMBEDDED_TEMPLATES } =
           await import("@better-fullstack/template-generator");
@@ -1882,6 +1884,12 @@ export async function startMcpServer() {
 
         const result = await generateVirtualProject({ config, templates: EMBEDDED_TEMPLATES });
         if (!result.success || !result.tree) {
+          await trackProjectCreation(config, false, {
+            source: "mcp",
+            success: false,
+            errorName: "GenerationFailed",
+            durationMs: Date.now() - startTime,
+          });
           return {
             content: [
               {
@@ -1907,6 +1915,9 @@ export async function startMcpServer() {
           addonWarnings = await setupAddons(config);
         }
 
+        const { recordScaffoldManifest } = await import("./utils/scaffold-manifest.js");
+        await recordScaffoldManifest(projectDir);
+
         const ecosystem = (input.ecosystem as string) ?? "typescript";
         const installCmd = getInstallCommand(
           ecosystem,
@@ -1915,6 +1926,12 @@ export async function startMcpServer() {
           input.javaBuildTool as string | undefined,
           input.javaWebFramework as string | undefined,
         );
+        await trackProjectCreation(config, false, {
+          source: "mcp",
+          success: true,
+          fileCount: result.tree.fileCount,
+          durationMs: Date.now() - startTime,
+        });
         const payload = {
           success: true as const,
           projectDirectory: projectDir,
@@ -1928,6 +1945,16 @@ export async function startMcpServer() {
           structuredContent: payload,
         };
       } catch (error) {
+        await trackEvent(
+          "project_created",
+          {},
+          {
+            source: "mcp",
+            success: false,
+            errorName: error instanceof Error ? error.name : "UnknownError",
+            durationMs: Date.now() - startTime,
+          },
+        );
         return {
           content: [
             {
@@ -2030,10 +2057,16 @@ export async function startMcpServer() {
       },
     },
     async (input: Record<string, unknown> & { projectDir: string }) => {
+      const startTime = Date.now();
+      const { projectDir: _projectDir, projectName: _projectName, ...requestedChanges } = input;
       try {
         const safePath = sanitizePath(input.projectDir);
-        const { projectDir: _projectDir, projectName: _projectName, ...requestedChanges } = input;
         const result = await applyStackUpdate(safePath, requestedChanges);
+        await trackEvent("stack_updated", requestedChanges, {
+          source: "mcp",
+          success: result.success,
+          durationMs: Date.now() - startTime,
+        });
         if (!result.success) {
           return {
             content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
@@ -2056,6 +2089,12 @@ export async function startMcpServer() {
           structuredContent: payload,
         };
       } catch (error) {
+        await trackEvent("stack_updated", requestedChanges, {
+          source: "mcp",
+          success: false,
+          errorName: error instanceof Error ? error.name : "UnknownError",
+          durationMs: Date.now() - startTime,
+        });
         const payload = {
           success: false as const,
           projectDir: input.projectDir,
@@ -2214,7 +2253,7 @@ export async function startMcpServer() {
           packageManager: input.packageManager as ProjectConfig["packageManager"] | undefined,
         };
 
-        const result = await add(addInput);
+        const result = await add(addInput, { telemetrySource: "mcp" });
         if (result?.success) {
           const existingConfig = await readBtsConfig(safePath);
           const graphPreview = existingConfig ? getMcpGraphPreview(existingConfig) : undefined;

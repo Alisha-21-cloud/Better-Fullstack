@@ -87,6 +87,14 @@ describe("generateStackCommand parity", () => {
     expect(command).toContain("--workspace-shape single-app");
   });
 
+  it("omits default monorepo workspace shape from copied TypeScript commands", () => {
+    const command = generateStackCommand({
+      ...DEFAULT_STACK,
+      aiSdk: "vercel-ai",
+    });
+
+    expect(command).not.toContain("--workspace-shape monorepo");
+  });
   it("serializes addons from codeQuality, documentation, and appPlatforms", () => {
     const command = generateStackCommand({
       ...DEFAULT_STACK,

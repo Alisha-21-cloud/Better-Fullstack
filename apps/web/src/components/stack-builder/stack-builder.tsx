@@ -10,9 +10,7 @@ import {
   type StackPartOptionContext,
   type StackPartRole,
 } from "@better-fullstack/types";
-import {
-  usesVirtualNoneStackSelection as usesVirtualNoneSelection,
-} from "@better-fullstack/types/stack-translation";
+import { usesVirtualNoneStackSelection as usesVirtualNoneSelection } from "@better-fullstack/types/stack-translation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -78,10 +76,7 @@ import {
   type StackState,
   TECH_OPTIONS,
 } from "@/lib/constant";
-import {
-  getLocalizedCategoryDisplayName,
-  getLocalizedTechOption,
-} from "@/lib/i18n/builder-copy";
+import { getLocalizedCategoryDisplayName, getLocalizedTechOption } from "@/lib/i18n/builder-copy";
 import {
   buildSavedStackEntry,
   loadSavedStacks,
@@ -138,6 +133,7 @@ type GraphSelection = {
   frontend: string;
   mobile: string;
   backendEcosystem: GraphBackendEcosystem;
+  backendLanguage: "java" | "kotlin";
   backend: string;
   database: string;
   backendOrm: string;
@@ -156,6 +152,10 @@ type GraphBackendConfig = {
   ormCategory: keyof typeof TECH_OPTIONS;
   apiCategory?: keyof typeof TECH_OPTIONS;
   authCategory?: keyof typeof TECH_OPTIONS;
+};
+type GraphBackendPickerConfig = GraphBackendConfig & {
+  id: GraphBackendEcosystem | "kotlin";
+  javaLanguage: "java" | "kotlin";
 };
 
 type MultiStackStepId = "frontend" | "backend" | "database" | "mobile" | "finalize";
@@ -250,6 +250,36 @@ const GRAPH_BACKEND_CONFIGS: GraphBackendConfig[] = [
   },
 ];
 
+const GRAPH_BACKEND_PICKER_CONFIGS = GRAPH_BACKEND_CONFIGS.flatMap<GraphBackendPickerConfig>(
+  (config) =>
+    config.ecosystem === "java"
+      ? [
+          { ...config, id: "java" as const, javaLanguage: "java" as const },
+          {
+            ...config,
+            id: "kotlin" as const,
+            label: "Kotlin",
+            javaLanguage: "kotlin" as const,
+          },
+        ]
+      : [{ ...config, id: config.ecosystem, javaLanguage: "java" as const }],
+);
+
+const BUILDER_ECOSYSTEMS = ECOSYSTEMS.flatMap((ecosystem) =>
+  ecosystem.id === "java"
+    ? [
+        ecosystem,
+        {
+          id: "kotlin" as const,
+          name: "Kotlin",
+          description: "Kotlin on the JVM with the Java ecosystem",
+          icon: "https://cdn.simpleicons.org/kotlin/7F52FF",
+          color: "from-violet-500 to-purple-700",
+        },
+      ]
+    : [ecosystem],
+);
+
 const GRAPH_FRONTEND_CONFIG_BY_ECOSYSTEM = Object.fromEntries(
   GRAPH_FRONTEND_CONFIGS.map((config) => [config.ecosystem, config]),
 ) as Record<GraphFrontendEcosystem, GraphFrontendConfig>;
@@ -258,7 +288,9 @@ const GRAPH_BACKEND_CONFIG_BY_ECOSYSTEM = Object.fromEntries(
   GRAPH_BACKEND_CONFIGS.map((config) => [config.ecosystem, config]),
 ) as Record<GraphBackendEcosystem, GraphBackendConfig>;
 
-function getAppPlatformGroupHeading(headingKey: (typeof APP_PLATFORM_OPTION_GROUPS)[number]["headingKey"]) {
+function getAppPlatformGroupHeading(
+  headingKey: (typeof APP_PLATFORM_OPTION_GROUPS)[number]["headingKey"],
+) {
   switch (headingKey) {
     case "workspacePlatforms":
       return m.builderGroupWorkspacePlatforms();
@@ -370,13 +402,7 @@ const GRAPH_BACKEND_ADVANCED_CATEGORY_ORDER_BY_ECOSYSTEM = {
     "goConfig",
     "goObservability",
   ],
-  java: [
-    "javaBuildTool",
-    "javaApi",
-    "javaLogging",
-    "javaLibraries",
-    "javaTestingLibraries",
-  ],
+  java: ["javaBuildTool", "javaApi", "javaLogging", "javaLibraries", "javaTestingLibraries"],
   elixir: [
     "elixirRealtime",
     "elixirJobs",
@@ -509,6 +535,7 @@ function getSoloBackendSelection(stack: StackState): GraphSelection {
         : getSelectedOptionId(stack.webFrontend, "tanstack-router"),
     mobile: getSelectedOptionId(stack.nativeFrontend),
     backendEcosystem: currentEcosystem,
+    backendLanguage: stack.javaLanguage === "kotlin" ? "kotlin" : "java",
     backend:
       typeof backendValue === "string" && backendValue !== "none"
         ? backendValue
@@ -548,12 +575,20 @@ function getGraphSelection(stack: StackState): GraphSelection {
     const backendAuth = backend
       ? selectedParts.find((part) => part.role === "auth" && part.ownerPartId === backend.id)
       : undefined;
+    const backendLanguage = backend
+      ? selectedParts.find((part) => part.role === "language" && part.ownerPartId === backend.id)
+      : undefined;
 
     return {
       frontendEcosystem,
       frontend: frontend?.toolId ?? "none",
       mobile: mobile?.toolId ?? "none",
       backendEcosystem,
+      backendLanguage:
+        backendLanguage?.toolId === "kotlin" ||
+        (!backendLanguage && backendEcosystem === "java" && stack.javaLanguage === "kotlin")
+          ? "kotlin"
+          : "java",
       backend: backend?.toolId ?? "none",
       database: database?.toolId ?? "none",
       backendOrm: backendOrm?.toolId ?? "none",
@@ -575,6 +610,9 @@ function graphSelectionToSpecs(selection: GraphSelection): string[] {
   }
   if (selection.backend !== "none") {
     specs.push(`backend:${selection.backendEcosystem}:${selection.backend}`);
+  }
+  if (selection.backend !== "none" && selection.backendEcosystem === "java") {
+    specs.push(`backend.language:java:${selection.backendLanguage}`);
   }
   if (selection.backend !== "none" && selection.backendOrm !== "none") {
     specs.push(`backend.orm:${selection.backendEcosystem}:${selection.backendOrm}`);
@@ -601,9 +639,7 @@ function shouldResetGraphBackendAdvancedCategory(
   ecosystem: GraphBackendEcosystem,
   category: keyof typeof TECH_OPTIONS,
 ) {
-  return (
-    ecosystem !== "typescript" || !GRAPH_TYPESCRIPT_SHARED_BACKEND_CATEGORY_SET.has(category)
-  );
+  return ecosystem !== "typescript" || !GRAPH_TYPESCRIPT_SHARED_BACKEND_CATEGORY_SET.has(category);
 }
 
 function getGraphBackendAdvancedResetPatch(
@@ -641,6 +677,7 @@ function stackPatchFromGraphSpecs(specs: string[]): Partial<StackState> {
     const database = selectedParts.find((part) => part.role === "database" && !part.ownerPartId);
 
     patch.ecosystem = (lowered.ecosystem ?? "typescript") as Ecosystem;
+    patch.javaLanguage = lowered.javaLanguage ?? "java";
     patch.webFrontend = ["none"];
     patch.rustFrontend = "none";
     if (frontend?.ecosystem === "typescript") {
@@ -1186,6 +1223,10 @@ function CreationModeComposer({
   const graphSelection = getGraphSelection(stack);
   const frontendConfig = GRAPH_FRONTEND_CONFIG_BY_ECOSYSTEM[graphSelection.frontendEcosystem];
   const backendConfig = GRAPH_BACKEND_CONFIG_BY_ECOSYSTEM[graphSelection.backendEcosystem];
+  const backendLabel =
+    graphSelection.backendEcosystem === "java" && graphSelection.backendLanguage === "kotlin"
+      ? "Kotlin"
+      : backendConfig.label;
   const primaryToolIdsByRole: GraphOptionContext["primaryToolIdsByRole"] = {
     frontend: graphSelection.frontend !== "none" ? graphSelection.frontend : undefined,
     backend: graphSelection.backend !== "none" ? graphSelection.backend : undefined,
@@ -1209,11 +1250,15 @@ function CreationModeComposer({
     graphSelection.frontendEcosystem,
   );
   const mobileOptions = getGraphToolOptions("nativeFrontend", "mobile", "react-native");
-  const backendOptions = getGraphToolOptions(
+  const allBackendOptions = getGraphToolOptions(
     backendConfig.frameworkCategory,
     "backend",
     graphSelection.backendEcosystem,
   );
+  const backendOptions =
+    graphSelection.backendEcosystem === "java" && graphSelection.backendLanguage === "kotlin"
+      ? allBackendOptions.filter((option) => option.id === "spring-boot" || option.id === "none")
+      : allBackendOptions;
   const databaseOptions = getGraphToolOptions("database", "database", "universal");
   const backendOrmOptions = getGraphToolOptions(
     backendConfig.ormCategory,
@@ -1377,7 +1422,7 @@ function CreationModeComposer({
         return graphSelection.backend === "none"
           ? null
           : {
-              scopeLabel: backendConfig.label,
+              scopeLabel: backendLabel,
               toolId: graphSelection.backend,
               toolName: getOptionName(backendConfig.frameworkCategory, graphSelection.backend),
             };
@@ -1570,7 +1615,10 @@ function CreationModeComposer({
               MULTI_FRONTEND_LIBRARY_GROUPS.map((category) => (
                 <div key={category}>
                   {renderStackOptionGroup({
-                    label: getLocalizedCategoryDisplayName(category, getCategoryDisplayName(category)),
+                    label: getLocalizedCategoryDisplayName(
+                      category,
+                      getCategoryDisplayName(category),
+                    ),
                     category,
                     testIdPrefix: `multi-frontend-${category}`,
                   })}
@@ -1582,14 +1630,17 @@ function CreationModeComposer({
         return (
           <div className="space-y-5">
             {renderLanguagePicker({
-              optionCount: GRAPH_BACKEND_CONFIGS.length,
+              optionCount: GRAPH_BACKEND_PICKER_CONFIGS.length,
               gridClassName: "grid-cols-3 lg:grid-cols-6",
-              children: GRAPH_BACKEND_CONFIGS.map((config) =>
+              children: GRAPH_BACKEND_PICKER_CONFIGS.map((config) =>
                 renderLanguageButton({
-                  selected: graphSelection.backendEcosystem === config.ecosystem,
-                  testId: `multi-backend-language-${config.ecosystem}`,
+                  selected:
+                    graphSelection.backendEcosystem === config.ecosystem &&
+                    (config.ecosystem !== "java" ||
+                      graphSelection.backendLanguage === config.javaLanguage),
+                  testId: `multi-backend-language-${config.id}`,
                   label: config.label,
-                  iconTechId: config.ecosystem,
+                  iconTechId: config.id,
                   onClick: () => {
                     const backend = getDefaultGraphTool(
                       config.frameworkCategory,
@@ -1600,6 +1651,7 @@ function CreationModeComposer({
                     const nextSelection: GraphSelection = {
                       ...graphSelection,
                       backendEcosystem: config.ecosystem,
+                      backendLanguage: config.javaLanguage,
                       backend,
                       backendOrm: "none",
                       backendApi: "none",
@@ -1607,6 +1659,7 @@ function CreationModeComposer({
                     };
                     updateGraphSelection({
                       backendEcosystem: config.ecosystem,
+                      backendLanguage: config.javaLanguage,
                       backend,
                       ...reconcileBackendCapabilities(nextSelection, config),
                     });
@@ -1616,7 +1669,7 @@ function CreationModeComposer({
             })}
 
             <GraphOptionGroup
-              label={m.builderBackendGroup({ ecosystem: backendConfig.label })}
+              label={m.builderBackendGroup({ ecosystem: backendLabel })}
               options={backendOptions}
               selectedId={graphSelection.backend}
               testIdPrefix="multi-backend-tool"
@@ -1637,7 +1690,7 @@ function CreationModeComposer({
 
             {graphSelection.backend !== "none" && backendOrmOptions.length > 0 && (
               <GraphOptionGroup
-                label={m.builderOrmGroup({ ecosystem: backendConfig.label })}
+                label={m.builderOrmGroup({ ecosystem: backendLabel })}
                 options={backendOrmOptions}
                 selectedId={graphSelection.backendOrm}
                 testIdPrefix="multi-backend-orm"
@@ -1650,7 +1703,7 @@ function CreationModeComposer({
 
             {graphSelection.backend !== "none" && backendApiOptions.length > 0 && (
               <GraphOptionGroup
-                label={m.builderApiGroup({ ecosystem: backendConfig.label })}
+                label={m.builderApiGroup({ ecosystem: backendLabel })}
                 options={backendApiOptions}
                 selectedId={graphSelection.backendApi}
                 testIdPrefix="multi-backend-api"
@@ -1663,7 +1716,7 @@ function CreationModeComposer({
 
             {graphSelection.backend !== "none" && backendAuthOptions.length > 0 && (
               <GraphOptionGroup
-                label={m.builderAuthGroup({ ecosystem: backendConfig.label })}
+                label={m.builderAuthGroup({ ecosystem: backendLabel })}
                 options={backendAuthOptions}
                 selectedId={graphSelection.backendAuth}
                 testIdPrefix="multi-backend-auth"
@@ -1737,7 +1790,10 @@ function CreationModeComposer({
               MULTI_MOBILE_LIBRARY_GROUPS.map((category) => (
                 <div key={category}>
                   {renderStackOptionGroup({
-                    label: getLocalizedCategoryDisplayName(category, getCategoryDisplayName(category)),
+                    label: getLocalizedCategoryDisplayName(
+                      category,
+                      getCategoryDisplayName(category),
+                    ),
                     category,
                     testIdPrefix: `multi-mobile-${category}`,
                   })}
@@ -1766,7 +1822,9 @@ function CreationModeComposer({
             const isFinalize = step.id === "finalize";
             const isLast = index === MULTI_STACK_STEPS.length - 1;
             const selection = isFinalize ? null : getStepSelection(step.id);
-            const subLabel = isFinalize ? m.builderSetup() : (selection?.toolName ?? m.builderNone());
+            const subLabel = isFinalize
+              ? m.builderSetup()
+              : (selection?.toolName ?? m.builderNone());
             const stepNumber = String(index + 1).padStart(2, "0");
 
             return (
@@ -2284,9 +2342,14 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
         >
           {stack.stackMode !== "multi" && (
             <div className="relative shrink-0 border-b border-border/60 bg-fd-background">
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7">
-                {ECOSYSTEMS.map((eco) => {
-                  const isActive = stack.ecosystem === eco.id;
+              <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9">
+                {BUILDER_ECOSYSTEMS.map((eco) => {
+                  const isKotlin = eco.id === "kotlin";
+                  const isActive =
+                    stack.ecosystem === "java" && isKotlin
+                      ? stack.javaLanguage === "kotlin"
+                      : stack.ecosystem === eco.id &&
+                        (eco.id !== "java" || stack.javaLanguage !== "kotlin");
                   return (
                     <button
                       key={eco.id}
@@ -2295,7 +2358,10 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
                       onClick={() => {
                         startTransition(() => {
                           setStack({
-                            ecosystem: eco.id as Ecosystem,
+                            ecosystem: (isKotlin ? "java" : eco.id) as Ecosystem,
+                            ...(isKotlin || eco.id === "java"
+                              ? { javaLanguage: isKotlin ? "kotlin" : "java" }
+                              : {}),
                             stackMode: "solo",
                             stackPartSpecs: [],
                           });
@@ -3051,7 +3117,10 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
                                                             {tech.name}
                                                           </span>
                                                           <p className="mt-0.5 line-clamp-1 text-muted-foreground text-[10px] sm:text-xs leading-relaxed">
-                                                            {getLocalizedTechOption(tech).description}
+                                                            {
+                                                              getLocalizedTechOption(tech)
+                                                                .description
+                                                            }
                                                           </p>
                                                         </div>
                                                       </div>

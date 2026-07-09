@@ -10,8 +10,8 @@ import {
   legacyProjectConfigToStackParts,
   stackPartsToLegacyProjectConfigPartial,
 } from "../types";
-import { getEffectiveStack, getGraphSummary } from "./graph-summary";
 import { getLatestCLIVersion } from "./get-latest-cli-version";
+import { getEffectiveStack, getGraphSummary } from "./graph-summary";
 
 const BTS_CONFIG_FILE = "bts.jsonc";
 
@@ -53,7 +53,10 @@ function hasExplicitMobileGraphField(
   });
 }
 
-function normalizeGraphConfigForPersistence(projectConfig: ProjectConfig, stackParts: ProjectConfig["stackParts"]) {
+function normalizeGraphConfigForPersistence(
+  projectConfig: ProjectConfig,
+  stackParts: ProjectConfig["stackParts"],
+) {
   if (!stackParts) return projectConfig;
 
   const legacyConfig = stackPartsToLegacyProjectConfigPartial(stackParts);
@@ -131,6 +134,7 @@ function normalizeGraphConfigForPersistence(projectConfig: ProjectConfig, stackP
   }
 
   if (!selectedEcosystems.has("java")) {
+    normalized.javaLanguage = "java";
     normalized.javaWebFramework = "none";
     normalized.javaBuildTool = "none";
     normalized.javaOrm = "none";
@@ -227,9 +231,7 @@ function findSelectedPrimaryPart(
 function isAddonGraphPart(part: StackPart) {
   const binding = getAddonStackPartBinding(part.toolId);
   return (
-    binding !== undefined &&
-    part.role === binding.role &&
-    part.ecosystem === binding.ecosystem
+    binding !== undefined && part.role === binding.role && part.ecosystem === binding.ecosystem
   );
 }
 
@@ -352,8 +354,7 @@ export function buildBtsConfigForPersistence(
     // Persist only the non-default single-app shape so bfs update/stack-update
     // re-render it flat; monorepo (the default) is omitted to keep existing
     // bts.jsonc output byte-identical (read-back defaults undefined -> monorepo).
-    workspaceShape:
-      persistedConfig.workspaceShape === "single-app" ? "single-app" : undefined,
+    workspaceShape: persistedConfig.workspaceShape === "single-app" ? "single-app" : undefined,
     dbSetup: persistedConfig.dbSetup,
     api: persistedConfig.api,
     webDeploy: persistedConfig.webDeploy,
@@ -429,6 +430,7 @@ export function buildBtsConfigForPersistence(
     goCaching: persistedConfig.goCaching,
     goConfig: persistedConfig.goConfig,
     goObservability: persistedConfig.goObservability,
+    javaLanguage: persistedConfig.javaLanguage,
     javaWebFramework: persistedConfig.javaWebFramework,
     javaBuildTool: persistedConfig.javaBuildTool,
     javaOrm: persistedConfig.javaOrm,
@@ -599,6 +601,7 @@ export async function writeBtsConfig(
     goCaching: btsConfig.goCaching,
     goConfig: btsConfig.goConfig,
     goObservability: btsConfig.goObservability,
+    javaLanguage: btsConfig.javaLanguage,
     javaWebFramework: btsConfig.javaWebFramework,
     javaBuildTool: btsConfig.javaBuildTool,
     javaOrm: btsConfig.javaOrm,
@@ -745,9 +748,8 @@ export async function updateBtsConfig(
     }) as BetterTStackConfig;
 
     let modifiedContent = configContent;
-    const nextConfig = errors.length === 0
-      ? previewBtsConfigUpdate(currentConfig, updates)
-      : undefined;
+    const nextConfig =
+      errors.length === 0 ? previewBtsConfigUpdate(currentConfig, updates) : undefined;
     const persistedUpdates = nextConfig
       ? Object.fromEntries(
           Object.entries(nextConfig).filter(([key]) => key !== "version" && key !== "createdAt"),

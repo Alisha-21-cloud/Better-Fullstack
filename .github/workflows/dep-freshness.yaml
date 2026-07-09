@@ -66,6 +66,11 @@ jobs:
       - name: Regenerate Snapshots
         run: bun test apps/cli/test/template-snapshots.test.ts --update-snapshots
 
+      - name: Verify Dependency Channel Resolution
+        run: |
+          bun test apps/cli/test/dependency-version-channel.test.ts
+          bun test apps/cli/test/generated-command-contract.test.ts
+
       - name: Check For Changes
         id: changes
         run: |
@@ -79,6 +84,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.PAT_WORKFLOW }}
           branch: chore/template-dep-updates
           delete-branch: true
           title: "chore(deps): update template dependency versions"
