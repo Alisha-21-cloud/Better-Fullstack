@@ -1,4 +1,11 @@
-import { Redis } from "@upstash/redis";
+import { Redis, type ScoreMember } from "@upstash/redis";
+
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | Record<string, unknown>
+  | Array<string | number | boolean | Record<string, unknown>>;
 
 // Create Upstash Redis client from environment variables
 // Get your credentials at https://console.upstash.com
@@ -23,18 +30,18 @@ export async function set(
   options?: { ex?: number; px?: number; nx?: boolean; xx?: boolean }
 ): Promise<"OK" | null> {
   if (options?.ex) {
-    return redis.set(key, value, { ex: options.ex });
+    return redis.set(key, value, { ex: options.ex }) as Promise<"OK" | null>;
   }
   if (options?.px) {
-    return redis.set(key, value, { px: options.px });
+    return redis.set(key, value, { px: options.px }) as Promise<"OK" | null>;
   }
   if (options?.nx) {
-    return redis.set(key, value, { nx: true });
+    return redis.set(key, value, { nx: true }) as Promise<"OK" | null>;
   }
   if (options?.xx) {
-    return redis.set(key, value, { xx: true });
+    return redis.set(key, value, { xx: true }) as Promise<"OK" | null>;
   }
-  return redis.set(key, value);
+  return redis.set(key, value) as Promise<"OK" | null>;
 }
 
 export async function del(...keys: string[]): Promise<number> {
@@ -161,11 +168,15 @@ export const list = {
  */
 export const set_ = {
   async add(key: string, ...members: unknown[]): Promise<number> {
-    return redis.sadd(key, ...members);
+    const [first, ...rest] = members;
+    if (first === undefined) return 0;
+    return redis.sadd(key, first, ...rest);
   },
 
   async remove(key: string, ...members: unknown[]): Promise<number> {
-    return redis.srem(key, ...members);
+    const [first, ...rest] = members;
+    if (first === undefined) return 0;
+    return redis.srem(key, first, ...rest);
   },
 
   async members<T = string>(key: string): Promise<T[]> {
@@ -186,9 +197,10 @@ export const set_ = {
  * Sorted set operations
  */
 export const zset = {
-  async add(key: string, ...scoreMembers: Array<{ score: number; member: unknown }>): Promise<number> {
-    const args = scoreMembers.map(({ score, member }) => ({ score, member }));
-    return redis.zadd(key, ...args);
+  async add(key: string, ...scoreMembers: Array<ScoreMember<unknown>>): Promise<number | null> {
+    const [first, ...rest] = scoreMembers;
+    if (!first) return 0;
+    return redis.zadd(key, first, ...rest);
   },
 
   async range<T = string>(key: string, start: number, stop: number): Promise<T[]> {
@@ -237,7 +249,7 @@ export const json = {
     return redis.json.get<T>(key, path);
   },
 
-  async set(key: string, path: string, value: unknown): Promise<"OK" | null> {
+  async set(key: string, path: string, value: JsonValue): Promise<"OK" | null> {
     return redis.json.set(key, path, value);
   },
 
