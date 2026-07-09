@@ -109,14 +109,6 @@ yarn create better-fullstack@latest
 
 <br>
 
-### 💻 The CLI
-
-`bun create better-fullstack@latest` walks you through a guided prompt flow, then scaffolds a runnable project with every integration pre-wired.
-
-<img src="https://raw.githubusercontent.com/Marve10s/Better-Fullstack/main/.github/media/cli.gif" alt="CLI demo" width="100%" />
-
-<br>
-
 ## 🤖 AI Agents
 
 Install the Claude Code plugin bundle:
