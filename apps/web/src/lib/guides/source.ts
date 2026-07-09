@@ -2,8 +2,8 @@ import { guidesMeta } from "virtual:content-meta";
 import { localizedGuideMdxLoaders } from "virtual:localized-content";
 
 import type { TocEntry } from "@/lib/docs/remark-extract-toc";
-import { guideMdxLoaders as mdxLoaders, type GuideMdxModule } from "@/lib/guides/mdx-loaders";
 
+import { guideMdxLoaders as mdxLoaders, type GuideMdxModule } from "@/lib/guides/mdx-loaders";
 import {
   type LocalizedContentLocale,
   type SupportedLocale,
@@ -50,7 +50,7 @@ function currentContentLocale(): SupportedLocale {
 }
 
 export function canRenderGuidePageContent(): boolean {
-  return !import.meta.env.SSR || currentContentLocale() === "en";
+  return true;
 }
 
 function localizedFilePath(filePath: string, locale: SupportedLocale): string {
@@ -115,7 +115,9 @@ async function loadGuideContent(page: GuidePage): Promise<GuidePageContent> {
  * chunk loads. Callers must render inside a `<Suspense>` boundary.
  */
 export function useGuidePageContent(page: GuidePage): GuidePageContent {
-  return contentCache.read(contentCacheKey(page, currentContentLocale()), () => loadGuideContent(page));
+  return contentCache.read(contentCacheKey(page, currentContentLocale()), () =>
+    loadGuideContent(page),
+  );
 }
 
 /** Start fetching a guide's content chunk early (e.g. from a route loader). */

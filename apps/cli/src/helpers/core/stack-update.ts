@@ -12,10 +12,6 @@ import path from "node:path";
 
 import { getDefaultConfig } from "../../constants";
 import { CreateCommandOptionsSchema } from "../../create-command-input";
-import { buildBtsConfigForPersistence, readBtsConfig, writeBtsConfig } from "../../utils/bts-config";
-import { validateConfigForProgrammaticUse } from "../../utils/config-validation";
-import { formatCode } from "../../utils/file-formatter";
-import { getEffectiveStack, getGraphSummary } from "../../utils/graph-summary";
 import {
   analyzeStackCompatibility,
   getAddonStackPartBinding,
@@ -28,6 +24,15 @@ import {
   type CompatibilityInput,
   type ProjectConfig,
 } from "../../types";
+import {
+  buildBtsConfigForPersistence,
+  readBtsConfig,
+  writeBtsConfig,
+} from "../../utils/bts-config";
+import { validateConfigForProgrammaticUse } from "../../utils/config-validation";
+import { formatCode } from "../../utils/file-formatter";
+import { getEffectiveStack, getGraphSummary } from "../../utils/graph-summary";
+import { refreshScaffoldManifestFiles } from "../../utils/scaffold-manifest";
 
 type JsonObject = Record<string, unknown>;
 
@@ -173,7 +178,11 @@ async function readGeneratedFileBytes(
   if (!isGeneratedBinaryFile(file)) return undefined;
   const tempDir = await fs.mkdtemp(path.join(tmpdir(), "bfs-stack-update-binary-"));
   try {
-    const writtenFiles = await writeSelectedFiles(tree, tempDir, (candidatePath) => candidatePath === filePath);
+    const writtenFiles = await writeSelectedFiles(
+      tree,
+      tempDir,
+      (candidatePath) => candidatePath === filePath,
+    );
     if (!writtenFiles.includes(filePath)) return undefined;
     return await fs.readFile(path.join(tempDir, filePath));
   } finally {
@@ -268,7 +277,10 @@ function mergeProjectConfig(
   return next;
 }
 
-function mergeStackPartSpecs(currentConfig: ProjectConfig, specs: string[]): Partial<ProjectConfig> {
+function mergeStackPartSpecs(
+  currentConfig: ProjectConfig,
+  specs: string[],
+): Partial<ProjectConfig> {
   if (specs.length === 0) return {};
   const currentStackParts = currentConfig.stackParts?.length
     ? currentConfig.stackParts
@@ -285,11 +297,7 @@ function mergeStackPartSpecs(currentConfig: ProjectConfig, specs: string[]): Par
 
 type StackPart = NonNullable<ProjectConfig["stackParts"]>[number];
 
-const GRAPH_CACHE_CONFIG_KEYS = new Set<string>([
-  "stackParts",
-  "graphSummary",
-  "effectiveStack",
-]);
+const GRAPH_CACHE_CONFIG_KEYS = new Set<string>(["stackParts", "graphSummary", "effectiveStack"]);
 
 function stableJson(value: unknown): string {
   return JSON.stringify(value);
@@ -313,7 +321,10 @@ function getChangedConfigKeys(
   return changed;
 }
 
-function getProjectedConfigKeys(part: StackPart, parts: readonly StackPart[]): Set<keyof ProjectConfig> {
+function getProjectedConfigKeys(
+  part: StackPart,
+  parts: readonly StackPart[],
+): Set<keyof ProjectConfig> {
   const owner = part.ownerPartId
     ? parts.find((candidate) => candidate.id === part.ownerPartId)
     : undefined;
@@ -385,15 +396,21 @@ function mergeDerivedStackPartsWithExistingGraph(
   const updatedSpecs = currentStackParts
     .filter((part) => part.source !== "provided" && part.toolId !== "none")
     .flatMap((part) => {
-      const spec = getUpdatedSpecForChangedPart(part, currentStackParts, proposedConfig, changedKeys);
+      const spec = getUpdatedSpecForChangedPart(
+        part,
+        currentStackParts,
+        proposedConfig,
+        changedKeys,
+      );
       return spec ? [spec] : [];
     });
-  const preservedSpecs = new Set(preservedParts.map((part) => formatStackPartSpec(part, currentStackParts)));
-  const coveredSpecs = pruneScopedSpecsWithoutOwners([...new Set([...preservedSpecs, ...updatedSpecs])]);
-  const coveredParts = parseStackPartSpecs(
-    coveredSpecs,
-    "selected",
+  const preservedSpecs = new Set(
+    preservedParts.map((part) => formatStackPartSpec(part, currentStackParts)),
   );
+  const coveredSpecs = pruneScopedSpecsWithoutOwners([
+    ...new Set([...preservedSpecs, ...updatedSpecs]),
+  ]);
+  const coveredParts = parseStackPartSpecs(coveredSpecs, "selected");
   const preservedProjectedKeys = new Set<keyof ProjectConfig>();
   for (const part of coveredParts) {
     for (const key of getProjectedConfigKeys(part, coveredParts)) {
@@ -514,7 +531,9 @@ async function writeMigrationChecklist(projectDir: string, plan: StackUpdatePlan
 }
 
 function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 }
 
 function getCompatibilityBackend(config: ProjectConfig, webFrontend: string[]): string {
@@ -533,7 +552,9 @@ function getProjectBackendFromCompatibility(backend: string): string {
   return backend.startsWith("self-") ? "self" : backend;
 }
 
-function getDefaultDatabaseForDbSetup(dbSetup: ProjectConfig["dbSetup"]): ProjectConfig["database"] | undefined {
+function getDefaultDatabaseForDbSetup(
+  dbSetup: ProjectConfig["dbSetup"],
+): ProjectConfig["database"] | undefined {
   switch (dbSetup) {
     case "turso":
     case "d1":
@@ -553,7 +574,9 @@ function getDefaultDatabaseForDbSetup(dbSetup: ProjectConfig["dbSetup"]): Projec
   }
 }
 
-function getDefaultOrmForDatabase(database: ProjectConfig["database"]): ProjectConfig["orm"] | undefined {
+function getDefaultOrmForDatabase(
+  database: ProjectConfig["database"],
+): ProjectConfig["orm"] | undefined {
   switch (database) {
     case "sqlite":
     case "postgres":
@@ -958,7 +981,11 @@ function applyKnownDependencyExpansions(
   }
 
   if (isBetterAuth(requestedChanges.auth) || requestedChanges.payments === "polar") {
-    if (requestedChanges.payments === "polar" && !isBetterAuth(next.auth) && !requestedKeys.has("auth")) {
+    if (
+      requestedChanges.payments === "polar" &&
+      !isBetterAuth(next.auth) &&
+      !requestedKeys.has("auth")
+    ) {
       next.auth = "better-auth";
       adjustments.push("payments: Auth set to 'better-auth' (Polar requires Better Auth)");
     }
@@ -1062,7 +1089,11 @@ function applyKnownDependencyExpansions(
       (item) => !item.startsWith("native-") && item !== "none",
     );
     const compatibilityBackend = getCompatibilityBackend(next, webFrontend);
-    if (compatibilityBackend === "hono" && next.runtime !== "node" && !requestedKeys.has("runtime")) {
+    if (
+      compatibilityBackend === "hono" &&
+      next.runtime !== "node" &&
+      !requestedKeys.has("runtime")
+    ) {
       next.runtime = "node";
       adjustments.push("examples: Runtime set to 'node' (Chat SDK Hono profile requires Node)");
     }
@@ -1241,7 +1272,13 @@ function mergePackageJson(
   existingContent: string,
   previousContent: string | undefined,
   proposedContent: string,
-): { content?: string; summary: string[]; blockers: string[]; dependencyChanges: Record<string, Record<string, string>>; scriptChanges: string[] } {
+): {
+  content?: string;
+  summary: string[];
+  blockers: string[];
+  dependencyChanges: Record<string, Record<string, string>>;
+  scriptChanges: string[];
+} {
   const existing = parseJson(existingContent);
   const previous = parseJson(previousContent);
   const proposed = parseJson(proposedContent);
@@ -1269,7 +1306,9 @@ function mergePackageJson(
     for (const [name, value] of Object.entries(diff.values)) {
       target[name] = value;
     }
-    next[section] = Object.fromEntries(Object.entries(target).sort(([a], [b]) => a.localeCompare(b)));
+    next[section] = Object.fromEntries(
+      Object.entries(target).sort(([a], [b]) => a.localeCompare(b)),
+    );
     summary.push(`${section}: ${Object.keys(diff.values).join(", ")}`);
     if (section === "scripts") {
       scriptChanges.push(...Object.keys(diff.values));
@@ -1378,7 +1417,10 @@ function recordEnvReferenceChanges(
   }
 }
 
-function appendMissingEnvKeys(content: string, keys: readonly string[]): { content?: string; keys: string[] } {
+function appendMissingEnvKeys(
+  content: string,
+  keys: readonly string[],
+): { content?: string; keys: string[] } {
   const existingKeys = parseEnvKeys(content);
   const missing = keys.filter((key) => !existingKeys.has(key));
   if (missing.length === 0) return { keys: [] };
@@ -1439,7 +1481,10 @@ async function addMissingEnvExampleOperation(options: {
 
   if (existingOperation) {
     existingOperation.content = merged.content;
-    existingOperation.summary = [...existingOperation.summary, `env refs: ${merged.keys.join(", ")}`];
+    existingOperation.summary = [
+      ...existingOperation.summary,
+      `env refs: ${merged.keys.join(", ")}`,
+    ];
   } else {
     options.operations.push({
       kind: "merge",
@@ -1509,7 +1554,11 @@ export async function planStackUpdate(
 
   const projectName = await inferProjectName(projectDir);
   const currentConfig = configFromBtsConfig(currentBtsConfig, projectDir, projectName);
-  const { changes: requestedChanges, stackPartSpecs, unsupportedKeys } = buildRequestedChanges(input);
+  const {
+    changes: requestedChanges,
+    stackPartSpecs,
+    unsupportedKeys,
+  } = buildRequestedChanges(input);
   if (unsupportedKeys.length > 0) {
     return {
       success: false,
@@ -1536,7 +1585,10 @@ export async function planStackUpdate(
       compatibilityChangesToProjectConfig(compatibilityResult.adjustedStack, proposedConfig),
     );
   }
-  proposedConfig.stackParts = mergeDerivedStackPartsWithExistingGraph(currentConfig, proposedConfig);
+  proposedConfig.stackParts = mergeDerivedStackPartsWithExistingGraph(
+    currentConfig,
+    proposedConfig,
+  );
   Object.assign(proposedConfig, mergeStackPartSpecs(proposedConfig, stackPartSpecs));
   try {
     validateConfigForProgrammaticUse(proposedConfig);
@@ -1591,7 +1643,9 @@ export async function planStackUpdate(
     [...proposedGeneratedFiles].map(async ([filePath, proposedFile]) => {
       const existingPath = path.join(projectDir, filePath);
       const exists = await fs.pathExists(existingPath);
-      const existingBuffer = exists ? await fs.readFile(existingPath).catch(() => undefined) : undefined;
+      const existingBuffer = exists
+        ? await fs.readFile(existingPath).catch(() => undefined)
+        : undefined;
       return { filePath, proposedFile, exists, existingBuffer };
     }),
   );
@@ -1604,8 +1658,7 @@ export async function planStackUpdate(
     const previousContent = previousFile?.content;
     const currentBaselineContents = uniqueContents([previousRawFile?.content, previousContent]);
     const proposedBaselineContents = uniqueContents([proposedRawFile?.content, proposedContent]);
-    const isBinaryFile =
-      isGeneratedBinaryFile(proposedFile) || isGeneratedBinaryFile(previousFile);
+    const isBinaryFile = isGeneratedBinaryFile(proposedFile) || isGeneratedBinaryFile(previousFile);
     const existingContent =
       exists && existingBuffer && !isBinaryFile ? existingBuffer.toString("utf-8") : undefined;
 
@@ -1636,7 +1689,9 @@ export async function planStackUpdate(
         continue;
       }
 
-      manualReviewBlockers.push(`${filePath}: existing binary file differs from the generated baseline`);
+      manualReviewBlockers.push(
+        `${filePath}: existing binary file differs from the generated baseline`,
+      );
       continue;
     }
 
@@ -1805,6 +1860,11 @@ export async function applyStackUpdate(
     version: plan.proposedConfig.version,
     createdAt: plan.proposedConfig.createdAt,
   });
+
+  await refreshScaffoldManifestFiles(
+    plan.projectDir,
+    plan.operations.map((operation) => operation.path),
+  );
 
   await writeMigrationChecklist(plan.projectDir, plan);
 

@@ -459,5 +459,11 @@
   "runCtaDesc": "Vos résultats s'affichent au même format que le classement. Vous avez réalisé une expérience intéressante ? Soumettez une pull request avec votre rapport.",
   "runCtaLeaderboard": "Consultez le classement",
   "runCtaWriteup": "Lisez le compte rendu",
-  "llmRunItYourself": "Exécutez-le vous-même"
+  "llmRunItYourself": "Exécutez-le vous-même",
+  "navBenchmark": "Benchmark",
+  "benchmarkTeaserTitle": "Les modèles d'IA sont-ils vraiment bons pour créer vos projets ?",
+  "benchmarkTeaserTopModels": "Meilleurs modèles",
+  "benchmarkTeaserCta": "Voir le benchmark complet",
+  "benchmarkSeoTitle": "ScaffBench — Les modèles d'IA sont-ils vraiment bons pour créer vos projets ?",
+  "benchmarkTeaserMcpBody": "La différence, c'est notre MCP. Connectez n'importe quel agent de codage aux outils de Better-Fullstack et même un petit modèle gratuit construit presque tout, avec une fraction des jetons et des étapes."
 }

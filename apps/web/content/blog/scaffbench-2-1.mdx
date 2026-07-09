@@ -1,6 +1,6 @@
 ---
-title: "ScaffBench 2.1: Claude Sonnet 5 vs Claude Opus 4.8 at scaffolding from a prompt"
-description: "Claude Sonnet 5 enters ScaffBench 2.1, tested against Opus 4.8 (low + max effort) on 13 hard full-stack specs: can a model scaffold a building project from a prompt?"
+title: "ScaffBench 2.1: Fable 5 and GPT-5.5 pull ahead at scaffolding from a prompt"
+description: "Fable 5 enters ScaffBench 2.1 at 6/13 — the best Claude config, second only to GPT-5.5 — can a model scaffold a building full-stack project from a prompt?"
 date: 2026-07-01
 authors:
   - Ibrahim Elkamali
@@ -14,6 +14,7 @@ keywords:
   - claude code
   - project generation
   - scaffbench
+  - fable 5
   - claude sonnet 5
 ---
 
@@ -21,13 +22,13 @@ keywords:
 hand-write a real full-stack project from a prompt, with no scaffolder, and have it build? The answer
 was "rarely."
 
-ScaffBench 2.1 puts the newest model, **Claude Sonnet 5**, to that test — head-to-head with **Claude
-Opus 4.8** at both low and maximum reasoning effort, on an expanded suite of **13 hard specs across
-eight ecosystems**. We also ran **Sonnet 4.6**, **GPT-5.3 Codex Spark**, and — via Google's Antigravity
-CLI — **Gemini 3.5 Flash** at high effort, for a six-config field. The prompt path is the purest
-measure of raw capability: the agent reads the spec and writes every file itself.
+ScaffBench 2.1 puts a field of frontier models to that test on an expanded suite of **13 hard specs
+across eight ecosystems** — and the newest entrant, **Fable 5**, takes the lead. It's tested alongside
+**Claude Opus 4.8** (low + maximum reasoning effort), **Claude Sonnet 5**, **Sonnet 4.6**, **GPT-5.5**,
+**GPT-5.3 Codex Spark**, and — via Google's Antigravity CLI — **Gemini 3.5 Flash**. The prompt path is
+the purest measure of raw capability: the agent reads the spec and writes every file itself.
 
-All three configurations have now finished the full 13-spec run. Here's where things stand.
+Here's where things stand.
 
 ## Leaderboard
 
@@ -36,6 +37,9 @@ better; cost and steps are per project.
 
 | Config | CORE pass@1 | Avg cost | Out tokens | Tool steps | Wired libs |
 | --- | :---: | ---: | ---: | ---: | :---: |
+| GPT-5.5 · **high** | **7 / 13** (54%) | $1.41 | 26k | 14 | 93% |
+| Fable 5 · **high** | **6 / 12** (50%) | $4.94 | 59k | 48 | 97% |
+| Fable 5 · **low** | **6 / 13** (46%) | $2.12 | 22k | 37 | 95% |
 | Claude Opus 4.8 · **low** | **3 / 11** (27%) | $1.63 | 21k | 38 | 96% |
 | Claude Opus 4.8 · **max** | **3 / 11** (27%) | $9.21 | 148k | 99 | 97% |
 | Gemini 3.5 Flash · **high** | **3 / 11** (27%) | — | — | — | 94% |
@@ -46,9 +50,12 @@ better; cost and steps are per project.
 <BenchBarChart
   title="CORE build pass@1 · prompt-only"
   bars={[
+    { label: "GPT-5.5 · high", value: 54, display: "7 / 13 · 54%" },
+    { label: "Fable 5 · high", value: 50, display: "6 / 12 · 50%", highlight: true },
+    { label: "Fable 5 · low", value: 46, display: "6 / 13 · 46%", highlight: true },
     { label: "Opus 4.8 · low", value: 27, display: "3 / 11 · 27%" },
     { label: "Opus 4.8 · max", value: 27, display: "3 / 11 · 27%" },
-    { label: "Gemini 3.5 Flash · high", value: 27, display: "3 / 11 · 27%", highlight: true },
+    { label: "Gemini 3.5 Flash · high", value: 27, display: "3 / 11 · 27%" },
     { label: "Sonnet 5 · max", value: 20, display: "2 / 10 · 20%" },
     { label: "Sonnet 4.6 · high", value: 9, display: "1 / 11 · 9%" },
     { label: "Codex Spark · high", value: 9, display: "1 / 11 · 9%" },
@@ -62,6 +69,40 @@ better; cost and steps are per project.
   mentioned. All three configs sit at ~96–97%: the models reliably pick the right stack. The gap is
   everything to the right of that.
 </Callout>
+
+## Fable 5: the strongest Claude config — and effort barely moves it
+
+Fable 5 is the highest-placing Claude model on the board, and at **low** reasoning effort it already
+builds **6 of 13** — double what Opus 4.8 manages at *either* low or max, and behind only GPT-5.5's 7/13.
+It does it cheaply: **37 tool steps and $2.12 per project**, against Sonnet 5's 215 steps / $5.26 and
+Opus-at-max's 99 steps / $9.21 — both of which spent far more to build fewer projects. And it isn't
+trading accuracy for builds: at **95% wired** it edges the entire field on stack selection.
+
+Turning the reasoning dial to **high** doesn't buy more builds. Fable at high lands the **same count — 6**
+— for **2.3× the cost** ($4.94 vs $2.12) and **~2.7× the tokens** (59k vs 22k). What the extra reasoning
+changes is *which* specs assemble, not how many: high **gains** the prompt-only `frontier-effect-eventsourcing`
+spec but **loses** `java-spring-jooq-keycloak`. It's the same shape we saw on Opus (3/11 at low *and* max)
+— now independently on a second model. The bottleneck isn't reasoning; it's coherent assembly.
+
+| Spec | Ecosystem | Fable 5 · low | Fable 5 · high | Opus 4.8 · max |
+| --- | --- | :---: | :---: | :---: |
+| `python-ingestion-api` | Python | ✅ | ✅ | ✅ |
+| `multi-dotnet-ops` | Multi (TS + .NET) | ✅ | ✅ | ❌ |
+| `elixir-broadway-absinthe` | Elixir | ✅ | ✅ | ❌ |
+| `multi-ts-go-grpc` | Multi (TS + Go) | ✅ | ✅ | ⚪ |
+| `react-native-expo` | React Native | ✅ | ✅ | ❌ |
+| `java-spring-jooq-keycloak` | Java | ✅ | ❌ **lost at high** | ✅ |
+| `frontier-effect-eventsourcing` | TypeScript | ❌ | ✅ **gained at high** | ❌ |
+| `rust-leptos-axum` | Rust | ❌ | ❌ | ✅ |
+| `ai-search-workbench` | TypeScript | ❌ | ❌ | ❌ |
+| `go-realtime-api` | Go | ❌ | ❌ | ❌ |
+| `ts-svelte-edge-orpc` | TypeScript | ❌ | ❌ | ❌ timeout |
+| `dotnet-blazor-cqrs` | .NET | ❌ | ❌ | ❌ |
+| `frontier-polyglot-proto` | Multi | ❌ | ⚪ inconclusive | ⚪ |
+
+Either Fable config beats Opus at max — the most expensive Claude run in the field — **6 to 3**, and
+Fable is the only Claude line to build the Expo `react-native-expo` app. The one spec Opus max uniquely
+lands is `rust-leptos-axum` (⚪ = the validator couldn't measure a subdirectory-manifest layout).
 
 ## Claude Sonnet 5: strong instincts, fewer builds
 
@@ -228,14 +269,18 @@ we surface it separately rather than folding it into the headline rate.
 
 ## Takeaways
 
+- **Fable 5 moves the ceiling — cheaply.** At low effort it builds 6/13, double either Opus config and
+  second only to GPT-5.5, at 37 steps and $2.12/project. The best Claude result on the board is also one
+  of the tersest and cheapest.
 - **Sonnet 5 knows the stack, but assembles fewer builds.** It ties the field on library selection
   (~96% wired) yet trails on projects that actually compile (2/10 vs Opus's 3/11), while doing the most
-  work to get there (215 steps/project). It does have its own strength — it's the only config that
-  built the Elixir spec.
-- **Reasoning effort isn't the lever.** Opus built the same 3/11 at max as at low, for 5–10× the cost —
-  extra deliberation reshuffles which stacks assemble, not how many.
-- **Stack selection is solved; coherent assembly isn't.** ~92–97% wired at a 9–27% build rate is the
-  whole story in one line — true for every model in the field, and exactly the gap a scaffolder closes,
-  which is why the MCP and CLI paths in ScaffBench 2 sat near 100% while prompt-only struggled.
+  work to get there (215 steps/project).
+- **Reasoning effort isn't the lever — on two models now.** Opus built the same 3/11 at max as at low,
+  and Fable the same 6 at high as at low, each for ~2–10× the cost. Extra deliberation reshuffles which
+  stacks assemble (Fable high traded `java` for a frontier spec), not how many.
+- **Stack selection is solved; coherent assembly is where models still split.** ~92–97% wired at a
+  9–54% build rate is the whole story in one line — every model picks the right stack, and the spread in
+  what actually compiles is exactly the gap a scaffolder closes, which is why the MCP and CLI paths in
+  ScaffBench 2 sat near 100% while prompt-only still separates the field.
 
 We'll keep the leaderboard growing as more models land.

@@ -1,16 +1,7 @@
-import type {
-  Database,
-  Ecosystem,
-  Frontend,
-  ProjectConfig,
-  ServerDeploy,
-} from "../types";
+import type { Database, Ecosystem, Frontend, ProjectConfig, ServerDeploy } from "../types";
 
 import { getDefaultConfig } from "../constants";
-import {
-  parseStackPartSpecs,
-  stackPartsToLegacyProjectConfigPartial,
-} from "../types";
+import { parseStackPartSpecs, stackPartsToLegacyProjectConfigPartial } from "../types";
 import { hasWebStyling } from "../utils/compatibility-rules";
 import { exitCancelled } from "../utils/errors";
 import { getAddonsChoice } from "./addons";
@@ -79,6 +70,7 @@ import {
   getJavaAuthChoice,
   getJavaApiChoice,
   getJavaLoggingChoice,
+  getJavaLanguageChoice,
   getJavaBuildToolChoice,
   getJavaLibrariesChoice,
   getJavaOrmChoice,
@@ -226,18 +218,16 @@ export async function gatherMultiEcosystemConfig(
 ): Promise<ProjectConfig> {
   const baseConfig = getDefaultConfig();
   const shouldPromptForScope = !hasMultiStackPromptFlags(flags);
-  const configScope = shouldPromptForScope
-    ? promptValue(await getConfigScopeChoice())
-    : "full";
+  const configScope = shouldPromptForScope ? promptValue(await getConfigScopeChoice()) : "full";
   // Offer only the TypeScript sections whose prompts this composer actually asks.
   const typeScriptSections =
     configScope === "custom"
       ? promptValue(
-          await getConfigSectionsChoice("typescript", [], [
-            "ui-styling",
-            "deploy",
-            "addons-examples",
-          ]),
+          await getConfigSectionsChoice(
+            "typescript",
+            [],
+            ["ui-styling", "deploy", "addons-examples"],
+          ),
         )
       : [];
 
@@ -282,9 +272,7 @@ export async function gatherMultiEcosystemConfig(
 
   const backendEcosystem = await selectBackendEcosystem();
   const backendSections =
-    configScope === "custom"
-      ? promptValue(await getConfigSectionsChoice(backendEcosystem))
-      : [];
+    configScope === "custom" ? promptValue(await getConfigSectionsChoice(backendEcosystem)) : [];
   const stackPartSpecs = [`frontend:typescript:${frontend}`];
   const backendChoices: Partial<ProjectConfig> = {};
   let database: Database = "none";
@@ -556,8 +544,12 @@ export async function gatherMultiEcosystemConfig(
     const pythonObservability =
       pythonWebFramework === "none"
         ? "none"
-        : await scopedPromptValue("python", "pythonObservability", configScope, backendSections, () =>
-            getPythonObservabilityChoice(flags.pythonObservability),
+        : await scopedPromptValue(
+            "python",
+            "pythonObservability",
+            configScope,
+            backendSections,
+            () => getPythonObservabilityChoice(flags.pythonObservability),
           );
     const pythonCli =
       pythonWebFramework === "none"
@@ -583,7 +575,8 @@ export async function gatherMultiEcosystemConfig(
     if (pythonWebFramework !== "none") stackPartSpecs.push(`backend:python:${pythonWebFramework}`);
     if (pythonOrm !== "none") stackPartSpecs.push(`backend.orm:python:${pythonOrm}`);
     if (pythonAuth !== "none") stackPartSpecs.push(`backend.auth:python:${pythonAuth}`);
-    if (pythonTaskQueue !== "none") stackPartSpecs.push(`backend.jobQueue:python:${pythonTaskQueue}`);
+    if (pythonTaskQueue !== "none")
+      stackPartSpecs.push(`backend.jobQueue:python:${pythonTaskQueue}`);
     if (pythonGraphql !== "none") stackPartSpecs.push(`backend.graphql:python:${pythonGraphql}`);
     for (const testing of pythonTesting) {
       if (testing !== "none") stackPartSpecs.push(`backend.testing:python:${testing}`);
@@ -602,6 +595,14 @@ export async function gatherMultiEcosystemConfig(
 
   if (backendEcosystem === "java") {
     const javaWebFramework = promptValue(await getJavaWebFrameworkChoice(flags.javaWebFramework));
+    const javaLanguage =
+      javaWebFramework !== "spring-boot"
+        ? "java"
+        : flags.javaLanguage !== undefined
+          ? promptValue(await getJavaLanguageChoice(flags.javaLanguage))
+          : flags.javaWebFramework !== undefined
+            ? "java"
+            : promptValue(await getJavaLanguageChoice(flags.javaLanguage));
     const javaBuildTool = promptValue(await getJavaBuildToolChoice(flags.javaBuildTool));
     if (javaWebFramework !== "none" && javaBuildTool !== "none") {
       const databaseConfig = await selectDatabaseConfig(flags);
@@ -640,6 +641,7 @@ export async function gatherMultiEcosystemConfig(
             getJavaLoggingChoice(flags.javaLogging),
           );
     Object.assign(backendChoices, {
+      javaLanguage,
       javaWebFramework,
       javaBuildTool,
       javaOrm,
@@ -650,6 +652,7 @@ export async function gatherMultiEcosystemConfig(
       javaTestingLibraries,
     });
     if (javaWebFramework !== "none") stackPartSpecs.push(`backend:java:${javaWebFramework}`);
+    if (javaWebFramework !== "none") stackPartSpecs.push(`backend.language:java:${javaLanguage}`);
     if (javaOrm !== "none") stackPartSpecs.push(`backend.orm:java:${javaOrm}`);
     if (javaAuth !== "none") stackPartSpecs.push(`backend.auth:java:${javaAuth}`);
     if (javaApi !== "none") stackPartSpecs.push(`backend.api:java:${javaApi}`);
@@ -698,8 +701,12 @@ export async function gatherMultiEcosystemConfig(
     const dotnetObservability =
       dotnetWebFramework === "none"
         ? []
-        : await scopedPromptValue("dotnet", "dotnetObservability", configScope, backendSections, () =>
-            getDotnetObservabilityChoice(flags.dotnetObservability),
+        : await scopedPromptValue(
+            "dotnet",
+            "dotnetObservability",
+            configScope,
+            backendSections,
+            () => getDotnetObservabilityChoice(flags.dotnetObservability),
           );
     const dotnetValidation =
       dotnetWebFramework === "none"
@@ -827,8 +834,12 @@ export async function gatherMultiEcosystemConfig(
     const elixirObservability =
       elixirWebFramework === "none"
         ? "none"
-        : await scopedPromptValue("elixir", "elixirObservability", configScope, backendSections, () =>
-            getElixirObservabilityChoice(flags.elixirObservability),
+        : await scopedPromptValue(
+            "elixir",
+            "elixirObservability",
+            configScope,
+            backendSections,
+            () => getElixirObservabilityChoice(flags.elixirObservability),
           );
     const elixirTesting =
       elixirWebFramework === "none"

@@ -95,7 +95,6 @@ describe("generateStackCommand parity", () => {
 
     expect(command).not.toContain("--workspace-shape monorepo");
   });
-
   it("serializes addons from codeQuality, documentation, and appPlatforms", () => {
     const command = generateStackCommand({
       ...DEFAULT_STACK,

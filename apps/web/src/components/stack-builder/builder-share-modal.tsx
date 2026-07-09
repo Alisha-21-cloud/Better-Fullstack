@@ -113,7 +113,6 @@ export function BuilderShareModal() {
       toast.error("Could not copy Claude Code command");
     }
   }, []);
-
   const shareWithFriends = useCallback(async () => {
     if (navigator.share) {
       try {

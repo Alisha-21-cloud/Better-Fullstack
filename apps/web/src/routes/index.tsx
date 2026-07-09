@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import BenchmarkTeaser from "@/components/home/benchmark-teaser";
 import CombinationsSection from "@/components/home/combinations-section";
 import ContributorsSection from "@/components/home/contributors-section";
 import FeaturesSection from "@/components/home/features-section";
 import Footer from "@/components/home/footer";
 import HeroSection from "@/components/home/hero-section";
-import LLMBenchmarkSection from "@/components/home/llm-benchmark-section";
 import TestimonialsSection from "@/components/home/testimonials-section";
 import {
   DEFAULT_OG_IMAGE_ALT,
@@ -54,8 +54,8 @@ function HomePage() {
     <main className="min-h-svh">
       <div className="mx-auto max-w-[1480px] border-x border-border">
         <HeroSection />
-        <LLMBenchmarkSection />
         <FeaturesSection />
+        <BenchmarkTeaser />
         <CombinationsSection />
         <TestimonialsSection />
         <ContributorsSection />

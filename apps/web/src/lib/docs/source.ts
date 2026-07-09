@@ -1,9 +1,11 @@
 import { docsMeta } from "virtual:content-meta";
-import {
-  localizedDocsMdxLoaders,
-  localizedDocsRawMdxLoaders,
-} from "virtual:localized-content";
+import { localizedDocsMdxLoaders, localizedDocsRawMdxLoaders } from "virtual:localized-content";
 
+import {
+  docsMdxLoaders as mdxLoaders,
+  docsRawMdxLoaders as rawMdxLoaders,
+  type DocMdxModule,
+} from "@/lib/docs/mdx-loaders";
 import {
   type LocalizedContentLocale,
   type SupportedLocale,
@@ -12,11 +14,6 @@ import {
 import { createSuspenseCache } from "@/lib/mdx-suspense-cache";
 import { getLocale } from "@/paraglide/runtime.js";
 
-import {
-  docsMdxLoaders as mdxLoaders,
-  docsRawMdxLoaders as rawMdxLoaders,
-  type DocMdxModule,
-} from "@/lib/docs/mdx-loaders";
 import type { TocEntry } from "./remark-extract-toc";
 
 /**
@@ -204,17 +201,16 @@ const DOC_FOLDER_TITLE_TRANSLATIONS: Record<string, LocalizedFrontmatter<{ title
   },
 };
 
-const metaModules = import.meta.glob<{ default: MetaFile }>(
-  "../../../content/docs/**/meta.json",
-  { eager: true },
-);
+const metaModules = import.meta.glob<{ default: MetaFile }>("../../../content/docs/**/meta.json", {
+  eager: true,
+});
 
 function currentContentLocale(): ContentLocale {
   return toSupportedLocale(getLocale()) ?? "en";
 }
 
 export function canRenderDocPageContent(): boolean {
-  return !import.meta.env.SSR || currentContentLocale() === "en";
+  return true;
 }
 
 function localizedFilePath(filePath: string, locale: ContentLocale): string {
@@ -306,10 +302,7 @@ async function loadPageContent(page: DocPage): Promise<DocPageContent> {
   const rawLoader = hasLocalized
     ? localizedDocsRawMdxLoaders[localizedKey]
     : rawMdxLoaders[filePath];
-  const [module, raw] = await Promise.all([
-    moduleLoader?.(),
-    rawLoader?.(),
-  ]);
+  const [module, raw] = await Promise.all([moduleLoader?.(), rawLoader?.()]);
   if (!module) throw new Error(`Docs content module missing for ${filePath}`);
   return {
     raw: raw ?? "",
@@ -425,9 +418,7 @@ function buildFolder(
   } else {
     // No meta.json: emit pages from this directory alphabetically.
     for (const [childKey, page] of pagesBySlug.entries()) {
-      const parent = childKey.includes("/")
-        ? childKey.slice(0, childKey.lastIndexOf("/"))
-        : "";
+      const parent = childKey.includes("/") ? childKey.slice(0, childKey.lastIndexOf("/")) : "";
       if (parent !== key) continue;
       if (page.slug.join("/") === key) continue; // index handled above
       children.push({

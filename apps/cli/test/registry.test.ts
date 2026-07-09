@@ -3,7 +3,6 @@ import fs from "fs-extra";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
 
 import { registryHandler } from "../src/commands/registry";
 import { addPack, listInstalledPacks } from "../src/helpers/core/registry-handler";
@@ -56,25 +55,32 @@ async function runRegistryJsonAdd(input: { projectDir: string; source?: string }
   exitCode: number;
   output: { ok: boolean; error: string };
 }> {
-  const registryModule = pathToFileURL(join(import.meta.dir, "../src/commands/registry.ts")).href;
-  const script = `
-    import { registryHandler } from ${JSON.stringify(registryModule)};
-    await registryHandler(${JSON.stringify({
+  const originalExit = process.exit;
+  let exitCode = 0;
+  let captured = "";
+  console.log = (...args: unknown[]) => {
+    captured += args.map(String).join(" ");
+  };
+  process.exit = ((code?: number) => {
+    exitCode = code ?? 0;
+    throw new Error("__REGISTRY_PROCESS_EXIT__");
+  }) as typeof process.exit;
+
+  try {
+    await registryHandler({
       action: "add",
       json: true,
       projectDir: input.projectDir,
       source: input.source,
-    })});
-  `;
-  const proc = Bun.spawn([process.execPath, "-e", script], {
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  const [stdout] = await Promise.all([new Response(proc.stdout).text(), proc.exited]);
-  return {
-    exitCode: proc.exitCode ?? 0,
-    output: JSON.parse(stdout),
-  };
+    });
+  } catch (error) {
+    if (!(error instanceof Error) || error.message !== "__REGISTRY_PROCESS_EXIT__") throw error;
+  } finally {
+    process.exit = originalExit;
+    console.log = originalLog;
+  }
+
+  return { exitCode, output: JSON.parse(captured) };
 }
 
 describe("registry add", () => {
@@ -157,6 +163,43 @@ describe("registry add", () => {
     await expect(addPack({ projectDir: dir, source: TRAVERSAL_DEP_PACK })).rejects.toThrow(
       /escapes the project directory/,
     );
+  });
+
+  it("rejects file writes that escape through an existing project symlink", async () => {
+    const dir = await stageProject();
+    const outside = await mkdtemp(join(tmpdir(), "bfs-registry-outside-"));
+    TEMP_ROOTS.push(outside);
+    await fs.ensureDir(join(dir, "apps", "server", "src"));
+    await fs.symlink(outside, join(dir, "apps", "server", "src", "lib"), "dir");
+
+    await expect(addPack({ projectDir: dir, source: SAMPLE_PACK })).rejects.toThrow(
+      /escapes the project directory through a symlink/,
+    );
+    expect(await fs.pathExists(join(outside, "rate-limit.ts"))).toBe(false);
+  });
+
+  it("rejects dependency merges that escape through an existing project symlink", async () => {
+    const dir = await stageProject();
+    const outside = await mkdtemp(join(tmpdir(), "bfs-registry-dep-outside-"));
+    TEMP_ROOTS.push(outside);
+    await fs.writeJson(join(outside, "package.json"), { name: "outside" });
+    await fs.remove(join(dir, "apps", "server"));
+    await fs.symlink(outside, join(dir, "apps", "server"), "dir");
+    const pack = await mkdtemp(join(tmpdir(), "bfs-registry-dep-pack-"));
+    TEMP_ROOTS.push(pack);
+    await fs.writeJson(join(pack, "registry.json"), {
+      name: "@evil/symlink-dependency",
+      version: "1.0.0",
+      description: "Dependency-only symlink escape fixture",
+      files: [],
+      dependencies: { "apps/server": { escaped: "1.0.0" } },
+      env: [],
+    });
+
+    await expect(addPack({ projectDir: dir, source: pack })).rejects.toThrow(
+      /escapes the project directory through a symlink/,
+    );
+    expect(await fs.readJson(join(outside, "package.json"))).toEqual({ name: "outside" });
   });
 
   it("--dry-run writes nothing", async () => {

@@ -1,11 +1,11 @@
-import mdx from "@mdx-js/rollup";
 import { paraglideVitePlugin } from "@inlang/paraglide-js";
+import mdx from "@mdx-js/rollup";
 import rehypeShiki from "@shikijs/rehype";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
-import { fileURLToPath } from "node:url";
 import { nitro } from "nitro/vite";
+import { fileURLToPath } from "node:url";
 import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
@@ -13,7 +13,6 @@ import { defineConfig, type PluginOption } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 import cliPackage from "../cli/package.json";
-
 import { paraglideCompilerOptions } from "./paraglide.config";
 import { remarkExtractToc } from "./src/lib/docs/remark-extract-toc";
 import { remarkNpmTabs } from "./src/lib/docs/remark-npm-tabs";
@@ -23,7 +22,9 @@ const buildDate = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
   year: "numeric",
-}).format(new Date()).toLowerCase();
+})
+  .format(new Date())
+  .toLowerCase();
 
 const ssrMdxLoaderAliases = new Map([
   [
@@ -37,10 +38,6 @@ const ssrMdxLoaderAliases = new Map([
   [
     "@/lib/blog/mdx-loaders",
     fileURLToPath(new URL("./src/lib/blog/mdx-loaders.ssr.ts", import.meta.url)),
-  ],
-  [
-    "virtual:localized-content",
-    fileURLToPath(new URL("./src/lib/i18n/localized-content.ssr.ts", import.meta.url)),
   ],
 ]);
 
@@ -81,13 +78,13 @@ export default defineConfig({
         chunkFileNames(chunkInfo) {
           const id = chunkInfo.facadeModuleId;
           if (id) {
-            const bundle =
-              /virtual:localized-content-mdx-bundle\/(docs|guides|blog)\/([^/]+)/.exec(id);
+            const bundle = /virtual:localized-content-mdx-bundle\/(docs|guides|blog)\/([^/]+)/.exec(
+              id,
+            );
             if (bundle) {
               return `assets/localized-content-${bundle[1]}-${bundle[2]}-[hash].js`;
             }
-            const mdx =
-              /virtual:localized-content-mdx\/(?:docs|guides|blog)\/([^/]+)\//.exec(id);
+            const mdx = /virtual:localized-content-mdx\/(?:docs|guides|blog)\/([^/]+)\//.exec(id);
             if (mdx) {
               return `assets/localized-content-${mdx[1]}-[name]-[hash].js`;
             }
@@ -155,6 +152,11 @@ export default defineConfig({
             },
           },
           "/new": {
+            headers: {
+              "cache-control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
+            },
+          },
+          "/benchmark": {
             headers: {
               "cache-control": "public, max-age=0, s-maxage=300, stale-while-revalidate=3600",
             },
