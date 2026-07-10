@@ -133,7 +133,7 @@ import { getKotlinJavaIncompatibilityReason } from "../types";
 import { hasWebStyling, requiresChatSdkVercelAI } from "../utils/compatibility-rules";
 import { exitCancelled } from "../utils/errors";
 import { getUserPkgManager } from "../utils/get-package-manager";
-import { getAddonsChoice } from "./addons";
+import { getAddonsChoice, getAppPlatformsChoice } from "./addons";
 import { getAIChoice } from "./ai";
 import { getAiDocsChoice } from "./ai-docs";
 import { getAnimationChoice } from "./animation";
@@ -296,6 +296,7 @@ type PromptGroupResults = {
   // TypeScript ecosystem
   frontend: Frontend[];
   astroIntegration: AstroIntegration | undefined;
+  appPlatforms: Addons[];
   uiLibrary: UILibrary;
   shadcnOptions: ShadcnOptions | undefined;
   cssFramework: CSSFramework;
@@ -457,6 +458,7 @@ const CONFIG_PROMPT_ENTRY_KEY_MAP = {
   configSections: true,
   frontend: true,
   astroIntegration: true,
+  appPlatforms: true,
   uiLibrary: true,
   shadcnOptions: true,
   cssFramework: true,
@@ -756,6 +758,10 @@ export async function gatherConfig(
           return getAstroIntegrationChoice(flags.astroIntegration);
         }
         return Promise.resolve(undefined);
+      },
+      appPlatforms: ({ results }) => {
+        if (results.ecosystem !== "typescript") return Promise.resolve([] as Addons[]);
+        return getAppPlatformsChoice(flags.addons, results.frontend);
       },
       uiLibrary: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as UILibrary);
@@ -1508,7 +1514,7 @@ export async function gatherConfig(
     payments: result.payments,
     email: result.email,
     effect: result.effect,
-    addons: result.addons,
+    addons: Array.from(new Set([...(result.appPlatforms ?? []), ...result.addons])),
     examples: result.examples,
     git: result.git,
     packageManager: result.packageManager,

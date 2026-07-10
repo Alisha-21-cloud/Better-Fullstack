@@ -9,6 +9,7 @@ import type {
 
 import {
   ADDONS_VALUES,
+  APP_PLATFORM_ADDON_VALUES,
   API_VALUES,
   AUTH_VALUES,
   AI_VALUES,
@@ -385,14 +386,7 @@ const CODE_QUALITY_ADDONS = new Set([
   "husky",
 ]);
 const DOCUMENTATION_ADDONS = new Set(["starlight", "fumadocs"]);
-const FRONTEND_APP_PLATFORM_ADDONS = new Set([
-  "pwa",
-  "tauri",
-  "electron",
-  "capacitor",
-  "wxt",
-  "opentui",
-]);
+const FRONTEND_APP_PLATFORM_ADDONS = new Set<string>(APP_PLATFORM_ADDON_VALUES);
 const FRONTEND_DATA_FETCHING_ADDONS = new Set([
   "swr",
   "apollo-client",

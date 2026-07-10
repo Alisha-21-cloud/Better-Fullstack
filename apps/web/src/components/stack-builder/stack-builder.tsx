@@ -191,7 +191,7 @@ const GRAPH_FRONTEND_CONFIGS: GraphFrontendConfig[] = [
 const APP_PLATFORM_OPTION_GROUPS = [
   {
     headingKey: "workspacePlatforms",
-    ids: ["turborepo", "nx", "docker-compose", "github-actions", "pwa", "tauri", "wxt", "opentui"],
+    ids: ["turborepo", "nx", "docker-compose", "github-actions"],
   },
   {
     headingKey: "aiAgents",
@@ -347,6 +347,7 @@ const MULTI_FRONTEND_LIBRARY_GROUPS: Array<keyof typeof TECH_OPTIONS> = [
   "cssFramework",
   "uiLibrary",
   "stateManagement",
+  "appShells",
   "appPlatforms",
   "forms",
   "validation",
@@ -936,6 +937,13 @@ function getSelectedCount(category: keyof typeof TECH_OPTIONS, stack: StackState
   }
 
   const catKey = getStackKeyForCategory(category);
+  // appShells and appPlatforms share one state array; count only the ids
+  // that belong to this section.
+  if (category === "appShells" || category === "appPlatforms") {
+    const optionIds = new Set((TECH_OPTIONS[category] ?? []).map((option) => option.id));
+    const values = Array.isArray(stack[catKey]) ? (stack[catKey] as string[]) : [];
+    return values.filter((value) => value !== "none" && optionIds.has(value)).length;
+  }
   return getSelectionCountForValue(category, stack[catKey]);
 }
 

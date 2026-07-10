@@ -47,6 +47,7 @@ describe("configuration scope registry", () => {
       "dbSetup",
     ]);
     expect(CONFIG_SCOPE_REGISTRY.typescript.sections.map((section) => section.id)).toEqual([
+      "app-platforms",
       "ui-styling",
       "state-forms",
       "type-safety",

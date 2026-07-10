@@ -5,6 +5,7 @@ import {
   ANALYTICS_VALUES,
   ANIMATION_VALUES,
   API_VALUES,
+  APP_PLATFORM_ADDON_VALUES,
   ASTRO_INTEGRATION_VALUES,
   AUTH_VALUES,
   CACHING_VALUES,
@@ -176,6 +177,7 @@ export type OptionCategory =
   | "mobileDeepLinking"
   | "codeQuality"
   | "documentation"
+  | "appShells"
   | "appPlatforms"
   | "packageManager"
   | "workspaceShape"
@@ -285,6 +287,7 @@ export type OptionCategoryEcosystem =
 export const TYPESCRIPT_CATEGORY_ORDER = [
   "webFrontend",
   "astroIntegration",
+  "appShells",
   "cssFramework",
   "uiLibrary",
   "shadcnBase",
@@ -523,6 +526,8 @@ export function getCategoryOrderForEcosystem(
 export function getCategoryDisplayName(categoryKey: string): string {
   const categoryNames: Record<string, string> = {
     i18n: "Internationalization (i18n)",
+    appShells: "App Platforms",
+    appPlatforms: "Addons",
     mobileNavigation: "Mobile Navigation",
     mobileUI: "Mobile UI",
     mobileStorage: "Mobile Storage",
@@ -691,13 +696,11 @@ const CODE_QUALITY_VALUES = [
 
 const DOCUMENTATION_VALUES = ["starlight", "fumadocs"] as const satisfies readonly string[];
 
+const APP_SHELL_VALUES = APP_PLATFORM_ADDON_VALUES;
+
 const APP_PLATFORM_VALUES = [
   "turborepo",
   "nx",
-  "pwa",
-  "tauri",
-  "wxt",
-  "opentui",
   "mcp",
   "skills",
   "msw",
@@ -717,8 +720,6 @@ const APP_PLATFORM_VALUES = [
   "graphql-codegen",
   "openapi-typescript",
   "apollo-client",
-  "electron",
-  "capacitor",
 ] as const satisfies readonly string[];
 
 const EXAMPLE_VALUES = ["ai", "chat-sdk"] as const satisfies readonly string[];
@@ -729,6 +730,7 @@ const MULTI_SELECT_CATEGORIES = new Set<OptionCategory>([
   "nativeFrontend",
   "codeQuality",
   "documentation",
+  "appShells",
   "appPlatforms",
   "examples",
   "aiDocs",
@@ -790,6 +792,7 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   mobileDeepLinking: MOBILE_DEEP_LINKING_VALUES,
   codeQuality: CODE_QUALITY_VALUES,
   documentation: DOCUMENTATION_VALUES,
+  appShells: APP_SHELL_VALUES,
   appPlatforms: APP_PLATFORM_VALUES,
   packageManager: PACKAGE_MANAGER_VALUES,
   workspaceShape: WORKSPACE_SHAPE_VALUES,
@@ -1125,10 +1128,15 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     starlight: "Starlight",
     fumadocs: "Fumadocs",
   },
-  appPlatforms: {
+  appShells: {
     pwa: "PWA",
+    tauri: "Tauri",
+    electron: "Electron",
+    capacitor: "Capacitor",
     wxt: "WXT",
     opentui: "OpenTUI",
+  },
+  appPlatforms: {
     mcp: "MCP",
     msw: "MSW",
     swr: "SWR",
@@ -1145,8 +1153,6 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     "graphql-codegen": "GraphQL Code Generator",
     "openapi-typescript": "openapi-typescript",
     "apollo-client": "Apollo Client",
-    electron: "Electron",
-    capacitor: "Capacitor",
   },
   versionChannel: {
     stable: "Stable",
@@ -1741,6 +1747,7 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   mobileDeepLinking: buildCategoryMetadata("mobileDeepLinking"),
   codeQuality: buildCategoryMetadata("codeQuality"),
   documentation: buildCategoryMetadata("documentation"),
+  appShells: buildCategoryMetadata("appShells"),
   appPlatforms: buildCategoryMetadata("appPlatforms"),
   packageManager: buildCategoryMetadata("packageManager"),
   workspaceShape: buildCategoryMetadata("workspaceShape"),

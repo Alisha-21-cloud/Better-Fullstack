@@ -102,7 +102,7 @@ export const WEB_FRONTEND_PROMPT_OPTIONS: PromptOption<Frontend>[] = [
   },
 ];
 
-const NATIVE_FRONTEND_PROMPT_OPTIONS: PromptOption<Frontend>[] = [
+export const NATIVE_FRONTEND_PROMPT_OPTIONS: PromptOption<Frontend>[] = [
   {
     value: "native-bare",
     label: "StyleSheet",

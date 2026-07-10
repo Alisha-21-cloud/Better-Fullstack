@@ -31,6 +31,7 @@ const BUILDER_CATEGORY_TO_CLI_OPTION_KEY: Partial<
   ai: "ai",
   codeQuality: "addons",
   documentation: "addons",
+  appShells: "addons",
   appPlatforms: "addons",
 };
 
