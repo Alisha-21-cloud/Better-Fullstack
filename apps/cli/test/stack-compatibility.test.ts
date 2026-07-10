@@ -61,6 +61,25 @@ describe("resolveCompatibilityAdjustments", () => {
     expect(changes.api).toBe("orpc");
   });
 
+  it("treats an omitted ecosystem as TypeScript (the CLI default)", () => {
+    const { changes, adjustments } = resolveCompatibilityAdjustments(
+      { frontend: ["svelte"], api: "trpc" },
+      { onlyDefinedKeys: true },
+    );
+
+    expect(changes).toEqual({ api: "orpc" });
+    expect(adjustments[0]).toStartWith("api: trpc → orpc — ");
+  });
+
+  it("stays silent for rust-only flags without an ecosystem", () => {
+    const result = resolveCompatibilityAdjustments(
+      { rustWebFramework: "axum", rustOrm: "sqlx" },
+      { onlyDefinedKeys: true },
+    );
+
+    expect(result).toEqual({ changes: {}, adjustments: [] });
+  });
+
   it("skips non-TypeScript ecosystems", () => {
     const result = resolveCompatibilityAdjustments({
       ecosystem: "rust",

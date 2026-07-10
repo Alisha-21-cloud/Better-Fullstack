@@ -294,7 +294,11 @@ export function resolveCompatibilityAdjustments(
   config: Partial<ProjectConfig>,
   options: { onlyDefinedKeys?: boolean } = {},
 ): CompatibilityAdjustmentResult {
-  if (config.ecosystem !== "typescript" && config.ecosystem !== "react-native") {
+  // The CLI defaults to the TypeScript ecosystem when --ecosystem is omitted,
+  // so an undefined ecosystem must not skip the pass (it matches the fallback
+  // in buildCompatibilityInputFromConfig / getCompatibilityEcosystem).
+  const ecosystem = config.ecosystem ?? "typescript";
+  if (ecosystem !== "typescript" && ecosystem !== "react-native") {
     return EMPTY_ADJUSTMENT_RESULT;
   }
   if (config.stackParts?.length) {
