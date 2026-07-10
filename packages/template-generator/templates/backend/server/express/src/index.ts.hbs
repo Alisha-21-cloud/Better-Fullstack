@@ -41,6 +41,19 @@ import session from "express-session";
 
 const app = express();
 
+app.use(
+	cors({
+		origin: env.CORS_ORIGIN,
+		methods: ["GET", "POST", "OPTIONS"],
+{{#if (or (isBetterAuth auth) (eq auth "passport"))}}
+		credentials: true,
+{{/if}}
+{{#if (isBetterAuth auth)}}
+		allowedHeaders: ["Content-Type", "Authorization"],
+{{/if}}
+	})
+);
+
 {{#if (eq auth "passport")}}
 app.use(
   session({
@@ -65,17 +78,6 @@ app.post("/api/auth/logout", (req, res, next) => {
   });
 });
 {{/if}}
-
-app.use(
-	cors({
-		origin: env.CORS_ORIGIN,
-		methods: ["GET", "POST", "OPTIONS"],
-{{#if (isBetterAuth auth)}}
-		allowedHeaders: ["Content-Type", "Authorization"],
-		credentials: true,
-{{/if}}
-	})
-);
 
 {{#if (isBetterAuth auth)}}
 app.all("/api/auth{/*path}", toNodeHandler(auth));

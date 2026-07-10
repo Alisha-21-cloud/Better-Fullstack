@@ -97,6 +97,7 @@ function hasGeneratedJavascriptTestScript(config: ProjectConfig): boolean {
   return (
     config.testing === "vitest" ||
     config.testing === "jest" ||
+    config.testing === "mocha" ||
     config.testing === "vitest-playwright" ||
     config.mobileTesting === "react-native-testing-library" ||
     config.mobileTesting === "maestro-react-native-testing-library"

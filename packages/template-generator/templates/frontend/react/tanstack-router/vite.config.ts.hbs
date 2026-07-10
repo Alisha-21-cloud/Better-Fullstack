@@ -7,6 +7,9 @@ import path from "node:path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+{{#if (includes addons "electron")}}
+  base: "./",
+{{/if}}
   plugins: [
     {{#if (eq cssFramework "tailwind")}}
     tailwindcss(),

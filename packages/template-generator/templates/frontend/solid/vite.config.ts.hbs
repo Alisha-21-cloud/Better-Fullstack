@@ -7,6 +7,9 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 
 export default defineConfig({
+{{#if (includes addons "electron")}}
+  base: "./",
+{{/if}}
   plugins: [
     tanstackRouter({ target: "solid", autoCodeSplitting: true }),
     solidPlugin(),

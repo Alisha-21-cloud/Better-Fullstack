@@ -3731,6 +3731,26 @@ const WEB_FRAMEWORKS: readonly Frontend[] = [
   "none",
 ] as const;
 
+const CODEGEN_COMPATIBLE_FRONTENDS: readonly Frontend[] = [
+  "tanstack-router",
+  "react-router",
+  "react-vite",
+  "vanilla-vite",
+  "vue",
+  "tanstack-start",
+  "next",
+  "vinext",
+  "nuxt",
+  "svelte",
+  "solid",
+  "solid-start",
+  "astro",
+  "qwik",
+  "angular",
+  "redwood",
+  "fresh",
+];
+
 const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
   pwa: [
     "tanstack-router",
@@ -3813,8 +3833,8 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
     "qwik",
     "angular",
   ],
-  "graphql-codegen": [],
-  "openapi-typescript": [],
+  "graphql-codegen": CODEGEN_COMPATIBLE_FRONTENDS,
+  "openapi-typescript": CODEGEN_COMPATIBLE_FRONTENDS,
   "apollo-client": [
     "tanstack-router",
     "react-router",
@@ -4005,8 +4025,29 @@ export function getApiFrontendCompatibilityIssue(
   const includesRedwood = frontends.includes("redwood");
   const includesFresh = frontends.includes("fresh");
   const includesSolidStart = frontends.includes("solid-start");
+  const includesStandaloneVite =
+    frontends.includes("vanilla-vite") || frontends.includes("vue");
   const isReactOnlyApi =
     api === "trpc" || api === "ts-rest" || api === "garph" || api === "apollo-server";
+
+  if (
+    includesStandaloneVite &&
+    (api === "trpc" || api === "orpc" || api === "ts-rest" || api === "garph")
+  ) {
+    const incompatibleFrontend = frontends.includes("vanilla-vite") ? "vanilla-vite" : "vue";
+    return {
+      code: "STANDALONE_VITE_API_UNSUPPORTED",
+      message: "Standalone Vite frontends support only GraphQL and OpenAPI API integrations.",
+      category: "api",
+      optionId: api,
+      provided: { api, frontend: incompatibleFrontend },
+      suggestions: [
+        "Use --api graphql-yoga, --api apollo-server, or --api openapi",
+        "Choose a React-based frontend for tRPC, oRPC, ts-rest, or garph",
+        "Use --api none",
+      ],
+    };
+  }
 
   if ((includesNuxt || includesSvelte || includesSolid || includesSolidStart) && isReactOnlyApi) {
     const incompatibleFrontend = includesNuxt

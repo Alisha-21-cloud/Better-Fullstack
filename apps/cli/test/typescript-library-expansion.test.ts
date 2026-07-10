@@ -44,6 +44,7 @@ describe("TypeScript library expansion", () => {
           "graphql-codegen",
           "apollo-client",
           "electron",
+          "github-actions",
         ],
         cssFramework: "styled-components",
         uiLibrary: "none",
@@ -95,6 +96,7 @@ describe("TypeScript library expansion", () => {
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/apollo-client.ts", "ApolloClient");
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/apollo-client.ts", "env.VITE_SERVER_URL");
     await expectGeneratedFile(result.projectDir, "apps/web/electron/main.mjs", "BrowserWindow");
+    await expectGeneratedFile(result.projectDir, "apps/web/vite.config.ts", 'base: "./"');
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/styled.tsx", "styled.section");
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/google-analytics.ts", "gtag");
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/contentful.ts", "createClient");
@@ -105,6 +107,10 @@ describe("TypeScript library expansion", () => {
     await expectGeneratedFile(result.projectDir, "apps/server/src/lib/paypal-server.ts", "new Client");
     await expectGeneratedFile(result.projectDir, "packages/auth/src/index.ts", "GitHubStrategy");
     await expectGeneratedFile(result.projectDir, "packages/auth/tsconfig.json", "tsconfig.base.json");
+    const serverEntry = await readGenerated(result.projectDir, "apps/server/src/index.ts");
+    expect(serverEntry.indexOf("cors({")).toBeLessThan(serverEntry.indexOf("session({"));
+    expect(serverEntry).toContain("credentials: true");
+    await expectGeneratedFile(result.projectDir, ".github/workflows/ci.yml", "- name: Test");
     expect(await readGenerated(result.projectDir, "apps/web/src/router.tsx")).not.toContain(
       'from "./routes/login"',
     );
@@ -137,6 +143,7 @@ describe("TypeScript library expansion", () => {
     expect(webPackage).toContain("@capacitor/core");
     expect(webPackage).toContain("codegen:openapi");
     expect(webPackage).toContain("mobile:sync");
+    expect(webPackage).toContain('"mobile:ios": "cap add ios || true && cap open ios"');
     await expectGeneratedFile(result.projectDir, "apps/web/src/main.ts", "querySelector");
     await expectGeneratedFile(result.projectDir, "apps/web/capacitor.config.ts", "CapacitorConfig");
   });
@@ -220,6 +227,7 @@ describe("TypeScript library expansion", () => {
         api: "openapi",
         addons: ["apollo-client"],
       },
+      { frontend: ["vue"], backend: "express", api: "orpc" },
     ] as const;
 
     for (const config of invalidConfigs) {

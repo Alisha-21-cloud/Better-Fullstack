@@ -221,8 +221,8 @@ export function processAddonsDeps(vfs: VirtualFileSystem, config: ProjectConfig)
       webPkg.scripts = {
         ...webPkg.scripts,
         "mobile:sync": "cap sync",
-        "mobile:ios": "cap open ios",
-        "mobile:android": "cap open android",
+        "mobile:ios": "cap add ios || true && cap open ios",
+        "mobile:android": "cap add android || true && cap open android",
       };
       vfs.writeJson(webPkgPath, webPkg);
     }

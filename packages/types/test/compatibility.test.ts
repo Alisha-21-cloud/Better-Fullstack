@@ -40,6 +40,17 @@ describe("compatibility issue helpers", () => {
     expect(getApiFrontendCompatibilityIssue("orpc", ["svelte"])).toBeUndefined();
   });
 
+  it("rejects API options without a standalone Vite web integration", () => {
+    const issue = getApiFrontendCompatibilityIssue("orpc", ["vue"]);
+
+    expect(issue).toMatchObject({
+      code: "STANDALONE_VITE_API_UNSUPPORTED",
+      category: "api",
+      optionId: "orpc",
+      provided: { api: "orpc", frontend: "vue" },
+    });
+  });
+
   it("treats Apollo Server as a React-only API option", () => {
     const issue = getApiFrontendCompatibilityIssue("apollo-server", ["svelte"]);
 
