@@ -31,6 +31,7 @@ import { handleDirectoryConflict, setupProjectDirectory } from "../../utils/proj
 import { addToHistory } from "../../utils/project-history";
 import { canPromptInteractively } from "../../utils/prompt-environment";
 import { renderTitle } from "../../utils/render-title";
+import { resolveCompatibilityAdjustments } from "../../utils/stack-compatibility";
 import { getTemplateConfig, getTemplateDescription } from "../../utils/templates";
 import {
   getProvidedFlags,
@@ -187,6 +188,8 @@ function getYesBaseConfig(flagConfig: Partial<ProjectConfig>): ProjectConfig {
     frontend: ["native-bare"],
     addons: [],
     examples: [],
+    database: "none",
+    orm: "none",
     auth: "none",
     payments: "none",
     email: "none",
@@ -223,6 +226,14 @@ function getYesBaseConfig(flagConfig: Partial<ProjectConfig>): ProjectConfig {
     mobileOTA: "none",
     mobileDeepLinking: "none",
   };
+}
+
+function reportCompatibilityAdjustments(adjustments: string[]) {
+  if (isSilent() || adjustments.length === 0) return;
+  log.warn(pc.yellow("Adjusted incompatible options (use --yolo to bypass):"));
+  for (const adjustment of adjustments) {
+    log.message(pc.yellow(`  ${adjustment}`));
+  }
 }
 
 function shouldPromptForVersionChannel(
@@ -593,6 +604,19 @@ export async function createProjectHandler(
           versionChannel,
         };
 
+        // Auto-adjust incompatible combos with the same engine the web builder
+        // and MCP flows use, explaining every change instead of silently
+        // normalizing or scaffolding a broken project. Programmatic (silent)
+        // callers keep strict validation errors — nobody would see the summary.
+        if (!cliInput.yolo && !isSilent()) {
+          const { changes, adjustments } = resolveCompatibilityAdjustments(config);
+          if (adjustments.length > 0) {
+            config = { ...config, ...changes };
+            cliInput = { ...cliInput, ...changes };
+            reportCompatibilityAdjustments(adjustments);
+          }
+        }
+
         validateConfigCompatibility(config, providedFlags, cliInput);
 
         const yesPreflight = validatePreflightConfig(config);
@@ -605,6 +629,23 @@ export async function createProjectHandler(
           log.message(displayConfig(config));
         }
       } else {
+        // Auto-adjust incompatible flag combos before strict validation so the
+        // non-interactive flag path explains adjustments (like the web builder
+        // and MCP flows) instead of hard-failing or silently coercing values.
+        // Only flags the user actually provided are adjusted; everything else
+        // is still resolved by prompts/defaults below. Programmatic (silent)
+        // callers keep strict validation errors — nobody would see the summary.
+        if (!cliInput.yolo && !isSilent()) {
+          const { changes, adjustments } = resolveCompatibilityAdjustments(
+            processProvidedFlagsWithoutValidation(cliInput, finalBaseName),
+            { onlyDefinedKeys: true },
+          );
+          if (adjustments.length > 0) {
+            cliInput = { ...cliInput, ...changes };
+            reportCompatibilityAdjustments(adjustments);
+          }
+        }
+
         const flagConfig = processAndValidateFlags(cliInput, providedFlags, finalBaseName);
         const { projectName: _projectNameFromFlags, ...otherFlags } = flagConfig;
 
