@@ -64,17 +64,22 @@ export function resolveRealtimePrompt(
     };
   }
 
+  const options =
+    context.backend === "express"
+      ? REALTIME_PROMPT_OPTIONS
+      : REALTIME_PROMPT_OPTIONS.filter((option) => option.value !== "ws");
+
   return context.realtime !== undefined
     ? {
         shouldPrompt: false,
         mode: "single",
-        options: REALTIME_PROMPT_OPTIONS,
+        options,
         autoValue: context.realtime,
       }
     : {
         shouldPrompt: true,
         mode: "single",
-        options: REALTIME_PROMPT_OPTIONS,
+        options,
         initialValue: "none",
       };
 }

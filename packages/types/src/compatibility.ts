@@ -3759,8 +3759,8 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
     "redwood",
     "fresh",
   ],
-  electron: ["tanstack-router", "react-router", "react-vite", "vanilla-vite", "vue", "svelte", "solid"],
-  capacitor: ["tanstack-router", "react-router", "react-vite", "vanilla-vite", "vue", "svelte", "solid"],
+  electron: ["tanstack-router", "react-router", "react-vite", "vanilla-vite", "vue", "solid"],
+  capacitor: ["tanstack-router", "react-router", "react-vite", "vanilla-vite", "vue", "solid"],
   biome: [],
   eslint: [],
   prettier: [],
@@ -4235,13 +4235,29 @@ export function getCompatibleUILibraries(
   });
 }
 
-export function getCompatibleCSSFrameworks(uiLibrary: UILibrary | undefined): CSSFramework[] {
-  if (!uiLibrary || uiLibrary === "none") {
-    return ["tailwind", "scss", "less", "postcss-only", "styled-components", "none"];
-  }
+export function getCompatibleCSSFrameworks(
+  uiLibrary: UILibrary | undefined,
+  frontends: Frontend[] = [],
+): CSSFramework[] {
+  const frameworks =
+    !uiLibrary || uiLibrary === "none"
+      ? (["tailwind", "scss", "less", "postcss-only", "styled-components", "none"] as CSSFramework[])
+      : ([...UI_LIBRARY_COMPATIBILITY[uiLibrary].cssFrameworks] as CSSFramework[]);
 
-  const compatibility = UI_LIBRARY_COMPATIBILITY[uiLibrary];
-  return compatibility.cssFrameworks as CSSFramework[];
+  if (frontends.length === 0) return frameworks;
+
+  const reactFrontends: Frontend[] = [
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "vinext",
+    "redwood",
+  ];
+  return frontends.some((frontend) => reactFrontends.includes(frontend))
+    ? frameworks
+    : frameworks.filter((framework) => framework !== "styled-components");
 }
 
 export function hasWebStyling(frontends: Frontend[] = []): boolean {

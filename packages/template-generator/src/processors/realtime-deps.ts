@@ -21,6 +21,7 @@ export function processRealtimeDeps(vfs: VirtualFileSystem, config: ProjectConfi
 
   // Skip if not selected or set to "none"
   if (!realtime || realtime === "none") return;
+  if (realtime === "ws" && backend !== "express") return;
 
   // Skip if no backend to support real-time (convex has its own real-time)
   if (backend === "none" || backend === "convex") return;

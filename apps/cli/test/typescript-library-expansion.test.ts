@@ -2,6 +2,12 @@ import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+import { resolveAIPrompt } from "../src/prompts/ai";
+import { resolveCSSFrameworkPrompt } from "../src/prompts/css-framework";
+import { resolvePaymentsPrompt } from "../src/prompts/payments";
+import { resolveRealtimePrompt } from "../src/prompts/realtime";
+import { runWithContext } from "../src/utils/context";
+import { validateConfigForProgrammaticUse } from "../src/utils/config-validation";
 import { createCustomConfig, expectSuccess, runTRPCTest } from "./test-utils";
 
 async function readGenerated(projectDir: string | undefined, path: string): Promise<string> {
@@ -71,6 +77,8 @@ describe("TypeScript library expansion", () => {
       expect(webPackage).toContain(dependency);
     }
     expect(webPackage).toContain("mocha --import=tsx");
+    expect(webPackage).toContain("concurrently -k");
+    expect(webPackage).toContain("ELECTRON_RENDERER_URL=http://localhost:5173");
     for (const dependency of ["openai", "ws", "@paypal/paypal-server-sdk", "mocha"]) {
       expect(serverPackage).toContain(dependency);
     }
@@ -85,14 +93,16 @@ describe("TypeScript library expansion", () => {
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/firebase.ts", "initializeApp");
     await expectGeneratedFile(result.projectDir, "apps/web/codegen.ts", 'preset: "client"');
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/apollo-client.ts", "ApolloClient");
+    await expectGeneratedFile(result.projectDir, "apps/web/src/lib/apollo-client.ts", "env.VITE_SERVER_URL");
     await expectGeneratedFile(result.projectDir, "apps/web/electron/main.mjs", "BrowserWindow");
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/styled.tsx", "styled.section");
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/google-analytics.ts", "gtag");
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/contentful.ts", "createClient");
-    await expectGeneratedFile(result.projectDir, "apps/web/src/lib/paypal.ts", "loadScript");
+    await expectGeneratedFile(result.projectDir, "apps/web/src/lib/paypal-client.ts", "loadScript");
     await expectGeneratedFile(result.projectDir, "apps/server/src/lib/openai.ts", "new OpenAI");
     await expectGeneratedFile(result.projectDir, "apps/server/src/lib/websocket.ts", "WebSocketServer");
-    await expectGeneratedFile(result.projectDir, "apps/server/src/lib/paypal.ts", "new Client");
+    await expectGeneratedFile(result.projectDir, "apps/web/src/lib/websocket.ts", "env.VITE_SERVER_URL");
+    await expectGeneratedFile(result.projectDir, "apps/server/src/lib/paypal-server.ts", "new Client");
     await expectGeneratedFile(result.projectDir, "packages/auth/src/index.ts", "GitHubStrategy");
     await expectGeneratedFile(result.projectDir, "packages/auth/tsconfig.json", "tsconfig.base.json");
     expect(await readGenerated(result.projectDir, "apps/web/src/router.tsx")).not.toContain(
@@ -154,5 +164,87 @@ describe("TypeScript library expansion", () => {
     expect(await readGenerated(result.projectDir, "apps/server/package.json")).toContain(
       "@anthropic-ai/sdk",
     );
+  });
+
+  test("keeps self-hosted GraphQL and PayPal helpers on distinct, same-origin paths", async () => {
+    const result = await runTRPCTest(
+      createCustomConfig({
+        projectName: "typescript-library-expansion-self",
+        frontend: ["next"],
+        backend: "self",
+        runtime: "none",
+        api: "graphql-yoga",
+        database: "sqlite",
+        orm: "drizzle",
+        payments: "paypal",
+        addons: ["graphql-codegen", "apollo-client"],
+      }),
+    );
+
+    expectSuccess(result);
+    const webPackage = await readGenerated(result.projectDir, "apps/web/package.json");
+    expect(webPackage).toContain("@paypal/paypal-js");
+    expect(webPackage).toContain("@paypal/paypal-server-sdk");
+    await expectGeneratedFile(result.projectDir, "apps/web/codegen.ts", "api/graphql");
+    await expectGeneratedFile(result.projectDir, "apps/web/src/lib/apollo-client.ts", "/api/graphql");
+    await expectGeneratedFile(result.projectDir, "apps/web/src/lib/paypal-client.ts", "loadScript");
+    await expectGeneratedFile(result.projectDir, "apps/web/src/lib/paypal-server.ts", "new Client");
+  });
+
+  test("keeps prompt filtering and hard validation aligned for constrained libraries", () => {
+    expect(resolveAIPrompt({ backend: "convex" }).options.map((option) => option.value)).not.toContain(
+      "openai-sdk",
+    );
+    expect(
+      resolvePaymentsPrompt({ backend: "convex", frontends: ["react-vite"] }).options.map(
+        (option) => option.value,
+      ),
+    ).not.toContain("paypal");
+    expect(resolveRealtimePrompt({ backend: "hono" }).options.map((option) => option.value)).not.toContain(
+      "ws",
+    );
+    expect(
+      resolveCSSFrameworkPrompt({ uiLibrary: "none", frontends: ["vue"] }).options.map(
+        (option) => option.value,
+      ),
+    ).not.toContain("styled-components");
+
+    const invalidConfigs = [
+      { frontend: ["vue"], backend: "express", cssFramework: "styled-components" },
+      { frontend: ["react-vite"], backend: "hono", realtime: "ws" },
+      { frontend: ["react-vite"], backend: "convex", ai: "openai-sdk" },
+      { frontend: ["react-vite"], backend: "convex", payments: "paypal" },
+      {
+        frontend: ["react-vite"],
+        backend: "express",
+        api: "openapi",
+        addons: ["apollo-client"],
+      },
+    ] as const;
+
+    for (const config of invalidConfigs) {
+      expect(() =>
+        runWithContext({ silent: true }, () => validateConfigForProgrammaticUse(config)),
+      ).toThrow();
+    }
+  });
+
+  test("adds the Contentful dependency whenever its web template is emitted", async () => {
+    const result = await runTRPCTest(
+      createCustomConfig({
+        projectName: "typescript-library-expansion-contentful",
+        frontend: ["angular"],
+        backend: "express",
+        runtime: "node",
+        api: "none",
+        database: "none",
+        orm: "none",
+        cms: "contentful",
+      }),
+    );
+
+    expectSuccess(result);
+    expect(await readGenerated(result.projectDir, "apps/web/package.json")).toContain("contentful");
+    await expectGeneratedFile(result.projectDir, "apps/web/src/lib/contentful.ts", "createClient");
   });
 });

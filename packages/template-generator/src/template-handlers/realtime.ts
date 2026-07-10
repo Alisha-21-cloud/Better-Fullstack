@@ -10,7 +10,7 @@ export async function processRealtimeTemplates(
   config: ProjectConfig,
 ): Promise<void> {
   if (config.realtime !== "ws") return;
-  if (["none", "convex", "self"].includes(config.backend)) return;
+  if (config.backend !== "express") return;
 
   processTemplatesFromPrefix(vfs, templates, "realtime/ws/server/base", "apps/server", config);
 

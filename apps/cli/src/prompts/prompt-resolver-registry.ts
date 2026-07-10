@@ -220,8 +220,9 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   },
   ai: {
     schemaValues: AI_VALUES,
-    resolve: ({ value }: { value?: string } = {}) => resolveAIPrompt(value as any),
-    coverageContexts: [{}],
+    resolve: ({ value, backend }: { value?: string; backend?: string } = {}) =>
+      resolveAIPrompt({ ai: value as any, backend: backend as any }),
+    coverageContexts: [{ backend: "hono" }, { backend: "none" }],
   },
   animation: {
     schemaValues: ANIMATION_VALUES,
@@ -263,7 +264,11 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   cssFramework: {
     schemaValues: CSS_FRAMEWORK_VALUES,
     resolve: resolveCSSFrameworkPrompt,
-    coverageContexts: [{}, { uiLibrary: "none" }, { uiLibrary: "radix-ui" }],
+    coverageContexts: [
+      { frontends: ["react-vite"] },
+      { uiLibrary: "none", frontends: ["vue"] },
+      { uiLibrary: "radix-ui", frontends: ["react-vite"] },
+    ],
   },
   database: {
     schemaValues: DATABASE_VALUES,
@@ -330,7 +335,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   realtime: {
     schemaValues: REALTIME_VALUES,
     resolve: resolveRealtimePrompt,
-    coverageContexts: [{ backend: "hono" }, { backend: "none" }],
+    coverageContexts: [{ backend: "express" }, { backend: "hono" }, { backend: "none" }],
   },
   runtime: {
     schemaValues: RUNTIME_VALUES,

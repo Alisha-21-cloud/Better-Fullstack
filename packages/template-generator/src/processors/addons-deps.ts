@@ -1,4 +1,4 @@
-import type { Frontend, ProjectConfig } from "@better-fullstack/types";
+import { getLocalWebDevPort, type Frontend, type ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
 
@@ -192,14 +192,17 @@ export function processAddonsDeps(vfs: VirtualFileSystem, config: ProjectConfig)
     addPackageDependency({
       vfs,
       packagePath: webPkgPath,
-      devDependencies: ["electron", "electron-builder"],
+      devDependencies: ["electron", "electron-builder", "concurrently", "cross-env", "wait-on"],
     });
     const webPkg = vfs.readJson<PackageJson>(webPkgPath);
     if (webPkg) {
       webPkg.main = "electron/main.mjs";
+      const rendererUrl = `http://localhost:${getLocalWebDevPort(config.frontend)}`;
+      const devCommand = `${config.packageManager} run dev`;
       webPkg.scripts = {
         ...webPkg.scripts,
-        "desktop:dev": "electron electron/main.mjs",
+        "desktop:dev":
+          `concurrently -k "${devCommand}" "wait-on ${rendererUrl} && cross-env ELECTRON_RENDERER_URL=${rendererUrl} electron electron/main.mjs"`,
         "desktop:build": "electron-builder",
       };
       vfs.writeJson(webPkgPath, webPkg);

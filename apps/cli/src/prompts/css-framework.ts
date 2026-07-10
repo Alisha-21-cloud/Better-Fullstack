@@ -1,4 +1,4 @@
-import type { CSSFramework, UILibrary } from "../types";
+import type { CSSFramework, Frontend, UILibrary } from "../types";
 
 import { getCompatibleCSSFrameworks } from "../utils/compatibility-rules";
 import { exitCancelled } from "../utils/errors";
@@ -35,12 +35,13 @@ const CSS_FRAMEWORK_OPTIONS: Record<CSSFramework, { label: string; hint: string 
 type CSSFrameworkPromptContext = {
   cssFramework?: CSSFramework;
   uiLibrary?: UILibrary;
+  frontends?: Frontend[];
 };
 
 export function resolveCSSFrameworkPrompt(
   context: CSSFrameworkPromptContext = {},
 ): PromptSingleResolution<CSSFramework> {
-  const compatibleFrameworks = getCompatibleCSSFrameworks(context.uiLibrary);
+  const compatibleFrameworks = getCompatibleCSSFrameworks(context.uiLibrary, context.frontends);
 
   if (context.cssFramework !== undefined) {
     return {
@@ -51,9 +52,7 @@ export function resolveCSSFrameworkPrompt(
         label: CSS_FRAMEWORK_OPTIONS[fw].label,
         hint: CSS_FRAMEWORK_OPTIONS[fw].hint,
       })),
-      autoValue: compatibleFrameworks.includes(context.cssFramework)
-        ? context.cssFramework
-        : compatibleFrameworks[0],
+      autoValue: context.cssFramework,
     };
   }
 
@@ -74,8 +73,9 @@ export function resolveCSSFrameworkPrompt(
 export async function getCSSFrameworkChoice(
   cssFramework?: CSSFramework,
   uiLibrary?: UILibrary,
+  frontends?: Frontend[],
 ): Promise<CSSFramework> {
-  const resolution = resolveCSSFrameworkPrompt({ cssFramework, uiLibrary });
+  const resolution = resolveCSSFrameworkPrompt({ cssFramework, uiLibrary, frontends });
   if (!resolution.shouldPrompt) {
     return resolution.autoValue ?? "none";
   }

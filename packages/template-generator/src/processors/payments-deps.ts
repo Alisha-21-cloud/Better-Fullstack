@@ -174,10 +174,11 @@ export function processPaymentsDeps(vfs: VirtualFileSystem, config: ProjectConfi
   }
 
   if (payments === "paypal") {
-    if (vfs.exists(serverPath)) {
+    const paypalServerPath = backend === "self" ? webPath : serverPath;
+    if (vfs.exists(paypalServerPath)) {
       addPackageDependency({
         vfs,
-        packagePath: serverPath,
+        packagePath: paypalServerPath,
         dependencies: ["@paypal/paypal-server-sdk"],
       });
     }

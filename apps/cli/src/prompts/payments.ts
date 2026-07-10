@@ -94,11 +94,6 @@ export function resolvePaymentsPrompt(
       hint: "Complete payments infrastructure for SaaS.",
     },
     {
-      value: "paypal" as Payments,
-      label: "PayPal",
-      hint: "PayPal JavaScript SDK buttons with server-side Orders API helpers.",
-    },
-    {
       value: "dodo" as Payments,
       label: "Dodo Payments",
       hint: "Simple payment infrastructure for developers.",
@@ -124,6 +119,15 @@ export function resolvePaymentsPrompt(
       hint: "No payments integration",
     },
   );
+
+  if (context.backend !== "convex") {
+    const insertAt = options.findIndex((option) => option.value === "dodo");
+    options.splice(insertAt, 0, {
+      value: "paypal" as Payments,
+      label: "PayPal",
+      hint: "PayPal JavaScript SDK buttons with server-side Orders API helpers.",
+    });
+  }
 
   if (isRevenueCatCompatible) {
     options.push({

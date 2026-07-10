@@ -2,6 +2,7 @@ import { DEFAULT_CONFIG } from "../constants";
 import {
   type Addons,
   AddonsSchema,
+  type API,
   type Auth,
   type Backend,
   type Frontend,
@@ -226,8 +227,20 @@ function validateAddonCompatibilityForPrompt(
   auth?: Auth,
   backend?: Backend,
   runtime?: Runtime,
+  api?: API,
 ) {
-  return validateAddonCompatibility(addon, frontends, auth, backend, runtime);
+  return validateAddonCompatibility(
+    addon,
+    frontends,
+    auth,
+    backend,
+    runtime,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    api,
+  );
 }
 
 function getCompatibleAddonsForPrompt(
@@ -237,8 +250,9 @@ function getCompatibleAddonsForPrompt(
   auth?: Auth,
   backend?: Backend,
   runtime?: Runtime,
+  api?: API,
 ) {
-  return getCompatibleAddons(allAddons, frontends, existingAddons, auth, backend, runtime);
+  return getCompatibleAddons(allAddons, frontends, existingAddons, auth, backend, runtime, api);
 }
 
 export async function getAddonsChoice(
@@ -247,6 +261,7 @@ export async function getAddonsChoice(
   auth?: Auth,
   backend?: Backend,
   runtime?: Runtime,
+  api?: API,
 ) {
   if (addons !== undefined) return addons;
 
@@ -262,6 +277,7 @@ export async function getAddonsChoice(
       auth,
       backend,
       runtime,
+      api,
     );
     if (!isCompatible) continue;
 
@@ -309,6 +325,7 @@ export async function getAddonsToAdd(
   auth?: Auth,
   backend?: Backend,
   runtime?: Runtime,
+  api?: API,
 ) {
   const groupedOptions: Record<string, AddonOption[]> = createGroupedAddonOptions();
 
@@ -321,6 +338,7 @@ export async function getAddonsToAdd(
     auth,
     backend,
     runtime,
+    api,
   );
 
   for (const addon of compatibleAddons) {
