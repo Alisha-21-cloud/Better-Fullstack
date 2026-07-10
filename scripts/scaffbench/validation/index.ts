@@ -4,6 +4,7 @@ import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promi
 import path from "node:path";
 import { bfSpec, HARNESS_VERSION, VALIDATION_CACHE_VERSION, VALIDATION_TIMEOUT_MS } from "../constants";
 import { runCommand, tail } from "../agents/command";
+import { typecheckGate } from "../scoring";
 import { parseJsonc, walk } from "./shared";
 import type { BenchmarkSpec, CommandResult, ProjectValidation, RunResult, ScaffbenchOptions, StepResult } from "../types";
 

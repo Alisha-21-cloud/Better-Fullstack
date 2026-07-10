@@ -336,7 +336,7 @@ function formatSeconds(ms: number) {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
-async function collectMetadata(options: ScaffbenchOptions) {
+export async function collectMetadata(options: ScaffbenchOptions) {
   const gitHead = await tryCommandText("git", ["rev-parse", "HEAD"], process.cwd());
   const gitBranch = await tryCommandText("git", ["branch", "--show-current"], process.cwd());
   const bunVersion = await tryCommandText(
@@ -390,7 +390,7 @@ async function collectToolchainVersions() {
   return Object.fromEntries(entries);
 }
 
-function effectiveReasoning(model: string, effort: Effort) {
+export function effectiveReasoning(model: string, effort: Effort) {
   if (effort !== "default") return effort;
   const normalized = model.toLowerCase();
   if (normalized.includes("4-7") || normalized.includes("4.7")) return "xhigh";
