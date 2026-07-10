@@ -77,6 +77,7 @@ describe("TypeScript library expansion", () => {
     for (const dependency of ["passport", "passport-github2"]) {
       expect(authPackage).toContain(dependency);
     }
+    expect(authPackage).toContain('"check-types": "tsc --noEmit"');
 
     await expectGeneratedFile(result.projectDir, "eslint.config.mjs", "typescript-eslint");
     await expectGeneratedFile(result.projectDir, ".prettierrc.json", "trailingComma");
@@ -93,6 +94,7 @@ describe("TypeScript library expansion", () => {
     await expectGeneratedFile(result.projectDir, "apps/server/src/lib/websocket.ts", "WebSocketServer");
     await expectGeneratedFile(result.projectDir, "apps/server/src/lib/paypal.ts", "new Client");
     await expectGeneratedFile(result.projectDir, "packages/auth/src/index.ts", "GitHubStrategy");
+    await expectGeneratedFile(result.projectDir, "packages/auth/tsconfig.json", "tsconfig.base.json");
     expect(await readGenerated(result.projectDir, "apps/web/src/router.tsx")).not.toContain(
       'from "./routes/login"',
     );

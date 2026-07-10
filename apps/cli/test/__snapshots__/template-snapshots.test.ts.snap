@@ -512,6 +512,7 @@ exports[`Template Snapshots File Structure Snapshots file structure: typescript-
   "packages/api/tsconfig.json",
   "packages/auth/package.json",
   "packages/auth/src/index.ts",
+  "packages/auth/tsconfig.json",
   "packages/config/package.json",
   "packages/config/tsconfig.base.json",
   "packages/db/drizzle.config.ts",
