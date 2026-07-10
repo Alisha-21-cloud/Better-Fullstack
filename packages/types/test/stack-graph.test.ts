@@ -1320,13 +1320,22 @@ describe("stack graph structural round-trip (phase 0)", () => {
   });
 
   it("round-trips every addon and example value as multi-select graph parts", () => {
+    // API- and frontend-coupled addons need compatible selections to validate cleanly.
+    const CONFIG_BY_ADDON: Partial<Record<string, Partial<ProjectConfig>>> = {
+      "tanstack-query": { api: "none" },
+      "graphql-codegen": { api: "graphql-yoga" },
+      "apollo-client": { api: "graphql-yoga" },
+      "openapi-typescript": { api: "openapi" },
+      electron: { frontend: ["react-vite"] },
+      capacitor: { frontend: ["react-vite"] },
+    };
     for (const addon of ADDONS_VALUES) {
       const config = {
         ...TS_BASE,
         frontend: ["next"],
         runtime: "bun",
-        api: addon === "tanstack-query" ? "none" : TS_BASE.api,
         addons: [addon],
+        ...CONFIG_BY_ADDON[addon],
       };
       const parts = legacyProjectConfigToStackParts(config);
       const binding = getAddonStackPartBinding(addon);

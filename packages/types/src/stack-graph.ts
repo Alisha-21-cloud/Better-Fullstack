@@ -1795,15 +1795,9 @@ function createAddonCompatibilityIssue(
     }
     if (
       ["electron", "capacitor"].includes(part.toolId) &&
-      ![
-        "tanstack-router",
-        "react-router",
-        "react-vite",
-        "vanilla-vite",
-        "vue",
-        "svelte",
-        "solid",
-      ].includes(frontendTool ?? "")
+      !["tanstack-router", "react-vite", "vanilla-vite", "vue", "solid"].includes(
+        frontendTool ?? "",
+      )
     ) {
       return createStackGraphIssue({
         code: "INCOMPATIBLE_OWNER_TOOL",
@@ -2724,8 +2718,11 @@ function appendUniqueLegacyArrayValue(
 
 function getLegacyArrayCategoryForPart(part: StackPart): keyof ProjectConfig | undefined {
   if (part.role === "examples") return "examples";
-  if (LEGACY_ADDON_GRAPH_ROLES.has(part.role) && getAddonStackPartBinding(part.toolId)) {
-    return "addons";
+  if (LEGACY_ADDON_GRAPH_ROLES.has(part.role)) {
+    const binding = getAddonStackPartBinding(part.toolId);
+    if (binding && binding.role === part.role && binding.ecosystem === part.ecosystem) {
+      return "addons";
+    }
   }
   const legacyCategory = findDefinition(part)?.legacyCategory;
   if (legacyCategory && LEGACY_ARRAY_CATEGORIES.has(legacyCategory)) return legacyCategory;

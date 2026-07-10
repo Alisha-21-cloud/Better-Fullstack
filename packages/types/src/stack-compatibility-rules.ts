@@ -154,7 +154,7 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
       "vinext",
       "astro",
     ],
-    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
+    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "styled-components", "none"],
   },
   "headless-ui": {
     frontends: [

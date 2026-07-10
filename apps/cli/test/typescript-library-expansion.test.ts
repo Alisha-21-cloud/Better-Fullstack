@@ -91,6 +91,11 @@ describe("TypeScript library expansion", () => {
     await expectGeneratedFile(result.projectDir, "eslint.config.mjs", "typescript-eslint");
     await expectGeneratedFile(result.projectDir, ".prettierrc.json", "trailingComma");
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/http-client.ts", "axios.create");
+    await expectGeneratedFile(
+      result.projectDir,
+      "apps/web/src/lib/http-client.ts",
+      "env.VITE_SERVER_URL",
+    );
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/firebase.ts", "initializeApp");
     await expectGeneratedFile(result.projectDir, "apps/web/codegen.ts", 'preset: "client"');
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/apollo-client.ts", "ApolloClient");

@@ -1,6 +1,21 @@
 import axios from "axios";
+{{#unless (or (eq backend "self") (or (eq backend "none") (eq backend "convex")))}}
+import { env } from "@{{projectName}}/env/web";
+{{/unless}}
 
-export function createHttpClient(baseURL = "/api") {
+{{#if (or (eq backend "self") (or (eq backend "none") (eq backend "convex")))}}
+const serverBaseURL = "/api";
+{{else if (includes frontend "next")}}
+const serverBaseURL = env.NEXT_PUBLIC_SERVER_URL;
+{{else if (includes frontend "nuxt")}}
+const serverBaseURL = env.NUXT_PUBLIC_SERVER_URL;
+{{else if (includes frontend "svelte")}}
+const serverBaseURL = env.PUBLIC_SERVER_URL;
+{{else}}
+const serverBaseURL = env.VITE_SERVER_URL;
+{{/if}}
+
+export function createHttpClient(baseURL = serverBaseURL) {
   return axios.create({
     baseURL,
     headers: { "Content-Type": "application/json" },
