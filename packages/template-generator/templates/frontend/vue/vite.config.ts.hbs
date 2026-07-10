@@ -1,0 +1,10 @@
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+{{#if (eq cssFramework "tailwind")}}
+import tailwindcss from "@tailwindcss/vite";
+{{/if}}
+
+export default defineConfig({
+  plugins: [vue(){{#if (eq cssFramework "tailwind")}}, tailwindcss(){{/if}}],
+  server: { port: 5173 },
+});

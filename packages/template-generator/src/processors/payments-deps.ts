@@ -173,6 +173,24 @@ export function processPaymentsDeps(vfs: VirtualFileSystem, config: ProjectConfi
     }
   }
 
+  if (payments === "paypal") {
+    if (vfs.exists(serverPath)) {
+      addPackageDependency({
+        vfs,
+        packagePath: serverPath,
+        dependencies: ["@paypal/paypal-server-sdk"],
+      });
+    }
+
+    if (vfs.exists(webPath)) {
+      addPackageDependency({
+        vfs,
+        packagePath: webPath,
+        dependencies: ["@paypal/paypal-js"],
+      });
+    }
+  }
+
   if (payments === "dodo") {
     // Add server-side Dodo Payments SDK
     if (vfs.exists(serverPath)) {

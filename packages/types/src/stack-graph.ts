@@ -224,11 +224,20 @@ const PARAGLIDE_COMPATIBLE_FRONTENDS = new Set([
   "solid-start",
   "astro",
 ]);
-const TYPESCRIPT_TRPC_INCOMPATIBLE_FRONTENDS = new Set(["nuxt", "svelte", "solid", "solid-start"]);
+const TYPESCRIPT_TRPC_INCOMPATIBLE_FRONTENDS = new Set([
+  "nuxt",
+  "svelte",
+  "solid",
+  "solid-start",
+  "vanilla-vite",
+  "vue",
+]);
 const TYPESCRIPT_APOLLO_SERVER_COMPATIBLE_FRONTENDS = new Set([
   "tanstack-router",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "tanstack-start",
   "next",
   "vinext",
@@ -366,17 +375,35 @@ const LEGACY_BACKEND_ARRAY_CATEGORIES_BY_ECOSYSTEM = {
   Partial<Record<StackPartRole, keyof ProjectConfig>>
 >;
 
-const CODE_QUALITY_ADDONS = new Set(["biome", "oxlint", "ultracite", "lefthook", "husky"]);
+const CODE_QUALITY_ADDONS = new Set([
+  "biome",
+  "eslint",
+  "prettier",
+  "oxlint",
+  "ultracite",
+  "lefthook",
+  "husky",
+]);
 const DOCUMENTATION_ADDONS = new Set(["starlight", "fumadocs"]);
-const FRONTEND_APP_PLATFORM_ADDONS = new Set(["pwa", "tauri", "wxt", "opentui"]);
+const FRONTEND_APP_PLATFORM_ADDONS = new Set([
+  "pwa",
+  "tauri",
+  "electron",
+  "capacitor",
+  "wxt",
+  "opentui",
+]);
 const FRONTEND_DATA_FETCHING_ADDONS = new Set([
   "swr",
+  "apollo-client",
   "tanstack-query",
   "tanstack-table",
   "tanstack-virtual",
   "tanstack-db",
   "tanstack-pacer",
 ]);
+const FRONTEND_HTTP_CLIENT_ADDONS = new Set(["axios"]);
+const FRONTEND_LIBRARY_ADDONS = new Set(["firebase"]);
 const FRONTEND_TESTING_ADDONS = new Set(["msw", "storybook"]);
 const WORKSPACE_TOOLING_ADDONS = new Set([
   "turborepo",
@@ -388,6 +415,8 @@ const WORKSPACE_TOOLING_ADDONS = new Set([
   "mcp",
   "skills",
   "backend-utils",
+  "graphql-codegen",
+  "openapi-typescript",
 ]);
 const DOCKER_COMPOSE_COMPATIBLE_ECOSYSTEMS = new Set<StackPartEcosystem>([
   "typescript",
@@ -403,6 +432,8 @@ const LEGACY_ADDON_GRAPH_ROLES = new Set<StackPartRole>([
   "documentation",
   "testing",
   "workspaceTooling",
+  "httpClient",
+  "libraries",
 ]);
 const LEGACY_ARRAY_CATEGORIES = new Set<keyof ProjectConfig>([
   "addons",
@@ -438,6 +469,12 @@ export function getAddonStackPartBinding(toolId: string): AddonStackPartBinding 
   if (FRONTEND_DATA_FETCHING_ADDONS.has(toolId)) {
     return { role: "dataFetching", ecosystem: "typescript", ownerRole: "frontend" };
   }
+  if (FRONTEND_HTTP_CLIENT_ADDONS.has(toolId)) {
+    return { role: "httpClient", ecosystem: "typescript", ownerRole: "frontend" };
+  }
+  if (FRONTEND_LIBRARY_ADDONS.has(toolId)) {
+    return { role: "libraries", ecosystem: "typescript", ownerRole: "frontend" };
+  }
   if (FRONTEND_TESTING_ADDONS.has(toolId)) {
     return { role: "testing", ecosystem: "typescript", ownerRole: "frontend" };
   }
@@ -471,8 +508,8 @@ const OWNER_ROLES_BY_SCOPED_ROLE = {
   buildTool: ["backend"],
   cli: ["backend"],
   errorHandling: ["backend"],
-  httpClient: ["backend"],
-  libraries: ["backend"],
+  httpClient: ["frontend", "backend"],
+  libraries: ["frontend", "backend"],
 } as Partial<Record<StackPartRole, readonly StackPrimaryRole[]>>;
 
 const FRESH_UNSUPPORTED_STATE_MANAGEMENT_TOOLS = new Set([
@@ -767,6 +804,20 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(
     ADDONS_VALUES.filter((value) => FRONTEND_DATA_FETCHING_ADDONS.has(value)),
     "dataFetching",
+    "typescript",
+    undefined,
+    { allowMultiple: true },
+  ),
+  ...defineTools(
+    ADDONS_VALUES.filter((value) => FRONTEND_HTTP_CLIENT_ADDONS.has(value)),
+    "httpClient",
+    "typescript",
+    undefined,
+    { allowMultiple: true },
+  ),
+  ...defineTools(
+    ADDONS_VALUES.filter((value) => FRONTEND_LIBRARY_ADDONS.has(value)),
+    "libraries",
     "typescript",
     undefined,
     { allowMultiple: true },
@@ -1700,6 +1751,29 @@ function createAddonCompatibilityIssue(
   const runtimeTool = context.selectedToolIdsByRole?.runtime ?? "bun";
   const apiTool = context.selectedToolIdsByRole?.api;
 
+  if (
+    part.toolId === "graphql-codegen" &&
+    !apiTool?.match(/^(garph|graphql-yoga|apollo-server)$/)
+  ) {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_GRAPH_SELECTION",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message: "GraphQL Code Generator requires a GraphQL API selection.",
+    });
+  }
+
+  if (part.toolId === "openapi-typescript" && apiTool !== "openapi") {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_GRAPH_SELECTION",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message: "openapi-typescript requires the OpenAPI API selection.",
+    });
+  }
+
   if (part.role === "appPlatform") {
     if (part.toolId === "pwa" && !hasPWACompatibleFrontend(frontendTools)) {
       return createStackGraphIssue({
@@ -1719,9 +1793,41 @@ function createAddonCompatibilityIssue(
         message: "Tauri requires a compatible web frontend.",
       });
     }
+    if (
+      ["electron", "capacitor"].includes(part.toolId) &&
+      ![
+        "tanstack-router",
+        "react-router",
+        "react-vite",
+        "vanilla-vite",
+        "vue",
+        "svelte",
+        "solid",
+      ].includes(frontendTool ?? "")
+    ) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_OWNER_TOOL",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: `${part.toolId} requires a compatible Vite SPA frontend.`,
+      });
+    }
   }
 
   if (part.role === "dataFetching") {
+    if (
+      part.toolId === "apollo-client" &&
+      !apiTool?.match(/^(garph|graphql-yoga|apollo-server)$/)
+    ) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Apollo Client requires a GraphQL API selection.",
+      });
+    }
     if (part.toolId === "tanstack-query" && apiTool && apiTool !== "none") {
       return createStackGraphIssue({
         code: "INCOMPATIBLE_GRAPH_SELECTION",

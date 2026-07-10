@@ -12,4 +12,18 @@ export async function processTestingTemplates(
   if (config.testing === "playwright" || config.testing === "vitest-playwright") {
     processTemplatesFromPrefix(vfs, templates, "testing", "", config);
   }
+
+  if (config.testing === "mocha") {
+    for (const packagePath of ["apps/web", "apps/server", "packages/api"]) {
+      if (vfs.exists(`${packagePath}/package.json`)) {
+        processTemplatesFromPrefix(
+          vfs,
+          templates,
+          `testing/mocha/${packagePath}`,
+          packagePath,
+          config,
+        );
+      }
+    }
+  }
 }

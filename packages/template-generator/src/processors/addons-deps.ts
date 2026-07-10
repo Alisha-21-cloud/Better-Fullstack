@@ -31,7 +31,7 @@ function getTanStackFrameworkAdapter(
   const { frontend, astroIntegration } = config;
 
   if (frontend.some((f) => REACT_FRONTENDS.includes(f))) return `@tanstack/react-${lib}`;
-  if (frontend.includes("nuxt")) return `@tanstack/vue-${lib}`;
+  if (frontend.includes("nuxt") || frontend.includes("vue")) return `@tanstack/vue-${lib}`;
   if (frontend.includes("svelte")) return `@tanstack/svelte-${lib}`;
   if (frontend.includes("solid") || frontend.includes("solid-start")) return `@tanstack/solid-${lib}`;
   if (frontend.includes("angular")) return `@tanstack/angular-${lib}`;
@@ -48,7 +48,7 @@ function getTanStackDBAdapter(config: ProjectConfig): AvailableDependencies | nu
   const { frontend, astroIntegration } = config;
 
   if (frontend.some((f) => REACT_FRONTENDS.includes(f))) return "@tanstack/react-db";
-  if (frontend.includes("nuxt")) return "@tanstack/vue-db";
+  if (frontend.includes("nuxt") || frontend.includes("vue")) return "@tanstack/vue-db";
   if (frontend.includes("svelte")) return "@tanstack/svelte-db";
   if (frontend.includes("solid") || frontend.includes("solid-start")) return "@tanstack/solid-db";
   if (frontend.includes("astro")) {
@@ -66,7 +66,7 @@ function getTanStackQueryDeps(config: ProjectConfig): AvailableDependencies[] {
   if (frontend.some((f) => REACT_FRONTENDS.includes(f))) {
     return ["@tanstack/react-query", "@tanstack/react-query-devtools"];
   }
-  if (frontend.includes("nuxt")) {
+  if (frontend.includes("nuxt") || frontend.includes("vue")) {
     return ["@tanstack/vue-query", "@tanstack/vue-query-devtools"];
   }
   if (frontend.includes("svelte")) {
@@ -111,6 +111,118 @@ export function processAddonsDeps(vfs: VirtualFileSystem, config: ProjectConfig)
 
   if (config.addons.includes("nx")) {
     addPackageDependency({ vfs, packagePath: "package.json", devDependencies: ["nx"] });
+  }
+
+  if (config.addons.includes("eslint")) {
+    addPackageDependency({
+      vfs,
+      packagePath: "package.json",
+      devDependencies: ["eslint", "@eslint/js", "typescript-eslint", "globals"],
+    });
+    const rootPkg = vfs.readJson<PackageJson>("package.json");
+    if (rootPkg) {
+      rootPkg.scripts = {
+        ...rootPkg.scripts,
+        "lint:eslint": "eslint .",
+      };
+      vfs.writeJson("package.json", rootPkg);
+    }
+  }
+
+  if (config.addons.includes("prettier")) {
+    addPackageDependency({ vfs, packagePath: "package.json", devDependencies: ["prettier"] });
+    const rootPkg = vfs.readJson<PackageJson>("package.json");
+    if (rootPkg) {
+      rootPkg.scripts = {
+        ...rootPkg.scripts,
+        "format:prettier": "prettier --write .",
+        "format:prettier:check": "prettier --check .",
+      };
+      vfs.writeJson("package.json", rootPkg);
+    }
+  }
+
+  if (config.addons.includes("axios") && vfs.exists(webPkgPath)) {
+    addPackageDependency({ vfs, packagePath: webPkgPath, dependencies: ["axios"] });
+  }
+
+  if (config.addons.includes("firebase") && vfs.exists(webPkgPath)) {
+    addPackageDependency({ vfs, packagePath: webPkgPath, dependencies: ["firebase"] });
+  }
+
+  if (config.addons.includes("graphql-codegen") && vfs.exists(webPkgPath)) {
+    addPackageDependency({
+      vfs,
+      packagePath: webPkgPath,
+      devDependencies: ["@graphql-codegen/cli", "@graphql-codegen/client-preset", "graphql"],
+    });
+    const webPkg = vfs.readJson<PackageJson>(webPkgPath);
+    if (webPkg) {
+      webPkg.scripts = { ...webPkg.scripts, codegen: "graphql-codegen --config codegen.ts" };
+      vfs.writeJson(webPkgPath, webPkg);
+    }
+  }
+
+  if (config.addons.includes("openapi-typescript") && vfs.exists(webPkgPath)) {
+    addPackageDependency({
+      vfs,
+      packagePath: webPkgPath,
+      devDependencies: ["openapi-typescript"],
+    });
+    const webPkg = vfs.readJson<PackageJson>(webPkgPath);
+    if (webPkg) {
+      webPkg.scripts = {
+        ...webPkg.scripts,
+        "codegen:openapi":
+          "openapi-typescript ${OPENAPI_SCHEMA_URL:-http://localhost:3000/openapi.json} -o src/lib/api-schema.d.ts",
+      };
+      vfs.writeJson(webPkgPath, webPkg);
+    }
+  }
+
+  if (config.addons.includes("apollo-client") && vfs.exists(webPkgPath)) {
+    addPackageDependency({
+      vfs,
+      packagePath: webPkgPath,
+      dependencies: ["@apollo/client", "graphql"],
+    });
+  }
+
+  if (config.addons.includes("electron") && vfs.exists(webPkgPath)) {
+    addPackageDependency({
+      vfs,
+      packagePath: webPkgPath,
+      devDependencies: ["electron", "electron-builder"],
+    });
+    const webPkg = vfs.readJson<PackageJson>(webPkgPath);
+    if (webPkg) {
+      webPkg.main = "electron/main.mjs";
+      webPkg.scripts = {
+        ...webPkg.scripts,
+        "desktop:dev": "electron electron/main.mjs",
+        "desktop:build": "electron-builder",
+      };
+      vfs.writeJson(webPkgPath, webPkg);
+    }
+  }
+
+  if (config.addons.includes("capacitor") && vfs.exists(webPkgPath)) {
+    addPackageDependency({
+      vfs,
+      packagePath: webPkgPath,
+      dependencies: ["@capacitor/core"],
+      devDependencies: ["@capacitor/cli", "@capacitor/ios", "@capacitor/android"],
+    });
+    const webPkg = vfs.readJson<PackageJson>(webPkgPath);
+    if (webPkg) {
+      webPkg.scripts = {
+        ...webPkg.scripts,
+        "mobile:sync": "cap sync",
+        "mobile:ios": "cap open ios",
+        "mobile:android": "cap open android",
+      };
+      vfs.writeJson(webPkgPath, webPkg);
+    }
   }
 
   if (config.addons.includes("ultracite")) {

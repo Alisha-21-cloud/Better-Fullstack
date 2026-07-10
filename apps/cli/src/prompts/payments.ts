@@ -94,6 +94,11 @@ export function resolvePaymentsPrompt(
       hint: "Complete payments infrastructure for SaaS.",
     },
     {
+      value: "paypal" as Payments,
+      label: "PayPal",
+      hint: "PayPal JavaScript SDK buttons with server-side Orders API helpers.",
+    },
+    {
       value: "dodo" as Payments,
       label: "Dodo Payments",
       hint: "Simple payment infrastructure for developers.",

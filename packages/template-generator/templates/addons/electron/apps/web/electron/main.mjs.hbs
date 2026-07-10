@@ -1,0 +1,26 @@
+import { app, BrowserWindow } from "electron";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
+
+function createWindow() {
+  const window = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      preload: path.join(currentDirectory, "preload.mjs"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  const developmentUrl = process.env.ELECTRON_RENDERER_URL;
+  if (developmentUrl) void window.loadURL(developmentUrl);
+  else void window.loadFile(path.join(currentDirectory, "../dist/index.html"));
+}
+
+app.whenReady().then(createWindow);
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
+});

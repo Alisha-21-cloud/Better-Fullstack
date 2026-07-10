@@ -36,6 +36,11 @@ const CMS_PROMPT_OPTIONS = [
     hint: "Git-backed CMS for Markdown, JSON, and YAML content",
   },
   {
+    value: "contentful" as const,
+    label: "Contentful",
+    hint: "Hosted headless CMS with a typed JavaScript delivery client",
+  },
+  {
     value: "none" as const,
     label: "None",
     hint: "Skip headless CMS setup",

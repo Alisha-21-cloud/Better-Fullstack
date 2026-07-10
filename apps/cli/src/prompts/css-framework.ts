@@ -22,6 +22,10 @@ const CSS_FRAMEWORK_OPTIONS: Record<CSSFramework, { label: string; hint: string 
     label: "PostCSS Only",
     hint: "Minimal setup with just PostCSS",
   },
+  "styled-components": {
+    label: "styled-components",
+    hint: "CSS-in-JS with tagged template literals for React",
+  },
   none: {
     label: "None",
     hint: "Plain CSS without preprocessors",

@@ -54,6 +54,8 @@ import {
   processRateLimitTemplates,
   processFeatureFlagsTemplates,
   processAnalyticsTemplates,
+  processAITemplates,
+  processRealtimeTemplates,
   processJobQueueTemplates,
   processCMSTemplates,
   processI18nTemplates,
@@ -175,6 +177,8 @@ async function processGraphTemplates(
     await processRateLimitTemplates(vfs, templates, tsConfig);
     await processFeatureFlagsTemplates(vfs, templates, tsConfig);
     await processAnalyticsTemplates(vfs, templates, tsConfig);
+    await processAITemplates(vfs, templates, tsConfig);
+    await processRealtimeTemplates(vfs, templates, tsConfig);
     await processJobQueueTemplates(vfs, templates, tsConfig);
     await processCMSTemplates(vfs, templates, tsConfig);
     await processI18nTemplates(vfs, templates, tsConfig);
@@ -310,6 +314,8 @@ export async function generateVirtualProject(options: GeneratorOptions): Promise
       await processRateLimitTemplates(vfs, templates, config);
       await processFeatureFlagsTemplates(vfs, templates, config);
       await processAnalyticsTemplates(vfs, templates, config);
+      await processAITemplates(vfs, templates, config);
+      await processRealtimeTemplates(vfs, templates, config);
       await processJobQueueTemplates(vfs, templates, config);
       await processCMSTemplates(vfs, templates, config);
       await processI18nTemplates(vfs, templates, config);

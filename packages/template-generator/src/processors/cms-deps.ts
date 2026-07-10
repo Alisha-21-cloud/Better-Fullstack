@@ -23,6 +23,8 @@ export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): v
     frontend.includes("astro") ||
     frontend.includes("nuxt") ||
     frontend.includes("svelte") ||
+    frontend.includes("vanilla-vite") ||
+    frontend.includes("vue") ||
     frontend.some((f) => REACT_CMS_FRONTENDS.has(f));
 
   if (cms === "payload") {
@@ -82,6 +84,14 @@ export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): v
       vfs,
       packagePath: webPath,
       dependencies: ["@directus/sdk"],
+    });
+  }
+
+  if (cms === "contentful") {
+    addPackageDependency({
+      vfs,
+      packagePath: webPath,
+      dependencies: ["contentful"],
     });
   }
 

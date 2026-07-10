@@ -121,6 +121,8 @@ export const FrontendSchema = z
     "tanstack-router",
     "react-router",
     "react-vite",
+    "vanilla-vite",
+    "vue",
     "tanstack-start",
     "next",
     "vinext",
@@ -174,6 +176,15 @@ export const AddonsSchema = z
     "devcontainer",
     "docker-compose",
     "github-actions",
+    "eslint",
+    "prettier",
+    "axios",
+    "firebase",
+    "graphql-codegen",
+    "openapi-typescript",
+    "apollo-client",
+    "electron",
+    "capacitor",
     "none",
   ])
   .describe("Additional addons");
@@ -225,6 +236,7 @@ export const AuthSchema = z
     "auth0",
     "workos",
     "kinde",
+    "passport",
     "none",
   ])
   .describe("Authentication provider");
@@ -236,6 +248,7 @@ export const PaymentsSchema = z
     "stripe",
     "lemon-squeezy",
     "paddle",
+    "paypal",
     "dodo",
     "creem",
     "autumn",
@@ -259,6 +272,8 @@ export const AISchema = z
     "voltagent",
     "langgraph",
     "openai-agents",
+    "openai-sdk",
+    "anthropic-sdk",
     "google-adk",
     "modelfusion",
     "langchain",
@@ -307,7 +322,7 @@ export const ValidationSchema = z
   .describe("Schema validation library (none uses Zod as default for internal usage)");
 
 export const TestingSchema = z
-  .enum(["vitest", "playwright", "vitest-playwright", "jest", "cypress", "none"])
+  .enum(["vitest", "playwright", "vitest-playwright", "jest", "mocha", "cypress", "none"])
   .describe("Testing framework (vitest-playwright includes both unit and e2e testing)");
 
 export const EmailSchema = z
@@ -327,7 +342,7 @@ export const EmailSchema = z
   );
 
 export const RealtimeSchema = z
-  .enum(["socket-io", "partykit", "ably", "pusher", "liveblocks", "yjs", "none"])
+  .enum(["socket-io", "ws", "partykit", "ably", "pusher", "liveblocks", "yjs", "none"])
   .describe("Real-time/WebSocket solution");
 
 export const JobQueueSchema = z
@@ -335,7 +350,7 @@ export const JobQueueSchema = z
   .describe("Job queue/background worker solution");
 
 export const CMSSchema = z
-  .enum(["payload", "sanity", "strapi", "tinacms", "directus", "keystatic", "none"])
+  .enum(["payload", "sanity", "strapi", "tinacms", "directus", "keystatic", "contentful", "none"])
   .describe("Headless CMS solution");
 
 export const CachingSchema = z
@@ -387,7 +402,7 @@ export const FeatureFlagsSchema = z
   .describe("Feature flags provider for A/B testing and feature management");
 
 export const AnalyticsSchema = z
-  .enum(["plausible", "umami", "posthog", "none"])
+  .enum(["plausible", "umami", "posthog", "ga4", "none"])
   .describe("Product analytics provider");
 
 export const MobileNavigationSchema = z
@@ -781,7 +796,7 @@ export const AiDocsSchema = z
   .describe("AI documentation files (CLAUDE.md, AGENTS.md, .cursorrules)");
 
 export const CSSFrameworkSchema = z
-  .enum(["tailwind", "scss", "less", "postcss-only", "none"])
+  .enum(["tailwind", "scss", "less", "postcss-only", "styled-components", "none"])
   .describe("CSS framework/preprocessor");
 
 export const UILibrarySchema = z

@@ -34,6 +34,16 @@ const AI_PROMPT_OPTIONS: PromptOption<AI>[] = [
     hint: "Official multi-agent framework with handoffs and guardrails",
   },
   {
+    value: "openai-sdk",
+    label: "OpenAI SDK",
+    hint: "Official OpenAI JavaScript and TypeScript client",
+  },
+  {
+    value: "anthropic-sdk",
+    label: "Anthropic SDK",
+    hint: "Official Anthropic TypeScript client for Claude",
+  },
+  {
     value: "google-adk",
     label: "Google ADK",
     hint: "Code-first agent development kit for building AI agents",

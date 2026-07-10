@@ -241,6 +241,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
     resolve: resolveAuthPrompt,
     coverageContexts: [
       { ecosystem: "typescript", backend: "self", frontend: ["next"] },
+      { ecosystem: "typescript", backend: "express", frontend: ["react-vite"] },
       { ecosystem: "go", backend: "none", frontend: [] },
     ],
   },
@@ -262,7 +263,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   cssFramework: {
     schemaValues: CSS_FRAMEWORK_VALUES,
     resolve: resolveCSSFrameworkPrompt,
-    coverageContexts: [{}, { uiLibrary: "radix-ui" }],
+    coverageContexts: [{}, { uiLibrary: "none" }, { uiLibrary: "radix-ui" }],
   },
   database: {
     schemaValues: DATABASE_VALUES,

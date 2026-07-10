@@ -25,6 +25,7 @@ export function resolveAuthPrompt(context: AuthPromptContext = {}): PromptSingle
     { value: "auth0" },
     { value: "workos" },
     { value: "kinde" },
+    { value: "passport" },
     { value: "none" },
   ] as const satisfies ReadonlyArray<{ value: Auth }>;
 

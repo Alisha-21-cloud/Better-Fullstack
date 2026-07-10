@@ -121,6 +121,14 @@ const AUTH_CAPABILITIES = [
     color: "from-sky-400 to-cyan-600",
   },
   {
+    id: "passport",
+    label: "Passport.js",
+    description: "Strategy-based authentication middleware for Express applications",
+    promptHint: "Passport.js with GitHub OAuth for Express",
+    icon: "https://cdn.simpleicons.org/passport/34E27A",
+    color: "from-emerald-400 to-green-600",
+  },
+  {
     id: "none",
     label: "No Auth",
     description: "Skip authentication",
@@ -177,7 +185,17 @@ function isSelfBackend(backend?: string): boolean {
   return backend === "self" || backend?.startsWith("self-") === true;
 }
 
-function getNextOnlyAuthLabel(optionId: Exclude<Auth, "none" | "better-auth" | "better-auth-organizations" | "go-better-auth" | "clerk">): string {
+function getNextOnlyAuthLabel(
+  optionId: Exclude<
+    Auth,
+    | "none"
+    | "better-auth"
+    | "better-auth-organizations"
+    | "go-better-auth"
+    | "clerk"
+    | "passport"
+  >,
+): string {
   switch (optionId) {
     case "nextauth":
       return "Auth.js (NextAuth)";
@@ -310,6 +328,12 @@ function getAuthDisabledReason(context: CapabilityStackContext, optionId: Auth):
     }
 
     return "In Better-Fullstack, Supabase Auth is currently supported only with the 'self' backend (fullstack Next.js or TanStack Start)";
+  }
+
+  if (optionId === "passport") {
+    return backend === "express"
+      ? null
+      : "Passport.js is currently scaffolded for the Express backend";
   }
 
   const nextOnlyLabel = getNextOnlyAuthLabel(optionId);

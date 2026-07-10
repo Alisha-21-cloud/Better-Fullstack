@@ -77,7 +77,7 @@ export function processAIDeps(vfs: VirtualFileSystem, config: ProjectConfig): vo
         });
       }
       // Add Vue hooks if Vue frontend
-      if (frontendPath && webFrontend === "nuxt") {
+      if (frontendPath && (webFrontend === "nuxt" || webFrontend === "vue")) {
         addPackageDependency({
           vfs,
           packagePath: frontendPath,
@@ -128,6 +128,22 @@ export function processAIDeps(vfs: VirtualFileSystem, config: ProjectConfig): vo
         vfs,
         packagePath: serverPath,
         dependencies: ["@openai/agents"],
+      });
+      break;
+
+    case "openai-sdk":
+      addPackageDependency({
+        vfs,
+        packagePath: serverPath,
+        dependencies: ["openai"],
+      });
+      break;
+
+    case "anthropic-sdk":
+      addPackageDependency({
+        vfs,
+        packagePath: serverPath,
+        dependencies: ["@anthropic-ai/sdk"],
       });
       break;
 

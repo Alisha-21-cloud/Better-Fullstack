@@ -1,0 +1,11 @@
+import axios from "axios";
+
+export function createHttpClient(baseURL = "/api") {
+  return axios.create({
+    baseURL,
+    headers: { "Content-Type": "application/json" },
+    timeout: 10_000,
+  });
+}
+
+export const httpClient = createHttpClient();
