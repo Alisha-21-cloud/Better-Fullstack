@@ -21,6 +21,24 @@ members = [
     "crates/tui",
 {{/if}}
 ]
+default-members = [
+    "crates/server",
+{{#if (eq rustApi "tonic")}}
+    "crates/proto",
+{{/if}}
+{{#if (eq rustFrontend "leptos")}}
+    "crates/client",
+{{/if}}
+{{#if (eq rustFrontend "dioxus")}}
+    "crates/dioxus-client",
+{{/if}}
+{{#if (eq rustCli "clap")}}
+    "crates/cli",
+{{/if}}
+{{#if (eq rustCli "ratatui")}}
+    "crates/tui",
+{{/if}}
+]
 
 [workspace.package]
 version = "0.1.0"
@@ -150,7 +168,7 @@ warp = { version = "0.4", features = ["server"] }
 {{/if}}
 {{#if (eq rustWebFramework "salvo")}}
 # Web framework (Salvo)
-salvo = "=0.93.0"
+salvo = { version = "=0.93.0", features = ["cors"] }
 {{/if}}
 
 {{#if (eq rustOrm "sqlx")}}

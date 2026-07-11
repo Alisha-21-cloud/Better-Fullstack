@@ -650,6 +650,48 @@ describe("Addon Configurations", () => {
         expect(compose).toContain("GRPC_PORT=50051");
       });
 
+      it("should generate MongoDB and SQLite services for the new Rust drivers", async () => {
+        for (const rustOrm of ["mongodb", "rusqlite"] as const) {
+          const projectName = `docker-compose-rust-${rustOrm}`;
+          const result = await runTRPCTest({
+            projectName,
+            ecosystem: "rust",
+            addons: ["docker-compose"],
+            rustWebFramework: "axum",
+            rustFrontend: "none",
+            rustOrm,
+            rustApi: "none",
+            rustCli: "none",
+            rustLibraries: [],
+            rustLogging: "tracing",
+            rustErrorHandling: "anyhow-thiserror",
+            rustCaching: "none",
+            rustAuth: "none",
+            rustRealtime: "none",
+            rustMessageQueue: "none",
+            rustObservability: "none",
+            rustTemplating: "none",
+            install: false,
+          });
+
+          expectSuccess(result);
+          const compose = readFileSync(join(result.projectDir!, "docker-compose.yml"), "utf8");
+          if (rustOrm === "mongodb") {
+            expect(compose).toContain("image: mongo:7");
+            expect(compose).toContain(
+              `DATABASE_URL=mongodb://root:password@db:27017/${projectName}?authSource=admin`,
+            );
+            expect(compose).toContain("mongodb_data:/data/db");
+            expect(compose).not.toContain("image: postgres:16-alpine");
+          } else {
+            expect(compose).toContain("DATABASE_URL=/app/data/data.db");
+            expect(compose).toContain("rust_sqlite_data:/app/data");
+            expect(compose).not.toContain("depends_on:");
+            expect(compose).not.toContain("image: postgres:16-alpine");
+          }
+        }
+      });
+
       it("should fail with docker-compose + Rust frontend until frontend container support exists", async () => {
         const result = await runTRPCTest({
           projectName: "docker-compose-rust-frontend-fail",

@@ -3210,6 +3210,8 @@ describe("Rust library expansion", () => {
       expect(cargo).toContain(dependency);
     }
     expect(serverCargo).toContain("jsonrpsee.workspace = true");
+    expect(cargo).toContain("default-members = [");
+    expect(cargo.split("default-members = [")[1]?.split("]")[0]).not.toContain("yew-client");
     expect(hasFile(root, "crates/yew-client/src/main.rs")).toBe(true);
     expect(hasFile(root, "crates/server/src/database.rs")).toBe(true);
     expect(hasFile(root, "crates/server/src/rpc.rs")).toBe(true);
@@ -3237,12 +3239,47 @@ describe("Rust library expansion", () => {
         rustApi: "jsonrpsee",
         rustCli: "none",
         rustLibraries: [],
+        email: "resend",
+        search: "meilisearch",
+        caching: "upstash-redis",
+        observability: "sentry",
+        rustRealtime: "tokio-tungstenite",
       });
 
       expect(result.success).toBe(true);
       const root = result.tree!.root;
-      expect(getFileContent(root, "crates/server/src/main.rs")).toContain(framework);
+      const main = getFileContent(root, "crates/server/src/main.rs");
+      expect(main).toContain(framework);
+      expect(main).toContain('std::env::var("CORS_ORIGIN")');
+      expect(main).toContain('std::env::var("JSONRPC_HOST")');
+      for (const integration of [
+        "mod email;",
+        "mod meilisearch;",
+        "mod observability;",
+        "mod realtime;",
+        "mod upstash_cache;",
+      ]) {
+        expect(main).toContain(integration);
+      }
       expect(getFileContent(root, "crates/server/src/database.rs")).toContain(databaseSymbol);
     }
+  });
+
+  it("keeps standalone JSON-RPC servers alive", async () => {
+    const result = await createVirtual({
+      projectName: "rust-jsonrpc-only",
+      ecosystem: "rust",
+      rustWebFramework: "none",
+      rustFrontend: "none",
+      rustOrm: "none",
+      rustApi: "jsonrpsee",
+      rustCli: "none",
+      rustLibraries: [],
+    });
+
+    expect(result.success).toBe(true);
+    const main = getFileContent(result.tree!.root, "crates/server/src/main.rs");
+    expect(main).toContain("rpc_server.stopped().await");
+    expect(main).toContain('std::env::var("JSONRPC_HOST")');
   });
 });
