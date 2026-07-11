@@ -629,23 +629,6 @@ export async function createProjectHandler(
           log.message(displayConfig(config));
         }
       } else {
-        // Auto-adjust incompatible flag combos before strict validation so the
-        // non-interactive flag path explains adjustments (like the web builder
-        // and MCP flows) instead of hard-failing or silently coercing values.
-        // Only flags the user actually provided are adjusted; everything else
-        // is still resolved by prompts/defaults below. Programmatic (silent)
-        // callers keep strict validation errors — nobody would see the summary.
-        if (!cliInput.yolo && !isSilent()) {
-          const { changes, adjustments } = resolveCompatibilityAdjustments(
-            processProvidedFlagsWithoutValidation(cliInput, finalBaseName),
-            { onlyDefinedKeys: true },
-          );
-          if (adjustments.length > 0) {
-            cliInput = { ...cliInput, ...changes };
-            reportCompatibilityAdjustments(adjustments);
-          }
-        }
-
         const flagConfig = processAndValidateFlags(cliInput, providedFlags, finalBaseName);
         const { projectName: _projectNameFromFlags, ...otherFlags } = flagConfig;
 
@@ -662,6 +645,19 @@ export async function createProjectHandler(
           currentPathInput,
         );
         config = { ...gatheredConfig, versionChannel };
+
+        // Partial flags lack the prompt/default context needed for reliable
+        // compatibility decisions (for example, shadcn-ui needs the frontend
+        // and CSS selections). Normalize only after gathering the full config.
+        if (!cliInput.yolo && !isSilent()) {
+          const { changes, adjustments } = resolveCompatibilityAdjustments(config);
+          if (adjustments.length > 0) {
+            config = { ...config, ...changes };
+            cliInput = { ...cliInput, ...changes };
+            reportCompatibilityAdjustments(adjustments);
+          }
+        }
+
         validateConfigCompatibility(config, providedFlags, cliInput);
       }
 

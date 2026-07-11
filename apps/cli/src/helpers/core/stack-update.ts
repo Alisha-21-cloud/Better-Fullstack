@@ -1355,7 +1355,7 @@ export async function planStackUpdate(
   if (compatibilityResult.adjustedStack) {
     proposedConfig = mergeProjectConfig(
       proposedConfig,
-      compatibilityChangesToProjectConfig(compatibilityResult.adjustedStack, proposedConfig),
+      compatibilityChangesToProjectConfig(compatibilityResult.adjustedStack),
     );
   }
   proposedConfig.stackParts = mergeDerivedStackPartsWithExistingGraph(

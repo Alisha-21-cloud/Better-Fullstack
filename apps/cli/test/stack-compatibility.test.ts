@@ -61,6 +61,27 @@ describe("resolveCompatibilityAdjustments", () => {
     expect(changes.api).toBe("orpc");
   });
 
+  it("preserves an explicit none sentinel when compatibility clears an array flag", () => {
+    const { changes } = resolveCompatibilityAdjustments(
+      { ecosystem: "typescript", backend: "convex", frontend: ["solid"] },
+      { onlyDefinedKeys: true },
+    );
+
+    expect(changes.frontend).toEqual(["none"]);
+  });
+
+  it("keeps context-dependent flags when the complete prompted config is compatible", () => {
+    const result = resolveCompatibilityAdjustments({
+      ...TS_FLAG_BASE,
+      frontend: ["tanstack-router"],
+      cssFramework: "tailwind",
+      uiLibrary: "shadcn-ui",
+      api: "orpc",
+    });
+
+    expect(result.changes.uiLibrary).toBeUndefined();
+  });
+
   it("treats an omitted ecosystem as TypeScript (the CLI default)", () => {
     const { changes, adjustments } = resolveCompatibilityAdjustments(
       { frontend: ["svelte"], api: "trpc" },

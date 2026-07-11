@@ -222,7 +222,6 @@ export function buildCompatibilityInputFromConfig(
 
 export function compatibilityChangesToProjectConfig(
   adjusted: CompatibilityInput,
-  baseConfig: Partial<ProjectConfig>,
 ): Partial<ProjectConfig> {
   const frontend = [...adjusted.webFrontend, ...adjusted.nativeFrontend];
   const ignoredCompatibilityKeys = new Set([
@@ -246,7 +245,7 @@ export function compatibilityChangesToProjectConfig(
     }
   }
 
-  changes.frontend = frontend.length > 0 ? frontend : baseConfig.frontend;
+  changes.frontend = frontend;
   changes.addons = [...adjusted.codeQuality, ...adjusted.documentation, ...adjusted.appPlatforms];
   changes.ai = adjusted.aiSdk;
   changes.effect = adjusted.backendLibraries;
@@ -263,6 +262,11 @@ export type CompatibilityAdjustmentResult = {
 };
 
 const EMPTY_ADJUSTMENT_RESULT: CompatibilityAdjustmentResult = { changes: {}, adjustments: [] };
+
+// Empty arrays are ignored by the CLI flag translator. Preserve an explicit
+// "none" value when compatibility removes the final selected item so the
+// adjustment survives the second flag-processing pass.
+const EXPLICIT_NONE_ARRAY_KEYS = new Set(["frontend", "addons", "examples", "aiDocs"]);
 
 // Compatibility-input keys whose CLI flag/config key has a different name.
 const COMPAT_KEY_DISPLAY: Record<string, string> = {
@@ -314,8 +318,8 @@ export function resolveCompatibilityAdjustments(
   // Diff in config-key space against the engine INPUT (not the raw config) so
   // defaults injected by the input mapper (e.g. javaLanguage) never count as
   // adjustments — only values the engine actually changed do.
-  const mapped = compatibilityChangesToProjectConfig(result.adjustedStack, config);
-  const mappedInput = compatibilityChangesToProjectConfig(input, config);
+  const mapped = compatibilityChangesToProjectConfig(result.adjustedStack);
+  const mappedInput = compatibilityChangesToProjectConfig(input);
   const changes: Partial<ProjectConfig> = {};
   for (const [key, value] of Object.entries(mapped)) {
     if (value === undefined) continue;
@@ -324,7 +328,10 @@ export function resolveCompatibilityAdjustments(
     const before = mappedInput[key as keyof ProjectConfig];
     const previous = Array.isArray(before) ? before.filter((item) => item !== "none") : before;
     if (JSON.stringify(next) !== JSON.stringify(previous)) {
-      (changes as Record<string, unknown>)[key] = next;
+      (changes as Record<string, unknown>)[key] =
+        Array.isArray(next) && next.length === 0 && EXPLICIT_NONE_ARRAY_KEYS.has(key)
+          ? ["none"]
+          : next;
     }
   }
   if (Object.keys(changes).length === 0) {
