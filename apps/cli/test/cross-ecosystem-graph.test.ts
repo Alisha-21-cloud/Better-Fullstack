@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { cliInputToProjectConfigPartial } from "@better-fullstack/types";
+import { cliInputToProjectConfigPartial, getLocalWebDevPort } from "@better-fullstack/types";
 
 import { createVirtual } from "../src/index";
 import { displayConfig } from "../src/utils/display-config";
@@ -73,14 +73,8 @@ function envPathFor(frontend: string) {
   return frontend === "redwood" ? ".env" : "apps/web/.env";
 }
 
-// Mirrors getLocalWebDevPort in @better-fullstack/types.
 function webOriginFor(frontend: string) {
-  if (frontend === "redwood") return "http://localhost:8910";
-  if (["react-router", "react-vite", "svelte", "fresh"].includes(frontend)) {
-    return "http://localhost:5173";
-  }
-  if (frontend === "astro") return "http://localhost:4321";
-  return "http://localhost:3001";
+  return `http://localhost:${getLocalWebDevPort([frontend])}`;
 }
 
 function graphDocPathFor(frontend: string) {

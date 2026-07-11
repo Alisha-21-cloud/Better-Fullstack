@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { parseStackPartSpecs } from "@better-fullstack/types";
+import { getLocalWebDevPort, parseStackPartSpecs } from "@better-fullstack/types";
 
 import { createVirtual } from "../src/index";
 import { validateConfigForProgrammaticUse } from "../src/utils/config-validation";
@@ -34,6 +34,24 @@ function packageHasDependency(packageJson: PackageJsonShape | undefined, name: s
 
 describe("Virtual Generator Regressions", () => {
   const packageManagers = ["npm", "pnpm", "bun", "yarn"] as const;
+
+  it("uses the canonical TanStack Router dev port in the generated Vite config", async () => {
+    const result = await createVirtual({
+      projectName: "tanstack-router-dev-port",
+      frontend: ["tanstack-router"],
+      backend: "hono",
+      runtime: "bun",
+      api: "orpc",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "none",
+    });
+
+    expect(result.success).toBe(true);
+    expect(readTextFromTree(result.tree!, "apps/web/vite.config.ts")).toContain(
+      `port: ${getLocalWebDevPort(["tanstack-router"])}`,
+    );
+  });
 
   for (const packageManager of packageManagers) {
     it(`writes a concrete ${packageManager} packageManager version`, async () => {
