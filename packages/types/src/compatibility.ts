@@ -2614,6 +2614,10 @@ export const getDisabledReason = (
       return "openapi-typescript requires the OpenAPI API selection";
     }
 
+    if (optionId === "openapi-typescript" && currentStack.backend === "self") {
+      return "openapi-typescript requires a standalone backend that exposes an OpenAPI schema";
+    }
+
     if (
       optionId === "apollo-client" &&
       !["garph", "graphql-yoga", "apollo-server"].includes(currentStack.api)

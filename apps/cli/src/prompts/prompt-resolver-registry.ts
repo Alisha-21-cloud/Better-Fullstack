@@ -259,7 +259,11 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   cms: {
     schemaValues: CMS_VALUES,
     resolve: resolveCMSPrompt,
-    coverageContexts: [{ backend: "hono" }, { backend: "none" }],
+    coverageContexts: [
+      { backend: "hono" },
+      { backend: "none", frontends: ["vue"] },
+      { backend: "none", frontends: [] },
+    ],
   },
   cssFramework: {
     schemaValues: CSS_FRAMEWORK_VALUES,

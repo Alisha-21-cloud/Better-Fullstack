@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { resolveAIPrompt } from "../src/prompts/ai";
+import { resolveCMSPrompt } from "../src/prompts/cms";
 import { resolveCSSFrameworkPrompt } from "../src/prompts/css-framework";
 import { resolvePaymentsPrompt } from "../src/prompts/payments";
 import { resolveRealtimePrompt } from "../src/prompts/realtime";
@@ -80,6 +81,7 @@ describe("TypeScript library expansion", () => {
     expect(webPackage).toContain("mocha --import=tsx");
     expect(webPackage).toContain("concurrently -k");
     expect(webPackage).toContain("ELECTRON_RENDERER_URL=http://localhost:5173");
+    expect(webPackage).toContain('"desktop:build": "bun run build && electron-builder"');
     for (const dependency of ["openai", "ws", "@paypal/paypal-server-sdk", "mocha"]) {
       expect(serverPackage).toContain(dependency);
     }
@@ -220,17 +222,36 @@ describe("TypeScript library expansion", () => {
         (option) => option.value,
       ),
     ).not.toContain("styled-components");
+    expect(
+      resolveCMSPrompt({
+        cms: "contentful",
+        backend: "none",
+        frontends: ["vue"],
+      }).autoValue,
+    ).toBe("contentful");
+    expect(
+      resolveCMSPrompt({ backend: "none", frontends: ["vue"] }).options.map(
+        (option) => option.value,
+      ),
+    ).toEqual(["contentful", "none"]);
 
     const invalidConfigs = [
       { frontend: ["vue"], backend: "express", cssFramework: "styled-components" },
       { frontend: ["react-vite"], backend: "hono", realtime: "ws" },
       { frontend: ["react-vite"], backend: "convex", ai: "openai-sdk" },
       { frontend: ["react-vite"], backend: "convex", payments: "paypal" },
+      { frontend: ["none"], backend: "express", payments: "paypal" },
       {
         frontend: ["react-vite"],
         backend: "express",
         api: "openapi",
         addons: ["apollo-client"],
+      },
+      {
+        frontend: ["next"],
+        backend: "self",
+        api: "openapi",
+        addons: ["openapi-typescript"],
       },
       { frontend: ["vue"], backend: "express", api: "orpc" },
     ] as const;
@@ -242,13 +263,13 @@ describe("TypeScript library expansion", () => {
     }
   });
 
-  test("adds the Contentful dependency whenever its web template is emitted", async () => {
+  test("adds Contentful to a backendless web stack", async () => {
     const result = await runTRPCTest(
       createCustomConfig({
         projectName: "typescript-library-expansion-contentful",
-        frontend: ["angular"],
-        backend: "express",
-        runtime: "node",
+        frontend: ["vue"],
+        backend: "none",
+        runtime: "none",
         api: "none",
         database: "none",
         orm: "none",

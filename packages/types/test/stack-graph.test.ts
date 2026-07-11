@@ -618,6 +618,14 @@ describe("stack graph", () => {
       "frontend:typescript:qwik",
       "frontend.i18n:typescript:paraglide",
     ]);
+    const paraglideVueParts = parseStackPartSpecs([
+      "frontend:typescript:vue",
+      "frontend.i18n:typescript:paraglide",
+    ]);
+    const paraglideVanillaViteParts = parseStackPartSpecs([
+      "frontend:typescript:vanilla-vite",
+      "frontend.i18n:typescript:paraglide",
+    ]);
     const freshParts = parseStackPartSpecs([
       "frontend:typescript:fresh",
       "frontend.animation:typescript:lottie",
@@ -636,6 +644,8 @@ describe("stack graph", () => {
     expect(validateStackParts(paraglideQwikParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_OWNER_TOOL",
     );
+    expect(validateStackParts(paraglideVueParts).issues).toEqual([]);
+    expect(validateStackParts(paraglideVanillaViteParts).issues).toEqual([]);
     expect(validateStackParts(freshParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_OWNER_TOOL",
     );
@@ -711,6 +721,12 @@ describe("stack graph", () => {
       "backend:go:gin",
       "workspaceTooling:universal:backend-utils",
     ]);
+    const selfOpenapiCodegenParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "backend:typescript:self",
+      "backend.api:typescript:openapi",
+      "workspaceTooling:universal:openapi-typescript",
+    ]);
 
     expect(validateStackParts(dockerWorkersParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_GRAPH_SELECTION",
@@ -724,6 +740,9 @@ describe("stack graph", () => {
     expect(validateStackParts(backendUtilsGoParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_GRAPH_SELECTION",
     );
+    expect(
+      validateStackParts(selfOpenapiCodegenParts).issues.map((issue) => issue.code),
+    ).toContain("INCOMPATIBLE_GRAPH_SELECTION");
   });
 
   it("rejects shared non-TypeScript backend service candidates through graph checks", () => {

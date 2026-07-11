@@ -220,6 +220,8 @@ const PARAGLIDE_COMPATIBLE_FRONTENDS = new Set([
   "tanstack-start",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "svelte",
   "solid",
   "solid-start",
@@ -1765,6 +1767,17 @@ function createAddonCompatibilityIssue(
       role: part.role,
       toolId: part.toolId,
       message: "openapi-typescript requires the OpenAPI API selection.",
+    });
+  }
+
+  if (part.toolId === "openapi-typescript" && backendTool === "self") {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_GRAPH_SELECTION",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message:
+        "openapi-typescript requires a standalone backend that exposes an OpenAPI schema.",
     });
   }
 
