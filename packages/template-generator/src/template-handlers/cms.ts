@@ -44,6 +44,19 @@ export async function processCMSTemplates(
     return;
   }
 
+  if (config.cms === "contentful") {
+    if (vfs.exists("apps/web/package.json")) {
+      processTemplatesFromPrefix(
+        vfs,
+        templates,
+        "cms/contentful/web/base",
+        "apps/web",
+        config,
+      );
+    }
+    return;
+  }
+
   const variant = getCMSVariant(config.frontend);
   if (!variant) return;
 

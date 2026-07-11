@@ -6,6 +6,25 @@ type TechResourceLinks = {
 type LinkMap = Record<string, TechResourceLinks>;
 
 const BASE_LINKS: LinkMap = {
+  eslint: { docsUrl: "https://eslint.org/docs/latest/", githubUrl: "https://github.com/eslint/eslint" },
+  prettier: { docsUrl: "https://prettier.io/docs/", githubUrl: "https://github.com/prettier/prettier" },
+  axios: { docsUrl: "https://axios-http.com/docs/intro", githubUrl: "https://github.com/axios/axios" },
+  ws: { docsUrl: "https://github.com/websockets/ws/blob/master/doc/ws.md", githubUrl: "https://github.com/websockets/ws" },
+  "vanilla-vite": { docsUrl: "https://vite.dev/guide/", githubUrl: "https://github.com/vitejs/vite" },
+  firebase: { docsUrl: "https://firebase.google.com/docs/web/setup", githubUrl: "https://github.com/firebase/firebase-js-sdk" },
+  "openai-sdk": { docsUrl: "https://platform.openai.com/docs/libraries/javascript", githubUrl: "https://github.com/openai/openai-node" },
+  "anthropic-sdk": { docsUrl: "https://docs.anthropic.com/en/api/client-sdks", githubUrl: "https://github.com/anthropics/anthropic-sdk-typescript" },
+  "graphql-codegen": { docsUrl: "https://the-guild.dev/graphql/codegen/docs/getting-started", githubUrl: "https://github.com/dotansimha/graphql-code-generator" },
+  "openapi-typescript": { docsUrl: "https://openapi-ts.dev/", githubUrl: "https://github.com/openapi-ts/openapi-typescript" },
+  "apollo-client": { docsUrl: "https://www.apollographql.com/docs/react/", githubUrl: "https://github.com/apollographql/apollo-client" },
+  ga4: { docsUrl: "https://developers.google.com/analytics/devguides/collection/ga4", githubUrl: "https://github.com/googleanalytics" },
+  paypal: { docsUrl: "https://developer.paypal.com/sdk/js/", githubUrl: "https://github.com/paypal/paypal-js" },
+  electron: { docsUrl: "https://www.electronjs.org/docs/latest/", githubUrl: "https://github.com/electron/electron" },
+  capacitor: { docsUrl: "https://capacitorjs.com/docs", githubUrl: "https://github.com/ionic-team/capacitor" },
+  "styled-components": { docsUrl: "https://styled-components.com/docs", githubUrl: "https://github.com/styled-components/styled-components" },
+  passport: { docsUrl: "https://www.passportjs.org/concepts/authentication/", githubUrl: "https://github.com/jaredhanson/passport" },
+  mocha: { docsUrl: "https://mochajs.org/", githubUrl: "https://github.com/mochajs/mocha" },
+  contentful: { docsUrl: "https://www.contentful.com/developers/docs/javascript/tutorials/using-js-cda-sdk/", githubUrl: "https://github.com/contentful/contentful.js" },
   trpc: { docsUrl: "https://trpc.io/docs", githubUrl: "https://github.com/trpc/trpc" },
   orpc: { docsUrl: "https://orpc.unnoq.com/", githubUrl: "https://github.com/unnoq/orpc" },
   "ts-rest": {

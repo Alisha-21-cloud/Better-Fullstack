@@ -11,6 +11,11 @@ const REALTIME_PROMPT_OPTIONS = [
     hint: "Real-time bidirectional communication with fallbacks",
   },
   {
+    value: "ws" as const,
+    label: "ws",
+    hint: "Lightweight standards-based WebSocket server and client",
+  },
+  {
     value: "partykit" as const,
     label: "PartyKit",
     hint: "Edge-native multiplayer infrastructure on Cloudflare",
@@ -59,17 +64,22 @@ export function resolveRealtimePrompt(
     };
   }
 
+  const options =
+    context.backend === "express"
+      ? REALTIME_PROMPT_OPTIONS
+      : REALTIME_PROMPT_OPTIONS.filter((option) => option.value !== "ws");
+
   return context.realtime !== undefined
     ? {
         shouldPrompt: false,
         mode: "single",
-        options: REALTIME_PROMPT_OPTIONS,
+        options,
         autoValue: context.realtime,
       }
     : {
         shouldPrompt: true,
         mode: "single",
-        options: REALTIME_PROMPT_OPTIONS,
+        options,
         initialValue: "none",
       };
 }

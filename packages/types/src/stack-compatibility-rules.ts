@@ -4,6 +4,8 @@ const WEB_FRAMEWORKS: readonly Frontend[] = [
   "tanstack-router",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "tanstack-start",
   "next",
   "vinext",
@@ -152,7 +154,7 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
       "vinext",
       "astro",
     ],
-    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
+    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "styled-components", "none"],
   },
   "headless-ui": {
     frontends: [
@@ -267,7 +269,7 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
   },
   none: {
     frontends: WEB_FRAMEWORKS,
-    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
+    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "styled-components", "none"],
   },
 };
 

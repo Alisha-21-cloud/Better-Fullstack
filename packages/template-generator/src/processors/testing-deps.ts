@@ -20,7 +20,7 @@ const REACT_FRONTENDS = [
 ] as const;
 
 // Vue-based frontends that can use @testing-library/vue
-const VUE_FRONTENDS = ["nuxt"] as const;
+const VUE_FRONTENDS = ["nuxt", "vue"] as const;
 
 // Svelte frontends that can use @testing-library/svelte
 const SVELTE_FRONTENDS = ["svelte"] as const;
@@ -103,6 +103,9 @@ function getTestingDeps(testing: ProjectConfig["testing"]): {
       break;
     case "jest":
       devDeps.push("jest", "@types/jest", "ts-jest", "@jest/globals", "jest-environment-jsdom");
+      break;
+    case "mocha":
+      devDeps.push("mocha", "@types/mocha", "tsx");
       break;
     case "playwright":
       devDeps.push("@playwright/test", "playwright");

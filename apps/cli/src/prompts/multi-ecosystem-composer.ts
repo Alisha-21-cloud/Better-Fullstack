@@ -266,7 +266,7 @@ export async function gatherMultiEcosystemConfig(
       : undefined;
   const cssFramework = hasWebStyling(frontendList)
     ? await scopedPromptValue("typescript", "cssFramework", configScope, typeScriptSections, () =>
-        getCSSFrameworkChoice(flags.cssFramework, uiLibrary),
+        getCSSFrameworkChoice(flags.cssFramework, uiLibrary, frontendList),
       )
     : "none";
 
@@ -916,7 +916,7 @@ export async function gatherMultiEcosystemConfig(
     "addons",
     configScope,
     typeScriptSections,
-    () => getAddonsChoice(flags.addons, frontendList, "none", "none", "bun"),
+    () => getAddonsChoice(flags.addons, frontendList, "none", "none", "bun", "none"),
   );
   const webDeploy = await scopedPromptValue(
     "typescript",

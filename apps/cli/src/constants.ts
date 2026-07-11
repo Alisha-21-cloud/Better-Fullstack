@@ -131,6 +131,8 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
       "tanstack-router",
       "react-router",
       "react-vite",
+      "vanilla-vite",
+      "vue",
       "tanstack-start",
       "next",
       "vinext",
@@ -148,7 +150,14 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
   },
   "radix-ui": {
     frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "astro"],
-    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
+    cssFrameworks: [
+      "tailwind",
+      "scss",
+      "less",
+      "postcss-only",
+      "styled-components",
+      "none",
+    ],
   },
   "headless-ui": {
     frontends: ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "nuxt", "astro"],
@@ -218,6 +227,8 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
       "tanstack-router",
       "react-router",
       "react-vite",
+      "vanilla-vite",
+      "vue",
       "tanstack-start",
       "next",
       "vinext",
@@ -231,7 +242,14 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
       "redwood",
       "fresh",
     ],
-    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
+    cssFrameworks: [
+      "tailwind",
+      "scss",
+      "less",
+      "postcss-only",
+      "styled-components",
+      "none",
+    ],
   },
 } as const;
 
@@ -243,6 +261,8 @@ export const DEFAULT_UI_LIBRARY_BY_FRONTEND: Record<Frontend, UILibrary> = {
   "tanstack-router": "shadcn-ui",
   "react-router": "shadcn-ui",
   "react-vite": "shadcn-ui",
+  "vanilla-vite": "none",
+  vue: "none",
   "tanstack-start": "shadcn-ui",
   next: "shadcn-ui",
   vinext: "shadcn-ui",

@@ -40,6 +40,17 @@ describe("compatibility issue helpers", () => {
     expect(getApiFrontendCompatibilityIssue("orpc", ["svelte"])).toBeUndefined();
   });
 
+  it("rejects API options without a standalone Vite web integration", () => {
+    const issue = getApiFrontendCompatibilityIssue("orpc", ["vue"]);
+
+    expect(issue).toMatchObject({
+      code: "STANDALONE_VITE_API_UNSUPPORTED",
+      category: "api",
+      optionId: "orpc",
+      provided: { api: "orpc", frontend: "vue" },
+    });
+  });
+
   it("treats Apollo Server as a React-only API option", () => {
     const issue = getApiFrontendCompatibilityIssue("apollo-server", ["svelte"]);
 
@@ -267,6 +278,12 @@ describe("compatibility issue helpers", () => {
     ).toBeNull();
     expect(
       getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "paraglide"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["vue"] }, "i18n", "paraglide"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["vanilla-vite"] }, "i18n", "paraglide"),
     ).toBeNull();
     expect(getDisabledReason({ ...baseStack, webFrontend: ["angular"] }, "i18n", "paraglide")).toBe(
       "Paraglide is not yet wired for the 'angular' frontend",
@@ -706,6 +723,18 @@ describe("compatibility issue helpers", () => {
         "tanstack-query",
       ),
     ).toBe("TanStack Query is already included via the selected API layer.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "self",
+          api: "openapi",
+        },
+        "appPlatforms",
+        "openapi-typescript",
+      ),
+    ).toBe("openapi-typescript requires a standalone backend that exposes an OpenAPI schema.");
 
     expect(
       getDisabledReason(

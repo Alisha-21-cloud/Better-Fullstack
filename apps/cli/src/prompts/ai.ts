@@ -1,4 +1,4 @@
-import type { AI } from "../types";
+import type { AI, Backend } from "../types";
 
 import { exitCancelled } from "../utils/errors";
 import {
@@ -32,6 +32,16 @@ const AI_PROMPT_OPTIONS: PromptOption<AI>[] = [
     value: "openai-agents",
     label: "OpenAI Agents SDK",
     hint: "Official multi-agent framework with handoffs and guardrails",
+  },
+  {
+    value: "openai-sdk",
+    label: "OpenAI SDK",
+    hint: "Official OpenAI JavaScript and TypeScript client",
+  },
+  {
+    value: "anthropic-sdk",
+    label: "Anthropic SDK",
+    hint: "Official Anthropic TypeScript client for Claude",
   },
   {
     value: "google-adk",
@@ -70,12 +80,22 @@ const AI_PROMPT_OPTIONS: PromptOption<AI>[] = [
   },
 ];
 
-export function resolveAIPrompt(ai?: AI) {
-  return createStaticSinglePromptResolution(AI_PROMPT_OPTIONS, "none", ai);
+type AIPromptContext = {
+  ai?: AI;
+  backend?: Backend;
+};
+
+export function resolveAIPrompt(context: AIPromptContext = {}) {
+  const options = ["none", "convex"].includes(context.backend ?? "")
+    ? AI_PROMPT_OPTIONS.filter(
+        (option) => option.value !== "openai-sdk" && option.value !== "anthropic-sdk",
+      )
+    : AI_PROMPT_OPTIONS;
+  return createStaticSinglePromptResolution(options, "none", context.ai);
 }
 
-export async function getAIChoice(ai?: AI) {
-  const resolution = resolveAIPrompt(ai);
+export async function getAIChoice(ai?: AI, backend?: Backend) {
+  const resolution = resolveAIPrompt({ ai, backend });
   if (!resolution.shouldPrompt) {
     return resolution.autoValue ?? "none";
   }

@@ -27,6 +27,29 @@ export async function processPaymentsTemplates(
         ? "unistyles"
         : null;
 
+  if (config.payments === "paypal") {
+    if (config.backend !== "none" && config.backend !== "convex") {
+      const serverDir = config.backend === "self" ? "apps/web" : "apps/server";
+      processTemplatesFromPrefix(
+        vfs,
+        templates,
+        "payments/paypal/server/base",
+        serverDir,
+        config,
+      );
+    }
+    if (vfs.exists("apps/web/package.json")) {
+      processTemplatesFromPrefix(
+        vfs,
+        templates,
+        "payments/paypal/web/base",
+        "apps/web",
+        config,
+      );
+    }
+    return;
+  }
+
   if (config.backend === "convex") {
     processTemplatesFromPrefix(
       vfs,

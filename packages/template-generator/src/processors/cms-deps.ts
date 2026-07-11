@@ -18,11 +18,26 @@ export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): v
   if (!cms || cms === "none") return;
 
   const hasNext = frontend.includes("next");
+  const webPath = "apps/web/package.json";
+
+  if (cms === "contentful") {
+    if (vfs.exists(webPath)) {
+      addPackageDependency({
+        vfs,
+        packagePath: webPath,
+        dependencies: ["contentful"],
+      });
+    }
+    return;
+  }
+
   const hasWebFrontend =
     frontend.includes("next") ||
     frontend.includes("astro") ||
     frontend.includes("nuxt") ||
     frontend.includes("svelte") ||
+    frontend.includes("vanilla-vite") ||
+    frontend.includes("vue") ||
     frontend.some((f) => REACT_CMS_FRONTENDS.has(f));
 
   if (cms === "payload") {
@@ -55,7 +70,6 @@ export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): v
 
   if (!hasWebFrontend) return;
 
-  const webPath = "apps/web/package.json";
   if (!vfs.exists(webPath)) return;
 
   if (cms === "sanity") {

@@ -1,0 +1,5 @@
+import { createClient, type CreateClientParams } from "contentful";
+
+export function createContentfulClient(options: CreateClientParams) {
+  return createClient({ environment: "master", ...options });
+}

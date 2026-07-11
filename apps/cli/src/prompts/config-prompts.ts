@@ -637,7 +637,11 @@ function getPromptResolutionValue(key: ConfigPromptKey, results: Partial<PromptG
       frontends,
       astroIntegration: results.astroIntegration,
     },
-    cssFramework: { cssFramework: flags.cssFramework, uiLibrary: results.uiLibrary },
+    cssFramework: {
+      cssFramework: flags.cssFramework,
+      uiLibrary: results.uiLibrary,
+      frontends,
+    },
     forms: { forms: flags.forms, frontends },
     stateManagement: { stateManagement: flags.stateManagement, frontends },
     animation: { animation: flags.animation, frontends },
@@ -775,7 +779,7 @@ export async function gatherConfig(
       cssFramework: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as CSSFramework);
         if (hasWebStyling(results.frontend)) {
-          return getCSSFrameworkChoice(flags.cssFramework, results.uiLibrary);
+          return getCSSFrameworkChoice(flags.cssFramework, results.uiLibrary, results.frontend);
         }
         return Promise.resolve("none" as CSSFramework);
       },
@@ -862,6 +866,7 @@ export async function gatherConfig(
           results.auth,
           results.backend,
           results.runtime,
+          results.api,
         );
       },
       examples: ({ results }) => {
@@ -911,7 +916,7 @@ export async function gatherConfig(
         ) {
           return Promise.resolve("vercel-ai" as AI);
         }
-        return getAIChoice(flags.ai);
+        return getAIChoice(flags.ai, results.backend);
       },
       validation: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as Validation);
@@ -972,7 +977,7 @@ export async function gatherConfig(
       },
       cms: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as CMS);
-        return getCMSChoice(flags.cms, results.backend);
+        return getCMSChoice(flags.cms, results.backend, results.frontend);
       },
       caching: ({ results }) => {
         if (results.ecosystem === "react-native" || results.ecosystem === "elixir") {

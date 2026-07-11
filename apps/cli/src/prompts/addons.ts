@@ -2,6 +2,7 @@ import { DEFAULT_CONFIG } from "../constants";
 import {
   type Addons,
   AddonsSchema,
+  type API,
   type Auth,
   type Backend,
   type Frontend,
@@ -134,6 +135,42 @@ function getAddonDisplay(addon: Addons): { label: string; hint: string } {
       label = "GitHub Actions";
       hint = "Ship a CI workflow (install, lint, type-check, build)";
       break;
+    case "eslint":
+      label = "ESLint";
+      hint = "Pluggable JavaScript and TypeScript linting with flat config";
+      break;
+    case "prettier":
+      label = "Prettier";
+      hint = "Opinionated formatting for code, JSON, Markdown, and styles";
+      break;
+    case "axios":
+      label = "Axios";
+      hint = "HTTP client with interceptors, cancellation, and typed responses";
+      break;
+    case "firebase":
+      label = "Firebase JS SDK";
+      hint = "Firebase app, Auth, Firestore, and Storage client setup";
+      break;
+    case "graphql-codegen":
+      label = "GraphQL Code Generator";
+      hint = "Generate typed GraphQL documents and client helpers";
+      break;
+    case "openapi-typescript":
+      label = "openapi-typescript";
+      hint = "Generate runtime-free TypeScript types from OpenAPI schemas";
+      break;
+    case "apollo-client":
+      label = "Apollo Client";
+      hint = "GraphQL client with normalized caching and framework integrations";
+      break;
+    case "electron":
+      label = "Electron";
+      hint = "Package compatible Vite frontends as desktop applications";
+      break;
+    case "capacitor":
+      label = "Capacitor";
+      hint = "Ship compatible Vite frontends to iOS and Android";
+      break;
     default:
       label = addon;
       hint = `Add ${addon}`;
@@ -143,12 +180,34 @@ function getAddonDisplay(addon: Addons): { label: string; hint: string } {
 }
 
 const ADDON_GROUPS: Record<string, Addons[]> = {
-  Tooling: ["turborepo", "nx", "github-actions", "biome", "oxlint", "ultracite", "husky", "lefthook"],
+  Tooling: [
+    "turborepo",
+    "nx",
+    "github-actions",
+    "biome",
+    "eslint",
+    "prettier",
+    "oxlint",
+    "ultracite",
+    "husky",
+    "lefthook",
+  ],
   Documentation: ["starlight", "fumadocs"],
-  Extensions: ["pwa", "tauri", "opentui", "wxt", "ruler", "devcontainer", "docker-compose"],
-  Integrations: ["msw", "storybook", "backend-utils"],
+  Extensions: [
+    "pwa",
+    "tauri",
+    "electron",
+    "capacitor",
+    "opentui",
+    "wxt",
+    "ruler",
+    "devcontainer",
+    "docker-compose",
+  ],
+  Integrations: ["msw", "storybook", "backend-utils", "axios", "firebase"],
+  "API Tooling": ["graphql-codegen", "openapi-typescript"],
   "AI Agents": ["mcp", "skills"],
-  "Data Fetching": ["swr"],
+  "Data Fetching": ["swr", "apollo-client"],
   TanStack: ["tanstack-query", "tanstack-table", "tanstack-virtual", "tanstack-db", "tanstack-pacer"],
 };
 
@@ -168,8 +227,20 @@ function validateAddonCompatibilityForPrompt(
   auth?: Auth,
   backend?: Backend,
   runtime?: Runtime,
+  api?: API,
 ) {
-  return validateAddonCompatibility(addon, frontends, auth, backend, runtime);
+  return validateAddonCompatibility(
+    addon,
+    frontends,
+    auth,
+    backend,
+    runtime,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    api,
+  );
 }
 
 function getCompatibleAddonsForPrompt(
@@ -179,8 +250,9 @@ function getCompatibleAddonsForPrompt(
   auth?: Auth,
   backend?: Backend,
   runtime?: Runtime,
+  api?: API,
 ) {
-  return getCompatibleAddons(allAddons, frontends, existingAddons, auth, backend, runtime);
+  return getCompatibleAddons(allAddons, frontends, existingAddons, auth, backend, runtime, api);
 }
 
 export async function getAddonsChoice(
@@ -189,6 +261,7 @@ export async function getAddonsChoice(
   auth?: Auth,
   backend?: Backend,
   runtime?: Runtime,
+  api?: API,
 ) {
   if (addons !== undefined) return addons;
 
@@ -204,6 +277,7 @@ export async function getAddonsChoice(
       auth,
       backend,
       runtime,
+      api,
     );
     if (!isCompatible) continue;
 
@@ -251,6 +325,7 @@ export async function getAddonsToAdd(
   auth?: Auth,
   backend?: Backend,
   runtime?: Runtime,
+  api?: API,
 ) {
   const groupedOptions: Record<string, AddonOption[]> = createGroupedAddonOptions();
 
@@ -263,6 +338,7 @@ export async function getAddonsToAdd(
     auth,
     backend,
     runtime,
+    api,
   );
 
   for (const addon of compatibleAddons) {

@@ -1,4 +1,11 @@
-const VITE_WEB_FRONTENDS = new Set(["react-router", "react-vite", "svelte", "fresh"]);
+const VITE_WEB_FRONTENDS = new Set([
+  "react-router",
+  "react-vite",
+  "vanilla-vite",
+  "vue",
+  "svelte",
+  "fresh",
+]);
 const ASTRO_WEB_FRONTENDS = new Set(["astro"]);
 
 export function getLocalWebDevPort(frontend: readonly string[]): 3001 | 4321 | 5173 | 8910 {

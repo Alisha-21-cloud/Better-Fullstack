@@ -1,0 +1,15 @@
+import type { Server } from "node:http";
+import { WebSocketServer } from "ws";
+
+export function attachWebSocketServer(server: Server) {
+  const websocketServer = new WebSocketServer({ server, path: "/ws" });
+
+  websocketServer.on("connection", (socket) => {
+    socket.send(JSON.stringify({ type: "connected" }));
+    socket.on("message", (message) => {
+      socket.send(message.toString());
+    });
+  });
+
+  return websocketServer;
+}

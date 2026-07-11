@@ -19,6 +19,9 @@ import {
   validateWebDeployFrontendTemplates,
   validateWebDeployRequiresWebFrontend,
   validateAIFrontendCompatibility,
+  validateAIBackendCompatibility,
+  validateCSSFrameworkFrontendCompatibility,
+  validateRealtimeCompatibility,
   validateWorkersCompatibility,
 } from "./compatibility-rules";
 import { isSilent } from "./context";
@@ -1221,6 +1224,7 @@ export function validateFullConfig(
       config.rustFrontend,
       config.javaWebFramework,
       config.database,
+      config.api,
     );
     config.addons = [...new Set(config.addons)];
   }
@@ -1241,6 +1245,9 @@ export function validateFullConfig(
   );
 
   validateAIFrontendCompatibility(config.ai, config.frontend ?? []);
+  validateAIBackendCompatibility(config.ai, config.backend);
+  validateRealtimeCompatibility(config.realtime, config.backend);
+  validateCSSFrameworkFrontendCompatibility(config.cssFramework, config.frontend ?? []);
 
   validateUILibraryFrontendCompatibility(
     config.uiLibrary,
@@ -1295,6 +1302,7 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
         config.rustFrontend,
         config.javaWebFramework,
         config.database,
+        config.api,
       );
     }
 
@@ -1307,6 +1315,9 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
     );
 
     validateAIFrontendCompatibility(config.ai, config.frontend ?? []);
+    validateAIBackendCompatibility(config.ai, config.backend);
+    validateRealtimeCompatibility(config.realtime, config.backend);
+    validateCSSFrameworkFrontendCompatibility(config.cssFramework, config.frontend ?? []);
 
     validateUILibraryFrontendCompatibility(
       config.uiLibrary,

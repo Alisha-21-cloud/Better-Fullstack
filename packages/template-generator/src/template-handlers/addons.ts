@@ -142,6 +142,23 @@ export async function processAddonTemplates(
       continue;
     }
 
+    if (
+      [
+        "axios",
+        "firebase",
+        "graphql-codegen",
+        "openapi-typescript",
+        "apollo-client",
+        "electron",
+        "capacitor",
+      ].includes(addon)
+    ) {
+      if (vfs.exists("apps/web/package.json")) {
+        processTemplatesFromPrefix(vfs, templates, `addons/${addon}/apps/web`, "apps/web", config);
+      }
+      continue;
+    }
+
     // Backend Utils templates - framework-aligned server helpers
     if (addon === "backend-utils") {
       if (
