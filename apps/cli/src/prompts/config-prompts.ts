@@ -977,7 +977,7 @@ export async function gatherConfig(
       },
       cms: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as CMS);
-        return getCMSChoice(flags.cms, results.backend);
+        return getCMSChoice(flags.cms, results.backend, results.frontend);
       },
       caching: ({ results }) => {
         if (results.ecosystem === "react-native" || results.ecosystem === "elixir") {

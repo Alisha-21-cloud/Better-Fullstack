@@ -203,7 +203,7 @@ export function processAddonsDeps(vfs: VirtualFileSystem, config: ProjectConfig)
         ...webPkg.scripts,
         "desktop:dev":
           `concurrently -k "${devCommand}" "wait-on ${rendererUrl} && cross-env ELECTRON_RENDERER_URL=${rendererUrl} electron electron/main.mjs"`,
-        "desktop:build": "electron-builder",
+        "desktop:build": `${config.packageManager} run build && electron-builder`,
       };
       vfs.writeJson(webPkgPath, webPkg);
     }

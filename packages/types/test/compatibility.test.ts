@@ -279,6 +279,12 @@ describe("compatibility issue helpers", () => {
     expect(
       getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "paraglide"),
     ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["vue"] }, "i18n", "paraglide"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["vanilla-vite"] }, "i18n", "paraglide"),
+    ).toBeNull();
     expect(getDisabledReason({ ...baseStack, webFrontend: ["angular"] }, "i18n", "paraglide")).toBe(
       "Paraglide is not yet wired for the 'angular' frontend",
     );
@@ -717,6 +723,18 @@ describe("compatibility issue helpers", () => {
         "tanstack-query",
       ),
     ).toBe("TanStack Query is already included via the selected API layer.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "self",
+          api: "openapi",
+        },
+        "appPlatforms",
+        "openapi-typescript",
+      ),
+    ).toBe("openapi-typescript requires a standalone backend that exposes an OpenAPI schema.");
 
     expect(
       getDisabledReason(

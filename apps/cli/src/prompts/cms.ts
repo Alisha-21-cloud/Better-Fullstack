@@ -1,5 +1,6 @@
-import type { Backend, CMS } from "../types";
+import type { Backend, CMS, Frontend } from "../types";
 
+import { isWebFrontend } from "../utils/compatibility-rules";
 import { exitCancelled } from "../utils/errors";
 import type { PromptSingleResolution } from "./prompt-contract";
 import { isCancel, navigableSelect } from "./navigable";
@@ -50,12 +51,36 @@ const CMS_PROMPT_OPTIONS = [
 type CmsPromptContext = {
   cms?: CMS;
   backend?: Backend;
+  frontends?: Frontend[];
 };
 
 export function resolveCMSPrompt(
   context: CmsPromptContext = {},
 ): PromptSingleResolution<CMS> {
   if (context.backend === "none" || context.backend === "convex") {
+    const options = CMS_PROMPT_OPTIONS.filter((option) =>
+      ["contentful", "none"].includes(option.value),
+    );
+    const hasWebFrontend =
+      context.frontends?.some((frontend) => frontend !== "none" && isWebFrontend(frontend)) ??
+      false;
+
+    if (hasWebFrontend && (context.cms === undefined || context.cms === "contentful")) {
+      return context.cms === "contentful"
+        ? {
+            shouldPrompt: false,
+            mode: "single",
+            options,
+            autoValue: "contentful",
+          }
+        : {
+            shouldPrompt: true,
+            mode: "single",
+            options,
+            initialValue: "none",
+          };
+    }
+
     return {
       shouldPrompt: false,
       mode: "single",
@@ -79,8 +104,8 @@ export function resolveCMSPrompt(
       };
 }
 
-export async function getCMSChoice(cms?: CMS, backend?: Backend) {
-  const resolution = resolveCMSPrompt({ cms, backend });
+export async function getCMSChoice(cms?: CMS, backend?: Backend, frontends?: Frontend[]) {
+  const resolution = resolveCMSPrompt({ cms, backend, frontends });
   if (!resolution.shouldPrompt) {
     return resolution.autoValue ?? "none";
   }

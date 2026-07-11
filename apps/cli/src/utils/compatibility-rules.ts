@@ -496,6 +496,13 @@ export function validateAddonCompatibility(
     };
   }
 
+  if (addon === "openapi-typescript" && backend === "self") {
+    return {
+      isCompatible: false,
+      reason: "openapi-typescript requires a standalone backend that exposes an OpenAPI schema",
+    };
+  }
+
   // Backend Utils generates framework-specific server helpers.
   if (addon === "backend-utils") {
     if (ecosystem !== undefined && ecosystem !== "typescript") {
@@ -651,6 +658,15 @@ export function validatePaymentsCompatibility(
   frontends: Frontend[] = [],
 ) {
   if (!payments || payments === "none") return;
+
+  if (
+    payments === "paypal" &&
+    !frontends.some((frontend) => frontend !== "none" && isWebFrontend(frontend))
+  ) {
+    exitWithError(
+      "PayPal requires a web frontend. Please choose a web frontend or a different payments provider.",
+    );
+  }
 
   if (payments === "paypal" && (backend === "none" || backend === "convex")) {
     exitWithError(
