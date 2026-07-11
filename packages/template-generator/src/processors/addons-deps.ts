@@ -164,6 +164,7 @@ export function processAddonsDeps(vfs: VirtualFileSystem, config: ProjectConfig)
   }
 
   if (config.addons.includes("openapi-typescript") && vfs.exists(webPkgPath)) {
+    vfs.writeFile(webPkgPath.replace("package.json", "src/lib/.gitkeep"), "");
     addPackageDependency({
       vfs,
       packagePath: webPkgPath,

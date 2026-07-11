@@ -484,7 +484,8 @@ export function validateAddonCompatibility(
   if (
     (addon === "graphql-codegen" || addon === "apollo-client") &&
     api !== undefined &&
-    !["garph", "graphql-yoga", "apollo-server"].includes(api)
+    !["garph", "graphql-yoga", "apollo-server"].includes(api) &&
+    !(addon === "graphql-codegen" && frontend.includes("redwood"))
   ) {
     return { isCompatible: false, reason: `${addon} requires a GraphQL API selection` };
   }

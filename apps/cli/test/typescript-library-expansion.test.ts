@@ -151,6 +151,7 @@ describe("TypeScript library expansion", () => {
     expect(webPackage).toContain("codegen:openapi");
     expect(webPackage).toContain("mobile:sync");
     expect(webPackage).toContain('"mobile:ios": "cap add ios || true && cap open ios"');
+    expect(await readGenerated(result.projectDir, "apps/web/src/lib/.gitkeep")).toBe("");
     await expectGeneratedFile(result.projectDir, "apps/web/src/main.ts", "querySelector");
     await expectGeneratedFile(result.projectDir, "apps/web/capacitor.config.ts", "CapacitorConfig");
   });
@@ -280,5 +281,26 @@ describe("TypeScript library expansion", () => {
     expectSuccess(result);
     expect(await readGenerated(result.projectDir, "apps/web/package.json")).toContain("contentful");
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/contentful.ts", "createClient");
+  });
+
+  test("generates GraphQL Codegen config for Redwood", async () => {
+    const result = await runTRPCTest(
+      createCustomConfig({
+        projectName: "typescript-library-expansion-redwood-codegen",
+        frontend: ["redwood"],
+        backend: "none",
+        runtime: "none",
+        api: "none",
+        database: "none",
+        orm: "none",
+        addons: ["graphql-codegen"],
+      }),
+    );
+
+    expectSuccess(result);
+    expect(await readGenerated(result.projectDir, "web/package.json")).toContain(
+      "graphql-codegen --config codegen.ts",
+    );
+    await expectGeneratedFile(result.projectDir, "web/codegen.ts", "localhost:8911/graphql");
   });
 });

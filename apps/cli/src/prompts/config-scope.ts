@@ -23,7 +23,7 @@ export type ConfigPromptKey = Exclude<
   | "shadcnBaseColor"
   | "shadcnFont"
   | "shadcnRadius"
-> | "astroIntegration" | "shadcnOptions";
+> | "astroIntegration" | "shadcnOptions" | "appPlatforms";
 
 export type ConfigSection = {
   id: string;
@@ -51,6 +51,11 @@ const sharedServiceSection = {
 } as const satisfies ConfigSection;
 
 const typescriptSections = [
+  {
+    id: "app-platforms",
+    label: "App Platforms",
+    promptKeys: ["appPlatforms"],
+  },
   {
     id: "ui-styling",
     label: "UI & Styling",
@@ -348,6 +353,8 @@ export function shouldAskConfigPromptKey(
 
 export function getDefaultPromptValue(key: ConfigPromptKey): unknown {
   if (key === "astroIntegration") return undefined;
+  // appPlatforms merges into config.addons; a skipped prompt adds nothing.
+  if (key === "appPlatforms") return [];
   const defaults = getDefaultConfig();
   if (key === "shadcnOptions") {
     // uiLibrary defaults to shadcn-ui, so a skipped shadcn prompt must carry

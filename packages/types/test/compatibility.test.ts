@@ -184,6 +184,44 @@ describe("compatibility issue helpers", () => {
     });
   });
 
+  it("removes incompatible Electron and Capacitor selections after a frontend change", () => {
+    const result = analyzeStackCompatibility({
+      ...DEFAULT_STACK_SELECTION,
+      nativeFrontend: [],
+      webFrontend: ["next"],
+      appPlatforms: ["electron", "capacitor"],
+    });
+
+    expect(result.adjustedStack.appPlatforms).toEqual([]);
+    expect(result.changes.map((change) => change.message)).toEqual(
+      expect.arrayContaining([
+        "Electron removed (requires compatible frontend)",
+        "Capacitor removed (requires compatible frontend)",
+      ]),
+    );
+  });
+
+  it("allows daisyUI and platform tooling for Vue and vanilla Vite", () => {
+    for (const frontend of ["vue", "vanilla-vite"] as const) {
+      expect(
+        getDisabledReason(
+          { ...DEFAULT_STACK_SELECTION, webFrontend: [frontend], nativeFrontend: [] },
+          "uiLibrary",
+          "daisyui",
+        ),
+      ).toBeNull();
+      for (const platform of ["pwa", "tauri", "docker-compose"] as const) {
+        expect(
+          getDisabledReason(
+            { ...DEFAULT_STACK_SELECTION, webFrontend: [frontend], nativeFrontend: [] },
+            "appPlatforms",
+            platform,
+          ),
+        ).toBeNull();
+      }
+    }
+  });
+
   it("returns structured TanStack AI frontend issues", () => {
     const issue = getAIFrontendCompatibilityIssue("tanstack-ai", ["svelte"]);
 

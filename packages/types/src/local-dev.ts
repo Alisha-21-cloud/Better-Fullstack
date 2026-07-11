@@ -1,9 +1,11 @@
 const VITE_WEB_FRONTENDS = new Set([
   "react-router",
   "react-vite",
+  "tanstack-router",
   "vanilla-vite",
   "vue",
   "svelte",
+  "solid",
   "fresh",
 ]);
 const ASTRO_WEB_FRONTENDS = new Set(["astro"]);

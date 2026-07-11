@@ -1428,6 +1428,20 @@ export const analyzeStackCompatibility = (
     });
   }
 
+  for (const platform of ["electron", "capacitor"] as const) {
+    if (
+      nextStack.appPlatforms.includes(platform) &&
+      !validateAddonCompatibility(platform, nextStack.webFrontend as Frontend[]).isCompatible
+    ) {
+      nextStack.appPlatforms = nextStack.appPlatforms.filter((addon) => addon !== platform);
+      changed = true;
+      changes.push({
+        category: "appPlatforms",
+        message: `${platform === "electron" ? "Electron" : "Capacitor"} removed (requires compatible frontend)`,
+      });
+    }
+  }
+
   // ============================================
   // EXAMPLES CONSTRAINTS
   // ============================================
@@ -2605,7 +2619,8 @@ export const getDisabledReason = (
 
     if (
       optionId === "graphql-codegen" &&
-      !["garph", "graphql-yoga", "apollo-server"].includes(currentStack.api)
+      !["garph", "graphql-yoga", "apollo-server"].includes(currentStack.api) &&
+      !currentStack.webFrontend.includes("redwood")
     ) {
       return "GraphQL Code Generator requires a GraphQL API selection";
     }
@@ -3762,6 +3777,8 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
     "tanstack-router",
     "react-router",
     "react-vite",
+    "vanilla-vite",
+    "vue",
     "solid",
     "next",
     "vinext",
@@ -3775,6 +3792,8 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
     "tanstack-router",
     "react-router",
     "react-vite",
+    "vanilla-vite",
+    "vue",
     "nuxt",
     "svelte",
     "solid",

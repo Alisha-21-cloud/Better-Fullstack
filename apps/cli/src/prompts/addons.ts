@@ -3,6 +3,7 @@ import {
   type Addons,
   AddonsSchema,
   type API,
+  APP_PLATFORM_ADDON_VALUES,
   type Auth,
   type Backend,
   type Frontend,
@@ -10,7 +11,7 @@ import {
 } from "../types";
 import { getCompatibleAddons, validateAddonCompatibility } from "../utils/compatibility-rules";
 import { exitCancelled } from "../utils/errors";
-import { isCancel, navigableGroupMultiselect } from "./navigable";
+import { isCancel, navigableGroupMultiselect, navigableMultiselect } from "./navigable";
 
 type AddonOption = {
   value: Addons;
@@ -193,20 +194,11 @@ const ADDON_GROUPS: Record<string, Addons[]> = {
     "lefthook",
   ],
   Documentation: ["starlight", "fumadocs"],
-  Extensions: [
-    "pwa",
-    "tauri",
-    "electron",
-    "capacitor",
-    "opentui",
-    "wxt",
-    "ruler",
-    "devcontainer",
-    "docker-compose",
-  ],
+  Extensions: ["ruler", "devcontainer", "docker-compose"],
   Integrations: ["msw", "storybook", "backend-utils", "axios", "firebase"],
   "API Tooling": ["graphql-codegen", "openapi-typescript"],
   "AI Agents": ["mcp", "skills"],
+  "App Platforms": [...APP_PLATFORM_ADDON_VALUES],
   "Data Fetching": ["swr", "apollo-client"],
   TanStack: ["tanstack-query", "tanstack-table", "tanstack-virtual", "tanstack-db", "tanstack-pacer"],
 };
@@ -217,7 +209,7 @@ function createGroupedAddonOptions() {
   ) as Record<string, AddonOption[]>;
 }
 
-function getAddonGroup(addon: Addons) {
+export function getAddonGroup(addon: Addons) {
   return Object.entries(ADDON_GROUPS).find(([, addons]) => addons.includes(addon))?.[0];
 }
 
@@ -255,6 +247,38 @@ function getCompatibleAddonsForPrompt(
   return getCompatibleAddons(allAddons, frontends, existingAddons, auth, backend, runtime, api);
 }
 
+const APP_PLATFORM_ADDONS = new Set<Addons>(APP_PLATFORM_ADDON_VALUES);
+
+/**
+ * Dedicated multiselect for app platforms (Electron, Tauri, Capacitor, PWA,
+ * WXT, OpenTUI). Selections merge into `config.addons`; when `--addons` is
+ * passed the flag already carries any platforms, so this returns [] to avoid
+ * double-collecting.
+ */
+export async function getAppPlatformsChoice(addons?: Addons[], frontends?: Frontend[]) {
+  if (addons !== undefined) return [] as Addons[];
+
+  const options: AddonOption[] = [];
+  for (const platform of APP_PLATFORM_ADDON_VALUES) {
+    const { isCompatible } = validateAddonCompatibilityForPrompt(platform, frontends || []);
+    if (!isCompatible) continue;
+    const { label, hint } = getAddonDisplay(platform);
+    options.push({ value: platform, label, hint });
+  }
+  if (options.length === 0) return [] as Addons[];
+
+  const response = await navigableMultiselect<Addons>({
+    message: "Select app platforms (desktop, mobile, extension)",
+    options,
+    initialValues: [],
+    required: false,
+  });
+
+  if (isCancel(response)) return exitCancelled("Operation cancelled");
+
+  return response;
+}
+
 export async function getAddonsChoice(
   addons?: Addons[],
   frontends?: Frontend[],
@@ -265,7 +289,9 @@ export async function getAddonsChoice(
 ) {
   if (addons !== undefined) return addons;
 
-  const allAddons = AddonsSchema.options.filter((addon) => addon !== "none");
+  const allAddons = AddonsSchema.options.filter(
+    (addon) => addon !== "none" && !APP_PLATFORM_ADDONS.has(addon),
+  );
   const groupedOptions: Record<string, AddonOption[]> = createGroupedAddonOptions();
 
   const frontendsArray = frontends || [];

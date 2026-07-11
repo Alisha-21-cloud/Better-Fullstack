@@ -189,6 +189,21 @@ export const AddonsSchema = z
   ])
   .describe("Additional addons");
 
+/**
+ * Addon values that are app platforms — shells/targets that package the web
+ * frontend (desktop, mobile hybrid, browser extension, terminal, installable
+ * PWA). Surfaced as a dedicated "App Platforms" section in the CLI and web
+ * builder; they still serialize into the `addons` config field.
+ */
+export const APP_PLATFORM_ADDON_VALUES = [
+  "pwa",
+  "tauri",
+  "electron",
+  "capacitor",
+  "wxt",
+  "opentui",
+] as const;
+
 export const ExamplesSchema = z
   .enum(["ai", "chat-sdk", "tanstack-showcase", "none"])
   .describe("Example templates to include");

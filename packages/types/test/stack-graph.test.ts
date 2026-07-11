@@ -745,6 +745,15 @@ describe("stack graph", () => {
     ).toContain("INCOMPATIBLE_GRAPH_SELECTION");
   });
 
+  it("allows Redwood GraphQL Codegen without a separate API selection", () => {
+    const parts = parseStackPartSpecs([
+      "frontend:typescript:redwood",
+      "workspaceTooling:universal:graphql-codegen",
+    ]);
+
+    expect(validateStackParts(parts).issues).toEqual([]);
+  });
+
   it("rejects shared non-TypeScript backend service candidates through graph checks", () => {
     const javaParts = parseStackPartSpecs([
       "backend:java:spring-boot",
