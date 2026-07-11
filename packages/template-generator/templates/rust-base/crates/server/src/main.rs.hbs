@@ -1006,9 +1006,13 @@ async fn rocket() -> _ {
     let rpc_address = format!("{rpc_host}:{rpc_port}")
         .parse()
         .expect("JSONRPC_PORT must be a valid port");
-    let _rpc_server = rpc::start(rpc_address)
+    let rpc_server = rpc::start(rpc_address)
         .await
         .expect("failed to start the JSON-RPC server");
+    // Keep the handle owned by a long-lived task for Rocket's lifetime.
+    rocket::tokio::spawn(async move {
+        rpc_server.stopped().await;
+    });
 {{/if}}
 {{#if (eq rustObservability "metrics")}}
 

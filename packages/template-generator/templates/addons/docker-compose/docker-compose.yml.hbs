@@ -154,6 +154,9 @@ volumes:
 {{#if (eq rustApi "jsonrpsee")}}
       - "9944:9944"
 {{/if}}
+{{#if (eq rustObservability "metrics")}}
+      - "9000:9000"
+{{/if}}
 {{else}}
       - "8080:8080"
 {{/if}}
@@ -183,8 +186,11 @@ volumes:
 {{#if (eq rustApi "jsonrpsee")}}
       - JSONRPC_PORT=9944
 {{/if}}
+{{#if (eq rustObservability "metrics")}}
+      - METRICS_LISTEN_ADDRESS=0.0.0.0:9000
+{{/if}}
 {{#if (eq rustOrm "mongodb")}}
-      - DATABASE_URL=mongodb://root:password@db:27017/{{projectName}}?authSource=admin
+      - MONGODB_URI=mongodb://root:password@db:27017/{{projectName}}?authSource=admin
 {{else if (eq rustOrm "rusqlite")}}
       - DATABASE_URL=/app/data/data.db
 {{else if (ne rustOrm "none")}}

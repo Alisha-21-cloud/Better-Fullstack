@@ -3282,4 +3282,22 @@ describe("Rust library expansion", () => {
     expect(main).toContain("rpc_server.stopped().await");
     expect(main).toContain('std::env::var("JSONRPC_HOST")');
   });
+
+  it("keeps Rocket JSON-RPC servers alive for the Rocket process lifetime", async () => {
+    const result = await createVirtual({
+      projectName: "rust-rocket-jsonrpc",
+      ecosystem: "rust",
+      rustWebFramework: "rocket",
+      rustFrontend: "none",
+      rustOrm: "none",
+      rustApi: "jsonrpsee",
+      rustCli: "none",
+      rustLibraries: [],
+    });
+
+    expect(result.success).toBe(true);
+    const main = getFileContent(result.tree!.root, "crates/server/src/main.rs");
+    expect(main).toContain("rocket::tokio::spawn(async move");
+    expect(main).toContain("rpc_server.stopped().await");
+  });
 });

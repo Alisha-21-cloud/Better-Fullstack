@@ -25,7 +25,9 @@ export const authOptions = {
   adapter: PrismaAdapter(prisma),
 {{/if}}
   session: {
-    strategy: "{{#if (or (eq orm "drizzle") (eq orm "prisma"))}}database{{else}}jwt{{/if}}",
+    // JWT sessions are required by NextAuth's edge middleware. The adapter still
+    // persists users, accounts, and verification tokens in the selected database.
+    strategy: "jwt",
   },
   providers: [
     // OAuth providers - configure in your .env file
