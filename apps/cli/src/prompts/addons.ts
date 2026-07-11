@@ -198,6 +198,7 @@ const ADDON_GROUPS: Record<string, Addons[]> = {
   Integrations: ["msw", "storybook", "backend-utils", "axios", "firebase"],
   "API Tooling": ["graphql-codegen", "openapi-typescript"],
   "AI Agents": ["mcp", "skills"],
+  "App Platforms": [...APP_PLATFORM_ADDON_VALUES],
   "Data Fetching": ["swr", "apollo-client"],
   TanStack: ["tanstack-query", "tanstack-table", "tanstack-virtual", "tanstack-db", "tanstack-pacer"],
 };
@@ -208,7 +209,7 @@ function createGroupedAddonOptions() {
   ) as Record<string, AddonOption[]>;
 }
 
-function getAddonGroup(addon: Addons) {
+export function getAddonGroup(addon: Addons) {
   return Object.entries(ADDON_GROUPS).find(([, addons]) => addons.includes(addon))?.[0];
 }
 

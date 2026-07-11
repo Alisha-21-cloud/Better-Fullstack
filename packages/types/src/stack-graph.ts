@@ -1749,7 +1749,8 @@ function createAddonCompatibilityIssue(
 
   if (
     part.toolId === "graphql-codegen" &&
-    !apiTool?.match(/^(garph|graphql-yoga|apollo-server)$/)
+    !apiTool?.match(/^(garph|graphql-yoga|apollo-server)$/) &&
+    frontendTool !== "redwood"
   ) {
     return createStackGraphIssue({
       code: "INCOMPATIBLE_GRAPH_SELECTION",

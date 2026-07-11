@@ -18777,7 +18777,7 @@ SPRING_PROFILES_ACTIVE=dev
 # CORS_ORIGIN=http://localhost:3001
 APP_BASIC_USERNAME=admin
 APP_BASIC_PASSWORD=change-me
-CORS_ORIGIN=http://localhost:3001"
+CORS_ORIGIN=http://localhost:5173"
 ,
       "path": ".env.example",
     },
@@ -19015,7 +19015,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -19460,7 +19460,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -19896,7 +19896,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -20322,7 +20322,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -20598,7 +20598,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -20851,7 +20851,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -21244,7 +21244,7 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
@@ -21304,7 +21304,7 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
@@ -21396,7 +21396,7 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
@@ -21456,7 +21456,7 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
@@ -21516,7 +21516,7 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
@@ -21568,7 +21568,7 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
@@ -21628,7 +21628,7 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
@@ -21704,7 +21704,7 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
@@ -21772,7 +21772,7 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
@@ -21955,7 +21955,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22071,7 +22071,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22179,7 +22179,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22271,7 +22271,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22347,7 +22347,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22423,7 +22423,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22590,7 +22590,7 @@ PORT=4000
 SECRET_KEY_BASE=replace-with-mix-phx-gen-secret
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 DATABASE_URL=ecto://postgres:postgres@localhost/snapshot_elixir_phoenix_ecto_rest_prod
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
@@ -22743,7 +22743,7 @@ PORT=4000
 SECRET_KEY_BASE=replace-with-mix-phx-gen-secret
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 DATABASE_URL=ecto://postgres:postgres@localhost/snapshot_elixir_phoenix_liveview_full_prod
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
