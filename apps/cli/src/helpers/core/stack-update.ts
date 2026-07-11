@@ -14,14 +14,12 @@ import { getDefaultConfig } from "../../constants";
 import { CreateCommandOptionsSchema } from "../../create-command-input";
 import {
   analyzeStackCompatibility,
-  getAddonStackPartBinding,
   formatStackPartSpec,
   legacyProjectConfigToStackParts,
   parseStackPartSpecs,
   requiresChatSdkVercelAI,
   stackPartsToLegacyProjectConfigPartial,
   type BetterTStackConfig,
-  type CompatibilityInput,
   type ProjectConfig,
 } from "../../types";
 import {
@@ -36,6 +34,13 @@ import {
   collectStructuredBaselines,
   refreshScaffoldManifestFiles,
 } from "../../utils/scaffold-manifest";
+import {
+  asString,
+  asStringArray,
+  buildCompatibilityInputFromConfig,
+  compatibilityChangesToProjectConfig,
+  getCompatibilityBackend,
+} from "../../utils/stack-compatibility";
 
 type JsonObject = Record<string, unknown>;
 
@@ -441,10 +446,6 @@ function mergeDerivedStackPartsWithExistingGraph(
   return parseStackPartSpecs(pruneScopedSpecsWithoutOwners([...new Set(nextSpecs)]), "selected");
 }
 
-function asString(value: unknown, fallback = "none"): string {
-  return typeof value === "string" ? value : fallback;
-}
-
 function computeArchitectureChanges(
   currentConfig: ProjectConfig,
   proposedConfig: ProjectConfig,
@@ -536,28 +537,6 @@ async function writeMigrationChecklist(projectDir: string, plan: StackUpdatePlan
   } else {
     await fs.writeFile(migrationPath, `# Migration checklist\n\n${section}\n`, "utf-8");
   }
-}
-
-function asStringArray(value: unknown): string[] {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : [];
-}
-
-function getCompatibilityBackend(config: ProjectConfig, webFrontend: string[]): string {
-  if (config.backend !== "self") return asString(config.backend, "hono");
-  if (webFrontend.includes("next")) return "self-next";
-  if (webFrontend.includes("vinext")) return "self-vinext";
-  if (webFrontend.includes("tanstack-start")) return "self-tanstack-start";
-  if (webFrontend.includes("astro")) return "self-astro";
-  if (webFrontend.includes("nuxt")) return "self-nuxt";
-  if (webFrontend.includes("svelte")) return "self-svelte";
-  if (webFrontend.includes("solid-start")) return "self-solid-start";
-  return "self";
-}
-
-function getProjectBackendFromCompatibility(backend: string): string {
-  return backend.startsWith("self-") ? "self" : backend;
 }
 
 function getDefaultDatabaseForDbSetup(
@@ -710,224 +689,6 @@ function getDefaultNativeFrontendForRequestedUpdate(
     hasRequestedNonNoneValue(requestedChanges, "mobileDeepLinking");
 
   return needsNativeFrontend ? "native-bare" : undefined;
-}
-
-function hasSelectedTypeScriptBackendPart(config: ProjectConfig): boolean {
-  return (
-    config.stackParts?.some(
-      (part) =>
-        part.source !== "provided" &&
-        !part.ownerPartId &&
-        part.role === "backend" &&
-        part.ecosystem === "typescript" &&
-        part.toolId !== "none",
-    ) ?? false
-  );
-}
-
-function getCompatibilityEcosystem(config: ProjectConfig): ProjectConfig["ecosystem"] {
-  if (config.ecosystem === "react-native" && hasSelectedTypeScriptBackendPart(config)) {
-    return "typescript";
-  }
-  return config.ecosystem;
-}
-
-function buildCompatibilityInputFromConfig(config: ProjectConfig): CompatibilityInput {
-  const frontend = asStringArray(config.frontend);
-  const addons = asStringArray(config.addons);
-  const webFrontend = frontend.filter((item) => !item.startsWith("native-") && item !== "none");
-  const nativeFrontend = frontend.filter((item) => item.startsWith("native-"));
-  const codeQuality: string[] = [];
-  const documentation: string[] = [];
-  const appPlatforms: string[] = [];
-
-  for (const addon of addons) {
-    const binding = getAddonStackPartBinding(addon);
-    if (binding?.role === "codeQuality") {
-      codeQuality.push(addon);
-    } else if (binding?.role === "documentation") {
-      documentation.push(addon);
-    } else if (addon !== "none") {
-      appPlatforms.push(addon);
-    }
-  }
-
-  return {
-    ecosystem: getCompatibilityEcosystem(config),
-    projectName: config.projectName ?? null,
-    webFrontend,
-    nativeFrontend,
-    astroIntegration: asString(config.astroIntegration),
-    runtime: asString(config.runtime, "bun"),
-    backend: getCompatibilityBackend(config, webFrontend),
-    database: asString(config.database),
-    orm: asString(config.orm),
-    dbSetup: asString(config.dbSetup),
-    auth: asString(config.auth),
-    payments: asString(config.payments),
-    email: asString(config.email),
-    fileUpload: asString(config.fileUpload),
-    logging: asString(config.logging),
-    observability: asString(config.observability),
-    featureFlags: asString(config.featureFlags),
-    analytics: asString(config.analytics),
-    backendLibraries: "none",
-    stateManagement: asString(config.stateManagement),
-    forms: asString(config.forms),
-    validation: asString(config.validation),
-    testing: asString(config.testing),
-    realtime: asString(config.realtime),
-    jobQueue: asString(config.jobQueue),
-    caching: asString(config.caching),
-    rateLimit: asString(config.rateLimit),
-    animation: asString(config.animation),
-    cssFramework: asString(config.cssFramework),
-    uiLibrary: asString(config.uiLibrary),
-    shadcnBase: asString(config.shadcnBase, "radix"),
-    shadcnStyle: asString(config.shadcnStyle, "nova"),
-    shadcnIconLibrary: asString(config.shadcnIconLibrary, "lucide"),
-    shadcnColorTheme: asString(config.shadcnColorTheme, "neutral"),
-    shadcnBaseColor: asString(config.shadcnBaseColor, "neutral"),
-    shadcnFont: asString(config.shadcnFont, "inter"),
-    shadcnRadius: asString(config.shadcnRadius, "default"),
-    cms: asString(config.cms),
-    i18n: asString(config.i18n),
-    search: asString(config.search),
-    vectorDb: asString(config.vectorDb),
-    fileStorage: asString(config.fileStorage),
-    mobileNavigation: asString(config.mobileNavigation),
-    mobileUI: asString(config.mobileUI),
-    mobileStorage: asString(config.mobileStorage),
-    mobileTesting: asString(config.mobileTesting),
-    mobilePush: asString(config.mobilePush),
-    mobileOTA: asString(config.mobileOTA),
-    mobileDeepLinking: asString(config.mobileDeepLinking),
-    codeQuality,
-    documentation,
-    appPlatforms,
-    packageManager: asString(config.packageManager, "bun"),
-    workspaceShape: asString(config.workspaceShape, "monorepo"),
-    versionChannel: asString(config.versionChannel, "stable"),
-    examples: asStringArray(config.examples),
-    aiSdk: asString(config.ai),
-    aiDocs: asStringArray(config.aiDocs),
-    git: "false",
-    install: "false",
-    api: asString(config.api),
-    webDeploy: asString(config.webDeploy),
-    serverDeploy: asString(config.serverDeploy),
-    yolo: "false",
-    rustWebFramework: asString(config.rustWebFramework),
-    rustFrontend: asString(config.rustFrontend),
-    rustOrm: asString(config.rustOrm),
-    rustApi: asString(config.rustApi),
-    rustCli: asString(config.rustCli),
-    rustLibraries: asStringArray(config.rustLibraries),
-    rustLogging: asString(config.rustLogging),
-    rustErrorHandling: asString(config.rustErrorHandling),
-    rustCaching: asString(config.rustCaching),
-    rustAuth: asString(config.rustAuth),
-    rustRealtime: asString(config.rustRealtime),
-    rustMessageQueue: asString(config.rustMessageQueue),
-    rustObservability: asString(config.rustObservability),
-    rustTemplating: asString(config.rustTemplating),
-    pythonWebFramework: asString(config.pythonWebFramework),
-    pythonOrm: asString(config.pythonOrm),
-    pythonValidation: asString(config.pythonValidation),
-    pythonAi: asStringArray(config.pythonAi),
-    pythonAuth: asString(config.pythonAuth),
-    pythonApi: asString(config.pythonApi),
-    pythonTaskQueue: asString(config.pythonTaskQueue),
-    pythonGraphql: asString(config.pythonGraphql),
-    pythonQuality: asString(config.pythonQuality),
-    pythonTesting: asStringArray(config.pythonTesting),
-    pythonCaching: asString(config.pythonCaching),
-    pythonRealtime: asString(config.pythonRealtime),
-    pythonObservability: asString(config.pythonObservability),
-    pythonCli: asStringArray(config.pythonCli),
-    goWebFramework: asString(config.goWebFramework),
-    goOrm: asString(config.goOrm),
-    goApi: asString(config.goApi),
-    goCli: asString(config.goCli),
-    goLogging: asString(config.goLogging),
-    goAuth: asString(config.goAuth),
-    goTesting: asStringArray(config.goTesting),
-    goRealtime: asString(config.goRealtime),
-    goMessageQueue: asString(config.goMessageQueue),
-    goCaching: asString(config.goCaching),
-    goConfig: asString(config.goConfig),
-    goObservability: asString(config.goObservability),
-    javaLanguage: asString(config.javaLanguage, "java"),
-    javaWebFramework: asString(config.javaWebFramework),
-    javaBuildTool: asString(config.javaBuildTool),
-    javaOrm: asString(config.javaOrm),
-    javaAuth: asString(config.javaAuth),
-    javaApi: asString(config.javaApi),
-    javaLogging: asString(config.javaLogging),
-    javaLibraries: asStringArray(config.javaLibraries),
-    javaTestingLibraries: asStringArray(config.javaTestingLibraries),
-    dotnetWebFramework: asString(config.dotnetWebFramework),
-    dotnetOrm: asString(config.dotnetOrm),
-    dotnetAuth: asString(config.dotnetAuth),
-    dotnetApi: asString(config.dotnetApi),
-    dotnetTesting: asStringArray(config.dotnetTesting),
-    dotnetJobQueue: asString(config.dotnetJobQueue),
-    dotnetRealtime: asString(config.dotnetRealtime),
-    dotnetObservability: asStringArray(config.dotnetObservability),
-    dotnetValidation: asString(config.dotnetValidation),
-    dotnetCaching: asString(config.dotnetCaching),
-    dotnetDeploy: asString(config.dotnetDeploy),
-    elixirWebFramework: asString(config.elixirWebFramework),
-    elixirOrm: asString(config.elixirOrm),
-    elixirAuth: asString(config.elixirAuth),
-    elixirApi: asString(config.elixirApi),
-    elixirRealtime: asString(config.elixirRealtime),
-    elixirJobs: asString(config.elixirJobs),
-    elixirValidation: asString(config.elixirValidation),
-    elixirHttp: asString(config.elixirHttp),
-    elixirJson: asString(config.elixirJson),
-    elixirEmail: asString(config.elixirEmail),
-    elixirCaching: asString(config.elixirCaching),
-    elixirObservability: asString(config.elixirObservability),
-    elixirTesting: asString(config.elixirTesting),
-    elixirQuality: asString(config.elixirQuality),
-    elixirDeploy: asString(config.elixirDeploy),
-    elixirLibraries: asStringArray(config.elixirLibraries),
-  };
-}
-
-function compatibilityChangesToProjectConfig(
-  adjusted: CompatibilityInput,
-  baseConfig: ProjectConfig,
-): Partial<ProjectConfig> {
-  const frontend = [...adjusted.webFrontend, ...adjusted.nativeFrontend];
-  const ignoredCompatibilityKeys = new Set([
-    "webFrontend",
-    "nativeFrontend",
-    "codeQuality",
-    "documentation",
-    "appPlatforms",
-    "aiSdk",
-    "backendLibraries",
-    "projectName",
-    "git",
-    "install",
-    "yolo",
-  ]);
-  const changes: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(adjusted)) {
-    if (!ignoredCompatibilityKeys.has(key)) {
-      changes[key] = value;
-    }
-  }
-
-  changes.frontend = frontend.length > 0 ? frontend : baseConfig.frontend;
-  changes.addons = [...adjusted.codeQuality, ...adjusted.documentation, ...adjusted.appPlatforms];
-  changes.ai = adjusted.aiSdk;
-  changes.backend = getProjectBackendFromCompatibility(adjusted.backend);
-
-  return changes as Partial<ProjectConfig>;
 }
 
 function applyKnownDependencyExpansions(
@@ -1594,7 +1355,7 @@ export async function planStackUpdate(
   if (compatibilityResult.adjustedStack) {
     proposedConfig = mergeProjectConfig(
       proposedConfig,
-      compatibilityChangesToProjectConfig(compatibilityResult.adjustedStack, proposedConfig),
+      compatibilityChangesToProjectConfig(compatibilityResult.adjustedStack),
     );
   }
   proposedConfig.stackParts = mergeDerivedStackPartsWithExistingGraph(
