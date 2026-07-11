@@ -3,10 +3,18 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import type { Addons, Frontend } from "../src";
+import { getAddonGroup } from "../src/prompts/addons";
+import { APP_PLATFORM_ADDON_VALUES } from "../src/types";
 
 import { expectError, expectSuccess, runTRPCTest, type TestConfig } from "./test-utils";
 
 describe("Addon Configurations", () => {
+  it("keeps app platforms grouped in the bts add prompt", () => {
+    for (const addon of APP_PLATFORM_ADDON_VALUES) {
+      expect(getAddonGroup(addon)).toBe("App Platforms");
+    }
+  });
+
   describe("Universal Addons (no frontend restrictions)", () => {
     const universalAddons = ["biome", "lefthook", "husky", "turborepo", "nx", "oxlint", "msw"];
     const universalAddonTimeoutMs = 60_000;
@@ -143,7 +151,16 @@ describe("Addon Configurations", () => {
     });
 
     describe("PWA Addon", () => {
-      const pwaCompatibleFrontends = ["tanstack-router", "react-router", "react-vite", "solid", "next", "vinext"];
+      const pwaCompatibleFrontends = [
+        "tanstack-router",
+        "react-router",
+        "react-vite",
+        "vanilla-vite",
+        "vue",
+        "solid",
+        "next",
+        "vinext",
+      ];
 
       for (const frontend of pwaCompatibleFrontends) {
         it(`should work with PWA + ${frontend}`, async () => {
@@ -164,7 +181,9 @@ describe("Addon Configurations", () => {
           };
 
           // Handle special frontend requirements
-          if (frontend === "solid") {
+          if (["vanilla-vite", "vue"].includes(frontend)) {
+            config.api = "openapi";
+          } else if (frontend === "solid") {
             config.api = "orpc"; // tRPC not supported with solid
           } else {
             config.api = "trpc";
@@ -217,6 +236,8 @@ describe("Addon Configurations", () => {
       const tauriCompatibleFrontends = [
         "tanstack-router",
         "react-router",
+        "vanilla-vite",
+        "vue",
         "nuxt",
         "svelte",
         "solid",
@@ -241,7 +262,9 @@ describe("Addon Configurations", () => {
             install: false,
           };
 
-          if (["nuxt", "svelte", "solid"].includes(frontend)) {
+          if (["vanilla-vite", "vue"].includes(frontend)) {
+            config.api = "openapi";
+          } else if (["nuxt", "svelte", "solid"].includes(frontend)) {
             config.api = "orpc";
           } else {
             config.api = "trpc";

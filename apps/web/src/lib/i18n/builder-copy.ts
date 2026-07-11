@@ -263,7 +263,7 @@ const CATEGORY_NAMES: Record<string, LocalizedMap> = {
     "fr": "Bibliothèque d'interface utilisateur",
     "uk": "UI-бібліотека",
   },
-  appPlatforms: {
+  appShells: {
     "es": "Plataformas de app",
     "zh": "应用平台",
     "ja": "アプリプラットフォーム",
@@ -272,6 +272,16 @@ const CATEGORY_NAMES: Record<string, LocalizedMap> = {
     "de": "App-Plattformen",
     "fr": "Plateformes d'applications",
     "uk": "Платформи додатків",
+  },
+  appPlatforms: {
+    "es": "Complementos",
+    "zh": "扩展插件",
+    "ja": "アドオン",
+    "ko": "애드온",
+    "zh-Hant": "擴充套件",
+    "de": "Add-ons",
+    "fr": "Modules complémentaires",
+    "uk": "Доповнення",
   },
   packageManager: {
     "es": "Gestor de paquetes",

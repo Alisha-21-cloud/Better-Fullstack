@@ -1066,6 +1066,30 @@ function buildServerVars(
       comment: "Kinde redirect URL after logout",
     },
     {
+      key: "GITHUB_CLIENT_ID",
+      value: "",
+      condition: auth === "passport",
+      comment: "GitHub OAuth App client ID for Passport.js",
+    },
+    {
+      key: "GITHUB_CLIENT_SECRET",
+      value: "",
+      condition: auth === "passport",
+      comment: "GitHub OAuth App client secret for Passport.js",
+    },
+    {
+      key: "GITHUB_CALLBACK_URL",
+      value: "http://localhost:3000/api/auth/github/callback",
+      condition: auth === "passport",
+      comment: "GitHub OAuth callback URL",
+    },
+    {
+      key: "PASSPORT_SESSION_SECRET",
+      value: generateAuthSecret(),
+      condition: auth === "passport",
+      comment: "Session cookie signing secret for Passport.js",
+    },
+    {
       key: "POLAR_ACCESS_TOKEN",
       value: "polar_oat_your_access_token",
       condition: payments === "polar",
@@ -1122,6 +1146,24 @@ function buildServerVars(
       value: "sandbox",
       condition: payments === "paddle",
       comment: "Paddle environment - use 'sandbox' for testing, 'production' for live",
+    },
+    {
+      key: "PAYPAL_CLIENT_ID",
+      value: "",
+      condition: payments === "paypal",
+      comment: "PayPal REST application client ID",
+    },
+    {
+      key: "PAYPAL_CLIENT_SECRET",
+      value: "",
+      condition: payments === "paypal",
+      comment: "PayPal REST application client secret",
+    },
+    {
+      key: "PAYPAL_ENVIRONMENT",
+      value: "sandbox",
+      condition: payments === "paypal",
+      comment: "PayPal environment - use 'sandbox' or 'production'",
     },
     {
       key: "DODO_PAYMENTS_API_KEY",
@@ -1324,6 +1366,30 @@ function buildServerVars(
       key: "GOOGLE_GENERATIVE_AI_API_KEY",
       value: "",
       condition: examples?.includes("ai") || false,
+    },
+    {
+      key: "OPENAI_API_KEY",
+      value: "",
+      condition: ai === "openai-sdk",
+      comment: "OpenAI API key",
+    },
+    {
+      key: "OPENAI_MODEL",
+      value: "gpt-5-mini",
+      condition: ai === "openai-sdk",
+      comment: "Default OpenAI Responses API model",
+    },
+    {
+      key: "ANTHROPIC_API_KEY",
+      value: "",
+      condition: ai === "anthropic-sdk",
+      comment: "Anthropic API key",
+    },
+    {
+      key: "ANTHROPIC_MODEL",
+      value: "claude-sonnet-4-6",
+      condition: ai === "anthropic-sdk",
+      comment: "Default Anthropic Messages API model",
     },
     {
       key: "SLACK_BOT_TOKEN",

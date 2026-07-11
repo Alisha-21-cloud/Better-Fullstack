@@ -476,9 +476,33 @@ export function validateAddonCompatibility(
   rustFrontend?: string,
   javaWebFramework?: string,
   database?: Database,
+  api?: API,
 ): { isCompatible: boolean; reason?: string } {
   const baseCompatibility = validateAddonCompatibilityShared(addon, frontend, _auth);
   if (!baseCompatibility.isCompatible) return baseCompatibility;
+
+  if (
+    (addon === "graphql-codegen" || addon === "apollo-client") &&
+    api !== undefined &&
+    !["garph", "graphql-yoga", "apollo-server"].includes(api) &&
+    !(addon === "graphql-codegen" && frontend.includes("redwood"))
+  ) {
+    return { isCompatible: false, reason: `${addon} requires a GraphQL API selection` };
+  }
+
+  if (addon === "openapi-typescript" && api !== undefined && api !== "openapi") {
+    return {
+      isCompatible: false,
+      reason: "openapi-typescript requires the OpenAPI API selection",
+    };
+  }
+
+  if (addon === "openapi-typescript" && backend === "self") {
+    return {
+      isCompatible: false,
+      reason: "openapi-typescript requires a standalone backend that exposes an OpenAPI schema",
+    };
+  }
 
   // Backend Utils generates framework-specific server helpers.
   if (addon === "backend-utils") {
@@ -571,11 +595,23 @@ export function getCompatibleAddons(
   auth?: Auth,
   backend?: Backend,
   runtime?: Runtime,
+  api?: API,
 ) {
   const compatibleAddons = getCompatibleAddonsShared(allAddons, frontend, existingAddons, auth);
 
   return compatibleAddons.filter((addon) => {
-    const { isCompatible } = validateAddonCompatibility(addon, frontend, auth, backend, runtime);
+    const { isCompatible } = validateAddonCompatibility(
+      addon,
+      frontend,
+      auth,
+      backend,
+      runtime,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      api,
+    );
     return isCompatible;
   });
 }
@@ -590,6 +626,7 @@ export function validateAddonsAgainstFrontends(
   rustFrontend?: string,
   javaWebFramework?: string,
   database?: Database,
+  api?: API,
 ) {
   if (addons.includes("nx") && addons.includes("turborepo")) {
     exitWithError("Nx and Turborepo are alternative workspace runners. Choose one addon.");
@@ -607,6 +644,7 @@ export function validateAddonsAgainstFrontends(
       rustFrontend,
       javaWebFramework,
       database,
+      api,
     );
     if (!isCompatible) {
       exitWithError(`Incompatible addon/frontend combination: ${reason}`);
@@ -617,10 +655,25 @@ export function validateAddonsAgainstFrontends(
 export function validatePaymentsCompatibility(
   payments: Payments | undefined,
   auth: Auth | undefined,
-  _backend: Backend | undefined,
+  backend: Backend | undefined,
   frontends: Frontend[] = [],
 ) {
   if (!payments || payments === "none") return;
+
+  if (
+    payments === "paypal" &&
+    !frontends.some((frontend) => frontend !== "none" && isWebFrontend(frontend))
+  ) {
+    exitWithError(
+      "PayPal requires a web frontend. Please choose a web frontend or a different payments provider.",
+    );
+  }
+
+  if (payments === "paypal" && (backend === "none" || backend === "convex")) {
+    exitWithError(
+      "PayPal checkout requires a standalone or fullstack backend. Please choose a server backend or a different payments provider.",
+    );
+  }
 
   if (payments === "dodo" && frontends.includes("react-vite")) {
     exitWithError("Dodo Payments are not yet supported for React + Vite projects.");
@@ -752,6 +805,47 @@ export function validateAIFrontendCompatibility(
   exitWithError(issue.message);
 }
 
+export function validateAIBackendCompatibility(ai: AI | undefined, backend: Backend | undefined) {
+  if (
+    ai &&
+    ["openai-sdk", "anthropic-sdk"].includes(ai) &&
+    (backend === "none" || backend === "convex")
+  ) {
+    exitWithError(
+      "Direct AI provider SDKs require a standalone or fullstack backend. Please choose a server backend or another AI integration.",
+    );
+  }
+}
+
+export function validateRealtimeCompatibility(
+  realtime: ProjectConfig["realtime"] | undefined,
+  backend: Backend | undefined,
+) {
+  if (realtime === "ws" && backend !== "express") {
+    exitWithError("The ws integration is currently wired for the Express backend.");
+  }
+}
+
+export function validateCSSFrameworkFrontendCompatibility(
+  cssFramework: CSSFramework | undefined,
+  frontends: Frontend[] = [],
+) {
+  if (cssFramework !== "styled-components") return;
+
+  const reactFrontends: Frontend[] = [
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "vinext",
+    "redwood",
+  ];
+  if (!frontends.some((frontend) => reactFrontends.includes(frontend))) {
+    exitWithError("styled-components requires a React frontend.");
+  }
+}
+
 /**
  * Validates that a UI library is compatible with the selected frontend(s)
  */
@@ -827,8 +921,11 @@ export function getCompatibleUILibraries(
 /**
  * Gets list of CSS frameworks compatible with the selected UI library
  */
-export function getCompatibleCSSFrameworks(uiLibrary: UILibrary | undefined): CSSFramework[] {
-  return getCompatibleCSSFrameworksShared(uiLibrary);
+export function getCompatibleCSSFrameworks(
+  uiLibrary: UILibrary | undefined,
+  frontends: Frontend[] = [],
+): CSSFramework[] {
+  return getCompatibleCSSFrameworksShared(uiLibrary, frontends);
 }
 
 /**

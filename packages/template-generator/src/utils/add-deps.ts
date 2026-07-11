@@ -207,6 +207,8 @@ export const dependencyVersionMap = {
 
   // OpenAI Agents SDK
   "@openai/agents": "^0.12.0",
+  openai: "^6.46.0",
+  "@anthropic-ai/sdk": "^0.110.0",
 
   // Google ADK (Agent Development Kit)
   "@google/adk": "^1.3.0",
@@ -398,6 +400,41 @@ export const dependencyVersionMap = {
   // CSS preprocessors
   sass: "^1.101.0",
   less: "^4.6.7",
+  "styled-components": "^6.4.3",
+
+  // TypeScript ecosystem expansion addons
+  eslint: "^10.6.0",
+  "@eslint/js": "^10.0.1",
+  "typescript-eslint": "^8.63.0",
+  globals: "^17.7.0",
+  prettier: "^3.9.5",
+  axios: "^1.18.1",
+  firebase: "^12.16.0",
+  "@graphql-codegen/cli": "^7.2.0",
+  "@graphql-codegen/client-preset": "^6.1.0",
+  "openapi-typescript": "^7.13.0",
+  "@apollo/client": "^4.2.6",
+  electron: "^43.1.0",
+  "electron-builder": "^26.15.3",
+  concurrently: "^9.2.1",
+  "cross-env": "^7.0.3",
+  "wait-on": "^9.0.4",
+  "@capacitor/core": "^8.4.1",
+  "@capacitor/cli": "^8.4.1",
+  "@capacitor/ios": "^8.4.1",
+  "@capacitor/android": "^8.4.1",
+  passport: "^0.7.0",
+  "passport-github2": "^0.1.12",
+  "express-session": "^1.19.0",
+  "@types/passport": "^1.0.17",
+  "@types/passport-github2": "^1.2.9",
+  "@types/express-session": "^1.19.0",
+  mocha: "^11.7.6",
+  "@types/mocha": "^10.0.10",
+  contentful: "^11.12.7",
+  "@paypal/paypal-js": "^10.0.3",
+  "@paypal/react-paypal-js": "^10.1.2",
+  "@paypal/paypal-server-sdk": "^2.4.0",
 
   // UI libraries
   "@radix-ui/react-dialog": "^1.1.17",

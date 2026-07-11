@@ -21,6 +21,7 @@ export function processRealtimeDeps(vfs: VirtualFileSystem, config: ProjectConfi
 
   // Skip if not selected or set to "none"
   if (!realtime || realtime === "none") return;
+  if (realtime === "ws" && backend !== "express") return;
 
   // Skip if no backend to support real-time (convex has its own real-time)
   if (backend === "none" || backend === "convex") return;
@@ -32,6 +33,14 @@ export function processRealtimeDeps(vfs: VirtualFileSystem, config: ProjectConfi
   // Add server-side real-time dependencies
   const serverPath = "apps/server/package.json";
   if (vfs.exists(serverPath)) {
+    if (realtime === "ws") {
+      addPackageDependency({
+        vfs,
+        packagePath: serverPath,
+        dependencies: ["ws"],
+        devDependencies: ["@types/ws"],
+      });
+    }
     const deps = getRealtimeServerDeps(realtime);
     if (deps.length > 0) {
       addPackageDependency({
@@ -75,6 +84,8 @@ function getRealtimeServerDeps(realtime: ProjectConfig["realtime"]): AvailableDe
   switch (realtime) {
     case "socket-io":
       deps.push("socket.io");
+      break;
+    case "ws":
       break;
     case "partykit":
       deps.push("partykit");

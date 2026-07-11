@@ -16,6 +16,8 @@ function processCSSFrameworkDeps(vfs: VirtualFileSystem, config: ProjectConfig):
       "tanstack-router",
       "react-router",
       "react-vite",
+      "vanilla-vite",
+      "vue",
       "tanstack-start",
       "next",
       "nuxt",
@@ -47,6 +49,12 @@ function processCSSFrameworkDeps(vfs: VirtualFileSystem, config: ProjectConfig):
       vfs,
       packagePath: webPath,
       devDependencies: ["less"],
+    });
+  } else if (cssFramework === "styled-components") {
+    addPackageDependency({
+      vfs,
+      packagePath: webPath,
+      dependencies: ["styled-components"],
     });
   } else if (cssFramework === "tailwind" && frontend.includes("astro")) {
     addPackageDependency({

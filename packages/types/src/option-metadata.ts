@@ -5,6 +5,7 @@ import {
   ANALYTICS_VALUES,
   ANIMATION_VALUES,
   API_VALUES,
+  APP_PLATFORM_ADDON_VALUES,
   ASTRO_INTEGRATION_VALUES,
   AUTH_VALUES,
   CACHING_VALUES,
@@ -176,6 +177,7 @@ export type OptionCategory =
   | "mobileDeepLinking"
   | "codeQuality"
   | "documentation"
+  | "appShells"
   | "appPlatforms"
   | "packageManager"
   | "workspaceShape"
@@ -285,6 +287,7 @@ export type OptionCategoryEcosystem =
 export const TYPESCRIPT_CATEGORY_ORDER = [
   "webFrontend",
   "astroIntegration",
+  "appShells",
   "cssFramework",
   "uiLibrary",
   "shadcnBase",
@@ -523,6 +526,8 @@ export function getCategoryOrderForEcosystem(
 export function getCategoryDisplayName(categoryKey: string): string {
   const categoryNames: Record<string, string> = {
     i18n: "Internationalization (i18n)",
+    appShells: "App Platforms",
+    appPlatforms: "Addons",
     mobileNavigation: "Mobile Navigation",
     mobileUI: "Mobile UI",
     mobileStorage: "Mobile Storage",
@@ -632,6 +637,8 @@ const WEB_FRONTEND_VALUES = [
   "tanstack-router",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "tanstack-start",
   "next",
   "vinext",
@@ -678,6 +685,8 @@ const BACKEND_BUILDER_VALUES = [
 
 const CODE_QUALITY_VALUES = [
   "biome",
+  "eslint",
+  "prettier",
   "oxlint",
   "ultracite",
   "lefthook",
@@ -687,13 +696,11 @@ const CODE_QUALITY_VALUES = [
 
 const DOCUMENTATION_VALUES = ["starlight", "fumadocs"] as const satisfies readonly string[];
 
+const APP_SHELL_VALUES = APP_PLATFORM_ADDON_VALUES;
+
 const APP_PLATFORM_VALUES = [
   "turborepo",
   "nx",
-  "pwa",
-  "tauri",
-  "wxt",
-  "opentui",
   "mcp",
   "skills",
   "msw",
@@ -708,6 +715,11 @@ const APP_PLATFORM_VALUES = [
   "devcontainer",
   "docker-compose",
   "github-actions",
+  "axios",
+  "firebase",
+  "graphql-codegen",
+  "openapi-typescript",
+  "apollo-client",
 ] as const satisfies readonly string[];
 
 const EXAMPLE_VALUES = ["ai", "chat-sdk"] as const satisfies readonly string[];
@@ -718,6 +730,7 @@ const MULTI_SELECT_CATEGORIES = new Set<OptionCategory>([
   "nativeFrontend",
   "codeQuality",
   "documentation",
+  "appShells",
   "appPlatforms",
   "examples",
   "aiDocs",
@@ -779,6 +792,7 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   mobileDeepLinking: MOBILE_DEEP_LINKING_VALUES,
   codeQuality: CODE_QUALITY_VALUES,
   documentation: DOCUMENTATION_VALUES,
+  appShells: APP_SHELL_VALUES,
   appPlatforms: APP_PLATFORM_VALUES,
   packageManager: PACKAGE_MANAGER_VALUES,
   workspaceShape: WORKSPACE_SHAPE_VALUES,
@@ -886,6 +900,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     next: "Next.js",
     vinext: "Vinext",
     "react-vite": "React + Vite",
+    "vanilla-vite": "Vite (Vanilla TypeScript)",
+    vue: "Vue 3 + Vite",
     svelte: "SvelteKit",
     redwood: "RedwoodJS",
   },
@@ -940,16 +956,23 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     sst: "SST",
     vercel: "Vercel",
   },
-  cms: { tinacms: "TinaCMS", directus: "Directus", keystatic: "Keystatic" },
+  cms: {
+    tinacms: "TinaCMS",
+    directus: "Directus",
+    keystatic: "Keystatic",
+    contentful: "Contentful",
+  },
   auth: {
     "better-auth-organizations": "Better Auth + Organizations",
     auth0: "Auth0",
     workos: "WorkOS AuthKit",
     kinde: "Kinde",
+    passport: "Passport.js",
   },
   payments: {
     "lemon-squeezy": "Lemon Squeezy",
     dodo: "Dodo Payments",
+    paypal: "PayPal",
   },
   email: {
     "react-email": "React Email",
@@ -993,9 +1016,11 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   },
   testing: {
     "vitest-playwright": "Vitest + Playwright",
+    mocha: "Mocha",
   },
   realtime: {
     "socket-io": "Socket.IO",
+    ws: "ws",
     yjs: "Y.js",
   },
   jobQueue: {
@@ -1029,7 +1054,12 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   logging: {
     evlog: "evlog",
   },
-  cssFramework: { tailwind: "Tailwind CSS", scss: "SCSS", "postcss-only": "PostCSS Only" },
+  cssFramework: {
+    tailwind: "Tailwind CSS",
+    scss: "SCSS",
+    "postcss-only": "PostCSS Only",
+    "styled-components": "styled-components",
+  },
   uiLibrary: {
     "shadcn-ui": "shadcn/ui",
     "shadcn-svelte": "shadcn-svelte",
@@ -1055,6 +1085,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   analytics: {
     plausible: "Plausible",
     umami: "Umami",
+    ga4: "Google Analytics 4",
   },
   mobileNavigation: {
     "expo-router": "Expo Router",
@@ -1085,6 +1116,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   },
   codeQuality: {
     biome: "Biome",
+    eslint: "ESLint",
+    prettier: "Prettier",
     oxlint: "Oxlint",
     ultracite: "Ultracite",
     lefthook: "Lefthook",
@@ -1095,10 +1128,15 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     starlight: "Starlight",
     fumadocs: "Fumadocs",
   },
-  appPlatforms: {
+  appShells: {
     pwa: "PWA",
+    tauri: "Tauri",
+    electron: "Electron",
+    capacitor: "Capacitor",
     wxt: "WXT",
     opentui: "OpenTUI",
+  },
+  appPlatforms: {
     mcp: "MCP",
     msw: "MSW",
     swr: "SWR",
@@ -1110,6 +1148,11 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     devcontainer: "DevContainer",
     "docker-compose": "Docker Compose",
     "github-actions": "GitHub Actions",
+    axios: "Axios",
+    firebase: "Firebase JS SDK",
+    "graphql-codegen": "GraphQL Code Generator",
+    "openapi-typescript": "openapi-typescript",
+    "apollo-client": "Apollo Client",
   },
   versionChannel: {
     stable: "Stable",
@@ -1125,6 +1168,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     voltagent: "VoltAgent",
     langgraph: "LangGraph.js",
     "openai-agents": "OpenAI Agents SDK",
+    "openai-sdk": "OpenAI SDK",
+    "anthropic-sdk": "Anthropic SDK",
     "google-adk": "Google ADK",
     modelfusion: "ModelFusion",
     langchain: "LangChain",
@@ -1702,6 +1747,7 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   mobileDeepLinking: buildCategoryMetadata("mobileDeepLinking"),
   codeQuality: buildCategoryMetadata("codeQuality"),
   documentation: buildCategoryMetadata("documentation"),
+  appShells: buildCategoryMetadata("appShells"),
   appPlatforms: buildCategoryMetadata("appPlatforms"),
   packageManager: buildCategoryMetadata("packageManager"),
   workspaceShape: buildCategoryMetadata("workspaceShape"),

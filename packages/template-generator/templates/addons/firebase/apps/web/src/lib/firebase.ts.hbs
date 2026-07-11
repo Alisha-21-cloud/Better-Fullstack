@@ -1,0 +1,14 @@
+import { getApp, getApps, initializeApp, type FirebaseOptions } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+
+export function createFirebase(options: FirebaseOptions) {
+  const app = getApps().length > 0 ? getApp() : initializeApp(options);
+  return {
+    app,
+    auth: getAuth(app),
+    firestore: getFirestore(app),
+    storage: getStorage(app),
+  };
+}

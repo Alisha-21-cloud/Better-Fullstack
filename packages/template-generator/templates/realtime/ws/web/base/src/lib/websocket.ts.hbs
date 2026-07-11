@@ -1,0 +1,16 @@
+import { env } from "@{{projectName}}/env/web";
+
+export function createWebSocketClient(url?: string) {
+  {{#if (includes frontend "next")}}
+  const serverUrl = env.NEXT_PUBLIC_SERVER_URL;
+  {{else if (includes frontend "nuxt")}}
+  const serverUrl = env.NUXT_PUBLIC_SERVER_URL;
+  {{else if (or (includes frontend "svelte") (includes frontend "astro"))}}
+  const serverUrl = env.PUBLIC_SERVER_URL;
+  {{else}}
+  const serverUrl = env.VITE_SERVER_URL;
+  {{/if}}
+  const websocketUrl = new URL("/ws", serverUrl);
+  websocketUrl.protocol = websocketUrl.protocol === "https:" ? "wss:" : "ws:";
+  return new WebSocket(url ?? websocketUrl);
+}

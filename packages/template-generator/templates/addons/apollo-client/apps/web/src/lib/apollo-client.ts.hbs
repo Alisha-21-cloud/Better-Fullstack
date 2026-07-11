@@ -1,0 +1,25 @@
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
+{{#unless (eq backend "self")}}
+import { env } from "@{{projectName}}/env/web";
+{{/unless}}
+
+{{#if (eq backend "self")}}
+const graphqlUrl = "/api/graphql";
+{{else if (includes frontend "next")}}
+const graphqlUrl = `${env.NEXT_PUBLIC_SERVER_URL}/graphql`;
+{{else if (includes frontend "nuxt")}}
+const graphqlUrl = `${env.NUXT_PUBLIC_SERVER_URL}/graphql`;
+{{else if (includes frontend "svelte")}}
+const graphqlUrl = `${env.PUBLIC_SERVER_URL}/graphql`;
+{{else}}
+const graphqlUrl = `${env.VITE_SERVER_URL}/graphql`;
+{{/if}}
+
+export function createApolloClient(uri = graphqlUrl) {
+  return new ApolloClient({
+    cache: new InMemoryCache(),
+    link: new HttpLink({ uri }),
+  });
+}
+
+export const apolloClient = createApolloClient();

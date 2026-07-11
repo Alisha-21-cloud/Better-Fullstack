@@ -26,7 +26,10 @@ import {
   processEnvVariables,
 } from "./processors";
 import { processAiDocs } from "./processors/ai-docs-generator";
-import { processGraphBackendConnection } from "./processors/graph-backend-connection";
+import {
+  processGraphBackendConnection,
+  processGraphBackendEnv,
+} from "./processors/graph-backend-connection";
 import {
   type TemplateData,
   processBaseTemplate,
@@ -54,6 +57,8 @@ import {
   processRateLimitTemplates,
   processFeatureFlagsTemplates,
   processAnalyticsTemplates,
+  processAITemplates,
+  processRealtimeTemplates,
   processJobQueueTemplates,
   processCMSTemplates,
   processI18nTemplates,
@@ -95,6 +100,7 @@ function hasGeneratedJavascriptTestScript(config: ProjectConfig): boolean {
   return (
     config.testing === "vitest" ||
     config.testing === "jest" ||
+    config.testing === "mocha" ||
     config.testing === "vitest-playwright" ||
     config.mobileTesting === "react-native-testing-library" ||
     config.mobileTesting === "maestro-react-native-testing-library"
@@ -175,6 +181,8 @@ async function processGraphTemplates(
     await processRateLimitTemplates(vfs, templates, tsConfig);
     await processFeatureFlagsTemplates(vfs, templates, tsConfig);
     await processAnalyticsTemplates(vfs, templates, tsConfig);
+    await processAITemplates(vfs, templates, tsConfig);
+    await processRealtimeTemplates(vfs, templates, tsConfig);
     await processJobQueueTemplates(vfs, templates, tsConfig);
     await processCMSTemplates(vfs, templates, tsConfig);
     await processI18nTemplates(vfs, templates, tsConfig);
@@ -238,6 +246,10 @@ async function processGraphTemplates(
       targetPath,
     );
   }
+
+  // Pin the backend's CORS to the web frontend's dev origin (must run after the
+  // backend templates above so the backend .env.example exists).
+  processGraphBackendEnv(vfs, tsConfig);
 
   if (
     tsConfig.frontend.length === 0 &&
@@ -310,6 +322,8 @@ export async function generateVirtualProject(options: GeneratorOptions): Promise
       await processRateLimitTemplates(vfs, templates, config);
       await processFeatureFlagsTemplates(vfs, templates, config);
       await processAnalyticsTemplates(vfs, templates, config);
+      await processAITemplates(vfs, templates, config);
+      await processRealtimeTemplates(vfs, templates, config);
       await processJobQueueTemplates(vfs, templates, config);
       await processCMSTemplates(vfs, templates, config);
       await processI18nTemplates(vfs, templates, config);

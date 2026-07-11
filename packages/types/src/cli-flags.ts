@@ -85,7 +85,10 @@ export const CLI_FLAG_GROUP_DEFINITIONS: readonly CliFlagGroupDefinition[] = [
       {
         flag: "addons",
         summary: "Repo tooling and platform addons.",
-        source: { kind: "categories", categories: ["appPlatforms", "codeQuality", "documentation"] },
+        source: {
+          kind: "categories",
+          categories: ["appShells", "appPlatforms", "codeQuality", "documentation"],
+        },
         configKey: "addons",
         multiple: true,
       },

@@ -282,5 +282,24 @@ function processStandardAuthDeps(vfs: VirtualFileSystem, config: ProjectConfig):
         dependencies: ["@kinde-oss/kinde-auth-nextjs"],
       });
     }
+  } else if (auth === "passport") {
+    if (authExists) {
+      addPackageDependency({
+        vfs,
+        packagePath: authPath,
+        dependencies: ["passport", "passport-github2"],
+        devDependencies: ["@types/passport", "@types/passport-github2"],
+      });
+    }
+
+    const serverPath = "apps/server/package.json";
+    if (vfs.exists(serverPath)) {
+      addPackageDependency({
+        vfs,
+        packagePath: serverPath,
+        dependencies: ["express-session"],
+        devDependencies: ["@types/express-session"],
+      });
+    }
   }
 }

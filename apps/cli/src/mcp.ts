@@ -291,6 +291,7 @@ const MCP_LEGACY_CATEGORY_KEYS: Partial<Record<OptionCategory, readonly string[]
   backendLibraries: ["effect"],
   codeQuality: ["addons"],
   documentation: ["addons"],
+  appShells: ["addons"],
   appPlatforms: ["addons"],
 };
 
@@ -300,6 +301,7 @@ const MCP_SCHEMA_EXCLUDED_CATEGORIES = new Set<OptionCategory>([
   "backendLibraries",
   "codeQuality",
   "documentation",
+  "appShells",
   "appPlatforms",
   "aiDocs",
   "git",

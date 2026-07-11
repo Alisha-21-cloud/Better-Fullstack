@@ -31,6 +31,16 @@ export const WEB_FRONTEND_PROMPT_OPTIONS: PromptOption<Frontend>[] = [
     hint: "Client-routed React SPA powered by Vite",
   },
   {
+    value: "vanilla-vite",
+    label: "Vite (Vanilla TypeScript)",
+    hint: "Framework-free TypeScript, HTML, and CSS powered by Vite",
+  },
+  {
+    value: "vue",
+    label: "Vue 3 + Vite",
+    hint: "Standalone Vue 3 SPA powered by Vite",
+  },
+  {
     value: "next",
     label: "Next.js",
     hint: "The React Framework for the Web",
@@ -92,7 +102,7 @@ export const WEB_FRONTEND_PROMPT_OPTIONS: PromptOption<Frontend>[] = [
   },
 ];
 
-const NATIVE_FRONTEND_PROMPT_OPTIONS: PromptOption<Frontend>[] = [
+export const NATIVE_FRONTEND_PROMPT_OPTIONS: PromptOption<Frontend>[] = [
   {
     value: "native-bare",
     label: "StyleSheet",

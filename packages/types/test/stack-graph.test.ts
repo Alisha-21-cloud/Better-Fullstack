@@ -618,6 +618,14 @@ describe("stack graph", () => {
       "frontend:typescript:qwik",
       "frontend.i18n:typescript:paraglide",
     ]);
+    const paraglideVueParts = parseStackPartSpecs([
+      "frontend:typescript:vue",
+      "frontend.i18n:typescript:paraglide",
+    ]);
+    const paraglideVanillaViteParts = parseStackPartSpecs([
+      "frontend:typescript:vanilla-vite",
+      "frontend.i18n:typescript:paraglide",
+    ]);
     const freshParts = parseStackPartSpecs([
       "frontend:typescript:fresh",
       "frontend.animation:typescript:lottie",
@@ -636,6 +644,8 @@ describe("stack graph", () => {
     expect(validateStackParts(paraglideQwikParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_OWNER_TOOL",
     );
+    expect(validateStackParts(paraglideVueParts).issues).toEqual([]);
+    expect(validateStackParts(paraglideVanillaViteParts).issues).toEqual([]);
     expect(validateStackParts(freshParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_OWNER_TOOL",
     );
@@ -711,6 +721,12 @@ describe("stack graph", () => {
       "backend:go:gin",
       "workspaceTooling:universal:backend-utils",
     ]);
+    const selfOpenapiCodegenParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "backend:typescript:self",
+      "backend.api:typescript:openapi",
+      "workspaceTooling:universal:openapi-typescript",
+    ]);
 
     expect(validateStackParts(dockerWorkersParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_GRAPH_SELECTION",
@@ -724,6 +740,18 @@ describe("stack graph", () => {
     expect(validateStackParts(backendUtilsGoParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_GRAPH_SELECTION",
     );
+    expect(
+      validateStackParts(selfOpenapiCodegenParts).issues.map((issue) => issue.code),
+    ).toContain("INCOMPATIBLE_GRAPH_SELECTION");
+  });
+
+  it("allows Redwood GraphQL Codegen without a separate API selection", () => {
+    const parts = parseStackPartSpecs([
+      "frontend:typescript:redwood",
+      "workspaceTooling:universal:graphql-codegen",
+    ]);
+
+    expect(validateStackParts(parts).issues).toEqual([]);
   });
 
   it("rejects shared non-TypeScript backend service candidates through graph checks", () => {
@@ -1320,13 +1348,22 @@ describe("stack graph structural round-trip (phase 0)", () => {
   });
 
   it("round-trips every addon and example value as multi-select graph parts", () => {
+    // API- and frontend-coupled addons need compatible selections to validate cleanly.
+    const CONFIG_BY_ADDON: Partial<Record<string, Partial<ProjectConfig>>> = {
+      "tanstack-query": { api: "none" },
+      "graphql-codegen": { api: "graphql-yoga" },
+      "apollo-client": { api: "graphql-yoga" },
+      "openapi-typescript": { api: "openapi" },
+      electron: { frontend: ["react-vite"] },
+      capacitor: { frontend: ["react-vite"] },
+    };
     for (const addon of ADDONS_VALUES) {
       const config = {
         ...TS_BASE,
         frontend: ["next"],
         runtime: "bun",
-        api: addon === "tanstack-query" ? "none" : TS_BASE.api,
         addons: [addon],
+        ...CONFIG_BY_ADDON[addon],
       };
       const parts = legacyProjectConfigToStackParts(config);
       const binding = getAddonStackPartBinding(addon);

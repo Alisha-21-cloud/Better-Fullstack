@@ -63,6 +63,23 @@ export function getInvertClass(needsInvert?: "dark" | "light" | "both"): string 
 // so they need needsInvert: 'dark' to become white on dark backgrounds.
 
 export const ICON_REGISTRY: Record<string, IconConfig> = {
+  eslint: { type: "si", slug: "eslint", hex: "4B32C3" },
+  prettier: { type: "si", slug: "prettier", hex: "F7B93E" },
+  axios: { type: "si", slug: "axios", hex: "5A29E4" },
+  ws: { type: "si", slug: "nodedotjs", hex: "5FA04E" },
+  "vanilla-vite": { type: "si", slug: "vite", hex: "646CFF" },
+  firebase: { type: "si", slug: "firebase", hex: "DD2C00" },
+  "graphql-codegen": { type: "si", slug: "graphql", hex: "E10098" },
+  "openapi-typescript": { type: "si", slug: "openapiinitiative", hex: "6BA539" },
+  "apollo-client": { type: "si", slug: "apollographql", hex: "311C87" },
+  ga4: { type: "si", slug: "googleanalytics", hex: "E37400" },
+  paypal: { type: "si", slug: "paypal", hex: "003087" },
+  electron: { type: "si", slug: "electron", hex: "47848F" },
+  capacitor: { type: "si", slug: "capacitor", hex: "119EFF" },
+  "styled-components": { type: "si", slug: "styledcomponents", hex: "DB7093" },
+  passport: { type: "si", slug: "passport", hex: "34E27A" },
+  mocha: { type: "si", slug: "mocha", hex: "8D6748" },
+  contentful: { type: "si", slug: "contentful", hex: "2478CC" },
   // ─── Ecosystems ────────────────────────────────────────────────────────────
   typescript: { type: "si", slug: "typescript", hex: "3178C6" },
   "react-native": { type: "si", slug: "react", hex: "61DAFB", fixedColor: true },

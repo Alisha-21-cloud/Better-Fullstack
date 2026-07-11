@@ -1,0 +1,12 @@
+import { defineConfig } from "vite";
+{{#if (eq cssFramework "tailwind")}}
+import tailwindcss from "@tailwindcss/vite";
+{{/if}}
+
+export default defineConfig({
+{{#if (includes addons "electron")}}
+  base: "./",
+{{/if}}
+  plugins: [{{#if (eq cssFramework "tailwind")}}tailwindcss(){{/if}}],
+  server: { port: 5173 },
+});

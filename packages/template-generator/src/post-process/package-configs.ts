@@ -257,6 +257,8 @@ function getGeneratedTypeScriptTestScript(
       return "vitest run --passWithNoTests";
     case "jest":
       return "jest --passWithNoTests";
+    case "mocha":
+      return 'mocha --import=tsx --extension ts "test/**/*.test.ts"';
     default:
       return undefined;
   }

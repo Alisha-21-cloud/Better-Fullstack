@@ -4,7 +4,7 @@ import { getDefaultConfig } from "../constants";
 import { parseStackPartSpecs, stackPartsToLegacyProjectConfigPartial } from "../types";
 import { hasWebStyling } from "../utils/compatibility-rules";
 import { exitCancelled } from "../utils/errors";
-import { getAddonsChoice } from "./addons";
+import { getAddonsChoice, getAppPlatformsChoice } from "./addons";
 import { getAiDocsChoice } from "./ai-docs";
 import { getAstroIntegrationChoice } from "./astro-integration";
 import {
@@ -49,7 +49,7 @@ import {
   getElixirValidationChoice,
   getElixirWebFrameworkChoice,
 } from "./elixir-ecosystem";
-import { WEB_FRONTEND_PROMPT_OPTIONS } from "./frontend";
+import { NATIVE_FRONTEND_PROMPT_OPTIONS, WEB_FRONTEND_PROMPT_OPTIONS } from "./frontend";
 import { getGitChoice } from "./git";
 import {
   getGoApiChoice,
@@ -226,7 +226,7 @@ export async function gatherMultiEcosystemConfig(
           await getConfigSectionsChoice(
             "typescript",
             [],
-            ["ui-styling", "deploy", "addons-examples"],
+            ["app-platforms", "ui-styling", "deploy", "addons-examples"],
           ),
         )
       : [];
@@ -243,6 +243,16 @@ export async function gatherMultiEcosystemConfig(
     frontend === "astro"
       ? promptValue(await getAstroIntegrationChoice(flags.astroIntegration))
       : undefined;
+  const nativeFrontend = promptValue(
+    await navigableSelect<Frontend | "none">({
+      message: "Add a native mobile app? (React Native ecosystem)",
+      options: [
+        { value: "none", label: "None", hint: "web app only" },
+        ...NATIVE_FRONTEND_PROMPT_OPTIONS,
+      ],
+      initialValue: "none",
+    }),
+  );
   const uiLibrary = hasWebStyling(frontendList)
     ? await scopedPromptValue("typescript", "uiLibrary", configScope, typeScriptSections, () =>
         getUILibraryChoice(flags.uiLibrary, frontendList, astroIntegration),
@@ -266,7 +276,7 @@ export async function gatherMultiEcosystemConfig(
       : undefined;
   const cssFramework = hasWebStyling(frontendList)
     ? await scopedPromptValue("typescript", "cssFramework", configScope, typeScriptSections, () =>
-        getCSSFrameworkChoice(flags.cssFramework, uiLibrary),
+        getCSSFrameworkChoice(flags.cssFramework, uiLibrary, frontendList),
       )
     : "none";
 
@@ -274,6 +284,16 @@ export async function gatherMultiEcosystemConfig(
   const backendSections =
     configScope === "custom" ? promptValue(await getConfigSectionsChoice(backendEcosystem)) : [];
   const stackPartSpecs = [`frontend:typescript:${frontend}`];
+  if (nativeFrontend !== "none") {
+    stackPartSpecs.push(`mobile:react-native:${nativeFrontend}`);
+    stackPartSpecs.push("mobile.navigation:react-native:expo-router");
+    if (nativeFrontend === "native-uniwind") {
+      stackPartSpecs.push("mobile.ui:react-native:uniwind");
+    }
+    if (nativeFrontend === "native-unistyles") {
+      stackPartSpecs.push("mobile.ui:react-native:unistyles");
+    }
+  }
   const backendChoices: Partial<ProjectConfig> = {};
   let database: Database = "none";
   let dbSetup: ProjectConfig["dbSetup"] = "none";
@@ -911,12 +931,19 @@ export async function gatherMultiEcosystemConfig(
 
   const stackParts = parseStackPartSpecs(stackPartSpecs, "selected");
   const graphPartial = stackPartsToLegacyProjectConfigPartial(stackParts);
+  const appPlatforms = await scopedPromptValue(
+    "typescript",
+    "appPlatforms",
+    configScope,
+    typeScriptSections,
+    () => getAppPlatformsChoice(flags.addons, frontendList),
+  );
   const addons = await scopedPromptValue(
     "typescript",
     "addons",
     configScope,
     typeScriptSections,
-    () => getAddonsChoice(flags.addons, frontendList, "none", "none", "bun"),
+    () => getAddonsChoice(flags.addons, frontendList, "none", "none", "bun", "none"),
   );
   const webDeploy = await scopedPromptValue(
     "typescript",
@@ -947,7 +974,7 @@ export async function gatherMultiEcosystemConfig(
     projectDir,
     relativePath,
     ecosystem: "typescript",
-    frontend: frontendList,
+    frontend: nativeFrontend === "none" ? frontendList : [...frontendList, nativeFrontend],
     backend: "none",
     runtime: "none",
     database,
@@ -958,7 +985,7 @@ export async function gatherMultiEcosystemConfig(
     uiLibrary,
     ...shadcnOptions,
     cssFramework,
-    addons,
+    addons: Array.from(new Set([...appPlatforms, ...addons])),
     examples: [],
     dbSetup,
     webDeploy,

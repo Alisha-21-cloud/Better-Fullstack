@@ -9,6 +9,9 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+{{#if (includes addons "electron")}}
+  base: "./",
+{{/if}}
   plugins: [
     {{#if (eq cssFramework "tailwind")}}
     tailwindcss(),

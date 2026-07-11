@@ -450,6 +450,160 @@ exports[`Template Snapshots File Structure Snapshots file structure: hono-apollo
 ]
 `;
 
+exports[`Template Snapshots File Structure Snapshots file structure: typescript-library-expansion-react 1`] = `
+[
+  ".prettierignore",
+  ".prettierrc.json",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "README.md",
+  "apps/server/.env",
+  "apps/server/package.json",
+  "apps/server/src/index.ts",
+  "apps/server/src/lib/openai.ts",
+  "apps/server/src/lib/paypal-server.ts",
+  "apps/server/src/lib/websocket.ts",
+  "apps/server/test/smoke.test.ts",
+  "apps/server/tsconfig.json",
+  "apps/server/tsdown.config.ts",
+  "apps/web/.env",
+  "apps/web/codegen.ts",
+  "apps/web/electron-builder.yml",
+  "apps/web/electron/main.mjs",
+  "apps/web/electron/preload.mjs",
+  "apps/web/index.html",
+  "apps/web/package.json",
+  "apps/web/src/app-shell.tsx",
+  "apps/web/src/components/header.tsx",
+  "apps/web/src/components/loader.tsx",
+  "apps/web/src/components/mode-toggle.tsx",
+  "apps/web/src/components/theme-provider.tsx",
+  "apps/web/src/components/ui/button.tsx",
+  "apps/web/src/components/ui/card.tsx",
+  "apps/web/src/components/ui/checkbox.tsx",
+  "apps/web/src/components/ui/dropdown-menu.tsx",
+  "apps/web/src/components/ui/input.tsx",
+  "apps/web/src/components/ui/label.tsx",
+  "apps/web/src/components/ui/skeleton.tsx",
+  "apps/web/src/components/ui/sonner.tsx",
+  "apps/web/src/index.css",
+  "apps/web/src/lib/apollo-client.ts",
+  "apps/web/src/lib/contentful.ts",
+  "apps/web/src/lib/firebase.ts",
+  "apps/web/src/lib/google-analytics.ts",
+  "apps/web/src/lib/http-client.ts",
+  "apps/web/src/lib/paypal-client.ts",
+  "apps/web/src/lib/styled.tsx",
+  "apps/web/src/lib/utils.ts",
+  "apps/web/src/lib/websocket.ts",
+  "apps/web/src/main.tsx",
+  "apps/web/src/router.tsx",
+  "apps/web/src/routes/home.tsx",
+  "apps/web/src/utils/graphql.ts",
+  "apps/web/test/smoke.test.ts",
+  "apps/web/tsconfig.json",
+  "apps/web/vite.config.ts",
+  "bunfig.toml",
+  "eslint.config.mjs",
+  "package.json",
+  "packages/api/package.json",
+  "packages/api/src/index.ts",
+  "packages/api/test/smoke.test.ts",
+  "packages/api/tsconfig.json",
+  "packages/auth/package.json",
+  "packages/auth/src/index.ts",
+  "packages/auth/tsconfig.json",
+  "packages/config/package.json",
+  "packages/config/tsconfig.base.json",
+  "packages/db/drizzle.config.ts",
+  "packages/db/package.json",
+  "packages/db/src/index.ts",
+  "packages/db/src/schema/example.ts",
+  "packages/db/src/schema/index.ts",
+  "packages/db/tsconfig.json",
+  "packages/env/package.json",
+  "packages/env/src/native.ts",
+  "packages/env/src/server.ts",
+  "packages/env/src/web.ts",
+  "packages/env/tsconfig.json",
+  "tsconfig.json",
+]
+`;
+
+exports[`Template Snapshots File Structure Snapshots file structure: vanilla-vite-openapi-capacitor 1`] = `
+[
+  "AGENTS.md",
+  "CLAUDE.md",
+  "README.md",
+  "apps/server/.env",
+  "apps/server/package.json",
+  "apps/server/src/index.ts",
+  "apps/server/tsconfig.json",
+  "apps/server/tsdown.config.ts",
+  "apps/web/.env",
+  "apps/web/capacitor.config.ts",
+  "apps/web/index.html",
+  "apps/web/package.json",
+  "apps/web/src/main.ts",
+  "apps/web/src/style.css",
+  "apps/web/tsconfig.json",
+  "apps/web/vite.config.ts",
+  "bunfig.toml",
+  "package.json",
+  "packages/api/package.json",
+  "packages/api/src/index.ts",
+  "packages/api/src/openapi.json",
+  "packages/api/src/verify-openapi.ts",
+  "packages/api/tsconfig.json",
+  "packages/config/package.json",
+  "packages/config/tsconfig.base.json",
+  "packages/env/package.json",
+  "packages/env/src/native.ts",
+  "packages/env/src/server.ts",
+  "packages/env/src/web.ts",
+  "packages/env/tsconfig.json",
+  "tsconfig.json",
+]
+`;
+
+exports[`Template Snapshots File Structure Snapshots file structure: vue-anthropic-sdk 1`] = `
+[
+  "AGENTS.md",
+  "CLAUDE.md",
+  "README.md",
+  "apps/server/.env",
+  "apps/server/package.json",
+  "apps/server/src/index.ts",
+  "apps/server/src/lib/anthropic.ts",
+  "apps/server/tsconfig.json",
+  "apps/server/tsdown.config.ts",
+  "apps/web/.env",
+  "apps/web/index.html",
+  "apps/web/package.json",
+  "apps/web/src/App.vue",
+  "apps/web/src/env.d.ts",
+  "apps/web/src/main.ts",
+  "apps/web/src/style.css",
+  "apps/web/tsconfig.json",
+  "apps/web/vite.config.ts",
+  "bunfig.toml",
+  "package.json",
+  "packages/api/package.json",
+  "packages/api/src/index.ts",
+  "packages/api/src/openapi.json",
+  "packages/api/src/verify-openapi.ts",
+  "packages/api/tsconfig.json",
+  "packages/config/package.json",
+  "packages/config/tsconfig.base.json",
+  "packages/env/package.json",
+  "packages/env/src/native.ts",
+  "packages/env/src/server.ts",
+  "packages/env/src/web.ts",
+  "packages/env/tsconfig.json",
+  "tsconfig.json",
+]
+`;
+
 exports[`Template Snapshots File Structure Snapshots file structure: better-auth-full 1`] = `
 [
   "AGENTS.md",
@@ -4059,6 +4213,7 @@ app.use(
 		methods: ["GET", "POST", "OPTIONS"],
 	})
 );
+
 
 
 app.use(
@@ -18617,9 +18772,12 @@ exports[`Template Snapshots Key File Content Snapshots key files: java-spring-bo
       "content": 
 "PORT=8080
 SPRING_PROFILES_ACTIVE=dev
+
+# Allowed web origin for CORS (unset = allow any origin)
+# CORS_ORIGIN=http://localhost:3001
 APP_BASIC_USERNAME=admin
 APP_BASIC_PASSWORD=change-me
-CORS_ORIGIN=http://localhost:3001"
+CORS_ORIGIN=http://localhost:5173"
 ,
       "path": ".env.example",
     },
@@ -18856,6 +19014,9 @@ APP_ENV=development
 HOST=127.0.0.1
 PORT=3000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # gRPC (if using tonic)
 # GRPC_PORT=50051
 
@@ -18864,8 +19025,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
 
 # JWT Secret (if using jsonwebtoken)
-# JWT_SECRET=your-secret-key-here
-CORS_ORIGIN=http://localhost:3001"
+# JWT_SECRET=your-secret-key-here"
 ,
       "path": ".env.example",
     },
@@ -19202,6 +19362,17 @@ async fn health(
     })
 }
 
+/// CORS pinned to \`CORS_ORIGIN\` when set, permissive otherwise.
+fn cors_layer() -> CorsLayer {
+    match std::env::var("CORS_ORIGIN") {
+        Ok(origin) if !origin.is_empty() => CorsLayer::new()
+            .allow_origin(origin.parse::<axum::http::HeaderValue>().expect("invalid CORS_ORIGIN"))
+            .allow_methods(tower_http::cors::Any)
+            .allow_headers(tower_http::cors::Any),
+        _ => CorsLayer::permissive(),
+    }
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Load environment variables
@@ -19230,7 +19401,7 @@ async fn main() -> anyhow::Result<()> {
     // Build router with state
     let app = Router::new()
         .route("/health", get(health))
-        .layer(CorsLayer::permissive())
+        .layer(cors_layer())
         .with_state(state);
 
     // Get host and port from environment
@@ -19288,6 +19459,9 @@ APP_ENV=development
 HOST=127.0.0.1
 PORT=3000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # gRPC (if using tonic)
 # GRPC_PORT=50051
 
@@ -19296,8 +19470,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
 
 # JWT Secret (if using jsonwebtoken)
-# JWT_SECRET=your-secret-key-here
-CORS_ORIGIN=http://localhost:3001"
+# JWT_SECRET=your-secret-key-here"
 ,
       "path": ".env.example",
     },
@@ -19619,6 +19792,17 @@ async fn health(data: web::Data<AppState>) -> impl Responder {
 }
 
 
+/// CORS pinned to \`CORS_ORIGIN\` when set, permissive otherwise.
+fn cors() -> Cors {
+    match std::env::var("CORS_ORIGIN") {
+        Ok(origin) if !origin.is_empty() => Cors::default()
+            .allowed_origin(&origin)
+            .allow_any_method()
+            .allow_any_header(),
+        _ => Cors::permissive(),
+    }
+}
+
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
     // Load environment variables
@@ -19657,7 +19841,7 @@ async fn main() -> anyhow::Result<()> {
 
     // Start server
     HttpServer::new(move || {
-        let cors = Cors::permissive();
+        let cors = cors();
         App::new()
             .wrap(cors)
             .app_data(state.clone())
@@ -19711,6 +19895,9 @@ APP_ENV=development
 HOST=127.0.0.1
 PORT=3000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # gRPC (if using tonic)
 # GRPC_PORT=50051
 
@@ -19719,8 +19906,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
 
 # JWT Secret (if using jsonwebtoken)
-# JWT_SECRET=your-secret-key-here
-CORS_ORIGIN=http://localhost:3001"
+# JWT_SECRET=your-secret-key-here"
 ,
       "path": ".env.example",
     },
@@ -20135,6 +20321,9 @@ APP_ENV=development
 HOST=127.0.0.1
 PORT=3000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # gRPC (if using tonic)
 # GRPC_PORT=50051
 
@@ -20143,8 +20332,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
 
 # JWT Secret (if using jsonwebtoken)
-# JWT_SECRET=your-secret-key-here
-CORS_ORIGIN=http://localhost:3001"
+# JWT_SECRET=your-secret-key-here"
 ,
       "path": ".env.example",
     },
@@ -20315,6 +20503,17 @@ async fn health(
     })
 }
 
+/// CORS pinned to \`CORS_ORIGIN\` when set, permissive otherwise.
+fn cors_layer() -> CorsLayer {
+    match std::env::var("CORS_ORIGIN") {
+        Ok(origin) if !origin.is_empty() => CorsLayer::new()
+            .allow_origin(origin.parse::<axum::http::HeaderValue>().expect("invalid CORS_ORIGIN"))
+            .allow_methods(tower_http::cors::Any)
+            .allow_headers(tower_http::cors::Any),
+        _ => CorsLayer::permissive(),
+    }
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // Load environment variables
@@ -20340,7 +20539,7 @@ async fn main() -> anyhow::Result<()> {
     // Build router with state
     let app = Router::new()
         .route("/health", get(health))
-        .layer(CorsLayer::permissive())
+        .layer(cors_layer())
         .with_state(state);
 
     // Get host and port from environment
@@ -20398,6 +20597,9 @@ APP_ENV=development
 HOST=127.0.0.1
 PORT=3000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # gRPC (if using tonic)
 # GRPC_PORT=50051
 
@@ -20406,8 +20608,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
 
 # JWT Secret (if using jsonwebtoken)
-# JWT_SECRET=your-secret-key-here
-CORS_ORIGIN=http://localhost:3001"
+# JWT_SECRET=your-secret-key-here"
 ,
       "path": ".env.example",
     },
@@ -20559,6 +20760,17 @@ async fn health() -> Json<HealthResponse> {
     })
 }
 
+/// CORS pinned to \`CORS_ORIGIN\` when set, permissive otherwise.
+fn cors_layer() -> CorsLayer {
+    match std::env::var("CORS_ORIGIN") {
+        Ok(origin) if !origin.is_empty() => CorsLayer::new()
+            .allow_origin(origin.parse::<axum::http::HeaderValue>().expect("invalid CORS_ORIGIN"))
+            .allow_methods(tower_http::cors::Any)
+            .allow_headers(tower_http::cors::Any),
+        _ => CorsLayer::permissive(),
+    }
+}
+
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
     // Load environment variables
@@ -20581,7 +20793,7 @@ async fn main() -> eyre::Result<()> {
     // Build router
     let app = Router::new()
         .route("/health", get(health))
-        .layer(CorsLayer::permissive());
+        .layer(cors_layer());
 
     // Get host and port from environment
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
@@ -20638,6 +20850,9 @@ APP_ENV=development
 HOST=127.0.0.1
 PORT=3000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # gRPC (if using tonic)
 # GRPC_PORT=50051
 
@@ -20646,8 +20861,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
 
 # JWT Secret (if using jsonwebtoken)
-# JWT_SECRET=your-secret-key-here
-CORS_ORIGIN=http://localhost:3001"
+# JWT_SECRET=your-secret-key-here"
 ,
       "path": ".env.example",
     },
@@ -20831,10 +21045,14 @@ async fn rocket() -> _ {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    // Configure CORS
-    let cors = CorsOptions::default()
-        .to_cors()
-        .expect("CORS configuration failed");
+    // Configure CORS: pinned to \`CORS_ORIGIN\` when set, permissive otherwise.
+    let cors = match std::env::var("CORS_ORIGIN") {
+        Ok(origin) if !origin.is_empty() => CorsOptions::default()
+            .allowed_origins(rocket_cors::AllowedOrigins::some_exact(&[origin])),
+        _ => CorsOptions::default(),
+    }
+    .to_cors()
+    .expect("CORS configuration failed");
 
 
     // Initialize database connection
@@ -21025,6 +21243,9 @@ exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key fil
 HOST=0.0.0.0
 PORT=8080
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
@@ -21032,8 +21253,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 GRPC_PORT=50051
 
 # Logging level
-LOG_LEVEL=debug
-CORS_ORIGIN=http://localhost:3001"
+LOG_LEVEL=debug"
 ,
       "path": ".env.example",
     },
@@ -21083,6 +21303,9 @@ exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key fil
 HOST=0.0.0.0
 PORT=8080
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
@@ -21090,8 +21313,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 GRPC_PORT=50051
 
 # Logging level
-LOG_LEVEL=debug
-CORS_ORIGIN=http://localhost:3001"
+LOG_LEVEL=debug"
 ,
       "path": ".env.example",
     },
@@ -21173,6 +21395,9 @@ exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key fil
 HOST=0.0.0.0
 PORT=8080
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
@@ -21180,8 +21405,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 GRPC_PORT=50051
 
 # Logging level
-LOG_LEVEL=debug
-CORS_ORIGIN=http://localhost:3001"
+LOG_LEVEL=debug"
 ,
       "path": ".env.example",
     },
@@ -21231,6 +21455,9 @@ exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key fil
 HOST=0.0.0.0
 PORT=8080
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
@@ -21238,8 +21465,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 GRPC_PORT=50051
 
 # Logging level
-LOG_LEVEL=debug
-CORS_ORIGIN=http://localhost:3001"
+LOG_LEVEL=debug"
 ,
       "path": ".env.example",
     },
@@ -21289,6 +21515,9 @@ exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key fil
 HOST=0.0.0.0
 PORT=8080
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
@@ -21296,8 +21525,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 GRPC_PORT=50051
 
 # Logging level
-LOG_LEVEL=debug
-CORS_ORIGIN=http://localhost:3001"
+LOG_LEVEL=debug"
 ,
       "path": ".env.example",
     },
@@ -21339,6 +21567,9 @@ exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key fil
 HOST=0.0.0.0
 PORT=8080
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
@@ -21346,8 +21577,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 GRPC_PORT=50051
 
 # Logging level
-LOG_LEVEL=debug
-CORS_ORIGIN=http://localhost:3001"
+LOG_LEVEL=debug"
 ,
       "path": ".env.example",
     },
@@ -21397,6 +21627,9 @@ exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key fil
 HOST=0.0.0.0
 PORT=8080
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
@@ -21404,8 +21637,7 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 GRPC_PORT=50051
 
 # Logging level
-LOG_LEVEL=debug
-CORS_ORIGIN=http://localhost:3001"
+LOG_LEVEL=debug"
 ,
       "path": ".env.example",
     },
@@ -21471,6 +21703,9 @@ exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key fil
 HOST=0.0.0.0
 PORT=8080
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
@@ -21482,8 +21717,7 @@ LOG_LEVEL=debug
 
 # Casbin settings
 CASBIN_MODEL=auth_model.conf
-CASBIN_POLICY=auth_policy.csv
-CORS_ORIGIN=http://localhost:3001"
+CASBIN_POLICY=auth_policy.csv"
 ,
       "path": ".env.example",
     },
@@ -21537,6 +21771,9 @@ exports[`Template Snapshots - Go Ecosystem Go Key File Content Snapshots key fil
 HOST=0.0.0.0
 PORT=8080
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database settings (if using GORM, sqlc, Ent, or Bun)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
@@ -21547,8 +21784,7 @@ GRPC_PORT=50051
 LOG_LEVEL=debug
 
 # JWT settings
-JWT_SECRET=change-me-to-a-real-secret
-CORS_ORIGIN=http://localhost:3001"
+JWT_SECRET=change-me-to-a-real-secret"
 ,
       "path": ".env.example",
     },
@@ -21718,6 +21954,9 @@ DEBUG=true
 HOST=0.0.0.0
 PORT=8000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
 
@@ -21729,8 +21968,7 @@ ANTHROPIC_API_KEY=your-anthropic-api-key
 
 # Celery (if using task queue)
 CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
-CORS_ORIGIN=http://localhost:3001"
+CELERY_RESULT_BACKEND=redis://localhost:6379/0"
 ,
       "path": ".env.example",
     },
@@ -21832,6 +22070,9 @@ DEBUG=true
 HOST=0.0.0.0
 PORT=8000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
 
@@ -21843,8 +22084,7 @@ ANTHROPIC_API_KEY=your-anthropic-api-key
 
 # Celery (if using task queue)
 CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
-CORS_ORIGIN=http://localhost:3001"
+CELERY_RESULT_BACKEND=redis://localhost:6379/0"
 ,
       "path": ".env.example",
     },
@@ -21938,6 +22178,9 @@ DEBUG=true
 HOST=0.0.0.0
 PORT=8000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
 
@@ -21949,8 +22192,7 @@ ANTHROPIC_API_KEY=your-anthropic-api-key
 
 # Celery (if using task queue)
 CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
-CORS_ORIGIN=http://localhost:3001"
+CELERY_RESULT_BACKEND=redis://localhost:6379/0"
 ,
       "path": ".env.example",
     },
@@ -22028,6 +22270,9 @@ DEBUG=true
 HOST=0.0.0.0
 PORT=8000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
 
@@ -22039,8 +22284,7 @@ ANTHROPIC_API_KEY=your-anthropic-api-key
 
 # Celery (if using task queue)
 CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
-CORS_ORIGIN=http://localhost:3001"
+CELERY_RESULT_BACKEND=redis://localhost:6379/0"
 ,
       "path": ".env.example",
     },
@@ -22102,6 +22346,9 @@ DEBUG=true
 HOST=0.0.0.0
 PORT=8000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
 
@@ -22113,8 +22360,7 @@ ANTHROPIC_API_KEY=your-anthropic-api-key
 
 # Celery (if using task queue)
 CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
-CORS_ORIGIN=http://localhost:3001"
+CELERY_RESULT_BACKEND=redis://localhost:6379/0"
 ,
       "path": ".env.example",
     },
@@ -22176,6 +22422,9 @@ DEBUG=true
 HOST=0.0.0.0
 PORT=8000
 
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
 
@@ -22187,8 +22436,7 @@ ANTHROPIC_API_KEY=your-anthropic-api-key
 
 # Celery (if using task queue)
 CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
-CORS_ORIGIN=http://localhost:3001"
+CELERY_RESULT_BACKEND=redis://localhost:6379/0"
 ,
       "path": ".env.example",
     },
@@ -22340,13 +22588,15 @@ exports[`Template Snapshots - Elixir Ecosystem Elixir Key File Content Snapshots
 "PHX_HOST=localhost
 PORT=4000
 SECRET_KEY_BASE=replace-with-mix-phx-gen-secret
+
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
 DATABASE_URL=ecto://postgres:postgres@localhost/snapshot_elixir_phoenix_ecto_rest_prod
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_HOST=localhost
 POSTGRES_DB=snapshot_elixir_phoenix_ecto_rest_dev
-POSTGRES_TEST_DB=snapshot_elixir_phoenix_ecto_rest_test
-CORS_ORIGIN=http://localhost:3001"
+POSTGRES_TEST_DB=snapshot_elixir_phoenix_ecto_rest_test"
 ,
       "path": ".env.example",
     },
@@ -22491,13 +22741,15 @@ exports[`Template Snapshots - Elixir Ecosystem Elixir Key File Content Snapshots
 "PHX_HOST=localhost
 PORT=4000
 SECRET_KEY_BASE=replace-with-mix-phx-gen-secret
+
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
 DATABASE_URL=ecto://postgres:postgres@localhost/snapshot_elixir_phoenix_liveview_full_prod
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_HOST=localhost
 POSTGRES_DB=snapshot_elixir_phoenix_liveview_full_dev
-POSTGRES_TEST_DB=snapshot_elixir_phoenix_liveview_full_test
-CORS_ORIGIN=http://localhost:3001"
+POSTGRES_TEST_DB=snapshot_elixir_phoenix_liveview_full_test"
 ,
       "path": ".env.example",
     },

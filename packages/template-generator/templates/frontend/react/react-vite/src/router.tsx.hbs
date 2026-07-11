@@ -1,9 +1,9 @@
 import AppShell from "./app-shell";
 import Home from "./routes/home";
-{{#if (and (ne auth "none") (ne auth "clerk") (ne backend "convex"))}}
+{{#if (and (isBetterAuth auth) (ne backend "convex"))}}
 import Dashboard from "./routes/dashboard";
 import Login from "./routes/login";
-{{else if (ne auth "none")}}
+{{else if (or (and (isBetterAuth auth) (eq backend "convex")) (and (eq auth "clerk") (eq backend "convex")))}}
 import Dashboard from "./routes/dashboard";
 {{/if}}
 {{#if (includes examples "ai")}}
@@ -34,10 +34,10 @@ export const router = createBrowserRouter([
     element: <AppShell />,
     children: [
       { index: true, element: <Home /> },
-      {{#if (and (ne auth "none") (ne auth "clerk") (ne backend "convex"))}}
+      {{#if (and (isBetterAuth auth) (ne backend "convex"))}}
       { path: "login", element: <Login /> },
       { path: "dashboard", element: <Dashboard /> },
-      {{else if (ne auth "none")}}
+      {{else if (or (and (isBetterAuth auth) (eq backend "convex")) (and (eq auth "clerk") (eq backend "convex")))}}
       { path: "dashboard", element: <Dashboard /> },
       {{/if}}
       {{#if (includes examples "ai")}}

@@ -298,6 +298,8 @@ const PARAGLIDE_COMPATIBLE_FRONTENDS = new Set<Frontend>([
   "tanstack-start",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "svelte",
   "solid",
   "solid-start",
@@ -1416,6 +1418,7 @@ export const analyzeStackCompatibility = (
       message: "PWA removed (requires compatible frontend)",
     });
   }
+
   if (!tauriCompat && nextStack.appPlatforms.includes("tauri")) {
     nextStack.appPlatforms = nextStack.appPlatforms.filter((a) => a !== "tauri");
     changed = true;
@@ -1423,6 +1426,20 @@ export const analyzeStackCompatibility = (
       category: "appPlatforms",
       message: "Tauri removed (requires compatible frontend)",
     });
+  }
+
+  for (const platform of ["electron", "capacitor"] as const) {
+    if (
+      nextStack.appPlatforms.includes(platform) &&
+      !validateAddonCompatibility(platform, nextStack.webFrontend as Frontend[]).isCompatible
+    ) {
+      nextStack.appPlatforms = nextStack.appPlatforms.filter((addon) => addon !== platform);
+      changed = true;
+      changes.push({
+        category: "appPlatforms",
+        message: `${platform === "electron" ? "Electron" : "Capacitor"} removed (requires compatible frontend)`,
+      });
+    }
   }
 
   // ============================================
@@ -2445,6 +2462,15 @@ export const getDisabledReason = (
     }
   }
 
+  if (category === "payments" && optionId === "paypal") {
+    if (!currentStack.webFrontend.some((f) => f !== "none")) {
+      return "PayPal requires a web frontend";
+    }
+    if (["none", "convex"].includes(currentStack.backend)) {
+      return "PayPal checkout requires a standalone or fullstack backend";
+    }
+  }
+
   // ============================================
   // CMS CONSTRAINTS
   // ============================================
@@ -2457,6 +2483,10 @@ export const getDisabledReason = (
     if (!currentStack.webFrontend.includes("next")) {
       return "Keystatic is currently scaffolded for Next.js only because @keystatic/astro is not Astro 7-compatible yet.";
     }
+  }
+
+  if (category === "realtime" && optionId === "ws" && currentStack.backend !== "express") {
+    return "The ws integration is currently wired for the Express backend";
   }
 
   // ============================================
@@ -2539,6 +2569,14 @@ export const getDisabledReason = (
     return "Chat SDK example (Nuxt/Hono profile) requires Vercel AI SDK in v1";
   }
 
+  if (
+    category === "ai" &&
+    ["openai-sdk", "anthropic-sdk"].includes(optionId) &&
+    ["none", "convex"].includes(currentStack.backend)
+  ) {
+    return "Direct AI provider SDKs require a standalone or fullstack backend";
+  }
+
   // TanStack AI: React and Solid only (client adapter). Server-side core works anywhere.
   if (category === "ai" && optionId === "tanstack-ai") {
     const compatibleFrontends = [
@@ -2578,6 +2616,29 @@ export const getDisabledReason = (
     ) {
       return "TanStack libraries with Astro require a UI framework integration (React, Vue, Svelte, or Solid)";
     }
+
+    if (
+      optionId === "graphql-codegen" &&
+      !["garph", "graphql-yoga", "apollo-server"].includes(currentStack.api) &&
+      !currentStack.webFrontend.includes("redwood")
+    ) {
+      return "GraphQL Code Generator requires a GraphQL API selection";
+    }
+
+    if (optionId === "openapi-typescript" && currentStack.api !== "openapi") {
+      return "openapi-typescript requires the OpenAPI API selection";
+    }
+
+    if (optionId === "openapi-typescript" && currentStack.backend === "self") {
+      return "openapi-typescript requires a standalone backend that exposes an OpenAPI schema";
+    }
+
+    if (
+      optionId === "apollo-client" &&
+      !["garph", "graphql-yoga", "apollo-server"].includes(currentStack.api)
+    ) {
+      return "Apollo Client requires a GraphQL API selection";
+    }
   }
 
   // ============================================
@@ -2589,6 +2650,22 @@ export const getDisabledReason = (
       if (optionId !== "none") {
         return "CSS framework requires a web frontend";
       }
+    }
+    if (
+      optionId === "styled-components" &&
+      !currentStack.webFrontend.some((f) =>
+        [
+          "tanstack-router",
+          "react-router",
+          "react-vite",
+          "tanstack-start",
+          "next",
+          "vinext",
+          "redwood",
+        ].includes(f),
+      )
+    ) {
+      return "styled-components requires a React frontend";
     }
     // Some UI libraries require Tailwind
     const requiresTailwind = ["shadcn-ui", "shadcn-svelte", "daisyui", "nextui"].includes(
@@ -3658,6 +3735,8 @@ const WEB_FRAMEWORKS: readonly Frontend[] = [
   "tanstack-router",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "tanstack-start",
   "next",
   "vinext",
@@ -3673,11 +3752,33 @@ const WEB_FRAMEWORKS: readonly Frontend[] = [
   "none",
 ] as const;
 
+const CODEGEN_COMPATIBLE_FRONTENDS: readonly Frontend[] = [
+  "tanstack-router",
+  "react-router",
+  "react-vite",
+  "vanilla-vite",
+  "vue",
+  "tanstack-start",
+  "next",
+  "vinext",
+  "nuxt",
+  "svelte",
+  "solid",
+  "solid-start",
+  "astro",
+  "qwik",
+  "angular",
+  "redwood",
+  "fresh",
+];
+
 const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
   pwa: [
     "tanstack-router",
     "react-router",
     "react-vite",
+    "vanilla-vite",
+    "vue",
     "solid",
     "next",
     "vinext",
@@ -3691,6 +3792,8 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
     "tanstack-router",
     "react-router",
     "react-vite",
+    "vanilla-vite",
+    "vue",
     "nuxt",
     "svelte",
     "solid",
@@ -3701,7 +3804,11 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
     "redwood",
     "fresh",
   ],
+  electron: ["tanstack-router", "react-vite", "vanilla-vite", "vue", "solid"],
+  capacitor: ["tanstack-router", "react-vite", "vanilla-vite", "vue", "solid"],
   biome: [],
+  eslint: [],
+  prettier: [],
   husky: [],
   lefthook: [],
   turborepo: [],
@@ -3717,6 +3824,55 @@ const ADDON_COMPATIBILITY: Record<Addons, readonly Frontend[]> = {
   wxt: [],
   msw: [],
   storybook: ["tanstack-router", "react-router", "react-vite", "next", "nuxt", "svelte", "solid"],
+  axios: [
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "vanilla-vite",
+    "vue",
+    "tanstack-start",
+    "next",
+    "vinext",
+    "nuxt",
+    "svelte",
+    "solid",
+    "solid-start",
+    "astro",
+    "qwik",
+    "angular",
+  ],
+  firebase: [
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "vanilla-vite",
+    "vue",
+    "tanstack-start",
+    "next",
+    "vinext",
+    "nuxt",
+    "svelte",
+    "solid",
+    "solid-start",
+    "astro",
+    "qwik",
+    "angular",
+  ],
+  "graphql-codegen": CODEGEN_COMPATIBLE_FRONTENDS,
+  "openapi-typescript": CODEGEN_COMPATIBLE_FRONTENDS,
+  "apollo-client": [
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "vue",
+    "tanstack-start",
+    "next",
+    "vinext",
+    "nuxt",
+    "svelte",
+    "solid",
+    "solid-start",
+  ],
   swr: [
     "tanstack-router",
     "react-router",
@@ -3830,6 +3986,8 @@ export function allowedApisForFrontends(
   const includesAngular = frontends.includes("angular");
   const includesRedwood = frontends.includes("redwood");
   const includesFresh = frontends.includes("fresh");
+  const includesStandaloneVite =
+    frontends.includes("vanilla-vite") || frontends.includes("vue");
   const includesNative = frontends.some((frontend) =>
     ["native-bare", "native-uniwind", "native-unistyles"].includes(frontend),
   );
@@ -3846,6 +4004,10 @@ export function allowedApisForFrontends(
 
   if (includesNative) {
     return ["trpc", "orpc", "ts-rest", "garph", "none"] as API[];
+  }
+
+  if (includesStandaloneVite) {
+    return ["graphql-yoga", "apollo-server", "openapi", "none"] as API[];
   }
 
   if (includesQwik || includesAngular || includesRedwood || includesFresh) {
@@ -3888,8 +4050,29 @@ export function getApiFrontendCompatibilityIssue(
   const includesRedwood = frontends.includes("redwood");
   const includesFresh = frontends.includes("fresh");
   const includesSolidStart = frontends.includes("solid-start");
+  const includesStandaloneVite =
+    frontends.includes("vanilla-vite") || frontends.includes("vue");
   const isReactOnlyApi =
     api === "trpc" || api === "ts-rest" || api === "garph" || api === "apollo-server";
+
+  if (
+    includesStandaloneVite &&
+    (api === "trpc" || api === "orpc" || api === "ts-rest" || api === "garph")
+  ) {
+    const incompatibleFrontend = frontends.includes("vanilla-vite") ? "vanilla-vite" : "vue";
+    return {
+      code: "STANDALONE_VITE_API_UNSUPPORTED",
+      message: "Standalone Vite frontends support only GraphQL and OpenAPI API integrations.",
+      category: "api",
+      optionId: api,
+      provided: { api, frontend: incompatibleFrontend },
+      suggestions: [
+        "Use --api graphql-yoga, --api apollo-server, or --api openapi",
+        "Choose a React-based frontend for tRPC, oRPC, ts-rest, or garph",
+        "Use --api none",
+      ],
+    };
+  }
 
   if ((includesNuxt || includesSvelte || includesSolid || includesSolidStart) && isReactOnlyApi) {
     const incompatibleFrontend = includesNuxt
@@ -4118,13 +4301,29 @@ export function getCompatibleUILibraries(
   });
 }
 
-export function getCompatibleCSSFrameworks(uiLibrary: UILibrary | undefined): CSSFramework[] {
-  if (!uiLibrary || uiLibrary === "none") {
-    return ["tailwind", "scss", "less", "postcss-only", "none"];
-  }
+export function getCompatibleCSSFrameworks(
+  uiLibrary: UILibrary | undefined,
+  frontends: Frontend[] = [],
+): CSSFramework[] {
+  const frameworks =
+    !uiLibrary || uiLibrary === "none"
+      ? (["tailwind", "scss", "less", "postcss-only", "styled-components", "none"] as CSSFramework[])
+      : ([...UI_LIBRARY_COMPATIBILITY[uiLibrary].cssFrameworks] as CSSFramework[]);
 
-  const compatibility = UI_LIBRARY_COMPATIBILITY[uiLibrary];
-  return compatibility.cssFrameworks as CSSFramework[];
+  if (frontends.length === 0) return frameworks;
+
+  const reactFrontends: Frontend[] = [
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "vinext",
+    "redwood",
+  ];
+  return frontends.some((frontend) => reactFrontends.includes(frontend))
+    ? frameworks
+    : frameworks.filter((framework) => framework !== "styled-components");
 }
 
 export function hasWebStyling(frontends: Frontend[] = []): boolean {

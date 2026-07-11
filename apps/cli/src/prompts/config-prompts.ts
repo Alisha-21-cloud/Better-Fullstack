@@ -133,7 +133,7 @@ import { getKotlinJavaIncompatibilityReason } from "../types";
 import { hasWebStyling, requiresChatSdkVercelAI } from "../utils/compatibility-rules";
 import { exitCancelled } from "../utils/errors";
 import { getUserPkgManager } from "../utils/get-package-manager";
-import { getAddonsChoice } from "./addons";
+import { getAddonsChoice, getAppPlatformsChoice } from "./addons";
 import { getAIChoice } from "./ai";
 import { getAiDocsChoice } from "./ai-docs";
 import { getAnimationChoice } from "./animation";
@@ -296,6 +296,7 @@ type PromptGroupResults = {
   // TypeScript ecosystem
   frontend: Frontend[];
   astroIntegration: AstroIntegration | undefined;
+  appPlatforms: Addons[];
   uiLibrary: UILibrary;
   shadcnOptions: ShadcnOptions | undefined;
   cssFramework: CSSFramework;
@@ -457,6 +458,7 @@ const CONFIG_PROMPT_ENTRY_KEY_MAP = {
   configSections: true,
   frontend: true,
   astroIntegration: true,
+  appPlatforms: true,
   uiLibrary: true,
   shadcnOptions: true,
   cssFramework: true,
@@ -637,7 +639,11 @@ function getPromptResolutionValue(key: ConfigPromptKey, results: Partial<PromptG
       frontends,
       astroIntegration: results.astroIntegration,
     },
-    cssFramework: { cssFramework: flags.cssFramework, uiLibrary: results.uiLibrary },
+    cssFramework: {
+      cssFramework: flags.cssFramework,
+      uiLibrary: results.uiLibrary,
+      frontends,
+    },
     forms: { forms: flags.forms, frontends },
     stateManagement: { stateManagement: flags.stateManagement, frontends },
     animation: { animation: flags.animation, frontends },
@@ -753,6 +759,10 @@ export async function gatherConfig(
         }
         return Promise.resolve(undefined);
       },
+      appPlatforms: ({ results }) => {
+        if (results.ecosystem !== "typescript") return Promise.resolve([] as Addons[]);
+        return getAppPlatformsChoice(flags.addons, results.frontend);
+      },
       uiLibrary: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as UILibrary);
         if (hasWebStyling(results.frontend)) {
@@ -775,7 +785,7 @@ export async function gatherConfig(
       cssFramework: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as CSSFramework);
         if (hasWebStyling(results.frontend)) {
-          return getCSSFrameworkChoice(flags.cssFramework, results.uiLibrary);
+          return getCSSFrameworkChoice(flags.cssFramework, results.uiLibrary, results.frontend);
         }
         return Promise.resolve("none" as CSSFramework);
       },
@@ -862,6 +872,7 @@ export async function gatherConfig(
           results.auth,
           results.backend,
           results.runtime,
+          results.api,
         );
       },
       examples: ({ results }) => {
@@ -911,7 +922,7 @@ export async function gatherConfig(
         ) {
           return Promise.resolve("vercel-ai" as AI);
         }
-        return getAIChoice(flags.ai);
+        return getAIChoice(flags.ai, results.backend);
       },
       validation: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as Validation);
@@ -972,7 +983,7 @@ export async function gatherConfig(
       },
       cms: ({ results }) => {
         if (results.ecosystem !== "typescript") return Promise.resolve("none" as CMS);
-        return getCMSChoice(flags.cms, results.backend);
+        return getCMSChoice(flags.cms, results.backend, results.frontend);
       },
       caching: ({ results }) => {
         if (results.ecosystem === "react-native" || results.ecosystem === "elixir") {
@@ -1503,7 +1514,7 @@ export async function gatherConfig(
     payments: result.payments,
     email: result.email,
     effect: result.effect,
-    addons: result.addons,
+    addons: Array.from(new Set([...(result.appPlatforms ?? []), ...result.addons])),
     examples: result.examples,
     git: result.git,
     packageManager: result.packageManager,
