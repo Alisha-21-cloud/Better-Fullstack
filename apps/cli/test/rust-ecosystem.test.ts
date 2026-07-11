@@ -10,6 +10,10 @@ import {
   RustCliSchema,
   RustLibrariesSchema,
   RustLoggingSchema,
+  RustAuthSchema,
+  RustMessageQueueSchema,
+  RustObservabilitySchema,
+  RustTemplatingSchema,
 } from "../src/types";
 import {
   extractEnumValues,
@@ -28,6 +32,10 @@ const RUST_APIS = extractEnumValues(RustApiSchema);
 const RUST_CLIS = extractEnumValues(RustCliSchema);
 const RUST_LIBRARIES = extractEnumValues(RustLibrariesSchema);
 const RUST_LOGGINGS = extractEnumValues(RustLoggingSchema);
+const RUST_AUTHS = extractEnumValues(RustAuthSchema);
+const RUST_MESSAGE_QUEUES = extractEnumValues(RustMessageQueueSchema);
+const RUST_OBSERVABILITY = extractEnumValues(RustObservabilitySchema);
+const RUST_TEMPLATING = extractEnumValues(RustTemplatingSchema);
 
 describe("Rust Ecosystem", () => {
   describe("Schema Definitions", () => {
@@ -3126,5 +3134,115 @@ describe("Rust Ecosystem", () => {
       const mainContent = getFileContent(root, "crates/server/src/main.rs");
       expect(mainContent).not.toContain("mod auth;");
     });
+  });
+});
+
+describe("Rust library expansion", () => {
+  it("exposes all twenty additions through the Rust schemas", () => {
+    expect(RUST_WEB_FRAMEWORKS).toEqual(expect.arrayContaining(["warp", "salvo"]));
+    expect(RUST_FRONTENDS).toContain("yew");
+    expect(RUST_ORMS).toEqual(
+      expect.arrayContaining(["mongodb", "rusqlite", "tokio-postgres"]),
+    );
+    expect(RUST_APIS).toContain("jsonrpsee");
+    expect(RUST_LIBRARIES).toEqual(
+      expect.arrayContaining([
+        "rand",
+        "regex",
+        "rayon",
+        "itertools",
+        "rstest",
+        "cargo-nextest",
+        "cargo-audit",
+      ]),
+    );
+    expect(RUST_AUTHS).toEqual(expect.arrayContaining(["openidconnect", "tower-sessions"]));
+    expect(RUST_MESSAGE_QUEUES).toEqual(
+      expect.arrayContaining(["rdkafka", "async-nats"]),
+    );
+    expect(RUST_OBSERVABILITY).toContain("metrics");
+    expect(RUST_TEMPLATING).toContain("minijinja");
+  });
+
+  it("generates the Yew workspace, integration modules, and Cargo tool configuration", async () => {
+    const result = await createVirtual({
+      projectName: "rust-expansion",
+      ecosystem: "rust",
+      rustWebFramework: "axum",
+      rustFrontend: "yew",
+      rustOrm: "mongodb",
+      rustApi: "jsonrpsee",
+      rustCli: "none",
+      rustLibraries: [
+        "rand",
+        "regex",
+        "rayon",
+        "itertools",
+        "rstest",
+        "cargo-nextest",
+        "cargo-audit",
+      ],
+      rustAuth: "tower-sessions",
+      rustMessageQueue: "rdkafka",
+      rustObservability: "metrics",
+      rustTemplating: "minijinja",
+    });
+
+    expect(result.success).toBe(true);
+    const root = result.tree!.root;
+    const cargo = getFileContent(root, "Cargo.toml");
+    const serverCargo = getFileContent(root, "crates/server/Cargo.toml");
+
+    for (const dependency of [
+      "yew",
+      "mongodb",
+      "jsonrpsee",
+      "rdkafka",
+      "tower-sessions",
+      "metrics-exporter-prometheus",
+      "minijinja",
+      "rand",
+      "regex",
+      "rayon",
+      "itertools",
+      "rstest",
+    ]) {
+      expect(cargo).toContain(dependency);
+    }
+    expect(serverCargo).toContain("jsonrpsee.workspace = true");
+    expect(hasFile(root, "crates/yew-client/src/main.rs")).toBe(true);
+    expect(hasFile(root, "crates/server/src/database.rs")).toBe(true);
+    expect(hasFile(root, "crates/server/src/rpc.rs")).toBe(true);
+    expect(hasFile(root, "crates/server/src/messaging.rs")).toBe(true);
+    expect(hasFile(root, "crates/server/src/otel.rs")).toBe(true);
+    expect(hasFile(root, "crates/server/src/templating.rs")).toBe(true);
+    expect(hasFile(root, "crates/server/tests/rstest_examples.rs")).toBe(true);
+    expect(hasFile(root, ".config/nextest.toml")).toBe(true);
+    expect(hasFile(root, ".cargo/audit.toml")).toBe(true);
+  });
+
+  it("generates Warp and Salvo servers with their selected database integrations", async () => {
+    const cases = [
+      { framework: "warp" as const, orm: "rusqlite" as const, databaseSymbol: "rusqlite::Connection" },
+      { framework: "salvo" as const, orm: "tokio-postgres" as const, databaseSymbol: "tokio_postgres" },
+    ];
+
+    for (const { framework, orm, databaseSymbol } of cases) {
+      const result = await createVirtual({
+        projectName: `rust-${framework}`,
+        ecosystem: "rust",
+        rustWebFramework: framework,
+        rustFrontend: "none",
+        rustOrm: orm,
+        rustApi: "jsonrpsee",
+        rustCli: "none",
+        rustLibraries: [],
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+      expect(getFileContent(root, "crates/server/src/main.rs")).toContain(framework);
+      expect(getFileContent(root, "crates/server/src/database.rs")).toContain(databaseSymbol);
+    }
   });
 });

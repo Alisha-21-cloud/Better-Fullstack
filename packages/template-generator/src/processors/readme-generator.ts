@@ -1282,6 +1282,14 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push("- **Actix-web** - Powerful, pragmatic, and extremely fast web framework");
   } else if (rustWebFramework === "rocket") {
     features.push("- **Rocket** - Convention-over-configuration web framework for Rust");
+  } else if (rustWebFramework === "poem") {
+    features.push("- **Poem** - Full-featured async web framework built on Tokio and Hyper");
+  } else if (rustWebFramework === "loco") {
+    features.push("- **Loco** - Opinionated Rails-inspired application framework");
+  } else if (rustWebFramework === "warp") {
+    features.push("- **Warp** - Composable filter-based async web framework");
+  } else if (rustWebFramework === "salvo") {
+    features.push("- **Salvo** - Batteries-included async web framework");
   }
 
   // Frontend
@@ -1290,6 +1298,9 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push("- **WebAssembly** - High-performance frontend compiled from Rust");
   } else if (rustFrontend === "dioxus") {
     features.push("- **Dioxus** - React-like GUI library for web, desktop, and mobile");
+    features.push("- **WebAssembly** - High-performance frontend compiled from Rust");
+  } else if (rustFrontend === "yew") {
+    features.push("- **Yew** - Mature React-like framework for Rust and WebAssembly");
     features.push("- **WebAssembly** - High-performance frontend compiled from Rust");
   }
 
@@ -1300,6 +1311,12 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push("- **SQLx** - Async SQL toolkit with compile-time checked queries");
   } else if (rustOrm === "diesel") {
     features.push("- **Diesel** - Safe, extensible ORM with compile-time query validation");
+  } else if (rustOrm === "mongodb") {
+    features.push("- **MongoDB Rust Driver** - Official async BSON document database client");
+  } else if (rustOrm === "rusqlite") {
+    features.push("- **rusqlite** - Ergonomic embedded SQLite access");
+  } else if (rustOrm === "tokio-postgres") {
+    features.push("- **tokio-postgres** - Native asynchronous PostgreSQL client");
   }
 
   // API
@@ -1307,6 +1324,8 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push("- **Tonic** - Production-ready gRPC implementation");
   } else if (rustApi === "async-graphql") {
     features.push("- **async-graphql** - High-performance GraphQL server");
+  } else if (rustApi === "jsonrpsee") {
+    features.push("- **jsonrpsee** - Async JSON-RPC server on a dedicated port");
   }
 
   // CLI
@@ -1342,6 +1361,17 @@ function generateRustReadmeContent(config: ProjectConfig): string {
   if (libs.includes("tokio-test")) {
     features.push("- **Tokio Test** - Async testing utilities");
   }
+  if (libs.includes("rand")) features.push("- **rand** - Randomness and sampling");
+  if (libs.includes("regex")) features.push("- **regex** - Safe linear-time regular expressions");
+  if (libs.includes("rayon")) features.push("- **Rayon** - Data parallel iterators");
+  if (libs.includes("itertools")) features.push("- **Itertools** - Extended iterator utilities");
+  if (libs.includes("rstest")) features.push("- **rstest** - Fixture and parameterized tests");
+  if (libs.includes("cargo-nextest")) {
+    features.push("- **cargo-nextest** - Fast isolated test runner with CI profiles");
+  }
+  if (libs.includes("cargo-audit")) {
+    features.push("- **cargo-audit** - RustSec dependency vulnerability auditing");
+  }
 
   // Logging
   const { rustLogging } = config;
@@ -1375,6 +1405,10 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push(
       "- **OAuth2** - OAuth2 client with authorization code, PKCE, and token exchange flows",
     );
+  } else if (rustAuth === "openidconnect") {
+    features.push("- **OpenID Connect** - Provider discovery and typed authorization flows");
+  } else if (rustAuth === "tower-sessions") {
+    features.push("- **tower-sessions** - Cookie-backed Axum session middleware");
   }
 
   // Project structure
@@ -1404,6 +1438,19 @@ function generateRustReadmeContent(config: ProjectConfig): string {
       "│       ├── Dioxus.toml   # Dioxus CLI config",
       "│       ├── src/main.rs",
       "│       └── assets/main.css",
+    );
+  } else if (rustFrontend === "yew") {
+    structure.push(
+      "├── crates/",
+      "│   ├── server/           # Backend API server",
+      "│   │   ├── Cargo.toml",
+      "│   │   └── src/main.rs",
+      "│   └── yew-client/       # Yew WASM frontend",
+      "│       ├── Cargo.toml",
+      "│       ├── Trunk.toml    # Trunk build config",
+      "│       ├── index.html",
+      "│       ├── src/main.rs",
+      "│       └── style/main.css",
     );
   } else {
     structure.push(
@@ -1435,7 +1482,13 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     scripts += `
 - \`cd crates/dioxus-client && dx serve\`: Start Dioxus dev server
 - \`cd crates/dioxus-client && dx build --release\`: Build Dioxus for production`;
+  } else if (rustFrontend === "yew") {
+    scripts += `
+- \`cd crates/yew-client && trunk serve\`: Start Yew dev server
+- \`cd crates/yew-client && trunk build --release\`: Build Yew for production`;
   }
+  if (libs.includes("cargo-nextest")) scripts += "\n- `cargo nextest run`: Run tests with nextest";
+  if (libs.includes("cargo-audit")) scripts += "\n- `cargo audit`: Audit dependencies with RustSec";
 
   return `# ${projectName}
 
@@ -1448,7 +1501,7 @@ ${features.join("\n")}
 ## Prerequisites
 
 - [Rust](https://rustup.rs/) (stable toolchain)
-${rustFrontend === "leptos" ? "- [Trunk](https://trunkrs.dev/) (`cargo install trunk`)\n- [wasm32-unknown-unknown target](https://rustwasm.github.io/docs/book/) (`rustup target add wasm32-unknown-unknown`)" : ""}${rustFrontend === "dioxus" ? "- [Dioxus CLI](https://dioxuslabs.com/learn/0.6/getting_started) (`cargo install dioxus-cli`)\n- [wasm32-unknown-unknown target](https://rustwasm.github.io/docs/book/) (`rustup target add wasm32-unknown-unknown`)" : ""}
+${rustFrontend === "leptos" || rustFrontend === "yew" ? "- [Trunk](https://trunkrs.dev/) (`cargo install trunk`)\n- [wasm32-unknown-unknown target](https://rustwasm.github.io/docs/book/) (`rustup target add wasm32-unknown-unknown`)" : ""}${rustFrontend === "dioxus" ? "- [Dioxus CLI](https://dioxuslabs.com/learn/0.6/getting_started) (`cargo install dioxus-cli`)\n- [wasm32-unknown-unknown target](https://rustwasm.github.io/docs/book/) (`rustup target add wasm32-unknown-unknown`)" : ""}${libs.includes("cargo-nextest") ? "\n- [cargo-nextest](https://nexte.st/) (`cargo install cargo-nextest --locked`)" : ""}${libs.includes("cargo-audit") ? "\n- [cargo-audit](https://rustsec.org/) (`cargo install cargo-audit --locked`)" : ""}
 
 ## Getting Started
 
@@ -1494,7 +1547,21 @@ dx serve
 The frontend will be available at [http://localhost:8080](http://localhost:8080).
 `
       : ""
-  }
+}${
+    rustFrontend === "yew"
+      ? `### Running the Frontend
+
+In a separate terminal, start the Yew frontend:
+
+\`\`\`bash
+cd crates/yew-client
+trunk serve
+\`\`\`
+
+The frontend will be available at [http://localhost:8080](http://localhost:8080).
+`
+      : ""
+}
 ## Project Structure
 
 \`\`\`

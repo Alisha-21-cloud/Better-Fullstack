@@ -6,6 +6,15 @@ import { processTemplateString, transformFilename, isBinaryFile } from "../core/
 
 export type TemplateData = Map<string, string>;
 
+/**
+ * Templates can legitimately produce no content when a feature is disabled.
+ * Those files should not appear in generated trees. This stays at the template
+ * boundary so processors can still create intentional empty markers directly.
+ */
+export function isEmptyTemplateOutput(templatePath: string, processedContent: string): boolean {
+  return !isBinaryFile(templatePath) && processedContent.trim() === "";
+}
+
 export function hasTemplatesWithPrefix(templates: TemplateData, prefix: string): boolean {
   const normalizedPrefix = prefix.endsWith("/") ? prefix : `${prefix}/`;
   for (const path of templates.keys()) {
@@ -34,6 +43,8 @@ export function processSingleTemplate(
   } else {
     processedContent = content;
   }
+
+  if (isEmptyTemplateOutput(templateKey, processedContent)) return;
 
   // Pass original template path for binary files
   const sourcePath = isBinaryFile(templateKey) ? templateKey : undefined;
@@ -70,8 +81,8 @@ export function processTemplatesFromPrefix(
       processedContent = content;
     }
 
-    // Skip writing empty files (all content was behind unmatched conditionals)
-    if (!isBinaryFile(templatePath) && processedContent.trim() === "") continue;
+    // Skip writing conditional templates whose selected branches emitted nothing.
+    if (isEmptyTemplateOutput(templatePath, processedContent)) continue;
 
     // Pass original template path for binary files
     const sourcePath = isBinaryFile(templatePath) ? templatePath : undefined;

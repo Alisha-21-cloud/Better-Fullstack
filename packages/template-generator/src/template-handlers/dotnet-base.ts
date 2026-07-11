@@ -1,9 +1,8 @@
 import type { ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
-import type { TemplateData } from "./utils";
-
 import { isBinaryFile, processTemplateString, transformFilename } from "../core/template-processor";
+import { isEmptyTemplateOutput, type TemplateData } from "./utils";
 
 const DOTNET_DOCKER_DEPLOY_TARGETS = new Set<ProjectConfig["dotnetDeploy"]>([
   "docker",
@@ -154,7 +153,7 @@ export async function processDotnetBaseTemplate(
       processedContent = content;
     }
 
-    if (processedContent.trim() === "") continue;
+    if (isEmptyTemplateOutput(templatePath, processedContent)) continue;
 
     const sourcePath = isBinaryFile(templatePath) ? templatePath : undefined;
     vfs.writeFile(destPath, processedContent, sourcePath);

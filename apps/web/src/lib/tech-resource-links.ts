@@ -1106,11 +1106,14 @@ const BASE_LINKS: LinkMap = {
   },
   poem: { docsUrl: "https://docs.rs/poem/latest/poem/", githubUrl: "https://github.com/poem-web/poem" },
   loco: { docsUrl: "https://loco.rs/docs/", githubUrl: "https://github.com/loco-rs/loco" },
+  warp: { docsUrl: "https://docs.rs/warp/latest/warp/", githubUrl: "https://github.com/seanmonstar/warp" },
+  salvo: { docsUrl: "https://salvo.rs/guide/", githubUrl: "https://github.com/salvo-rs/salvo" },
   leptos: { docsUrl: "https://book.leptos.dev/", githubUrl: "https://github.com/leptos-rs/leptos" },
   dioxus: {
     docsUrl: "https://dioxuslabs.com/learn/",
     githubUrl: "https://github.com/DioxusLabs/dioxus",
   },
+  yew: { docsUrl: "https://yew.rs/docs/", githubUrl: "https://github.com/yewstack/yew" },
   "sea-orm": {
     docsUrl: "https://www.sea-ql.org/SeaORM/docs/",
     githubUrl: "https://github.com/SeaQL/sea-orm",
@@ -1123,6 +1126,14 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://diesel.rs/guides/",
     githubUrl: "https://github.com/diesel-rs/diesel",
   },
+  rusqlite: {
+    docsUrl: "https://docs.rs/rusqlite/latest/rusqlite/",
+    githubUrl: "https://github.com/rusqlite/rusqlite",
+  },
+  "tokio-postgres": {
+    docsUrl: "https://docs.rs/tokio-postgres/latest/tokio_postgres/",
+    githubUrl: "https://github.com/sfackler/rust-postgres",
+  },
   "async-graphql": {
     docsUrl: "https://async-graphql.github.io/async-graphql/en/",
     githubUrl: "https://github.com/async-graphql/async-graphql",
@@ -1131,6 +1142,17 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://docs.rs/tonic/latest/tonic/",
     githubUrl: "https://github.com/hyperium/tonic",
   },
+  jsonrpsee: {
+    docsUrl: "https://docs.rs/jsonrpsee/latest/jsonrpsee/",
+    githubUrl: "https://github.com/paritytech/jsonrpsee",
+  },
+  rand: { docsUrl: "https://rust-random.github.io/book/", githubUrl: "https://github.com/rust-random/rand" },
+  regex: { docsUrl: "https://docs.rs/regex/latest/regex/", githubUrl: "https://github.com/rust-lang/regex" },
+  rayon: { docsUrl: "https://docs.rs/rayon/latest/rayon/", githubUrl: "https://github.com/rayon-rs/rayon" },
+  itertools: { docsUrl: "https://docs.rs/itertools/latest/itertools/", githubUrl: "https://github.com/rust-itertools/itertools" },
+  rstest: { docsUrl: "https://docs.rs/rstest/latest/rstest/", githubUrl: "https://github.com/la10736/rstest" },
+  "cargo-nextest": { docsUrl: "https://nexte.st/docs/", githubUrl: "https://github.com/nextest-rs/nextest" },
+  "cargo-audit": { docsUrl: "https://rustsec.org/", githubUrl: "https://github.com/rustsec/rustsec" },
   tracing: {
     docsUrl: "https://docs.rs/tracing/latest/tracing/",
     githubUrl: "https://github.com/tokio-rs/tracing",
@@ -1448,6 +1470,11 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://docs.rs/lapin",
     githubUrl: "https://github.com/amqp-rs/lapin",
   },
+  rdkafka: { docsUrl: "https://docs.rs/rdkafka/latest/rdkafka/", githubUrl: "https://github.com/fede1024/rust-rdkafka" },
+  "async-nats": { docsUrl: "https://docs.rs/async-nats/latest/async_nats/", githubUrl: "https://github.com/nats-io/nats.rs" },
+  openidconnect: { docsUrl: "https://docs.rs/openidconnect/latest/openidconnect/", githubUrl: "https://github.com/ramosbugs/openidconnect-rs" },
+  "tower-sessions": { docsUrl: "https://docs.rs/tower-sessions/latest/tower_sessions/", githubUrl: "https://github.com/maxcountryman/tower-sessions" },
+  metrics: { docsUrl: "https://metrics.rs/", githubUrl: "https://github.com/metrics-rs/metrics" },
   askama: {
     docsUrl: "https://askama.readthedocs.io/",
     githubUrl: "https://github.com/askama-rs/askama",
@@ -1456,6 +1483,7 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://keats.github.io/tera/docs/",
     githubUrl: "https://github.com/Keats/tera",
   },
+  minijinja: { docsUrl: "https://docs.rs/minijinja/latest/minijinja/", githubUrl: "https://github.com/mitsuhiko/minijinja" },
   starlette: {
     docsUrl: "https://www.starlette.io/",
     githubUrl: "https://github.com/encode/starlette",

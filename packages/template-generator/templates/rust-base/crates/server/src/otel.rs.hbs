@@ -27,3 +27,21 @@ pub fn init_tracing() -> Result<SdkTracerProvider, Box<dyn std::error::Error + S
     Ok(provider)
 }
 {{/if}}
+{{#if (eq rustObservability "metrics")}}
+//! Prometheus-compatible metrics recorder and exporter.
+
+#![allow(dead_code)]
+
+use std::net::SocketAddr;
+
+use metrics_exporter_prometheus::PrometheusBuilder;
+
+pub fn install_metrics() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let address = std::env::var("METRICS_LISTEN_ADDRESS")
+        .unwrap_or_else(|_| "127.0.0.1:9000".to_string())
+        .parse::<SocketAddr>()?;
+    PrometheusBuilder::new().with_http_listener(address).install()?;
+    metrics::describe_counter!("http_requests_total", "Total HTTP requests handled");
+    Ok(())
+}
+{{/if}}

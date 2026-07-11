@@ -1,14 +1,13 @@
 import type { ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
-import type { TemplateData } from "./utils";
-
 import {
   isBinaryFile,
   normalizeElixirAppName,
   processTemplateString,
   transformFilename,
 } from "../core/template-processor";
+import { isEmptyTemplateOutput, type TemplateData } from "./utils";
 
 export async function processElixirBaseTemplate(
   vfs: VirtualFileSystem,
@@ -104,7 +103,7 @@ export async function processElixirBaseTemplate(
       processedContent = content;
     }
 
-    if (processedContent.trim() === "") continue;
+    if (isEmptyTemplateOutput(templatePath, processedContent)) continue;
 
     const sourcePath = isBinaryFile(templatePath) ? templatePath : undefined;
     vfs.writeFile(destPath, processedContent, sourcePath);

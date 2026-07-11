@@ -1,3 +1,9 @@
+{{#if (ne rustOrm "none")}}
+mod database;
+{{/if}}
+{{#if (eq rustApi "jsonrpsee")}}
+mod rpc;
+{{/if}}
 {{#if (eq rustWebFramework "axum")}}
 use axum::{routing::get, Json, Router};
 use serde::Serialize;
@@ -17,13 +23,13 @@ mod error;
 {{#if (eq search "meilisearch")}}
 mod meilisearch;
 {{/if}}
-{{#if (eq rustMessageQueue "lapin")}}
+{{#if (ne rustMessageQueue "none")}}
 mod messaging;
 {{/if}}
 {{#if (eq observability "sentry")}}
 mod observability;
 {{/if}}
-{{#if (eq rustObservability "opentelemetry")}}
+{{#if (ne rustObservability "none")}}
 mod otel;
 {{/if}}
 {{#if (eq rustRealtime "tokio-tungstenite")}}
@@ -166,6 +172,23 @@ fn cors_layer() -> CorsLayer {
 async fn main() -> {{#if (eq rustErrorHandling "anyhow-thiserror")}}anyhow::Result<()>{{else if (eq rustErrorHandling "eyre")}}eyre::Result<()>{{else}}Result<(), Box<dyn std::error::Error>>{{/if}} {
     // Load environment variables
     dotenvy::dotenv().ok();
+{{#if (eq rustApi "jsonrpsee")}}
+
+    // Start JSON-RPC on a dedicated port alongside the HTTP server
+    let rpc_port = std::env::var("JSONRPC_PORT").unwrap_or_else(|_| "9944".to_string());
+    let rpc_address = format!("127.0.0.1:{rpc_port}").parse()?;
+    let _rpc_server = rpc::start(rpc_address).await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+
+    // Install the Prometheus metrics recorder and HTTP exporter
+    otel::install_metrics().map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (and (or (or (eq rustOrm "mongodb") (eq rustOrm "rusqlite")) (eq rustOrm "tokio-postgres")) (and (ne rustWebFramework "warp") (ne rustWebFramework "salvo")))}}
+
+    // Connect the selected database driver at startup
+    let _database = database::connect().await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
 {{#if (eq observability "sentry")}}
     let _sentry_guard = observability::init_sentry();
 {{/if}}
@@ -336,6 +359,11 @@ async fn main() -> {{#if (eq rustErrorHandling "anyhow-thiserror")}}anyhow::Resu
 {{/if}}
 {{/if}}
 
+{{#if (eq rustAuth "tower-sessions")}}
+    // Attach cookie-backed session management to every Axum route.
+    let app = app.layer(auth::session_layer());
+{{/if}}
+
     // Get host and port from environment
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
     let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
@@ -395,10 +423,10 @@ mod auth;
 {{#if (eq rustRealtime "tokio-tungstenite")}}
 mod realtime;
 {{/if}}
-{{#if (eq rustMessageQueue "lapin")}}
+{{#if (ne rustMessageQueue "none")}}
 mod messaging;
 {{/if}}
-{{#if (eq rustObservability "opentelemetry")}}
+{{#if (ne rustObservability "none")}}
 mod otel;
 {{/if}}
 {{#if (ne rustTemplating "none")}}
@@ -552,6 +580,23 @@ fn cors() -> Cors {
 async fn main() -> {{#if (eq rustErrorHandling "anyhow-thiserror")}}anyhow::Result<()>{{else if (eq rustErrorHandling "eyre")}}eyre::Result<()>{{else}}Result<(), Box<dyn std::error::Error>>{{/if}} {
     // Load environment variables
     dotenvy::dotenv().ok();
+{{#if (eq rustApi "jsonrpsee")}}
+
+    // Start JSON-RPC on a dedicated port alongside the HTTP server
+    let rpc_port = std::env::var("JSONRPC_PORT").unwrap_or_else(|_| "9944".to_string());
+    let rpc_address = format!("127.0.0.1:{rpc_port}").parse()?;
+    let _rpc_server = rpc::start(rpc_address).await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+
+    // Install the Prometheus metrics recorder and HTTP exporter
+    otel::install_metrics().map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (and (or (or (eq rustOrm "mongodb") (eq rustOrm "rusqlite")) (eq rustOrm "tokio-postgres")) (and (ne rustWebFramework "warp") (ne rustWebFramework "salvo")))}}
+
+    // Connect the selected database driver at startup
+    let _database = database::connect().await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
 {{#if (eq observability "sentry")}}
     let _sentry_guard = observability::init_sentry();
 {{/if}}
@@ -793,10 +838,10 @@ mod auth;
 {{#if (eq rustRealtime "tokio-tungstenite")}}
 mod realtime;
 {{/if}}
-{{#if (eq rustMessageQueue "lapin")}}
+{{#if (ne rustMessageQueue "none")}}
 mod messaging;
 {{/if}}
-{{#if (eq rustObservability "opentelemetry")}}
+{{#if (ne rustObservability "none")}}
 mod otel;
 {{/if}}
 {{#if (ne rustTemplating "none")}}
@@ -945,6 +990,29 @@ fn graphiql() -> RawHtml<String> {
 async fn rocket() -> _ {
     // Load environment variables
     dotenvy::dotenv().ok();
+{{#if (eq rustApi "jsonrpsee")}}
+
+    // Start JSON-RPC on a dedicated port alongside the HTTP server
+    let rpc_port = std::env::var("JSONRPC_PORT").unwrap_or_else(|_| "9944".to_string());
+    let rpc_address = format!("127.0.0.1:{rpc_port}")
+        .parse()
+        .expect("JSONRPC_PORT must be a valid port");
+    let _rpc_server = rpc::start(rpc_address)
+        .await
+        .expect("failed to start the JSON-RPC server");
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+
+    // Install the Prometheus metrics recorder and HTTP exporter
+    otel::install_metrics().expect("failed to install the metrics exporter");
+{{/if}}
+{{#if (and (or (or (eq rustOrm "mongodb") (eq rustOrm "rusqlite")) (eq rustOrm "tokio-postgres")) (and (ne rustWebFramework "warp") (ne rustWebFramework "salvo")))}}
+
+    // Connect the selected database driver at startup
+    let _database = database::connect()
+        .await
+        .expect("failed to connect the selected database");
+{{/if}}
 {{#if (eq observability "sentry")}}
     let _sentry_guard = observability::init_sentry();
 {{/if}}
@@ -1130,13 +1198,13 @@ mod error;
 {{#if (eq search "meilisearch")}}
 mod meilisearch;
 {{/if}}
-{{#if (eq rustMessageQueue "lapin")}}
+{{#if (ne rustMessageQueue "none")}}
 mod messaging;
 {{/if}}
 {{#if (eq observability "sentry")}}
 mod observability;
 {{/if}}
-{{#if (eq rustObservability "opentelemetry")}}
+{{#if (ne rustObservability "none")}}
 mod otel;
 {{/if}}
 {{#if (eq rustRealtime "tokio-tungstenite")}}
@@ -1271,6 +1339,23 @@ fn cors() -> Cors {
 async fn main() -> {{#if (eq rustErrorHandling "anyhow-thiserror")}}anyhow::Result<()>{{else if (eq rustErrorHandling "eyre")}}eyre::Result<()>{{else}}Result<(), Box<dyn std::error::Error>>{{/if}} {
     // Load environment variables
     dotenvy::dotenv().ok();
+{{#if (eq rustApi "jsonrpsee")}}
+
+    // Start JSON-RPC on a dedicated port alongside the HTTP server
+    let rpc_port = std::env::var("JSONRPC_PORT").unwrap_or_else(|_| "9944".to_string());
+    let rpc_address = format!("127.0.0.1:{rpc_port}").parse()?;
+    let _rpc_server = rpc::start(rpc_address).await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+
+    // Install the Prometheus metrics recorder and HTTP exporter
+    otel::install_metrics().map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (and (or (or (eq rustOrm "mongodb") (eq rustOrm "rusqlite")) (eq rustOrm "tokio-postgres")) (and (ne rustWebFramework "warp") (ne rustWebFramework "salvo")))}}
+
+    // Connect the selected database driver at startup
+    let _database = database::connect().await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
 {{#if (eq observability "sentry")}}
     let _sentry_guard = observability::init_sentry();
 {{/if}}
@@ -1482,6 +1567,188 @@ async fn main() -> {{#if (eq rustErrorHandling "anyhow-thiserror")}}anyhow::Resu
 
     Ok(())
 }
+{{else if (eq rustWebFramework "warp")}}
+use std::convert::Infallible;
+use std::net::SocketAddr;
+
+use serde::Serialize;
+use warp::Filter;
+{{#if (ne rustAuth "none")}}
+mod auth;
+{{/if}}
+{{#if (ne rustCaching "none")}}
+mod cache;
+{{/if}}
+{{#if (ne rustErrorHandling "none")}}
+mod error;
+{{/if}}
+{{#if (ne rustMessageQueue "none")}}
+mod messaging;
+{{/if}}
+{{#if (ne rustObservability "none")}}
+mod otel;
+{{/if}}
+{{#if (ne rustTemplating "none")}}
+mod templating;
+{{/if}}
+
+#[derive(Serialize)]
+struct HealthResponse {
+    status: &'static str,
+    message: &'static str,
+{{#if (ne rustOrm "none")}}
+    database: &'static str,
+{{/if}}
+}
+
+{{#if (ne rustOrm "none")}}
+async fn health(db: database::Database) -> Result<impl warp::Reply, Infallible> {
+    let database = if database::is_healthy(&db).await { "connected" } else { "disconnected" };
+    Ok(warp::reply::json(&HealthResponse {
+        status: "ok",
+        message: "Server is running",
+        database,
+    }))
+}
+{{else}}
+async fn health() -> Result<impl warp::Reply, Infallible> {
+    Ok(warp::reply::json(&HealthResponse {
+        status: "ok",
+        message: "Server is running",
+    }))
+}
+{{/if}}
+
+#[tokio::main]
+async fn main() -> {{#if (eq rustErrorHandling "anyhow-thiserror")}}anyhow::Result<()>{{else if (eq rustErrorHandling "eyre")}}eyre::Result<()>{{else}}Result<(), Box<dyn std::error::Error>>{{/if}} {
+    dotenvy::dotenv().ok();
+{{#if (eq rustApi "jsonrpsee")}}
+
+    // Start JSON-RPC on a dedicated port alongside the HTTP server
+    let rpc_port = std::env::var("JSONRPC_PORT").unwrap_or_else(|_| "9944".to_string());
+    let rpc_address = format!("127.0.0.1:{rpc_port}").parse()?;
+    let _rpc_server = rpc::start(rpc_address).await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+
+    // Install the Prometheus metrics recorder and HTTP exporter
+    otel::install_metrics().map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (and (or (or (eq rustOrm "mongodb") (eq rustOrm "rusqlite")) (eq rustOrm "tokio-postgres")) (and (ne rustWebFramework "warp") (ne rustWebFramework "salvo")))}}
+
+    // Connect the selected database driver at startup
+    let _database = database::connect().await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (eq rustLogging "tracing")}}
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+{{else if (eq rustLogging "env-logger")}}
+    env_logger::init();
+{{/if}}
+{{#if (ne rustOrm "none")}}
+    let db = database::connect().await.map_err(|error| std::io::Error::other(error.to_string()))?;
+    let database = warp::any().map(move || db.clone());
+    let health_route = warp::path("health")
+        .and(warp::get())
+        .and(database)
+        .and_then(health);
+{{else}}
+    let health_route = warp::path("health").and(warp::get()).and_then(health);
+{{/if}}
+    let routes = health_route.with(
+        warp::cors()
+            .allow_any_origin()
+            .allow_methods(["GET", "OPTIONS"])
+            .allow_headers(["content-type"]),
+    );
+    let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+    let address = format!("{host}:{port}").parse::<SocketAddr>()?;
+{{#if (eq rustLogging "tracing")}}
+    tracing::info!(%address, "Warp server listening");
+{{/if}}
+    warp::serve(routes).run(address).await;
+    Ok(())
+}
+{{else if (eq rustWebFramework "salvo")}}
+use salvo::prelude::*;
+use serde::Serialize;
+{{#if (ne rustAuth "none")}}
+mod auth;
+{{/if}}
+{{#if (ne rustCaching "none")}}
+mod cache;
+{{/if}}
+{{#if (ne rustErrorHandling "none")}}
+mod error;
+{{/if}}
+{{#if (ne rustMessageQueue "none")}}
+mod messaging;
+{{/if}}
+{{#if (ne rustObservability "none")}}
+mod otel;
+{{/if}}
+{{#if (ne rustTemplating "none")}}
+mod templating;
+{{/if}}
+
+#[derive(Serialize)]
+struct HealthResponse {
+    status: &'static str,
+    message: &'static str,
+}
+
+#[handler]
+async fn health(response: &mut Response) {
+    response.render(Json(HealthResponse {
+        status: "ok",
+        message: "Server is running",
+    }));
+}
+
+#[tokio::main]
+async fn main() -> {{#if (eq rustErrorHandling "anyhow-thiserror")}}anyhow::Result<()>{{else if (eq rustErrorHandling "eyre")}}eyre::Result<()>{{else}}Result<(), Box<dyn std::error::Error>>{{/if}} {
+    dotenvy::dotenv().ok();
+{{#if (eq rustApi "jsonrpsee")}}
+
+    // Start JSON-RPC on a dedicated port alongside the HTTP server
+    let rpc_port = std::env::var("JSONRPC_PORT").unwrap_or_else(|_| "9944".to_string());
+    let rpc_address = format!("127.0.0.1:{rpc_port}").parse()?;
+    let _rpc_server = rpc::start(rpc_address).await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+
+    // Install the Prometheus metrics recorder and HTTP exporter
+    otel::install_metrics().map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (and (or (or (eq rustOrm "mongodb") (eq rustOrm "rusqlite")) (eq rustOrm "tokio-postgres")) (and (ne rustWebFramework "warp") (ne rustWebFramework "salvo")))}}
+
+    // Connect the selected database driver at startup
+    let _database = database::connect().await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (eq rustLogging "tracing")}}
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+{{else if (eq rustLogging "env-logger")}}
+    env_logger::init();
+{{/if}}
+{{#if (ne rustOrm "none")}}
+    let _database = database::connect().await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+
+    let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+    let address = format!("{host}:{port}");
+    let router = Router::with_path("health").get(health);
+{{#if (eq rustLogging "tracing")}}
+    tracing::info!(%address, "Salvo server listening");
+{{/if}}
+    let acceptor = TcpListener::new(address).bind().await;
+    Server::new(acceptor).serve(router).await;
+    Ok(())
+}
 {{else if (eq rustWebFramework "loco")}}
 mod app;
 mod controllers;
@@ -1505,10 +1772,10 @@ mod auth;
 {{#if (eq rustRealtime "tokio-tungstenite")}}
 mod realtime;
 {{/if}}
-{{#if (eq rustMessageQueue "lapin")}}
+{{#if (ne rustMessageQueue "none")}}
 mod messaging;
 {{/if}}
-{{#if (eq rustObservability "opentelemetry")}}
+{{#if (ne rustObservability "none")}}
 mod otel;
 {{/if}}
 {{#if (ne rustTemplating "none")}}
@@ -1529,6 +1796,23 @@ mod grpc;
 async fn main() -> {{#if (eq rustErrorHandling "anyhow-thiserror")}}anyhow::Result<()>{{else if (eq rustErrorHandling "eyre")}}eyre::Result<()>{{else}}Result<(), Box<dyn std::error::Error>>{{/if}} {
     // Load environment variables
     dotenvy::dotenv().ok();
+{{#if (eq rustApi "jsonrpsee")}}
+
+    // Start JSON-RPC on a dedicated port alongside the HTTP server
+    let rpc_port = std::env::var("JSONRPC_PORT").unwrap_or_else(|_| "9944".to_string());
+    let rpc_address = format!("127.0.0.1:{rpc_port}").parse()?;
+    let _rpc_server = rpc::start(rpc_address).await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+
+    // Install the Prometheus metrics recorder and HTTP exporter
+    otel::install_metrics().map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
+{{#if (and (or (or (eq rustOrm "mongodb") (eq rustOrm "rusqlite")) (eq rustOrm "tokio-postgres")) (and (ne rustWebFramework "warp") (ne rustWebFramework "salvo")))}}
+
+    // Connect the selected database driver at startup
+    let _database = database::connect().await.map_err(|error| std::io::Error::other(error.to_string()))?;
+{{/if}}
 {{#if (eq rustErrorHandling "eyre")}}
 
     // Install color-eyre error handler

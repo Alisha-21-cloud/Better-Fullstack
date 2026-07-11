@@ -934,3 +934,38 @@ export function getCompatibleCSSFrameworks(
 export function hasWebStyling(frontends: Frontend[] = []): boolean {
   return hasWebStylingShared(frontends);
 }
+
+export function validateRustExpansionCompatibility(config: Partial<ProjectConfig>) {
+  if (config.ecosystem !== "rust") return;
+
+  const framework = config.rustWebFramework ?? "none";
+  const api = config.rustApi ?? "none";
+  const auth = config.rustAuth ?? "none";
+
+  if ((framework === "warp" || framework === "salvo") && !["none", "jsonrpsee"].includes(api)) {
+    incompatibilityError({
+      message: "Warp and Salvo currently support REST or the standalone jsonrpsee server.",
+      provided: { "rust-web-framework": framework, "rust-api": api },
+      suggestions: [
+        "Use --rust-api jsonrpsee or --rust-api none",
+        "Use Axum, Actix Web, Rocket, or Poem for Tonic/async-graphql",
+      ],
+    });
+  }
+
+  if (framework === "loco" && api === "jsonrpsee") {
+    incompatibilityError({
+      message: "Loco owns the server boot sequence and cannot start the generated jsonrpsee server.",
+      provided: { "rust-web-framework": framework, "rust-api": api },
+      suggestions: ["Use --rust-api none", "Choose Axum, Actix Web, Rocket, Poem, Warp, or Salvo"],
+    });
+  }
+
+  if (auth === "tower-sessions" && framework !== "axum") {
+    incompatibilityError({
+      message: "The generated tower-sessions middleware is wired specifically for Axum.",
+      provided: { "rust-web-framework": framework, "rust-auth": auth },
+      suggestions: ["Use --rust-web-framework axum", "Choose --rust-auth openidconnect or none"],
+    });
+  }
+}
