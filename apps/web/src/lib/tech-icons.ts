@@ -144,7 +144,7 @@ export const ICON_REGISTRY: Record<string, IconConfig> = {
   ecto_sqlite3: { type: "si", slug: "sqlite", hex: "003B57" },
   pow: { type: "si", slug: "elixir", hex: "4B275F" },
   open_api_spex: { type: "si", slug: "openapiinitiative", hex: "6BA539" },
-  ex_aws: { type: "si", slug: "amazonwebservices", hex: "232F3E" },
+  ex_aws: { type: "local", src: "https://aws.amazon.com/favicon.ico" },
   floki: { type: "si", slug: "elixir", hex: "4B275F" },
   rustler: { type: "si", slug: "rust", hex: "000000" },
   tesla: { type: "si", slug: "elixir", hex: "4B275F" },
