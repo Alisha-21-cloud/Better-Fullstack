@@ -77,7 +77,11 @@ describe("Elixir library expansion", () => {
     expect(mix).toContain('{:bandit, "~> 1.12"}');
     expect(mix).toContain('{:ash, "~> 3.29"}');
     expect(mix).toContain('{:rustler, "~> 0.38"}');
+    expect(mix).toContain('{:hackney, "~> 4.0 and >= 4.0.2"}');
     expect(mix).not.toContain(":plug_cowboy");
+    expect(getVirtualTreeFileContent(tree, "config/config.exs")).toContain(
+      "client: Sentry.HackneyClient",
+    );
     expect(getVirtualTreeFileContent(tree, "lib/elixir_roadmap_full/repo.ex")).toContain(
       "Ecto.Adapters.MyXQL",
     );
@@ -87,13 +91,101 @@ describe("Elixir library expansion", () => {
     expect(getVirtualTreeFileContent(tree, "lib/elixir_roadmap_full/cache.ex")).toContain(
       "Redix.command",
     );
-    expect(getVirtualTreeFileContent(tree, "lib/elixir_roadmap_full_web/router.ex")).toContain(
-      "pow_routes()",
+    const router = getVirtualTreeFileContent(tree, "lib/elixir_roadmap_full_web/router.ex");
+    expect(router).toContain("pow_routes()");
+    expect(router).toContain(
+      "plug OpenApiSpex.Plug.PutApiSpec, module: ElixirRoadmapFullWeb.ApiSpec",
     );
+    expect(router).toContain('forward "/openapi", OpenApiSpex.Plug.RenderSpec, []');
     expect(hasVirtualFile(tree.root, "lib/elixir_roadmap_full_web/api_spec.ex")).toBe(true);
     expect(hasVirtualFile(tree.root, "lib/elixir_roadmap_full/catalog_domain.ex")).toBe(true);
     expect(hasVirtualFile(tree.root, "native/string_ops/Cargo.toml")).toBe(true);
     expect(hasVirtualFile(tree.root, "test/support/factory.ex")).toBe(true);
+  });
+
+  it("keeps Ash domains independent of Ecto", async () => {
+    const result = await createVirtual({
+      ...base,
+      projectName: "elixir-ash-ets",
+      elixirOrm: "none",
+      elixirAuth: "none",
+      elixirApi: "rest",
+      elixirHttp: "req",
+      elixirEmail: "none",
+      elixirCaching: "none",
+      elixirObservability: "telemetry",
+      elixirTesting: "ex_unit",
+      elixirQuality: "none",
+      elixirI18n: "none",
+      elixirHttpServer: "bandit",
+      elixirApplicationFramework: "ash",
+      elixirDocumentation: "none",
+      elixirClustering: "none",
+      elixirLibraries: [],
+    });
+
+    expect(result.success).toBe(true);
+    const tree = result.tree!;
+    expect(hasVirtualFile(tree.root, "lib/elixir_ash_ets/catalog_domain.ex")).toBe(true);
+    expect(hasVirtualFile(tree.root, "lib/elixir_ash_ets/resources/item.ex")).toBe(true);
+    expect(hasVirtualFile(tree.root, "lib/elixir_ash_ets/catalog.ex")).toBe(false);
+  });
+
+  it("includes Rustler sources and toolchains in deploy images", async () => {
+    const result = await createVirtual({
+      ...base,
+      projectName: "elixir-rustler-deploy",
+      elixirOrm: "ecto-sql",
+      elixirAuth: "none",
+      elixirApi: "rest",
+      elixirHttp: "req",
+      elixirEmail: "none",
+      elixirCaching: "none",
+      elixirObservability: "telemetry",
+      elixirTesting: "ex_unit",
+      elixirQuality: "none",
+      elixirI18n: "none",
+      elixirHttpServer: "bandit",
+      elixirApplicationFramework: "none",
+      elixirDocumentation: "none",
+      elixirClustering: "none",
+      elixirDeploy: "docker",
+      elixirLibraries: ["rustler"],
+    });
+
+    expect(result.success).toBe(true);
+    const dockerfile = getVirtualTreeFileContent(result.tree!, "Dockerfile");
+    expect(dockerfile).toContain("build-essential git cargo rustc");
+    expect(dockerfile).toContain("COPY native native");
+  });
+
+  it("supports ExDoc for plain Elixir projects", async () => {
+    const result = await createVirtual({
+      ...base,
+      projectName: "elixir-plain-docs",
+      elixirWebFramework: "none",
+      elixirOrm: "none",
+      elixirAuth: "none",
+      elixirApi: "none",
+      elixirRealtime: "none",
+      elixirHttp: "none",
+      elixirEmail: "none",
+      elixirCaching: "none",
+      elixirObservability: "none",
+      elixirTesting: "none",
+      elixirQuality: "none",
+      elixirI18n: "none",
+      elixirHttpServer: "none",
+      elixirApplicationFramework: "none",
+      elixirDocumentation: "ex_doc",
+      elixirClustering: "none",
+      elixirLibraries: [],
+    });
+
+    expect(result.success).toBe(true);
+    expect(getVirtualTreeFileContent(result.tree!, "mix.exs")).toContain(
+      '{:ex_doc, "~> 0.40", only: :dev, runtime: false}',
+    );
   });
 
   it("generates SQLite, property testing, and ExCoveralls without PostgreSQL wiring", async () => {

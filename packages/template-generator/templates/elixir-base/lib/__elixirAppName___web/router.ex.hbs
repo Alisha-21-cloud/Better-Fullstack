@@ -19,6 +19,9 @@ defmodule {{elixirModuleName}}Web.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+{{#if (eq elixirApi "open_api_spex")}}
+    plug OpenApiSpex.Plug.PutApiSpec, module: {{elixirModuleName}}Web.ApiSpec
+{{/if}}
   end
 
   scope "/", {{elixirModuleName}}Web do
@@ -70,7 +73,7 @@ defmodule {{elixirModuleName}}Web.Router do
 {{#if (eq elixirApi "open_api_spex")}}
   scope "/api" do
     pipe_through :api
-    forward "/openapi", OpenApiSpex.Plug.RenderSpec, module: {{elixirModuleName}}Web.ApiSpec
+    forward "/openapi", OpenApiSpex.Plug.RenderSpec, []
   end
 
   forward "/swagger", OpenApiSpex.Plug.SwaggerUI,

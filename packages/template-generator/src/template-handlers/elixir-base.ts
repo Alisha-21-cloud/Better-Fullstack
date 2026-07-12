@@ -53,10 +53,9 @@ export async function processElixirBaseTemplate(
     if (!hasEctoSql && (templatePath.includes("/repo.ex") || templatePath.includes("/migrations/")))
       continue;
     if (!hasEctoSql && templatePath.includes("priv/repo/seeds.exs")) continue;
-    if (
-      !hasEcto &&
-      (templatePath.includes("/catalog") || templatePath.includes("/item_controller"))
-    )
+    const isEctoCatalogTemplate =
+      templatePath.includes("/catalog.ex") || templatePath.includes("/catalog/");
+    if (!hasEcto && (isEctoCatalogTemplate || templatePath.includes("/item_controller")))
       continue;
     if (!hasAuth && templatePath.includes("/accounts")) continue;
     if (!hasAuth && templatePath.includes("create_users")) continue;

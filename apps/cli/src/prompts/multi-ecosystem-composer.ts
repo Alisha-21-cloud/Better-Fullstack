@@ -902,16 +902,13 @@ export async function gatherMultiEcosystemConfig(
             backendSections,
             () => getElixirApplicationFrameworkChoice(flags.elixirApplicationFramework),
           );
-    const elixirDocumentation =
-      elixirWebFramework === "none"
-        ? "none"
-        : await scopedPromptValue(
-            "elixir",
-            "elixirDocumentation",
-            configScope,
-            backendSections,
-            () => getElixirDocumentationChoice(flags.elixirDocumentation),
-          );
+    const elixirDocumentation = await scopedPromptValue(
+      "elixir",
+      "elixirDocumentation",
+      configScope,
+      backendSections,
+      () => getElixirDocumentationChoice(flags.elixirDocumentation),
+    );
     const elixirClustering =
       elixirWebFramework === "none"
         ? "none"
