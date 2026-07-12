@@ -151,6 +151,12 @@ volumes:
 {{#if (eq rustApi "tonic")}}
       - "50051:50051"
 {{/if}}
+{{#if (eq rustApi "jsonrpsee")}}
+      - "9944:9944"
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+      - "9000:9000"
+{{/if}}
 {{else}}
       - "8080:8080"
 {{/if}}
@@ -177,22 +183,54 @@ volumes:
 {{#if (eq rustApi "tonic")}}
       - GRPC_PORT=50051
 {{/if}}
-{{#if (ne rustOrm "none")}}
+{{#if (eq rustApi "jsonrpsee")}}
+      - JSONRPC_PORT=9944
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+      - METRICS_LISTEN_ADDRESS=0.0.0.0:9000
+{{/if}}
+{{#if (eq rustOrm "mongodb")}}
+      - MONGODB_URI=mongodb://root:password@db:27017/{{projectName}}?authSource=admin
+{{else if (eq rustOrm "rusqlite")}}
+      - DATABASE_URL=/app/data/data.db
+{{else if (ne rustOrm "none")}}
       - DATABASE_URL=postgres://postgres:postgres@db:5432/{{projectName}}
 {{/if}}
 {{else if (eq ecosystem "java")}}
       - PORT=8080
       - SPRING_PROFILES_ACTIVE=prod
 {{/if}}
-{{#if (or (or (and (eq ecosystem "python") (and (ne pythonOrm "none") (eq database "postgres"))) (and (eq ecosystem "go") (ne goOrm "none"))) (and (eq ecosystem "rust") (ne rustOrm "none")))}}
+{{#if (or (or (and (eq ecosystem "python") (and (ne pythonOrm "none") (eq database "postgres"))) (and (eq ecosystem "go") (ne goOrm "none"))) (and (eq ecosystem "rust") (and (ne rustOrm "none") (ne rustOrm "rusqlite"))))}}
     depends_on:
       db:
         condition: service_healthy
 {{/if}}
+{{#if (and (eq ecosystem "rust") (eq rustOrm "rusqlite"))}}
+    volumes:
+      - rust_sqlite_data:/app/data
+{{/if}}
     restart: unless-stopped
 
-{{#if (or (or (and (eq ecosystem "python") (and (ne pythonOrm "none") (eq database "postgres"))) (and (eq ecosystem "go") (ne goOrm "none"))) (and (eq ecosystem "rust") (ne rustOrm "none")))}}
+{{#if (or (or (and (eq ecosystem "python") (and (ne pythonOrm "none") (eq database "postgres"))) (and (eq ecosystem "go") (ne goOrm "none"))) (and (eq ecosystem "rust") (and (ne rustOrm "none") (ne rustOrm "rusqlite"))))}}
   db:
+{{#if (and (eq ecosystem "rust") (eq rustOrm "mongodb"))}}
+    image: mongo:7
+    container_name: {{projectName}}-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-{{projectNameWithClosingBrace}}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+{{else}}
     image: postgres:16-alpine
     container_name: {{projectName}}-postgres
     environment:
@@ -209,8 +247,17 @@ volumes:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+{{/if}}
 
 volumes:
+{{#if (and (eq ecosystem "rust") (eq rustOrm "mongodb"))}}
+  mongodb_data:
+{{else}}
   postgres_data:
+{{/if}}
+{{/if}}
+{{#if (and (eq ecosystem "rust") (eq rustOrm "rusqlite"))}}
+volumes:
+  rust_sqlite_data:
 {{/if}}
 {{/if}}

@@ -2061,6 +2061,56 @@ export const getDisabledReason = (
     }
   }
 
+  if (currentStack.ecosystem === "rust") {
+    const filterOnlyFramework =
+      currentStack.rustWebFramework === "warp" || currentStack.rustWebFramework === "salvo";
+
+    if (
+      category === "rustApi" &&
+      filterOnlyFramework &&
+      optionId !== "none" &&
+      optionId !== "jsonrpsee"
+    ) {
+      return "Warp and Salvo currently support REST or the standalone jsonrpsee server";
+    }
+    if (
+      category === "rustWebFramework" &&
+      (optionId === "warp" || optionId === "salvo") &&
+      currentStack.rustApi !== "none" &&
+      currentStack.rustApi !== "jsonrpsee"
+    ) {
+      return "Warp and Salvo currently support REST or the standalone jsonrpsee server";
+    }
+    if (
+      category === "rustApi" &&
+      currentStack.rustWebFramework === "loco" &&
+      optionId === "jsonrpsee"
+    ) {
+      return "Loco owns the server boot sequence; jsonrpsee is available with the other Rust frameworks";
+    }
+    if (
+      category === "rustWebFramework" &&
+      optionId === "loco" &&
+      currentStack.rustApi === "jsonrpsee"
+    ) {
+      return "Loco owns the server boot sequence and cannot start the generated jsonrpsee server";
+    }
+    if (
+      category === "rustAuth" &&
+      optionId === "tower-sessions" &&
+      currentStack.rustWebFramework !== "axum"
+    ) {
+      return "The generated tower-sessions middleware is wired specifically for Axum";
+    }
+    if (
+      category === "rustWebFramework" &&
+      optionId !== "axum" &&
+      currentStack.rustAuth === "tower-sessions"
+    ) {
+      return "tower-sessions requires the generated Axum middleware stack";
+    }
+  }
+
   const graphDisabledReason =
     (category === "payments" && optionId === "revenuecat") ||
     (category === "i18n" && optionId === "intlayer")

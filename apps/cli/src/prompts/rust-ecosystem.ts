@@ -50,6 +50,16 @@ const RUST_WEB_FRAMEWORK_PROMPT_OPTIONS: PromptOption<RustWebFramework>[] = [
     hint: "The Rails of Rust: opinionated full-stack framework (runs DB-free too)",
   },
   {
+    value: "warp",
+    label: "Warp",
+    hint: "Composable, filter-based async web framework",
+  },
+  {
+    value: "salvo",
+    label: "Salvo",
+    hint: "Batteries-included async framework with OpenAPI and HTTP/3 support",
+  },
+  {
     value: "none",
     label: "None",
     hint: "No web framework",
@@ -66,6 +76,11 @@ const RUST_FRONTEND_PROMPT_OPTIONS: PromptOption<RustFrontend>[] = [
     value: "dioxus",
     label: "Dioxus",
     hint: "Fullstack, cross-platform UI library for Rust",
+  },
+  {
+    value: "yew",
+    label: "Yew",
+    hint: "Mature React-like framework for client-side Rust/WASM applications",
   },
   {
     value: "none",
@@ -91,6 +106,21 @@ const RUST_ORM_PROMPT_OPTIONS: PromptOption<RustOrm>[] = [
     hint: "Safe, extensible ORM with compile-time query validation",
   },
   {
+    value: "mongodb",
+    label: "MongoDB Rust Driver",
+    hint: "Official async MongoDB driver with typed BSON support",
+  },
+  {
+    value: "rusqlite",
+    label: "rusqlite",
+    hint: "Ergonomic embedded SQLite access",
+  },
+  {
+    value: "tokio-postgres",
+    label: "tokio-postgres",
+    hint: "Native asynchronous PostgreSQL client without an ORM",
+  },
+  {
     value: "none",
     label: "None",
     hint: "No database layer",
@@ -107,6 +137,11 @@ const RUST_API_PROMPT_OPTIONS: PromptOption<RustApi>[] = [
     value: "async-graphql",
     label: "async-graphql",
     hint: "High-performance GraphQL server library",
+  },
+  {
+    value: "jsonrpsee",
+    label: "jsonrpsee",
+    hint: "Async JSON-RPC server and client framework",
   },
   {
     value: "none",
@@ -218,6 +253,41 @@ const RUST_LIBRARIES_PROMPT_OPTIONS: PromptOption<RustLibraries>[] = [
     value: "insta",
     label: "Insta",
     hint: "Snapshot testing for Rust",
+  },
+  {
+    value: "rand",
+    label: "rand",
+    hint: "Randomness, sampling, and test-data generation",
+  },
+  {
+    value: "regex",
+    label: "regex",
+    hint: "Fast, safe regular expressions with linear-time matching",
+  },
+  {
+    value: "rayon",
+    label: "Rayon",
+    hint: "Data parallelism for CPU-bound iterators and collections",
+  },
+  {
+    value: "itertools",
+    label: "Itertools",
+    hint: "Additional iterator adaptors, grouping, and collection helpers",
+  },
+  {
+    value: "rstest",
+    label: "rstest",
+    hint: "Fixture-based and parameterized Rust tests",
+  },
+  {
+    value: "cargo-nextest",
+    label: "cargo-nextest",
+    hint: "Fast, isolated test runner with CI-friendly profiles",
+  },
+  {
+    value: "cargo-audit",
+    label: "cargo-audit",
+    hint: "RustSec vulnerability auditing for Cargo dependencies",
   },
 ];
 
@@ -504,6 +574,16 @@ export async function getRustAuthChoice(rustAuth?: RustAuth) {
       hint: "Auth framework with passwords, sessions, and pluggable storage",
     },
     {
+      value: "openidconnect" as const,
+      label: "OpenID Connect",
+      hint: "Strongly typed OIDC discovery, authorization, and token flows",
+    },
+    {
+      value: "tower-sessions" as const,
+      label: "tower-sessions",
+      hint: "Tower and Axum session middleware with pluggable stores",
+    },
+    {
       value: "none" as const,
       label: "None",
       hint: "No authentication library",
@@ -558,6 +638,16 @@ export async function getRustMessageQueueChoice(rustMessageQueue?: RustMessageQu
       hint: "Async RabbitMQ (AMQP) client",
     },
     {
+      value: "rdkafka" as const,
+      label: "rdkafka",
+      hint: "High-performance Kafka client backed by librdkafka",
+    },
+    {
+      value: "async-nats" as const,
+      label: "async-nats",
+      hint: "Async NATS and JetStream client for cloud-native messaging",
+    },
+    {
       value: "none" as const,
       label: "None",
       hint: "No message queue",
@@ -583,6 +673,11 @@ export async function getRustObservabilityChoice(rustObservability?: RustObserva
       value: "opentelemetry" as const,
       label: "OpenTelemetry",
       hint: "Official OTel SDK with OTLP/HTTP export",
+    },
+    {
+      value: "metrics" as const,
+      label: "metrics",
+      hint: "Lightweight metrics facade with a Prometheus exporter",
     },
     {
       value: "none" as const,
@@ -615,6 +710,11 @@ export async function getRustTemplatingChoice(rustTemplating?: RustTemplating) {
       value: "tera" as const,
       label: "Tera",
       hint: "Runtime Jinja2-style templates with dynamic loading",
+    },
+    {
+      value: "minijinja" as const,
+      label: "MiniJinja",
+      hint: "Lightweight Jinja-compatible runtime template engine",
     },
     {
       value: "none" as const,

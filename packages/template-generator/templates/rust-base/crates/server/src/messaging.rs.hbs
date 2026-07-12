@@ -61,3 +61,54 @@ pub async fn consumer(conn: &Connection, queue: &str) -> Result<lapin::Consumer,
         .await
 }
 {{/if}}
+{{#if (eq rustMessageQueue "rdkafka")}}
+//! Kafka producer helpers built on rust-rdkafka.
+
+#![allow(dead_code)]
+
+use std::time::Duration;
+
+use rdkafka::config::ClientConfig;
+use rdkafka::error::KafkaError;
+use rdkafka::producer::{FutureProducer, FutureRecord};
+
+pub fn connect() -> Result<FutureProducer, KafkaError> {
+    let brokers = std::env::var("KAFKA_BROKERS").unwrap_or_else(|_| "localhost:9092".to_string());
+    ClientConfig::new()
+        .set("bootstrap.servers", brokers)
+        .set("message.timeout.ms", "5000")
+        .create()
+}
+
+pub async fn publish(
+    producer: &FutureProducer,
+    topic: &str,
+    payload: &[u8],
+) -> Result<(), KafkaError> {
+    producer
+        .send(FutureRecord::<(), _>::to(topic).payload(payload), Duration::from_secs(5))
+        .await
+        .map(|_| ())
+        .map_err(|(error, _)| error)
+}
+{{/if}}
+{{#if (eq rustMessageQueue "async-nats")}}
+//! NATS messaging helpers built on async-nats.
+
+#![allow(dead_code)]
+
+use async_nats::Client;
+
+pub async fn connect() -> Result<Client, async_nats::ConnectError> {
+    let url = std::env::var("NATS_URL").unwrap_or_else(|_| "nats://127.0.0.1:4222".to_string());
+    async_nats::connect(url).await
+}
+
+pub async fn publish(
+    client: &Client,
+    subject: &str,
+    payload: Vec<u8>,
+) -> Result<(), async_nats::PublishError> {
+    client.publish(subject.to_string(), payload.into()).await
+}
+{{/if}}

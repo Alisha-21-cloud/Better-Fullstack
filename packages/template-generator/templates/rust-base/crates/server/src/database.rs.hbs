@@ -1,0 +1,143 @@
+{{#if (eq rustOrm "sea-orm")}}
+//! SeaORM connection and health-check helpers.
+
+#![allow(dead_code)]
+
+use std::sync::Arc;
+
+use sea_orm::{Database as SeaDatabase, DatabaseConnection};
+
+pub type Database = Arc<DatabaseConnection>;
+
+pub async fn connect() -> Result<Database, Box<dyn std::error::Error + Send + Sync>> {
+    let url = std::env::var("DATABASE_URL")?;
+    Ok(Arc::new(SeaDatabase::connect(url).await?))
+}
+
+pub async fn is_healthy(connection: &Database) -> bool {
+    connection.ping().await.is_ok()
+}
+{{/if}}
+{{#if (eq rustOrm "sqlx")}}
+//! SQLx connection pool and health-check helpers.
+
+#![allow(dead_code)]
+
+use sqlx::{postgres::PgPoolOptions, PgPool};
+
+pub type Database = PgPool;
+
+pub async fn connect() -> Result<Database, Box<dyn std::error::Error + Send + Sync>> {
+    let url = std::env::var("DATABASE_URL")?;
+    Ok(PgPoolOptions::new().max_connections(5).connect(&url).await?)
+}
+
+pub async fn is_healthy(pool: &Database) -> bool {
+    pool.acquire().await.is_ok()
+}
+{{/if}}
+{{#if (eq rustOrm "diesel")}}
+//! Diesel Async connection pool and health-check helpers.
+
+#![allow(dead_code)]
+
+use diesel_async::pooled_connection::deadpool::Pool;
+use diesel_async::pooled_connection::AsyncDieselConnectionManager;
+use diesel_async::{AsyncPgConnection, RunQueryDsl};
+
+pub type Database = Pool<AsyncPgConnection>;
+
+pub async fn connect() -> Result<Database, Box<dyn std::error::Error + Send + Sync>> {
+    let url = std::env::var("DATABASE_URL")?;
+    let manager = AsyncDieselConnectionManager::<AsyncPgConnection>::new(url);
+    Ok(Pool::builder(manager).build()?)
+}
+
+pub async fn is_healthy(pool: &Database) -> bool {
+    let Ok(mut connection) = pool.get().await else {
+        return false;
+    };
+    diesel::sql_query("SELECT 1")
+        .execute(&mut connection)
+        .await
+        .is_ok()
+}
+{{/if}}
+{{#if (eq rustOrm "mongodb")}}
+//! Official MongoDB driver connection and health-check helpers.
+
+#![allow(dead_code)]
+
+use mongodb::{bson::doc, Client};
+
+pub type Database = Client;
+
+pub async fn connect() -> Result<Database, Box<dyn std::error::Error + Send + Sync>> {
+    let uri = std::env::var("MONGODB_URI")
+        .unwrap_or_else(|_| "mongodb://localhost:27017".to_string());
+    Ok(Client::with_uri_str(uri).await?)
+}
+
+pub async fn is_healthy(client: &Database) -> bool {
+    let database = std::env::var("MONGODB_DATABASE")
+        .unwrap_or_else(|_| "{{projectName}}".to_string());
+    client
+        .database(&database)
+        .run_command(doc! { "ping": 1 })
+        .await
+        .is_ok()
+}
+{{/if}}
+{{#if (eq rustOrm "rusqlite")}}
+//! Embedded SQLite connection and health-check helpers.
+
+#![allow(dead_code)]
+
+use std::sync::Arc;
+
+use rusqlite::Connection;
+use tokio::sync::Mutex;
+
+pub type Database = Arc<Mutex<Connection>>;
+
+pub async fn connect() -> Result<Database, Box<dyn std::error::Error + Send + Sync>> {
+    let path = std::env::var("DATABASE_URL").unwrap_or_else(|_| "./data.db".to_string());
+    let path = path.strip_prefix("sqlite:").unwrap_or(&path);
+    Ok(Arc::new(Mutex::new(Connection::open(path)?)))
+}
+
+pub async fn is_healthy(connection: &Database) -> bool {
+    connection
+        .lock()
+        .await
+        .query_row("SELECT 1", [], |row| row.get::<_, i64>(0))
+        .is_ok()
+}
+{{/if}}
+{{#if (eq rustOrm "tokio-postgres")}}
+//! Native asynchronous PostgreSQL connection and health-check helpers.
+
+#![allow(dead_code)]
+
+use std::sync::Arc;
+
+use tokio_postgres::{Client, NoTls};
+
+pub type Database = Arc<Client>;
+
+pub async fn connect() -> Result<Database, Box<dyn std::error::Error + Send + Sync>> {
+    let url = std::env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "postgres://postgres:postgres@localhost/{{projectName}}".to_string());
+    let (client, connection) = tokio_postgres::connect(&url, NoTls).await?;
+    tokio::spawn(async move {
+        if let Err(error) = connection.await {
+            eprintln!("PostgreSQL connection error: {error}");
+        }
+    });
+    Ok(Arc::new(client))
+}
+
+pub async fn is_healthy(client: &Database) -> bool {
+    client.simple_query("SELECT 1").await.is_ok()
+}
+{{/if}}

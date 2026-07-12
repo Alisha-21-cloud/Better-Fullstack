@@ -849,6 +849,10 @@ function displayRustInstructions(config: ProjectConfig & { depsInstalled: boolea
       actix: "Actix Web",
       axum: "Axum",
       rocket: "Rocket",
+      poem: "Poem",
+      loco: "Loco",
+      warp: "Warp",
+      salvo: "Salvo",
     };
     output += `${pc.cyan("•")} Web Framework: ${frameworkNames[rustWebFramework] || rustWebFramework}\n`;
   }
@@ -867,6 +871,9 @@ function displayRustInstructions(config: ProjectConfig & { depsInstalled: boolea
       diesel: "Diesel",
       sqlx: "SQLx",
       "sea-orm": "SeaORM",
+      mongodb: "MongoDB Rust Driver",
+      rusqlite: "rusqlite",
+      "tokio-postgres": "tokio-postgres",
     };
     output += `${pc.cyan("•")} Database: ${ormNames[rustOrm] || rustOrm}\n`;
   }
@@ -874,7 +881,8 @@ function displayRustInstructions(config: ProjectConfig & { depsInstalled: boolea
   if (rustApi && rustApi !== "none") {
     const apiNames: Record<string, string> = {
       "async-graphql": "async-graphql",
-      juniper: "Juniper",
+      tonic: "Tonic",
+      jsonrpsee: "jsonrpsee",
     };
     output += `${pc.cyan("•")} API: ${apiNames[rustApi] || rustApi}\n`;
   }

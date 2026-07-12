@@ -1107,4 +1107,29 @@ describe("compatibility issue helpers", () => {
       ),
     ).toBeNull();
   });
+
+  it("enforces the generated Rust framework integration boundaries", () => {
+    const warpStack = {
+      ...DEFAULT_STACK_SELECTION,
+      ecosystem: "rust",
+      rustWebFramework: "warp",
+      rustApi: "jsonrpsee",
+      rustAuth: "none",
+    };
+
+    expect(getDisabledReason(warpStack, "rustApi", "tonic")).toBe(
+      "Warp and Salvo currently support REST or the standalone jsonrpsee server",
+    );
+    expect(getDisabledReason(warpStack, "rustApi", "jsonrpsee")).toBeNull();
+    expect(getDisabledReason(warpStack, "rustAuth", "tower-sessions")).toBe(
+      "The generated tower-sessions middleware is wired specifically for Axum",
+    );
+    expect(
+      getDisabledReason(
+        { ...warpStack, rustWebFramework: "axum", rustAuth: "tower-sessions" },
+        "rustWebFramework",
+        "salvo",
+      ),
+    ).toBe("tower-sessions requires the generated Axum middleware stack");
+  });
 });

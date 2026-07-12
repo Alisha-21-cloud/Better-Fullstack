@@ -210,7 +210,7 @@ function processStandardAuthDeps(vfs: VirtualFileSystem, config: ProjectConfig):
       addPackageDependency({
         vfs,
         packagePath: webPath,
-        dependencies: ["next-auth", "@auth/core"],
+        dependencies: ["next-auth", "@auth/core", "@tanstack/react-form", "zod"],
       });
 
       // Add ORM-specific adapter

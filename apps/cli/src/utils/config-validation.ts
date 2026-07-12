@@ -22,6 +22,7 @@ import {
   validateAIBackendCompatibility,
   validateCSSFrameworkFrontendCompatibility,
   validateRealtimeCompatibility,
+  validateRustExpansionCompatibility,
   validateWorkersCompatibility,
 } from "./compatibility-rules";
 import { isSilent } from "./context";
@@ -1124,6 +1125,7 @@ export function validateFullConfig(
 
   validateApiConstraints(config, options);
   validatePythonApiConstraints(config);
+  validateRustExpansionCompatibility(config);
   validateEmailConstraints(config);
   validateObservabilityConstraints(config);
   validateCachingConstraints(config);

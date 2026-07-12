@@ -79,6 +79,14 @@ poem.workspace = true
 # Web framework
 loco-rs.workspace = true
 {{/if}}
+{{#if (eq rustWebFramework "warp")}}
+# Web framework
+warp.workspace = true
+{{/if}}
+{{#if (eq rustWebFramework "salvo")}}
+# Web framework
+salvo.workspace = true
+{{/if}}
 
 {{#if (eq rustOrm "sqlx")}}
 # Database
@@ -92,6 +100,15 @@ sea-orm.workspace = true
 # Database
 diesel.workspace = true
 diesel-async.workspace = true
+{{/if}}
+{{#if (eq rustOrm "mongodb")}}
+mongodb.workspace = true
+{{/if}}
+{{#if (eq rustOrm "rusqlite")}}
+rusqlite.workspace = true
+{{/if}}
+{{#if (eq rustOrm "tokio-postgres")}}
+tokio-postgres.workspace = true
 {{/if}}
 
 {{#if (eq rustApi "tonic")}}
@@ -116,6 +133,9 @@ async-graphql-rocket.workspace = true
 {{#if (eq rustWebFramework "poem")}}
 async-graphql-poem.workspace = true
 {{/if}}
+{{/if}}
+{{#if (eq rustApi "jsonrpsee")}}
+jsonrpsee.workspace = true
 {{/if}}
 
 {{#if (includes rustLibraries "validator")}}
@@ -160,6 +180,18 @@ tokio-util.workspace = true
 {{#if (includes rustLibraries "utoipa")}}
 utoipa.workspace = true
 {{/if}}
+{{#if (includes rustLibraries "rand")}}
+rand.workspace = true
+{{/if}}
+{{#if (includes rustLibraries "regex")}}
+regex.workspace = true
+{{/if}}
+{{#if (includes rustLibraries "rayon")}}
+rayon.workspace = true
+{{/if}}
+{{#if (includes rustLibraries "itertools")}}
+itertools.workspace = true
+{{/if}}
 {{#if (eq rustCaching "moka")}}
 # Caching
 moka.workspace = true
@@ -173,6 +205,13 @@ url.workspace = true
 # Auth
 torii.workspace = true
 {{/if}}
+{{#if (eq rustAuth "openidconnect")}}
+openidconnect.workspace = true
+url.workspace = true
+{{/if}}
+{{#if (eq rustAuth "tower-sessions")}}
+tower-sessions.workspace = true
+{{/if}}
 {{#if (eq rustRealtime "tokio-tungstenite")}}
 # Realtime
 tokio-tungstenite.workspace = true
@@ -182,11 +221,21 @@ futures-util.workspace = true
 # Message queue
 lapin.workspace = true
 {{/if}}
+{{#if (eq rustMessageQueue "rdkafka")}}
+rdkafka.workspace = true
+{{/if}}
+{{#if (eq rustMessageQueue "async-nats")}}
+async-nats.workspace = true
+{{/if}}
 {{#if (eq rustObservability "opentelemetry")}}
 # Observability
 opentelemetry.workspace = true
 opentelemetry_sdk.workspace = true
 opentelemetry-otlp.workspace = true
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+metrics.workspace = true
+metrics-exporter-prometheus.workspace = true
 {{/if}}
 {{#if (eq rustTemplating "askama")}}
 # Templating
@@ -196,12 +245,15 @@ askama.workspace = true
 # Templating
 tera.workspace = true
 {{/if}}
+{{#if (eq rustTemplating "minijinja")}}
+minijinja.workspace = true
+{{/if}}
 
 [[bin]]
 name = "server"
 path = "src/main.rs"
 
-{{#if (or (or (includes rustLibraries "tokio-test") (includes rustLibraries "mockall")) (or (includes rustLibraries "proptest") (includes rustLibraries "insta")))}}
+{{#if (or (or (includes rustLibraries "tokio-test") (includes rustLibraries "mockall")) (or (or (includes rustLibraries "proptest") (includes rustLibraries "insta")) (includes rustLibraries "rstest")))}}
 [dev-dependencies]
 {{#if (includes rustLibraries "tokio-test")}}
 tokio-test.workspace = true
@@ -214,5 +266,8 @@ proptest.workspace = true
 {{/if}}
 {{#if (includes rustLibraries "insta")}}
 insta.workspace = true
+{{/if}}
+{{#if (includes rustLibraries "rstest")}}
+rstest.workspace = true
 {{/if}}
 {{/if}}

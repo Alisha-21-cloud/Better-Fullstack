@@ -1,9 +1,8 @@
 import type { ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
-import type { TemplateData } from "./utils";
-
 import { isBinaryFile, processTemplateString, transformFilename } from "../core/template-processor";
+import { isEmptyTemplateOutput, type TemplateData } from "./utils";
 
 export async function processRustBaseTemplate(
   vfs: VirtualFileSystem,
@@ -17,6 +16,7 @@ export async function processRustBaseTemplate(
   const prefix = "rust-base/";
   const hasLeptos = config.rustFrontend === "leptos";
   const hasDioxus = config.rustFrontend === "dioxus";
+  const hasYew = config.rustFrontend === "yew";
   const hasTonic = config.rustApi === "tonic";
   const hasAsyncGraphql = config.rustApi === "async-graphql";
   const hasClap = config.rustCli === "clap";
@@ -33,6 +33,9 @@ export async function processRustBaseTemplate(
 
     // Skip dioxus-client crate templates if Dioxus is not selected
     if (!hasDioxus && templatePath.includes("crates/dioxus-client/")) continue;
+
+    // Skip yew-client crate templates if Yew is not selected
+    if (!hasYew && templatePath.includes("crates/yew-client/")) continue;
 
     // Skip proto crate templates if Tonic is not selected
     if (!hasTonic && templatePath.includes("crates/proto/")) continue;
@@ -100,6 +103,8 @@ export async function processRustBaseTemplate(
     } else {
       processedContent = content;
     }
+
+    if (isEmptyTemplateOutput(templatePath, processedContent)) continue;
 
     // Pass original template path for binary files
     const sourcePath = isBinaryFile(templatePath) ? templatePath : undefined;

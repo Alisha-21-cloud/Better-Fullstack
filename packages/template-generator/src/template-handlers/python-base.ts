@@ -1,9 +1,8 @@
 import type { ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
-import type { TemplateData } from "./utils";
-
 import { isBinaryFile, processTemplateString, transformFilename } from "../core/template-processor";
+import { isEmptyTemplateOutput, type TemplateData } from "./utils";
 
 export async function processPythonBaseTemplate(
   vfs: VirtualFileSystem,
@@ -32,8 +31,7 @@ export async function processPythonBaseTemplate(
       processedContent = content;
     }
 
-    // Skip empty files (templates that evaluate to nothing based on config)
-    if (processedContent.trim() === "") continue;
+    if (isEmptyTemplateOutput(templatePath, processedContent)) continue;
 
     // Pass original template path for binary files
     const sourcePath = isBinaryFile(templatePath) ? templatePath : undefined;

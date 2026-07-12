@@ -450,19 +450,19 @@ export const MobileDeepLinkingSchema = z
 
 // Rust ecosystem schemas
 export const RustWebFrameworkSchema = z
-  .enum(["axum", "actix-web", "rocket", "poem", "loco", "none"])
+  .enum(["axum", "actix-web", "rocket", "poem", "loco", "warp", "salvo", "none"])
   .describe("Rust web framework");
 
 export const RustFrontendSchema = z
-  .enum(["leptos", "dioxus", "none"])
+  .enum(["leptos", "dioxus", "yew", "none"])
   .describe("Rust WASM frontend framework");
 
 export const RustOrmSchema = z
-  .enum(["sea-orm", "sqlx", "diesel", "none"])
+  .enum(["sea-orm", "sqlx", "diesel", "mongodb", "rusqlite", "tokio-postgres", "none"])
   .describe("Rust ORM/database layer");
 
 export const RustApiSchema = z
-  .enum(["tonic", "async-graphql", "none"])
+  .enum(["tonic", "async-graphql", "jsonrpsee", "none"])
   .describe("Rust API layer (gRPC/GraphQL)");
 
 export const RustCliSchema = z.enum(["clap", "ratatui", "none"]).describe("Rust CLI tools");
@@ -486,6 +486,13 @@ export const RustLibrariesSchema = z
     "mockall",
     "proptest",
     "insta",
+    "rand",
+    "regex",
+    "rayon",
+    "itertools",
+    "rstest",
+    "cargo-nextest",
+    "cargo-audit",
     "none",
   ])
   .describe("Rust core libraries");
@@ -501,7 +508,7 @@ export const RustErrorHandlingSchema = z
 export const RustCachingSchema = z.enum(["moka", "redis", "none"]).describe("Rust caching library");
 
 export const RustAuthSchema = z
-  .enum(["oauth2", "torii", "none"])
+  .enum(["oauth2", "torii", "openidconnect", "tower-sessions", "none"])
   .describe("Rust authentication library");
 
 export const RustRealtimeSchema = z
@@ -509,15 +516,15 @@ export const RustRealtimeSchema = z
   .describe("Rust realtime/WebSocket library");
 
 export const RustMessageQueueSchema = z
-  .enum(["lapin", "none"])
+  .enum(["lapin", "rdkafka", "async-nats", "none"])
   .describe("Rust message queue library");
 
 export const RustObservabilitySchema = z
-  .enum(["opentelemetry", "none"])
+  .enum(["opentelemetry", "metrics", "none"])
   .describe("Rust observability/tracing library");
 
 export const RustTemplatingSchema = z
-  .enum(["askama", "tera", "none"])
+  .enum(["askama", "tera", "minijinja", "none"])
   .describe("Rust template engine");
 
 // Python ecosystem schemas

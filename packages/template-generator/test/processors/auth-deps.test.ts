@@ -143,6 +143,8 @@ describe("processAuthDeps", () => {
     expectIncludesAll(getDeps(vfs, "apps/web/package.json").deps, [
       "next-auth",
       "@auth/core",
+      "@tanstack/react-form",
+      "zod",
       "@auth/prisma-adapter",
     ]);
   });

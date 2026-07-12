@@ -1239,19 +1239,26 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     rocket: "Rocket",
     poem: "Poem",
     loco: "Loco",
+    warp: "Warp",
+    salvo: "Salvo",
   },
   rustFrontend: {
     leptos: "Leptos",
     dioxus: "Dioxus",
+    yew: "Yew",
   },
   rustOrm: {
     "sea-orm": "SeaORM",
     sqlx: "SQLx",
     diesel: "Diesel",
+    mongodb: "MongoDB Rust Driver",
+    rusqlite: "rusqlite",
+    "tokio-postgres": "tokio-postgres",
   },
   rustApi: {
     "async-graphql": "async-graphql",
     tonic: "Tonic",
+    jsonrpsee: "jsonrpsee",
   },
   rustCli: {
     clap: "Clap",
@@ -1275,6 +1282,13 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     mockall: "Mockall",
     proptest: "Proptest",
     insta: "Insta",
+    rand: "rand",
+    regex: "regex",
+    rayon: "Rayon",
+    itertools: "Itertools",
+    rstest: "rstest",
+    "cargo-nextest": "cargo-nextest",
+    "cargo-audit": "cargo-audit",
   },
   rustLogging: {
     tracing: "Tracing",
@@ -1291,19 +1305,25 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   rustAuth: {
     oauth2: "OAuth2",
     torii: "Torii",
+    openidconnect: "OpenID Connect",
+    "tower-sessions": "tower-sessions",
   },
   rustRealtime: {
     "tokio-tungstenite": "tokio-tungstenite",
   },
   rustMessageQueue: {
     lapin: "Lapin (RabbitMQ)",
+    rdkafka: "rdkafka (Kafka)",
+    "async-nats": "async-nats",
   },
   rustObservability: {
     opentelemetry: "OpenTelemetry",
+    metrics: "metrics",
   },
   rustTemplating: {
     askama: "Askama",
     tera: "Tera",
+    minijinja: "MiniJinja",
   },
   pythonWebFramework: {
     fastapi: "FastAPI",

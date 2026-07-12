@@ -582,6 +582,30 @@ describe("Template Snapshots - Rust Ecosystem", () => {
         rustLibraries: ["serde"] as const,
       },
     },
+    {
+      name: "axum-yew-library-expansion",
+      config: {
+        ecosystem: "rust" as const,
+        rustWebFramework: "axum" as const,
+        rustFrontend: "yew" as const,
+        rustOrm: "mongodb" as const,
+        rustApi: "jsonrpsee" as const,
+        rustCli: "none" as const,
+        rustLibraries: [
+          "rand",
+          "regex",
+          "rayon",
+          "itertools",
+          "rstest",
+          "cargo-nextest",
+          "cargo-audit",
+        ] as const,
+        rustAuth: "tower-sessions" as const,
+        rustMessageQueue: "rdkafka" as const,
+        rustObservability: "metrics" as const,
+        rustTemplating: "minijinja" as const,
+      },
+    },
   ];
 
   describe("Rust File Structure Snapshots", () => {

@@ -1,0 +1,18 @@
+[package]
+name = "{{projectName}}-yew-client"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+yew.workspace = true
+gloo-net.workspace = true
+serde.workspace = true
+console_error_panic_hook.workspace = true
+wasm-bindgen-futures.workspace = true
+web-sys.workspace = true
+
+[[bin]]
+name = "yew-client"
+path = "src/main.rs"
