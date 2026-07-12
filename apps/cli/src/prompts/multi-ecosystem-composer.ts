@@ -892,16 +892,13 @@ export async function gatherMultiEcosystemConfig(
         : await scopedPromptValue("elixir", "elixirHttpServer", configScope, backendSections, () =>
             getElixirHttpServerChoice(flags.elixirHttpServer),
           );
-    const elixirApplicationFramework =
-      elixirWebFramework === "none"
-        ? "none"
-        : await scopedPromptValue(
-            "elixir",
-            "elixirApplicationFramework",
-            configScope,
-            backendSections,
-            () => getElixirApplicationFrameworkChoice(flags.elixirApplicationFramework),
-          );
+    const elixirApplicationFramework = await scopedPromptValue(
+      "elixir",
+      "elixirApplicationFramework",
+      configScope,
+      backendSections,
+      () => getElixirApplicationFrameworkChoice(flags.elixirApplicationFramework),
+    );
     const elixirDocumentation = await scopedPromptValue(
       "elixir",
       "elixirDocumentation",

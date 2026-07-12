@@ -21,5 +21,10 @@ FROM debian:bookworm-20240423-slim AS app
 RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV MIX_ENV=prod
+{{#if (eq elixirOrm "ecto_sqlite3")}}
+ENV DATABASE_PATH=/data/{{elixirAppName}}.db
+RUN mkdir -p /data
+VOLUME ["/data"]
+{{/if}}
 COPY --from=build /app/_build/prod/rel/{{elixirAppName}} ./
 CMD ["/app/bin/{{elixirAppName}}", "start"]

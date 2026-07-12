@@ -188,6 +188,41 @@ describe("Elixir library expansion", () => {
     );
   });
 
+  it("creates persistent SQLite paths for release deployments", async () => {
+    const result = await createVirtual({
+      ...base,
+      projectName: "elixir-sqlite-release",
+      elixirOrm: "ecto_sqlite3",
+      elixirAuth: "none",
+      elixirApi: "rest",
+      elixirHttp: "req",
+      elixirEmail: "none",
+      elixirCaching: "none",
+      elixirObservability: "telemetry",
+      elixirTesting: "ex_unit",
+      elixirQuality: "none",
+      elixirI18n: "none",
+      elixirHttpServer: "bandit",
+      elixirApplicationFramework: "none",
+      elixirDocumentation: "none",
+      elixirClustering: "none",
+      elixirDeploy: "fly",
+      elixirLibraries: [],
+    });
+
+    expect(result.success).toBe(true);
+    const tree = result.tree!;
+    const runtime = getVirtualTreeFileContent(tree, "config/runtime.exs");
+    expect(runtime).toContain('System.get_env("RELEASE_ROOT") || File.cwd!()');
+    expect(runtime).toContain("File.mkdir_p!(Path.dirname(database_path))");
+    const dockerfile = getVirtualTreeFileContent(tree, "Dockerfile");
+    expect(dockerfile).toContain("ENV DATABASE_PATH=/data/elixir_sqlite_release.db");
+    expect(dockerfile).toContain('VOLUME ["/data"]');
+    const fly = getVirtualTreeFileContent(tree, "fly.toml");
+    expect(fly).toContain('[mounts]');
+    expect(fly).toContain('destination = "/data"');
+  });
+
   it("generates SQLite, property testing, and ExCoveralls without PostgreSQL wiring", async () => {
     const result = await createVirtual({
       ...base,

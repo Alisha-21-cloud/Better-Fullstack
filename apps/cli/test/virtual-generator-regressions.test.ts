@@ -1,5 +1,9 @@
 import { describe, expect, it } from "bun:test";
-import { getLocalWebDevPort, parseStackPartSpecs } from "@better-fullstack/types";
+import {
+  getLocalWebDevPort,
+  parseStackPartSpecs,
+  type ProjectConfig,
+} from "@better-fullstack/types";
 
 import { createVirtual } from "../src/index";
 import { validateConfigForProgrammaticUse } from "../src/utils/config-validation";
@@ -7,6 +11,18 @@ import { runWithContext } from "../src/utils/context";
 import { getVirtualTreeFileContent, hasVirtualFile } from "./virtual-tree-utils";
 
 const readTextFromTree = getVirtualTreeFileContent;
+
+function validateElixirProgrammatic(config: Partial<ProjectConfig>) {
+  return runWithContext({ silent: true }, () =>
+    validateConfigForProgrammaticUse({
+      projectName: "elixir-validation",
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirHttpServer: "bandit",
+      ...config,
+    }),
+  );
+}
 
 type PackageJsonShape = {
   packageManager?: string;
@@ -1651,6 +1667,24 @@ describe("Virtual Generator Regressions", () => {
         }),
       ),
     ).toThrow("Elixir auth scaffolds require Phoenix.");
+  });
+
+  it("keeps CLI validation aligned with expanded Elixir adapters", () => {
+    expect(() =>
+      validateElixirProgrammatic({ elixirOrm: "myxql", elixirAuth: "phx-gen-auth" }),
+    ).not.toThrow();
+    expect(() =>
+      validateElixirProgrammatic({ elixirOrm: "ecto_sqlite3", elixirAuth: "phx-gen-auth" }),
+    ).not.toThrow();
+    expect(() => validateElixirProgrammatic({ elixirHttpServer: "none" })).toThrow(
+      "Phoenix requires an HTTP server adapter.",
+    );
+    expect(() => validateElixirProgrammatic({ elixirOrm: "ecto", elixirAuth: "pow" })).toThrow(
+      "Pow requires Phoenix and an Ecto SQL repository.",
+    );
+    expect(() =>
+      validateElixirProgrammatic({ elixirOrm: "none", elixirTesting: "ex_machina" }),
+    ).toThrow("ExMachina requires an Ecto SQL repository.");
   });
 
   it("keeps Phoenix LiveView demos self-contained without Ecto", async () => {
