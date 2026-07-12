@@ -5,6 +5,9 @@ defmodule {{elixirModuleName}}Web do
     quote do
       use Phoenix.Controller, formats: [:html, :json]
       import Plug.Conn
+{{#if (eq elixirI18n "gettext")}}
+      use Gettext, backend: {{elixirModuleName}}Web.Gettext
+{{/if}}
       unquote(verified_routes())
     end
   end
@@ -12,6 +15,9 @@ defmodule {{elixirModuleName}}Web do
   def html do
     quote do
       use Phoenix.Component
+{{#if (eq elixirI18n "gettext")}}
+      use Gettext, backend: {{elixirModuleName}}Web.Gettext
+{{/if}}
       import Phoenix.Controller, only: [get_csrf_token: 0, view_module: 1, view_template: 1]
       unquote(verified_routes())
     end
@@ -44,6 +50,9 @@ defmodule {{elixirModuleName}}Web do
       use Phoenix.Router, helpers: false
       import Plug.Conn
       import Phoenix.Controller
+{{#if (eq elixirAuth "pow")}}
+      use Pow.Phoenix.Router
+{{/if}}
 {{#if (eq elixirWebFramework "phoenix-live-view")}}
       import Phoenix.LiveView.Router
 {{/if}}
@@ -54,6 +63,9 @@ defmodule {{elixirModuleName}}Web do
   defp html_helpers do
     quote do
       import Phoenix.HTML
+{{#if (eq elixirI18n "gettext")}}
+      use Gettext, backend: {{elixirModuleName}}Web.Gettext
+{{/if}}
       unquote(verified_routes())
     end
   end

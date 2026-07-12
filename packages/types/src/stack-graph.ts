@@ -123,6 +123,11 @@ import {
   I18N_VALUES,
   ELIXIR_HTTP_VALUES,
   ELIXIR_QUALITY_VALUES,
+  ELIXIR_I18N_VALUES,
+  ELIXIR_HTTP_SERVER_VALUES,
+  ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  ELIXIR_DOCUMENTATION_VALUES,
+  ELIXIR_CLUSTERING_VALUES,
   StackPartRoleSchema,
   STATE_MANAGEMENT_VALUES,
   TESTING_VALUES,
@@ -248,10 +253,13 @@ const TYPESCRIPT_APOLLO_SERVER_COMPATIBLE_FRONTENDS = new Set([
 const BETTER_AUTH_UNSUPPORTED_ORM_TOOLS = new Set(["typeorm", "mikroorm", "sequelize"]);
 const ELIXIR_ECTO_REQUIRED_TOOLS = new Set(["absinthe"]);
 const ELIXIR_ECTO_SQL_REQUIRED_TOOLS = new Set(["oban", "phx-gen-auth"]);
+const ELIXIR_SQL_REPO_REQUIRED_TOOLS = new Set(["pow", "ex_machina"]);
 const ELIXIR_PHOENIX_REQUIRED_ROLE_MESSAGES: Partial<Record<StackPartRole, string>> = {
   auth: "Elixir auth scaffolds require Phoenix",
   api: "Elixir API scaffolds require Phoenix",
   realtime: "Elixir realtime scaffolds require Phoenix",
+  i18n: "Elixir Internationalization requires Phoenix",
+  runtime: "HTTP server adapters require Phoenix",
 };
 const ELIXIR_UNSUPPORTED_GRAPH_TOOL_MESSAGES: Record<string, string> = {};
 export const ELIXIR_UNSUPPORTED_GRAPH_TOOLS = new Set(
@@ -668,6 +676,11 @@ const LEGACY_EXTRA_CATEGORIES_BY_ECOSYSTEM = {
     observability: "elixirObservability",
     testing: "elixirTesting",
     codeQuality: "elixirQuality",
+    i18n: "elixirI18n",
+    runtime: "elixirHttpServer",
+    libraries: "elixirApplicationFramework",
+    documentation: "elixirDocumentation",
+    config: "elixirClustering",
     deploy: "elixirDeploy",
   },
 } as const satisfies Record<
@@ -971,6 +984,17 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(ELIXIR_OBSERVABILITY_VALUES, "observability", "elixir", "elixirObservability"),
   ...defineTools(ELIXIR_TESTING_VALUES, "testing", "elixir", "elixirTesting"),
   ...defineTools(ELIXIR_QUALITY_VALUES, "codeQuality", "elixir", "elixirQuality"),
+  ...defineTools(ELIXIR_I18N_VALUES, "i18n", "elixir", "elixirI18n"),
+  ...defineTools(ELIXIR_HTTP_SERVER_VALUES, "runtime", "elixir", "elixirHttpServer"),
+  ...defineTools(
+    ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+    "libraries",
+    "elixir",
+    "elixirApplicationFramework",
+    { allowMultiple: true },
+  ),
+  ...defineTools(ELIXIR_DOCUMENTATION_VALUES, "documentation", "elixir", "elixirDocumentation"),
+  ...defineTools(ELIXIR_CLUSTERING_VALUES, "config", "elixir", "elixirClustering"),
   ...defineTools(ELIXIR_DEPLOY_VALUES, "deploy", "elixir", "elixirDeploy"),
   {
     toolId: "convex",
@@ -1777,8 +1801,7 @@ function createAddonCompatibilityIssue(
       partId: part.id,
       role: part.role,
       toolId: part.toolId,
-      message:
-        "openapi-typescript requires a standalone backend that exposes an OpenAPI schema.",
+      message: "openapi-typescript requires a standalone backend that exposes an OpenAPI schema.",
     });
   }
 
@@ -2395,6 +2418,42 @@ function getStackPartCompatibilityIssue(
         message,
       });
     }
+  }
+
+  if (
+    part.ecosystem === "elixir" &&
+    ELIXIR_SQL_REPO_REQUIRED_TOOLS.has(part.toolId) &&
+    context.ownerRole === "backend"
+  ) {
+    const ormTool = context.siblingToolIdsByRole?.orm ?? context.selectedToolIdsByRole?.orm;
+    if (!ormTool || !["ecto-sql", "myxql", "ecto_sqlite3"].includes(ormTool)) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message:
+          part.toolId === "pow"
+            ? "Pow requires Phoenix and an Ecto SQL repository"
+            : "ExMachina requires an Ecto SQL repository",
+      });
+    }
+  }
+
+  if (
+    part.ecosystem === "elixir" &&
+    part.role === "runtime" &&
+    part.toolId === "none" &&
+    context.ownerRole === "backend" &&
+    context.ownerToolId !== "none"
+  ) {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_GRAPH_SELECTION",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message: "Phoenix requires Bandit or Cowboy",
+    });
   }
 
   if (

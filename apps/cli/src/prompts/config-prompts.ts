@@ -34,6 +34,11 @@ import type {
   ElixirObservability,
   ElixirOrm,
   ElixirQuality,
+  ElixirI18n,
+  ElixirHttpServer,
+  ElixirApplicationFramework,
+  ElixirDocumentation,
+  ElixirClustering,
   ElixirRealtime,
   ElixirTesting,
   ElixirValidation,
@@ -180,6 +185,11 @@ import {
   getElixirObservabilityChoice,
   getElixirOrmChoice,
   getElixirQualityChoice,
+  getElixirI18nChoice,
+  getElixirHttpServerChoice,
+  getElixirApplicationFrameworkChoice,
+  getElixirDocumentationChoice,
+  getElixirClusteringChoice,
   getElixirRealtimeChoice,
   getElixirTestingChoice,
   getElixirValidationChoice,
@@ -421,6 +431,11 @@ type PromptGroupResults = {
   elixirObservability: ElixirObservability;
   elixirTesting: ElixirTesting;
   elixirQuality: ElixirQuality;
+  elixirI18n: ElixirI18n;
+  elixirHttpServer: ElixirHttpServer;
+  elixirApplicationFramework: ElixirApplicationFramework;
+  elixirDocumentation: ElixirDocumentation;
+  elixirClustering: ElixirClustering;
   elixirDeploy: ElixirDeploy;
   elixirLibraries: ElixirLibraries[];
   // Keep at end
@@ -577,6 +592,11 @@ const CONFIG_PROMPT_ENTRY_KEY_MAP = {
   elixirObservability: true,
   elixirTesting: true,
   elixirQuality: true,
+  elixirI18n: true,
+  elixirHttpServer: true,
+  elixirApplicationFramework: true,
+  elixirDocumentation: true,
+  elixirClustering: true,
   elixirDeploy: true,
   elixirLibraries: true,
   aiDocs: true,
@@ -1453,6 +1473,28 @@ export async function gatherConfig(
         if (results.ecosystem !== "elixir") return Promise.resolve("none" as ElixirQuality);
         return getElixirQualityChoice(flags.elixirQuality);
       },
+      elixirI18n: ({ results }) => {
+        if (results.ecosystem !== "elixir") return Promise.resolve("none" as ElixirI18n);
+        return getElixirI18nChoice(flags.elixirI18n);
+      },
+      elixirHttpServer: ({ results }) => {
+        if (results.ecosystem !== "elixir") return Promise.resolve("none" as ElixirHttpServer);
+        return getElixirHttpServerChoice(flags.elixirHttpServer);
+      },
+      elixirApplicationFramework: ({ results }) => {
+        if (results.ecosystem !== "elixir") {
+          return Promise.resolve("none" as ElixirApplicationFramework);
+        }
+        return getElixirApplicationFrameworkChoice(flags.elixirApplicationFramework);
+      },
+      elixirDocumentation: ({ results }) => {
+        if (results.ecosystem !== "elixir") return Promise.resolve("none" as ElixirDocumentation);
+        return getElixirDocumentationChoice(flags.elixirDocumentation);
+      },
+      elixirClustering: ({ results }) => {
+        if (results.ecosystem !== "elixir") return Promise.resolve("none" as ElixirClustering);
+        return getElixirClusteringChoice(flags.elixirClustering);
+      },
       elixirDeploy: ({ results }) => {
         if (results.ecosystem !== "elixir") return Promise.resolve("none" as ElixirDeploy);
         return getElixirDeployChoice(flags.elixirDeploy);
@@ -1634,6 +1676,11 @@ export async function gatherConfig(
     elixirObservability: result.elixirObservability,
     elixirTesting: result.elixirTesting,
     elixirQuality: result.elixirQuality,
+    elixirI18n: result.elixirI18n,
+    elixirHttpServer: result.elixirHttpServer,
+    elixirApplicationFramework: result.elixirApplicationFramework,
+    elixirDocumentation: result.elixirDocumentation,
+    elixirClustering: result.elixirClustering,
     elixirDeploy: result.elixirDeploy,
     elixirLibraries: result.elixirLibraries,
     // AI documentation files

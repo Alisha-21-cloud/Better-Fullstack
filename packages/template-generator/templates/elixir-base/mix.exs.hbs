@@ -10,6 +10,13 @@ defmodule {{elixirModuleName}}.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+{{#if (eq elixirQuality "excoveralls")}}
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [coveralls: :test, "coveralls.detail": :test, "coveralls.html": :test],
+{{/if}}
+{{#if (eq elixirDocumentation "ex_doc")}}
+      docs: [main: "readme", extras: ["README.md"]],
+{{/if}}
       releases: [{{elixirAppName}}: [include_executables_for: [:unix]]]
     ]
   end
@@ -42,6 +49,14 @@ defmodule {{elixirModuleName}}.MixProject do
       {:ecto_sql, "~> 3.12"},
       {:postgrex, ">= 0.0.0"},
 {{/if}}
+{{#if (eq elixirOrm "myxql")}}
+      {:ecto_sql, "~> 3.12"},
+      {:myxql, "~> 0.9"},
+{{/if}}
+{{#if (eq elixirOrm "ecto_sqlite3")}}
+      {:ecto_sql, "~> 3.12"},
+      {:ecto_sqlite3, "~> 0.24"},
+{{/if}}
 {{#if (eq elixirAuth "ueberauth")}}
       {:ueberauth, "~> 0.10"},
 {{/if}}
@@ -50,6 +65,9 @@ defmodule {{elixirModuleName}}.MixProject do
 {{/if}}
 {{#if (eq elixirAuth "phx-gen-auth")}}
       {:bcrypt_elixir, "~> 3.0"},
+{{/if}}
+{{#if (eq elixirAuth "pow")}}
+      {:pow, "~> 1.0"},
 {{/if}}
 {{#if (eq elixirJobs "oban")}}
       {:oban, "~> 2.19"},
@@ -71,6 +89,9 @@ defmodule {{elixirModuleName}}.MixProject do
       {:absinthe, "~> 1.7"},
       {:absinthe_plug, "~> 1.5"},
 {{/if}}
+{{#if (eq elixirApi "open_api_spex")}}
+      {:open_api_spex, "~> 3.22"},
+{{/if}}
 {{#if (eq elixirValidation "nimble-options")}}
       {:nimble_options, "~> 1.1"},
 {{/if}}
@@ -80,17 +101,26 @@ defmodule {{elixirModuleName}}.MixProject do
 {{#if (or (eq elixirHttp "finch") (eq elixirEmail "swoosh"))}}
       {:finch, "~> 0.19"},
 {{/if}}
+{{#if (eq elixirHttp "tesla")}}
+      {:tesla, "~> 1.20"},
+{{/if}}
 {{#if (or (ne elixirWebFramework "none") (eq elixirJson "jason"))}}
       {:jason, "~> 1.4"},
 {{/if}}
 {{#if (eq elixirEmail "swoosh")}}
       {:swoosh, "~> 1.17"},
 {{/if}}
+{{#if (eq elixirEmail "bamboo")}}
+      {:bamboo, "~> 2.5"},
+{{/if}}
 {{#if (eq elixirCaching "cachex")}}
       {:cachex, "~> 4.0"},
 {{/if}}
 {{#if (eq elixirCaching "nebulex")}}
       {:nebulex, "~> 2.6"},
+{{/if}}
+{{#if (eq elixirCaching "redix")}}
+      {:redix, "~> 1.6"},
 {{/if}}
 {{#if (eq elixirObservability "opentelemetry")}}
       {:opentelemetry_api, "~> 1.4"},
@@ -99,6 +129,9 @@ defmodule {{elixirModuleName}}.MixProject do
 {{/if}}
 {{#if (eq elixirObservability "prom_ex")}}
       {:prom_ex, "~> 1.11"},
+{{/if}}
+{{#if (eq elixirObservability "sentry")}}
+      {:sentry, "~> 13.3"},
 {{/if}}
 {{#if (eq elixirTesting "mox")}}
       {:mox, "~> 1.2", only: :test},
@@ -109,6 +142,12 @@ defmodule {{elixirModuleName}}.MixProject do
 {{#if (eq elixirTesting "wallaby")}}
       {:wallaby, "~> 0.30", only: :test, runtime: false},
 {{/if}}
+{{#if (eq elixirTesting "stream_data")}}
+      {:stream_data, "~> 1.3", only: :test},
+{{/if}}
+{{#if (eq elixirTesting "ex_machina")}}
+      {:ex_machina, "~> 2.8", only: :test},
+{{/if}}
 {{#if (eq elixirQuality "credo")}}
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
 {{/if}}
@@ -118,17 +157,56 @@ defmodule {{elixirModuleName}}.MixProject do
 {{#if (eq elixirQuality "sobelow")}}
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},
 {{/if}}
-{{#if (ne elixirWebFramework "none")}}
-      {:plug_cowboy, "~> 2.7"}
-{{else}}
-      {:telemetry, "~> 1.3"}
+{{#if (eq elixirQuality "excoveralls")}}
+      {:excoveralls, "~> 0.18", only: :test},
 {{/if}}
+{{#if (eq elixirQuality "mix_audit")}}
+      {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
+{{/if}}
+{{#if (eq elixirI18n "gettext")}}
+      {:gettext, "~> 1.0"},
+{{/if}}
+{{#if (and (ne elixirWebFramework "none") (eq elixirHttpServer "bandit"))}}
+      {:bandit, "~> 1.12"},
+{{/if}}
+{{#if (and (ne elixirWebFramework "none") (eq elixirHttpServer "cowboy"))}}
+      {:plug_cowboy, "~> 2.7"},
+{{/if}}
+{{#if (eq elixirApplicationFramework "ash")}}
+      {:ash, "~> 3.29"},
+{{/if}}
+{{#if (eq elixirDocumentation "ex_doc")}}
+      {:ex_doc, "~> 0.40", only: :dev, runtime: false},
+{{/if}}
+{{#if (eq elixirClustering "libcluster")}}
+      {:libcluster, "~> 3.5"},
+{{/if}}
+{{#if (includes elixirLibraries "ex_aws")}}
+      {:ex_aws, "~> 2.7"},
+      {:ex_aws_s3, "~> 2.5"},
+      {:sweet_xml, "~> 0.7"},
+{{/if}}
+{{#if (or (eq elixirHttp "tesla") (or (eq elixirObservability "sentry") (includes elixirLibraries "ex_aws")))}}
+      {:hackney, "~> 4.0 and >= 4.0.2"},
+{{/if}}
+{{#if (includes elixirLibraries "floki")}}
+      {:floki, "~> 0.38"},
+{{/if}}
+{{#if (includes elixirLibraries "rustler")}}
+      {:rustler, "~> 0.38"},
+{{/if}}
+      {:telemetry, "~> 1.3"}
     ]
   end
 
   defp aliases do
     [
 {{#if (eq elixirOrm "ecto-sql")}}
+      setup: ["deps.get", "ecto.setup"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+{{else if (or (eq elixirOrm "myxql") (eq elixirOrm "ecto_sqlite3"))}}
       setup: ["deps.get", "ecto.setup"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],

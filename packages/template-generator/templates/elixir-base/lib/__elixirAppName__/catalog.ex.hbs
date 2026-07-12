@@ -3,12 +3,12 @@ defmodule {{elixirModuleName}}.Catalog do
 {{#if (eq elixirValidation "nimble-options")}}
   alias {{elixirModuleName}}.Catalog.ItemOptions
 {{/if}}
-{{#if (eq elixirOrm "ecto-sql")}}
+{{#if (or (eq elixirOrm "ecto-sql") (or (eq elixirOrm "myxql") (eq elixirOrm "ecto_sqlite3")))}}
   alias {{elixirModuleName}}.Repo
 {{/if}}
 
   def list_items do
-{{#if (eq elixirOrm "ecto-sql")}}
+{{#if (or (eq elixirOrm "ecto-sql") (or (eq elixirOrm "myxql") (eq elixirOrm "ecto_sqlite3")))}}
     Repo.all(Item)
 {{else}}
     [
@@ -17,7 +17,7 @@ defmodule {{elixirModuleName}}.Catalog do
 {{/if}}
   end
 
-{{#if (eq elixirOrm "ecto-sql")}}
+{{#if (or (eq elixirOrm "ecto-sql") (or (eq elixirOrm "myxql") (eq elixirOrm "ecto_sqlite3")))}}
   def get_item!(id), do: Repo.get!(Item, id)
 {{else}}
   def get_item!(id) do
@@ -29,7 +29,7 @@ defmodule {{elixirModuleName}}.Catalog do
   def create_item(attrs) do
 {{#if (eq elixirValidation "nimble-options")}}
     with {:ok, attrs} <- ItemOptions.validate(attrs) do
-{{#if (eq elixirOrm "ecto-sql")}}
+{{#if (or (eq elixirOrm "ecto-sql") (or (eq elixirOrm "myxql") (eq elixirOrm "ecto_sqlite3")))}}
       %Item{}
       |> Item.changeset(attrs)
       |> Repo.insert()
@@ -38,7 +38,7 @@ defmodule {{elixirModuleName}}.Catalog do
 {{/if}}
     end
 {{else}}
-{{#if (eq elixirOrm "ecto-sql")}}
+{{#if (or (eq elixirOrm "ecto-sql") (or (eq elixirOrm "myxql") (eq elixirOrm "ecto_sqlite3")))}}
     %Item{}
     |> Item.changeset(attrs)
     |> Repo.insert()

@@ -1,3 +1,4 @@
+{{#if (eq elixirCaching "nebulex")}}
 defmodule {{elixirModuleName}}.Cache do
   @moduledoc """
   Application cache backed by Nebulex's local adapter.
@@ -7,3 +8,14 @@ defmodule {{elixirModuleName}}.Cache do
     otp_app: :{{elixirAppName}},
     adapter: Nebulex.Adapters.Local
 end
+{{/if}}
+{{#if (eq elixirCaching "redix")}}
+defmodule {{elixirModuleName}}.Cache do
+  @moduledoc "Redis-backed cache helpers using the supervised Redix connection."
+
+  def get(key), do: Redix.command({{elixirModuleName}}.Redix, ["GET", key])
+  def put(key, value, ttl_seconds \\ 300) do
+    Redix.command({{elixirModuleName}}.Redix, ["SET", key, value, "EX", ttl_seconds])
+  end
+end
+{{/if}}

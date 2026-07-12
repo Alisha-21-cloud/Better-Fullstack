@@ -44,6 +44,11 @@ import {
   getElixirObservabilityChoice,
   getElixirOrmChoice,
   getElixirQualityChoice,
+  getElixirI18nChoice,
+  getElixirHttpServerChoice,
+  getElixirApplicationFrameworkChoice,
+  getElixirDocumentationChoice,
+  getElixirClusteringChoice,
   getElixirRealtimeChoice,
   getElixirTestingChoice,
   getElixirValidationChoice,
@@ -875,6 +880,44 @@ export async function gatherMultiEcosystemConfig(
         : await scopedPromptValue("elixir", "elixirQuality", configScope, backendSections, () =>
             getElixirQualityChoice(flags.elixirQuality),
           );
+    const elixirI18n =
+      elixirWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("elixir", "elixirI18n", configScope, backendSections, () =>
+            getElixirI18nChoice(flags.elixirI18n),
+          );
+    const elixirHttpServer =
+      elixirWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("elixir", "elixirHttpServer", configScope, backendSections, () =>
+            getElixirHttpServerChoice(flags.elixirHttpServer),
+          );
+    const elixirApplicationFramework =
+      elixirWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue(
+            "elixir",
+            "elixirApplicationFramework",
+            configScope,
+            backendSections,
+            () => getElixirApplicationFrameworkChoice(flags.elixirApplicationFramework),
+          );
+    const elixirDocumentation =
+      elixirWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue(
+            "elixir",
+            "elixirDocumentation",
+            configScope,
+            backendSections,
+            () => getElixirDocumentationChoice(flags.elixirDocumentation),
+          );
+    const elixirClustering =
+      elixirWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("elixir", "elixirClustering", configScope, backendSections, () =>
+            getElixirClusteringChoice(flags.elixirClustering),
+          );
     const elixirDeploy =
       elixirWebFramework === "none"
         ? "none"
@@ -902,6 +945,11 @@ export async function gatherMultiEcosystemConfig(
       elixirObservability,
       elixirTesting,
       elixirQuality,
+      elixirI18n,
+      elixirHttpServer,
+      elixirApplicationFramework,
+      elixirDocumentation,
+      elixirClustering,
       elixirDeploy,
       elixirLibraries,
     });
@@ -921,6 +969,19 @@ export async function gatherMultiEcosystemConfig(
       stackPartSpecs.push(`backend.observability:elixir:${elixirObservability}`);
     }
     if (elixirTesting !== "none") stackPartSpecs.push(`backend.testing:elixir:${elixirTesting}`);
+    if (elixirI18n !== "none") stackPartSpecs.push(`backend.i18n:elixir:${elixirI18n}`);
+    if (elixirHttpServer !== "none") {
+      stackPartSpecs.push(`backend.runtime:elixir:${elixirHttpServer}`);
+    }
+    if (elixirApplicationFramework !== "none") {
+      stackPartSpecs.push(`backend.libraries:elixir:${elixirApplicationFramework}`);
+    }
+    if (elixirDocumentation !== "none") {
+      stackPartSpecs.push(`backend.documentation:elixir:${elixirDocumentation}`);
+    }
+    if (elixirClustering !== "none") {
+      stackPartSpecs.push(`backend.config:elixir:${elixirClustering}`);
+    }
     if (elixirDeploy !== "none") stackPartSpecs.push(`backend.deploy:elixir:${elixirDeploy}`);
     for (const library of elixirLibraries) {
       if (library !== "none") stackPartSpecs.push(`backend.libraries:elixir:${library}`);

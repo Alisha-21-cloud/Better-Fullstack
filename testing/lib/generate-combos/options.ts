@@ -26,6 +26,11 @@ import {
   ELIXIR_OBSERVABILITY_VALUES,
   ELIXIR_ORM_VALUES,
   ELIXIR_QUALITY_VALUES,
+  ELIXIR_I18N_VALUES,
+  ELIXIR_HTTP_SERVER_VALUES,
+  ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  ELIXIR_DOCUMENTATION_VALUES,
+  ELIXIR_CLUSTERING_VALUES,
   ELIXIR_REALTIME_VALUES,
   ELIXIR_TESTING_VALUES,
   ELIXIR_VALIDATION_VALUES,
@@ -321,9 +326,7 @@ function makeTypeScriptDraft(args: GeneratorArgs): CandidateDraft {
       cms: sampleScalar(CMS_VALUES, 0.88),
       caching: sampleScalar(CACHING_VALUES, 0.88),
       rateLimit:
-        backend === "none" || backend === "convex"
-          ? "none"
-          : sampleScalar(RATE_LIMIT_VALUES, 0.9),
+        backend === "none" || backend === "convex" ? "none" : sampleScalar(RATE_LIMIT_VALUES, 0.9),
       i18n: sampleScalar(I18N_VALUES, 0.88),
       search: sampleScalar(SEARCH_VALUES, 0.9),
       fileStorage: sampleScalar(FILE_STORAGE_VALUES, 0.84),
@@ -534,9 +537,8 @@ function makeElixirDraft(args: GeneratorArgs): CandidateDraft {
       elixirRealtime: usesPhoenix
         ? sampleScalar(ELIXIR_REALTIME_VALUES, 0.25, "elixirRealtime")
         : "none",
-      elixirJobs: elixirOrm === "ecto-sql"
-        ? sampleScalar(ELIXIR_JOBS_VALUES, 0.55, "elixirJobs")
-        : "none",
+      elixirJobs:
+        elixirOrm === "ecto-sql" ? sampleScalar(ELIXIR_JOBS_VALUES, 0.55, "elixirJobs") : "none",
       elixirValidation: hasEcto
         ? sampleScalar(ELIXIR_VALIDATION_VALUES, 0.2, "elixirValidation")
         : "none",
@@ -555,9 +557,20 @@ function makeElixirDraft(args: GeneratorArgs): CandidateDraft {
       elixirQuality: usesPhoenix
         ? sampleScalar(ELIXIR_QUALITY_VALUES, 0.25, "elixirQuality")
         : "none",
-      elixirDeploy: usesPhoenix
-        ? sampleScalar(ELIXIR_DEPLOY_VALUES, 0.65, "elixirDeploy")
+      elixirI18n: usesPhoenix ? sampleScalar(ELIXIR_I18N_VALUES, 0.4, "elixirI18n") : "none",
+      elixirHttpServer: usesPhoenix
+        ? sampleScalar(ELIXIR_HTTP_SERVER_VALUES, 0.25, "elixirHttpServer")
         : "none",
+      elixirApplicationFramework: usesPhoenix
+        ? sampleScalar(ELIXIR_APPLICATION_FRAMEWORK_VALUES, 0.7, "elixirApplicationFramework")
+        : "none",
+      elixirDocumentation: usesPhoenix
+        ? sampleScalar(ELIXIR_DOCUMENTATION_VALUES, 0.5, "elixirDocumentation")
+        : "none",
+      elixirClustering: usesPhoenix
+        ? sampleScalar(ELIXIR_CLUSTERING_VALUES, 0.6, "elixirClustering")
+        : "none",
+      elixirDeploy: usesPhoenix ? sampleScalar(ELIXIR_DEPLOY_VALUES, 0.65, "elixirDeploy") : "none",
       elixirLibraries: usesPhoenix
         ? sampleArray(ELIXIR_LIBRARIES_VALUES, 0.5, 2, "elixirLibraries")
         : [],
@@ -731,6 +744,11 @@ function createValidationBase(projectName: string, draft: CandidateDraft): Proje
     elixirObservability: "none",
     elixirTesting: "none",
     elixirQuality: "none",
+    elixirI18n: "none",
+    elixirHttpServer: "none",
+    elixirApplicationFramework: "none",
+    elixirDocumentation: "none",
+    elixirClustering: "none",
     elixirDeploy: "none",
     elixirLibraries: [],
     aiDocs: [],

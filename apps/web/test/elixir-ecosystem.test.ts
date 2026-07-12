@@ -25,6 +25,11 @@ const ELIXIR_PRESET_CHECK_CATEGORIES = [
   "elixirObservability",
   "elixirTesting",
   "elixirQuality",
+  "elixirI18n",
+  "elixirHttpServer",
+  "elixirApplicationFramework",
+  "elixirDocumentation",
+  "elixirClustering",
   "elixirDeploy",
 ] as const;
 

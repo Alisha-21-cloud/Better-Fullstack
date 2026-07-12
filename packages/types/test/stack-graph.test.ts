@@ -36,6 +36,11 @@ import {
   ELIXIR_OBSERVABILITY_VALUES,
   ELIXIR_ORM_VALUES,
   ELIXIR_QUALITY_VALUES,
+  ELIXIR_I18N_VALUES,
+  ELIXIR_HTTP_SERVER_VALUES,
+  ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  ELIXIR_DOCUMENTATION_VALUES,
+  ELIXIR_CLUSTERING_VALUES,
   ELIXIR_REALTIME_VALUES,
   ELIXIR_TESTING_VALUES,
   ELIXIR_VALIDATION_VALUES,
@@ -740,9 +745,9 @@ describe("stack graph", () => {
     expect(validateStackParts(backendUtilsGoParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_GRAPH_SELECTION",
     );
-    expect(
-      validateStackParts(selfOpenapiCodegenParts).issues.map((issue) => issue.code),
-    ).toContain("INCOMPATIBLE_GRAPH_SELECTION");
+    expect(validateStackParts(selfOpenapiCodegenParts).issues.map((issue) => issue.code)).toContain(
+      "INCOMPATIBLE_GRAPH_SELECTION",
+    );
   });
 
   it("allows Redwood GraphQL Codegen without a separate API selection", () => {
@@ -1123,9 +1128,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
     const frontend = parts.find(
       (part) => part.role === "frontend" && part.ecosystem === "typescript",
     );
-    const frameworkPart = parts.find(
-      (part) => part.role === "testing" && part.toolId === "vitest",
-    );
+    const frameworkPart = parts.find((part) => part.role === "testing" && part.toolId === "vitest");
     const addonTestingParts = parts.filter(
       (part) => part.role === "testing" && part.toolId !== "vitest",
     );
@@ -1230,9 +1233,8 @@ describe("stack graph structural round-trip (phase 0)", () => {
       auth: "none",
     });
     expect(
-      noIntegrationParts.find(
-        (part) => part.role === "frontend" && part.ecosystem === "typescript",
-      )?.settings,
+      noIntegrationParts.find((part) => part.role === "frontend" && part.ecosystem === "typescript")
+        ?.settings,
     ).toBeUndefined();
     expect(
       stackPartsToLegacyProjectConfigPartial(noIntegrationParts).astroIntegration,
@@ -1581,6 +1583,11 @@ describe("stack graph structural round-trip (phase 0)", () => {
           elixirObservability: ELIXIR_OBSERVABILITY_VALUES,
           elixirTesting: ELIXIR_TESTING_VALUES,
           elixirQuality: ELIXIR_QUALITY_VALUES,
+          elixirI18n: ELIXIR_I18N_VALUES,
+          elixirHttpServer: ELIXIR_HTTP_SERVER_VALUES,
+          elixirApplicationFramework: ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+          elixirDocumentation: ELIXIR_DOCUMENTATION_VALUES,
+          elixirClustering: ELIXIR_CLUSTERING_VALUES,
           elixirDeploy: ELIXIR_DEPLOY_VALUES,
         },
         arrays: {
@@ -1631,6 +1638,11 @@ describe("stack graph structural round-trip (phase 0)", () => {
       "elixirObservability",
       "elixirTesting",
       "elixirQuality",
+      "elixirI18n",
+      "elixirHttpServer",
+      "elixirApplicationFramework",
+      "elixirDocumentation",
+      "elixirClustering",
       "elixirDeploy",
     ]);
 
@@ -1689,6 +1701,11 @@ describe("stack graph structural round-trip (phase 0)", () => {
       elixirObservability: "telemetry",
       elixirTesting: "ex_unit",
       elixirQuality: "credo",
+      elixirI18n: "gettext",
+      elixirHttpServer: "bandit",
+      elixirApplicationFramework: "ash",
+      elixirDocumentation: "ex_doc",
+      elixirClustering: "libcluster",
       elixirDeploy: "docker",
       elixirValidation: "ecto-changesets",
     });
@@ -1704,11 +1721,16 @@ describe("stack graph structural round-trip (phase 0)", () => {
         "observability",
         "testing",
         "codeQuality",
+        "i18n",
+        "runtime",
+        "libraries",
+        "documentation",
+        "config",
         "deploy",
         "validation",
       ].includes(part.role),
     );
-    expect(extras).toHaveLength(10);
+    expect(extras).toHaveLength(15);
     for (const part of extras) {
       expect(part.ownerPartId).toBe(backend?.id);
     }
@@ -1720,6 +1742,11 @@ describe("stack graph structural round-trip (phase 0)", () => {
     expect(lowered.elixirEmail).toBe("swoosh");
     expect(lowered.elixirHttp).toBe("finch");
     expect(lowered.elixirQuality).toBe("credo");
+    expect(lowered.elixirI18n).toBe("gettext");
+    expect(lowered.elixirHttpServer).toBe("bandit");
+    expect(lowered.elixirApplicationFramework).toBe("ash");
+    expect(lowered.elixirDocumentation).toBe("ex_doc");
+    expect(lowered.elixirClustering).toBe("libcluster");
     expect(lowered.elixirDeploy).toBe("docker");
   });
 
@@ -1803,9 +1830,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
     expect(lowered.pythonGraphql).toBe("strawberry");
 
     const reimported = legacyProjectConfigToStackParts(lowered);
-    expect(reimported.map(structuralTuple).sort()).toEqual(
-      pythonParts.map(structuralTuple).sort(),
-    );
+    expect(reimported.map(structuralTuple).sort()).toEqual(pythonParts.map(structuralTuple).sort());
   });
 
   it("imports Elixir realtime selections under the realtime role", () => {

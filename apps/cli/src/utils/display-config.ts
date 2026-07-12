@@ -1,13 +1,9 @@
-import pc from "picocolors";
 import { formatStackPartSpec } from "@better-fullstack/types";
+import pc from "picocolors";
 
 import type { ProjectConfig } from "../types";
 
-function getSelectedGraphPart(
-  config: Partial<ProjectConfig>,
-  role: string,
-  ownerPartId?: string,
-) {
+function getSelectedGraphPart(config: Partial<ProjectConfig>, role: string, ownerPartId?: string) {
   return config.stackParts?.find(
     (part) =>
       part.role === role &&
@@ -22,8 +18,8 @@ function getGraphDisplayValue(config: Partial<ProjectConfig>, role: string): str
   const part =
     role === "backend"
       ? primaryBackend
-      : getSelectedGraphPart(config, role, primaryBackend?.id) ??
-        getSelectedGraphPart(config, role);
+      : (getSelectedGraphPart(config, role, primaryBackend?.id) ??
+        getSelectedGraphPart(config, role));
 
   if (!part) return null;
   return `${part.ecosystem}:${part.toolId}`;
@@ -52,8 +48,7 @@ export function displayConfig(config: Partial<ProjectConfig>) {
   }
 
   if (config.backend !== undefined) {
-    const graphBackend =
-      config.backend === "none" ? getGraphDisplayValue(config, "backend") : null;
+    const graphBackend = config.backend === "none" ? getGraphDisplayValue(config, "backend") : null;
     configDisplay.push(`${pc.blue("Backend:")} ${graphBackend ?? String(config.backend)}`);
   }
 
@@ -222,6 +217,25 @@ export function displayConfig(config: Partial<ProjectConfig>) {
     }
     if (config.elixirQuality && config.elixirQuality !== "none") {
       configDisplay.push(`${pc.blue("Elixir Quality:")} ${String(config.elixirQuality)}`);
+    }
+    if (config.elixirI18n && config.elixirI18n !== "none") {
+      configDisplay.push(`${pc.blue("Elixir I18n:")} ${String(config.elixirI18n)}`);
+    }
+    if (config.elixirHttpServer && config.elixirHttpServer !== "none") {
+      configDisplay.push(`${pc.blue("Elixir HTTP Server:")} ${String(config.elixirHttpServer)}`);
+    }
+    if (config.elixirApplicationFramework && config.elixirApplicationFramework !== "none") {
+      configDisplay.push(
+        `${pc.blue("Elixir Application Framework:")} ${String(config.elixirApplicationFramework)}`,
+      );
+    }
+    if (config.elixirDocumentation && config.elixirDocumentation !== "none") {
+      configDisplay.push(
+        `${pc.blue("Elixir Documentation:")} ${String(config.elixirDocumentation)}`,
+      );
+    }
+    if (config.elixirClustering && config.elixirClustering !== "none") {
+      configDisplay.push(`${pc.blue("Elixir Clustering:")} ${String(config.elixirClustering)}`);
     }
     if (config.elixirDeploy && config.elixirDeploy !== "none") {
       configDisplay.push(`${pc.blue("Elixir Deploy:")} ${String(config.elixirDeploy)}`);

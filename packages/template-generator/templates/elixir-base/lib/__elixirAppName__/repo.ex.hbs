@@ -1,5 +1,11 @@
 defmodule {{elixirModuleName}}.Repo do
   use Ecto.Repo,
     otp_app: :{{elixirAppName}},
+{{#if (eq elixirOrm "ecto-sql")}}
     adapter: Ecto.Adapters.Postgres
+{{else if (eq elixirOrm "myxql")}}
+    adapter: Ecto.Adapters.MyXQL
+{{else}}
+    adapter: Ecto.Adapters.SQLite3
+{{/if}}
 end

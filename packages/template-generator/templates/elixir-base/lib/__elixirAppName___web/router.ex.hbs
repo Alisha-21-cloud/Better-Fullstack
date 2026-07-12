@@ -12,6 +12,9 @@ defmodule {{elixirModuleName}}Web.Router do
     plug :put_root_layout, html: { {{elixirModuleName}}Web.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+{{#if (eq elixirAuth "pow")}}
+    plug Pow.Plug.Session, otp_app: :{{elixirAppName}}
+{{/if}}
   end
 
   pipeline :api do
@@ -26,6 +29,13 @@ defmodule {{elixirModuleName}}Web.Router do
     live "/items", ItemLive.Index, :index
 {{/if}}
   end
+
+{{#if (eq elixirAuth "pow")}}
+  scope "/" do
+    pipe_through :browser
+    pow_routes()
+  end
+{{/if}}
 
 {{#if (eq elixirAuth "ueberauth")}}
   scope "/auth", {{elixirModuleName}}Web do
@@ -56,6 +66,16 @@ defmodule {{elixirModuleName}}Web.Router do
 
 {{#if (eq elixirApi "absinthe")}}
   forward "/graphql", Absinthe.Plug, schema: {{elixirModuleName}}Web.GraphQL.Schema
+{{/if}}
+{{#if (eq elixirApi "open_api_spex")}}
+  scope "/api" do
+    pipe_through :api
+    forward "/openapi", OpenApiSpex.Plug.RenderSpec, module: {{elixirModuleName}}Web.ApiSpec
+  end
+
+  forward "/swagger", OpenApiSpex.Plug.SwaggerUI,
+    path: "/api/openapi",
+    default_model_expand_depth: 3
 {{/if}}
 
   if Application.compile_env(:{{elixirAppName}}, :dev_routes) do
