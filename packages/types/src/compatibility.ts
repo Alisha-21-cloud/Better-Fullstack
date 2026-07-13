@@ -955,6 +955,21 @@ export const analyzeStackCompatibility = (
   // ============================================
 
   if (nextStack.backend !== "convex" && nextStack.backend !== "none") {
+    const hasStandaloneViteFrontend = nextStack.webFrontend.some((frontend) =>
+      ["vanilla-vite", "vue"].includes(frontend),
+    );
+    if (
+      hasStandaloneViteFrontend &&
+      ["trpc", "orpc", "ts-rest", "garph"].includes(nextStack.api)
+    ) {
+      nextStack.api = "graphql-yoga";
+      changed = true;
+      changes.push({
+        category: "api",
+        message: "API set to 'GraphQL Yoga' (supported by standalone Vite frontends)",
+      });
+    }
+
     // Nuxt, Svelte, Solid, SolidStart require oRPC for React-only API clients.
     const needsOrpc = nextStack.webFrontend.some((f) =>
       ["nuxt", "svelte", "solid", "solid-start"].includes(f),
@@ -1526,6 +1541,18 @@ export const analyzeStackCompatibility = (
 
   const isFresh = nextStack.webFrontend.includes("fresh");
 
+  const hasStandaloneViteFrontend = nextStack.webFrontend.some((frontend) =>
+    ["vanilla-vite", "vue"].includes(frontend),
+  );
+  if (hasStandaloneViteFrontend && nextStack.forms !== "none") {
+    nextStack.forms = "none";
+    changed = true;
+    changes.push({
+      category: "forms",
+      message: "Forms set to 'None' (standalone Vue and Vanilla integrations are not wired yet)",
+    });
+  }
+
   if (isFresh) {
     // TanStack Form has no Preact adapter
     if (nextStack.forms === "tanstack-form") {
@@ -1881,6 +1908,20 @@ export const getDisabledReason = (
   category: CompatibilityCategory,
   optionId: string,
 ): string | null => {
+  const hasStandaloneViteFrontend = currentStack.webFrontend.some((frontend) =>
+    ["vanilla-vite", "vue"].includes(frontend),
+  );
+  if (
+    category === "api" &&
+    hasStandaloneViteFrontend &&
+    ["trpc", "orpc", "ts-rest", "garph"].includes(optionId)
+  ) {
+    return "Standalone Vite frontends support only GraphQL and OpenAPI API integrations";
+  }
+  if (category === "forms" && hasStandaloneViteFrontend && optionId !== "none") {
+    return "Form library integrations are not yet wired for standalone Vue or Vanilla Vite";
+  }
+
   // ============================================
   // CONVEX BACKEND - locks down many options
   // ============================================
@@ -4459,6 +4500,10 @@ export function hasWebStyling(frontends: Frontend[] = []): boolean {
 }
 
 export function getCompatibleFormLibraries(frontends: Frontend[] = []): Forms[] {
+  if (frontends.some((frontend) => ["vanilla-vite", "vue"].includes(frontend))) {
+    return ["none"];
+  }
+
   const hasSolid = frontends.includes("solid");
   const hasSolidStart = frontends.includes("solid-start");
   const hasQwik = frontends.includes("qwik");

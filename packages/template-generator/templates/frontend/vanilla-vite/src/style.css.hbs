@@ -1,6 +1,9 @@
 {{#unless (or (eq cssFramework "scss") (eq cssFramework "less"))}}
 {{#if (eq cssFramework "tailwind")}}
 @import "tailwindcss";
+{{#if (eq uiLibrary "daisyui")}}
+@plugin "daisyui";
+{{/if}}
 {{/if}}
 
 :root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #e5e7eb; background: #09090b; }

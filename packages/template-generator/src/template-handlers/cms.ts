@@ -1,6 +1,7 @@
 import type { ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
+import { getWebPackagePath } from "../utils/project-paths";
 
 import { type TemplateData, processTemplatesFromPrefix } from "./utils";
 
@@ -45,12 +46,13 @@ export async function processCMSTemplates(
   }
 
   if (config.cms === "contentful") {
-    if (vfs.exists("apps/web/package.json")) {
+    const webPackagePath = getWebPackagePath(config.frontend, config.backend);
+    if (vfs.exists(webPackagePath)) {
       processTemplatesFromPrefix(
         vfs,
         templates,
         "cms/contentful/web/base",
-        "apps/web",
+        webPackagePath.replace(/\/package\.json$/, ""),
         config,
       );
     }

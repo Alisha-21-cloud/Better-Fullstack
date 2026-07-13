@@ -3211,7 +3211,7 @@ describe("Rust library expansion", () => {
     }
     expect(serverCargo).toContain("jsonrpsee.workspace = true");
     expect(cargo).toContain("default-members = [");
-    expect(cargo.split("default-members = [")[1]?.split("]")[0]).not.toContain("yew-client");
+    expect(cargo.split("default-members = [")[1]?.split("]")[0]).toContain("yew-client");
     expect(hasFile(root, "crates/yew-client/src/main.rs")).toBe(true);
     expect(hasFile(root, "crates/server/src/database.rs")).toBe(true);
     expect(hasFile(root, "crates/server/src/rpc.rs")).toBe(true);

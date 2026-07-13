@@ -100,7 +100,11 @@ export function processAddonsDeps(vfs: VirtualFileSystem, config: ProjectConfig)
   const hasAstroSolid = config.frontend.includes("astro") && config.astroIntegration === "solid";
   const hasSolidFrontend =
     config.frontend.includes("solid") || config.frontend.includes("solid-start");
-  const hasPwaCompatibleFrontend = hasViteReactFrontend || hasSolidFrontend;
+  const hasPwaCompatibleFrontend =
+    hasViteReactFrontend ||
+    hasSolidFrontend ||
+    config.frontend.includes("vanilla-vite") ||
+    config.frontend.includes("vue");
 
   const webPkgPath = getWebPackagePath(config.frontend, config.backend);
   const serverPkgPath = getServerPackagePath(config.frontend, config.backend);

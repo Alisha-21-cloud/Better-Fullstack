@@ -303,4 +303,25 @@ describe("TypeScript library expansion", () => {
     );
     await expectGeneratedFile(result.projectDir, "web/codegen.ts", "localhost:8911/graphql");
   });
+
+  test("generates Contentful and GA4 helpers for backendless Redwood", async () => {
+    const result = await runTRPCTest(
+      createCustomConfig({
+        projectName: "typescript-library-expansion-redwood-services",
+        frontend: ["redwood"],
+        backend: "none",
+        runtime: "none",
+        api: "none",
+        database: "none",
+        orm: "none",
+        cms: "contentful",
+        analytics: "ga4",
+      }),
+    );
+
+    expectSuccess(result);
+    expect(await readGenerated(result.projectDir, "web/package.json")).toContain("contentful");
+    await expectGeneratedFile(result.projectDir, "web/src/lib/contentful.ts", "createClient");
+    await expectGeneratedFile(result.projectDir, "web/src/lib/google-analytics.ts", "gtag");
+  });
 });

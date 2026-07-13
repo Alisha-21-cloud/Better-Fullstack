@@ -21184,6 +21184,7 @@ members = [
 ]
 default-members = [
     "crates/server",
+    "crates/yew-client",
 ]
 
 [workspace.package]

@@ -69,6 +69,73 @@ describe("Virtual Generator Regressions", () => {
     );
   });
 
+  it("uses the canonical Solid dev port in the generated Vite config", async () => {
+    const result = await createVirtual({
+      projectName: "solid-dev-port",
+      frontend: ["solid"],
+      backend: "hono",
+      runtime: "bun",
+      api: "orpc",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "none",
+    });
+
+    expect(result.success).toBe(true);
+    expect(readTextFromTree(result.tree!, "apps/web/vite.config.ts")).toContain(
+      `port: ${getLocalWebDevPort(["solid"])}`,
+    );
+  });
+
+  it("does not leak Mocha smoke tests into Playwright projects", async () => {
+    const result = await createVirtual({
+      projectName: "playwright-only",
+      frontend: ["react-vite"],
+      backend: "hono",
+      runtime: "bun",
+      api: "orpc",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "none",
+      testing: "playwright",
+    });
+
+    expect(result.success).toBe(true);
+    expect(hasVirtualFile(result.tree!.root, "playwright.config.ts")).toBe(true);
+    expect(hasVirtualFile(result.tree!.root, "apps/web/test/smoke.test.ts")).toBe(false);
+    expect(hasVirtualFile(result.tree!.root, "apps/server/test/smoke.test.ts")).toBe(false);
+  });
+
+  for (const frontend of ["vanilla-vite", "vue"] as const) {
+    it(`wires daisyUI, PWA, and framework-agnostic state for ${frontend}`, async () => {
+      const result = await createVirtual({
+        projectName: `${frontend}-integrations`,
+        frontend: [frontend],
+        backend: "none",
+        runtime: "none",
+        api: "none",
+        database: "none",
+        orm: "none",
+        auth: "none",
+        forms: "none",
+        cssFramework: "tailwind",
+        uiLibrary: "daisyui",
+        stateManagement: "nanostores",
+        addons: ["pwa"],
+      });
+
+      expect(result.success).toBe(true);
+      const webPackageJson = readJsonFromTree(result.tree!, "apps/web/package.json");
+      expect(packageHasDependency(webPackageJson, "nanostores")).toBe(true);
+      expect(packageHasDependency(webPackageJson, "vite-plugin-pwa")).toBe(true);
+      expect(packageHasDependency(webPackageJson, "@vite-pwa/assets-generator")).toBe(true);
+      expect(readTextFromTree(result.tree!, "apps/web/src/style.css")).toContain(
+        '@plugin "daisyui";',
+      );
+      expect(hasVirtualFile(result.tree!.root, "apps/web/pwa-assets.config.ts")).toBe(true);
+    });
+  }
+
   for (const packageManager of packageManagers) {
     it(`writes a concrete ${packageManager} packageManager version`, async () => {
       const result = await createVirtual({
@@ -1564,6 +1631,21 @@ describe("Virtual Generator Regressions", () => {
     const dockerfile = readTextFromTree(result.tree!, "Dockerfile");
     expect(dockerfile).toContain("COPY mix.exs ./");
     expect(dockerfile).not.toContain("mix.lock*");
+  });
+
+  it("copies priv into Elixir Docker builds for every SQL repository adapter", async () => {
+    for (const orm of ["ecto-sql", "myxql", "ecto_sqlite3"] as const) {
+      const result = await createVirtual({
+        projectName: `elixir-docker-${orm}`,
+        ecosystem: "elixir",
+        elixirWebFramework: "none",
+        elixirOrm: orm,
+        elixirDeploy: "docker",
+      });
+
+      expect(result.success).toBe(true);
+      expect(readTextFromTree(result.tree!, "Dockerfile")).toContain("COPY priv priv");
+    }
   });
 
   it("rolls initial Oban migrations all the way back down", async () => {

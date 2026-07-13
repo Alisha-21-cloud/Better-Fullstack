@@ -972,36 +972,6 @@ const REACT_NATIVE_CONFIG_KEYS = [
   "mobileDeepLinking",
 ] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
 
-const COMMAND_ADDONS = new Set([
-  "pwa",
-  "tauri",
-  "starlight",
-  "biome",
-  "lefthook",
-  "husky",
-  "turborepo",
-  "nx",
-  "docker-compose",
-  "devcontainer",
-  "github-actions",
-  "ultracite",
-  "fumadocs",
-  "oxlint",
-  "ruler",
-  "opentui",
-  "mcp",
-  "skills",
-  "wxt",
-  "msw",
-  "storybook",
-  "swr",
-  "tanstack-query",
-  "tanstack-table",
-  "tanstack-virtual",
-  "tanstack-db",
-  "tanstack-pacer",
-]);
-
 function withoutNone(values: readonly string[]): string[] {
   return values.filter((value) => value !== "none");
 }
@@ -1026,7 +996,7 @@ function formatTypeScriptAddonsFlag(selection: StackSelectionInput) {
 
   if (addons.length === 0) return "--addons none";
 
-  return `--addons ${addons.filter((addon) => COMMAND_ADDONS.has(addon)).join(" ") || "none"}`;
+  return `--addons ${toUniqueNonNoneArray(addons).join(" ") || "none"}`;
 }
 
 type StackSelectionStringKey = {

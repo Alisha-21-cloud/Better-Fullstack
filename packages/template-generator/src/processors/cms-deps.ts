@@ -3,6 +3,7 @@ import type { ProjectConfig } from "@better-fullstack/types";
 import type { VirtualFileSystem } from "../core/virtual-fs";
 
 import { addPackageDependency, type AvailableDependencies } from "../utils/add-deps";
+import { getWebPackagePath } from "../utils/project-paths";
 
 const REACT_CMS_FRONTENDS = new Set([
   "tanstack-router",
@@ -14,11 +15,11 @@ const REACT_CMS_FRONTENDS = new Set([
 ]);
 
 export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): void {
-  const { cms, frontend, database } = config;
+  const { cms, frontend, backend, database } = config;
   if (!cms || cms === "none") return;
 
   const hasNext = frontend.includes("next");
-  const webPath = "apps/web/package.json";
+  const webPath = getWebPackagePath(frontend, backend);
 
   if (cms === "contentful") {
     if (vfs.exists(webPath)) {

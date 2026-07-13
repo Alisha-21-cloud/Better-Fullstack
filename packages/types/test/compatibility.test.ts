@@ -6,6 +6,7 @@ import {
   evaluateCompatibility,
   getAIFrontendCompatibilityIssue,
   getApiFrontendCompatibilityIssue,
+  getCompatibleFormLibraries,
   getDisabledReason,
 } from "../src/compatibility";
 import { DEFAULT_STACK_SELECTION } from "../src/stack-translation";
@@ -49,6 +50,25 @@ describe("compatibility issue helpers", () => {
       optionId: "orpc",
       provided: { api: "orpc", frontend: "vue" },
     });
+  });
+
+  it("normalizes stale standalone Vite API and form selections", () => {
+    for (const frontend of ["vanilla-vite", "vue"] as const) {
+      const stack = {
+        ...DEFAULT_STACK_SELECTION,
+        backend: "hono" as const,
+        webFrontend: [frontend],
+        api: "orpc" as const,
+        forms: "tanstack-form" as const,
+      };
+      const result = analyzeStackCompatibility(stack);
+
+      expect(result.adjustedStack?.api).toBe("graphql-yoga");
+      expect(result.adjustedStack?.forms).toBe("none");
+      expect(getDisabledReason(stack, "api", "orpc")).not.toBeNull();
+      expect(getDisabledReason(stack, "forms", "tanstack-form")).not.toBeNull();
+      expect(getCompatibleFormLibraries([frontend])).toEqual(["none"]);
+    }
   });
 
   it("treats Apollo Server as a React-only API option", () => {
@@ -1040,7 +1060,7 @@ describe("compatibility issue helpers", () => {
     );
 
     expect(getDisabledReason(phoenixBase, "elixirAuth", "phx-gen-auth")).toBe(
-      "phx.gen.auth requires Ecto SQL with PostgreSQL in the current Phoenix scaffold",
+      "phx.gen.auth requires an Ecto SQL repository",
     );
     expect(getDisabledReason(phoenixBase, "elixirApi", "absinthe")).toBe(
       "Absinthe GraphQL requires Ecto in the current Phoenix scaffold",

@@ -1,6 +1,7 @@
 import type { ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
+import { getWebPackagePath } from "../utils/project-paths";
 
 import { type TemplateData, processTemplatesFromPrefix } from "./utils";
 
@@ -33,8 +34,15 @@ export async function processAnalyticsTemplates(
   if (!config.analytics || config.analytics === "none") return;
 
   if (config.analytics === "ga4") {
-    if (vfs.exists("apps/web/package.json")) {
-      processTemplatesFromPrefix(vfs, templates, "analytics/ga4/web/base", "apps/web", config);
+    const webPackagePath = getWebPackagePath(config.frontend, config.backend);
+    if (vfs.exists(webPackagePath)) {
+      processTemplatesFromPrefix(
+        vfs,
+        templates,
+        "analytics/ga4/web/base",
+        webPackagePath.replace(/\/package\.json$/, ""),
+        config,
+      );
     }
     return;
   }

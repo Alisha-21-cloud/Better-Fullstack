@@ -10,7 +10,7 @@ export async function processTestingTemplates(
   config: ProjectConfig,
 ): Promise<void> {
   if (config.testing === "playwright" || config.testing === "vitest-playwright") {
-    processTemplatesFromPrefix(vfs, templates, "testing", "", config);
+    processTemplatesFromPrefix(vfs, templates, "testing", "", config, ["testing/mocha"]);
   }
 
   if (config.testing === "mocha") {

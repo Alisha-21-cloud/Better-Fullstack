@@ -32,6 +32,9 @@ default-members = [
 {{#if (eq rustFrontend "dioxus")}}
     "crates/dioxus-client",
 {{/if}}
+{{#if (eq rustFrontend "yew")}}
+    "crates/yew-client",
+{{/if}}
 {{#if (eq rustCli "clap")}}
     "crates/cli",
 {{/if}}

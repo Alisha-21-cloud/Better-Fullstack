@@ -661,6 +661,19 @@ describe("stack selection translation", () => {
     expect(generateStackSelectionCommand(selection)).toContain("--addons biome fumadocs pwa");
   });
 
+  it("keeps every selected TypeScript addon in generated commands", () => {
+    const selection = {
+      ...DEFAULT_SELECTION,
+      codeQuality: ["eslint", "prettier"],
+      documentation: ["graphql-codegen"],
+      appPlatforms: ["axios", "firebase", "openapi-typescript", "apollo-client", "electron", "capacitor"],
+    } satisfies StackSelectionInput;
+
+    expect(generateStackSelectionCommand(selection)).toContain(
+      "--addons eslint prettier graphql-codegen axios firebase openapi-typescript apollo-client electron capacitor",
+    );
+  });
+
   it("converts boolean-like strings and allows preview install overrides", () => {
     const selection = {
       ...DEFAULT_SELECTION,

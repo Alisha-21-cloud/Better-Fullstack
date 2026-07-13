@@ -937,6 +937,27 @@ describe("stack graph", () => {
     ).toBe("Elixir auth scaffolds require Phoenix");
   });
 
+  it("allows ownerless plain Elixir application and documentation tools", () => {
+    const parts = parseStackPartSpecs([
+      "backend.libraries:elixir:ash",
+      "backend.documentation:elixir:ex_doc",
+    ]);
+
+    expect(validateStackParts(parts).issues).toEqual([]);
+  });
+
+  it("allows phx.gen.auth with every supported Ecto SQL repository", () => {
+    for (const orm of ["ecto-sql", "myxql", "ecto_sqlite3"]) {
+      const parts = parseStackPartSpecs([
+        "backend:elixir:phoenix",
+        `backend.orm:elixir:${orm}`,
+        "backend.auth:elixir:phx-gen-auth",
+      ]);
+
+      expect(validateStackParts(parts).issues).toEqual([]);
+    }
+  });
+
   it("materializes provided capabilities and rejects conflicts unless overrideable", () => {
     const stackParts = parseStackPartSpecs([
       "backend:typescript:convex",

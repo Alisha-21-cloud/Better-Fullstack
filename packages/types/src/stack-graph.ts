@@ -252,8 +252,8 @@ const TYPESCRIPT_APOLLO_SERVER_COMPATIBLE_FRONTENDS = new Set([
 ]);
 const BETTER_AUTH_UNSUPPORTED_ORM_TOOLS = new Set(["typeorm", "mikroorm", "sequelize"]);
 const ELIXIR_ECTO_REQUIRED_TOOLS = new Set(["absinthe"]);
-const ELIXIR_ECTO_SQL_REQUIRED_TOOLS = new Set(["oban", "phx-gen-auth"]);
-const ELIXIR_SQL_REPO_REQUIRED_TOOLS = new Set(["pow", "ex_machina"]);
+const ELIXIR_ECTO_SQL_REQUIRED_TOOLS = new Set(["oban"]);
+const ELIXIR_SQL_REPO_REQUIRED_TOOLS = new Set(["pow", "ex_machina", "phx-gen-auth"]);
 const ELIXIR_PHOENIX_REQUIRED_ROLE_MESSAGES: Partial<Record<StackPartRole, string>> = {
   auth: "Elixir auth scaffolds require Phoenix",
   api: "Elixir API scaffolds require Phoenix",
@@ -991,9 +991,11 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     "libraries",
     "elixir",
     "elixirApplicationFramework",
-    { allowMultiple: true },
+    { allowMultiple: true, ownerless: true },
   ),
-  ...defineTools(ELIXIR_DOCUMENTATION_VALUES, "documentation", "elixir", "elixirDocumentation"),
+  ...defineTools(ELIXIR_DOCUMENTATION_VALUES, "documentation", "elixir", "elixirDocumentation", {
+    ownerless: true,
+  }),
   ...defineTools(ELIXIR_CLUSTERING_VALUES, "config", "elixir", "elixirClustering"),
   ...defineTools(ELIXIR_DEPLOY_VALUES, "deploy", "elixir", "elixirDeploy"),
   {
@@ -2406,16 +2408,12 @@ function getStackPartCompatibilityIssue(
   ) {
     const ormTool = context.siblingToolIdsByRole?.orm ?? context.selectedToolIdsByRole?.orm;
     if (ormTool !== "ecto-sql") {
-      const message =
-        part.toolId === "phx-gen-auth"
-          ? "phx.gen.auth requires Ecto SQL with PostgreSQL in the current Phoenix scaffold"
-          : "Oban requires Ecto SQL with PostgreSQL in the current Phoenix scaffold";
       return createStackGraphIssue({
         code: "INCOMPATIBLE_GRAPH_SELECTION",
         partId: part.id,
         role: part.role,
         toolId: part.toolId,
-        message,
+        message: "Oban requires Ecto SQL with PostgreSQL in the current Phoenix scaffold",
       });
     }
   }
@@ -2435,7 +2433,9 @@ function getStackPartCompatibilityIssue(
         message:
           part.toolId === "pow"
             ? "Pow requires Phoenix and an Ecto SQL repository"
-            : "ExMachina requires an Ecto SQL repository",
+            : part.toolId === "phx-gen-auth"
+              ? "phx.gen.auth requires an Ecto SQL repository"
+              : "ExMachina requires an Ecto SQL repository",
       });
     }
   }
