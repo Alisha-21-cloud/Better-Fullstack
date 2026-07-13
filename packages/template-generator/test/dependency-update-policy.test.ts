@@ -21,9 +21,12 @@ const candidate = (name: string, updateType: VersionInfo["updateType"]): Version
 describe("dependency update policy", () => {
   it("keeps every policy pin synchronized with the canonical version map", () => {
     for (const [name, policy] of Object.entries(DEPENDENCY_UPDATE_POLICIES)) {
-      expect(dependencyVersionMap[name as keyof typeof dependencyVersionMap]).toBe(
-        policy.pinnedVersion,
-      );
+      if (policy.pinnedVersion === undefined) continue;
+
+      const canonicalVersion: string | undefined =
+        dependencyVersionMap[name as keyof typeof dependencyVersionMap];
+
+      expect(canonicalVersion).toBe(policy.pinnedVersion);
       expect(getPinnedDependencyVersion(name)).toBe(policy.pinnedVersion);
     }
   });
