@@ -10,10 +10,18 @@ import {
   GoApiSchema,
   GoCliSchema,
   GoLoggingSchema,
+  GoAuthSchema,
+  GoTestingSchema,
+  GoMessageQueueSchema,
+  GoObservabilitySchema,
+  GoValidationSchema,
+  GoQualitySchema,
+  GoMigrationsSchema,
+  GoTemplatingSchema,
+  GoProtoToolingSchema,
+  GoDISchema,
 } from "../src/types";
-import {
-  extractEnumValues,
-} from "./test-utils";
+import { extractEnumValues } from "./test-utils";
 import {
   getVirtualFileContent as getFileContent,
   hasVirtualFile as hasFile,
@@ -26,6 +34,10 @@ const GO_ORMS = extractEnumValues(GoOrmSchema);
 const GO_APIS = extractEnumValues(GoApiSchema);
 const GO_CLIS = extractEnumValues(GoCliSchema);
 const GO_LOGGINGS = extractEnumValues(GoLoggingSchema);
+const GO_AUTHS = extractEnumValues(GoAuthSchema);
+const GO_TESTING = extractEnumValues(GoTestingSchema);
+const GO_MESSAGE_QUEUES = extractEnumValues(GoMessageQueueSchema);
+const GO_OBSERVABILITY = extractEnumValues(GoObservabilitySchema);
 
 describe("Go Language Support", () => {
   describe("Schema Definitions", () => {
@@ -49,6 +61,9 @@ describe("Go Language Support", () => {
       expect(GO_WEB_FRAMEWORKS).toContain("fiber");
       expect(GO_WEB_FRAMEWORKS).toContain("chi");
       expect(GO_WEB_FRAMEWORKS).toContain("stdlib");
+      expect(GO_WEB_FRAMEWORKS).toContain("go-zero");
+      expect(GO_WEB_FRAMEWORKS).toContain("kratos");
+      expect(GO_WEB_FRAMEWORKS).toContain("httprouter");
       expect(GO_WEB_FRAMEWORKS).toContain("none");
     });
 
@@ -56,11 +71,15 @@ describe("Go Language Support", () => {
       expect(GO_ORMS).toContain("gorm");
       expect(GO_ORMS).toContain("sqlc");
       expect(GO_ORMS).toContain("bun");
+      expect(GO_ORMS).toContain("sqlx");
       expect(GO_ORMS).toContain("none");
     });
 
     it("should have go API options", () => {
       expect(GO_APIS).toContain("grpc-go");
+      expect(GO_APIS).toContain("grpc-gateway");
+      expect(GO_APIS).toContain("connect-go");
+      expect(GO_APIS).toContain("oapi-codegen");
       expect(GO_APIS).toContain("none");
     });
 
@@ -77,6 +96,21 @@ describe("Go Language Support", () => {
       expect(GO_LOGGINGS).toContain("slog");
       expect(GO_LOGGINGS).toContain("logrus");
       expect(GO_LOGGINGS).toContain("none");
+    });
+
+    it("should expose the complete Go library expansion", () => {
+      expect(GO_AUTHS).toContain("oauth2");
+      expect(GO_TESTING).toEqual(
+        expect.arrayContaining(["testcontainers", "ginkgo-gomega", "mockery"]),
+      );
+      expect(GO_MESSAGE_QUEUES).toEqual(expect.arrayContaining(["kafka-go", "asynq"]));
+      expect(GO_OBSERVABILITY).toContain("prometheus");
+      expect(extractEnumValues(GoValidationSchema)).toContain("validator");
+      expect(extractEnumValues(GoQualitySchema)).toContain("golangci-lint");
+      expect(extractEnumValues(GoMigrationsSchema)).toContain("golang-migrate");
+      expect(extractEnumValues(GoTemplatingSchema)).toContain("templ");
+      expect(extractEnumValues(GoProtoToolingSchema)).toContain("buf");
+      expect(extractEnumValues(GoDISchema)).toContain("fx");
     });
   });
 
@@ -126,7 +160,7 @@ describe("Go Language Support", () => {
 
       // Verify module declaration
       expect(goModContent).toContain("module go-mod-check");
-      expect(goModContent).toContain("go 1.22");
+      expect(goModContent).toContain("go 1.25.0");
 
       // Verify godotenv is always included
       expect(goModContent).toContain("github.com/joho/godotenv");
@@ -250,6 +284,46 @@ describe("Go Language Support", () => {
       expect(mainContent).toContain("http.NewServeMux()");
       expect(mainContent).toContain('mux.Handle("/api/auth", authApp.Handler())');
       expect(mainContent).toContain("server.ListenAndServe()");
+    });
+
+    it("should generate functional files for the primary Go expansion stack", async () => {
+      const result = await createVirtual({
+        projectName: "go-expansion-check",
+        ecosystem: "go",
+        goWebFramework: "go-zero",
+        goOrm: "sqlx",
+        goApi: "grpc-gateway",
+        goAuth: "oauth2",
+        goTesting: ["testcontainers", "ginkgo-gomega", "mockery"],
+        goMessageQueue: "kafka-go",
+        goObservability: "prometheus",
+        goValidation: "validator",
+        goQuality: "golangci-lint",
+        goMigrations: "golang-migrate",
+        goTemplating: "templ",
+        goProtoTooling: "buf",
+        goDI: "fx",
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+      for (const file of [
+        "internal/server/server.go",
+        "internal/database/database.go",
+        "cmd/gateway/main.go",
+        "internal/auth/oauth2.go",
+        "internal/validation/validation.go",
+        ".golangci.yml",
+        "migrations/000001_create_users.up.sql",
+        "web/components/greeting.templ",
+        "buf.yaml",
+        "internal/app/container.go",
+        "internal/observability/prometheus.go",
+        "internal/messaging/kafka.go",
+        ".mockery.yaml",
+      ]) {
+        expect(hasFile(root, file)).toBe(true);
+      }
     });
   });
 
@@ -1547,7 +1621,7 @@ describe("Go Language Support", () => {
 
       const mainContent = getFileContent(root, "cmd/server/main.go");
       expect(mainContent).toBeDefined();
-      expect(mainContent).toContain("\"log/slog\"");
+      expect(mainContent).toContain('"log/slog"');
       expect(mainContent).toContain("var logger *slog.Logger");
       expect(mainContent).toContain("func initLogger()");
       expect(mainContent).toContain("slog.SetDefault(logger)");

@@ -246,6 +246,12 @@ export type CompatibilityInput = {
   goCaching: string;
   goConfig: string;
   goObservability: string;
+  goValidation: string;
+  goQuality: string;
+  goMigrations: string;
+  goTemplating: string;
+  goProtoTooling: string;
+  goDI: string;
   javaLanguage: string;
   javaWebFramework: string;
   javaBuildTool: string;
@@ -958,10 +964,7 @@ export const analyzeStackCompatibility = (
     const hasStandaloneViteFrontend = nextStack.webFrontend.some((frontend) =>
       ["vanilla-vite", "vue"].includes(frontend),
     );
-    if (
-      hasStandaloneViteFrontend &&
-      ["trpc", "orpc", "ts-rest", "garph"].includes(nextStack.api)
-    ) {
+    if (hasStandaloneViteFrontend && ["trpc", "orpc", "ts-rest", "garph"].includes(nextStack.api)) {
       nextStack.api = "graphql-yoga";
       changed = true;
       changes.push({
@@ -3727,6 +3730,54 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     currentEcosystem: "go",
     authoritative: true,
     candidateIdPrefix: "candidate:native",
+  },
+  goValidation: {
+    role: "validation",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goQuality: {
+    role: "codeQuality",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goMigrations: {
+    role: "dbSetup",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goTemplating: {
+    role: "templating",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goProtoTooling: {
+    role: "buildTool",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goDI: {
+    role: "libraries",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
   },
   dotnetOrm: {
     role: "orm",

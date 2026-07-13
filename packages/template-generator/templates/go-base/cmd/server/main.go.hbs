@@ -7,6 +7,9 @@ import (
 {{#if (eq goLogging "slog")}}
 	"log/slog"
 {{/if}}
+{{#if (or (or (eq goWebFramework "go-zero") (eq goWebFramework "kratos")) (eq goWebFramework "httprouter"))}}
+	"os"
+{{/if}}
 {{#if (eq goApi "grpc-go")}}
 	"net"
 {{/if}}
@@ -61,14 +64,17 @@ import (
 {{#if (eq goApi "grpc-go")}}
 	"google.golang.org/grpc"
 {{/if}}
-{{#if (or (eq auth "go-better-auth") (ne goAuth "none") (eq goOrm "gorm") (eq goOrm "sqlc") (eq goOrm "ent") (eq goOrm "bun") (eq observability "sentry") (eq goApi "grpc-go"))}}
+{{#if (or (eq auth "go-better-auth") (ne goAuth "none") (eq goOrm "gorm") (eq goOrm "sqlc") (eq goOrm "ent") (eq goOrm "bun") (eq goOrm "sqlx") (eq observability "sentry") (eq goApi "grpc-go"))}}
 
 {{/if}}
 {{#if (or (eq auth "go-better-auth") (ne goAuth "none"))}}
 	appauth "{{projectName}}/internal/auth"
 {{/if}}
-{{#if (or (or (or (eq goOrm "gorm") (eq goOrm "sqlc")) (eq goOrm "ent")) (eq goOrm "bun"))}}
+{{#if (or (or (or (or (eq goOrm "gorm") (eq goOrm "sqlc")) (eq goOrm "ent")) (eq goOrm "bun")) (eq goOrm "sqlx"))}}
 	"{{projectName}}/internal/database"
+{{/if}}
+{{#if (or (or (eq goWebFramework "go-zero") (eq goWebFramework "kratos")) (eq goWebFramework "httprouter"))}}
+	appserver "{{projectName}}/internal/server"
 {{/if}}
 {{#if (and (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (or (or (or (eq goOrm "gorm") (eq goOrm "sqlc")) (eq goOrm "ent")) (eq goOrm "bun")))}}
 	"{{projectName}}/internal/handlers"
@@ -240,6 +246,11 @@ func main() {
 	logger.Info("Goth OAuth providers registered")
 {{/if}}
 {{/if}}
+{{#if (eq goAuth "oauth2")}}
+
+	// OAuth2Config reads provider endpoints and credentials from the environment.
+	_ = appauth.OAuth2Config()
+{{/if}}
 {{#if (eq goOrm "gorm")}}
 
 	// Initialize database
@@ -350,6 +361,16 @@ func main() {
 	logger.Info("Database connected successfully")
 {{/if}}
 	_ = db // Use db in your handlers
+{{/if}}
+{{#if (eq goOrm "sqlx")}}
+
+	// Initialize the sqlx database connection.
+	db, err := database.InitDB()
+	if err != nil {
+		panic("Failed to connect to database: " + err.Error())
+	}
+	defer database.Close()
+	_ = db
 {{/if}}
 {{#if (or (or (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (eq goApi "grpc-go")) (eq auth "go-better-auth"))}}
 
@@ -957,6 +978,22 @@ func main() {
 	println("{{projectName}} started")
 	println("Add a web framework (gin, echo, fiber, or chi) to start building your API")
 {{/if}}
+{{/if}}
+{{/if}}
+{{#if (or (or (eq goWebFramework "go-zero") (eq goWebFramework "kratos")) (eq goWebFramework "httprouter"))}}
+
+	host := os.Getenv("HOST")
+	if host == "" {
+		host = "0.0.0.0"
+	}
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+{{#if (eq auth "go-better-auth")}}
+	appserver.Run(host+":"+port, authApp.Handler())
+{{else}}
+	appserver.Run(host + ":" + port)
 {{/if}}
 {{/if}}
 {{#if (eq goApi "grpc-go")}}

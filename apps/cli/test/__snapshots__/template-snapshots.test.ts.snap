@@ -21717,7 +21717,7 @@ PORT=8080
 # Allowed web origin for CORS (unset or empty = allow any origin)
 CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21777,7 +21777,7 @@ PORT=8080
 # Allowed web origin for CORS (unset or empty = allow any origin)
 CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21869,7 +21869,7 @@ PORT=8080
 # Allowed web origin for CORS (unset or empty = allow any origin)
 CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21929,7 +21929,7 @@ PORT=8080
 # Allowed web origin for CORS (unset or empty = allow any origin)
 CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21989,7 +21989,7 @@ PORT=8080
 # Allowed web origin for CORS (unset or empty = allow any origin)
 CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -22041,7 +22041,7 @@ PORT=8080
 # Allowed web origin for CORS (unset or empty = allow any origin)
 CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -22101,7 +22101,7 @@ PORT=8080
 # Allowed web origin for CORS (unset or empty = allow any origin)
 CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -22177,7 +22177,7 @@ PORT=8080
 # Allowed web origin for CORS (unset or empty = allow any origin)
 CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -22245,7 +22245,7 @@ PORT=8080
 # Allowed web origin for CORS (unset or empty = allow any origin)
 CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
