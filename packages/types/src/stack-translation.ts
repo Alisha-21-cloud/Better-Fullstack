@@ -1092,7 +1092,12 @@ function formatChangedStringFlags(
 }
 
 function hasGraphPrimaryPart(
-  parts: readonly { role: string; ecosystem: string; toolId?: string; ownerPartId?: string }[],
+  parts: readonly {
+    role: string;
+    ecosystem: string;
+    toolId?: string;
+    ownerPartId?: string;
+  }[],
   role: "frontend" | "backend" | "mobile" | "database",
   ecosystem?: string,
   toolId?: string,
@@ -1210,7 +1215,7 @@ const GRAPH_GO_BACKEND_PART_SELECTION_KEYS = [
   ["goLogging", "logging"],
   ["goValidation", "validation"],
   ["goQuality", "codeQuality"],
-  ["goMigrations", "dbSetup"],
+  ["goMigrations", "migrations"],
   ["goTemplating", "templating"],
   ["goProtoTooling", "buildTool"],
   ["goDI", "libraries"],
@@ -1341,7 +1346,7 @@ const GRAPH_GO_BACKEND_PART_CLI_KEYS = [
   ["goLogging", "logging"],
   ["goValidation", "validation"],
   ["goQuality", "codeQuality"],
-  ["goMigrations", "dbSetup"],
+  ["goMigrations", "migrations"],
   ["goTemplating", "templating"],
   ["goProtoTooling", "buildTool"],
   ["goDI", "libraries"],
@@ -1786,7 +1791,9 @@ export function cliInputToProjectConfigPartial(
 
   if (Array.isArray(input.part) && input.part.length > 0) {
     const stackParts = getCliGraphStackParts(input);
-    Object.assign(config, stackPartsToLegacyProjectConfigPartial(stackParts), { stackParts });
+    Object.assign(config, stackPartsToLegacyProjectConfigPartial(stackParts), {
+      stackParts,
+    });
   }
 
   return config;

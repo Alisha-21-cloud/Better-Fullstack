@@ -23,6 +23,7 @@ export const StackPartRoleSchema = z
     "runtime",
     "deploy",
     "dbSetup",
+    "migrations",
     "realtime",
     "navigation",
     "caching",

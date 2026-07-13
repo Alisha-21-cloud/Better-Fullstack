@@ -7,13 +7,10 @@ import (
 {{#if (eq goLogging "slog")}}
 	"log/slog"
 {{/if}}
-{{#if (or (or (eq goWebFramework "go-zero") (eq goWebFramework "kratos")) (eq goWebFramework "httprouter"))}}
-	"os"
-{{/if}}
 {{#if (eq goApi "grpc-go")}}
 	"net"
 {{/if}}
-{{#if (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (and (eq auth "go-better-auth") (not (eq goWebFramework "fiber"))))}}
+{{#if (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (and (eq auth "go-better-auth") (eq goWebFramework "none")))}}
 	"net/http"
 {{/if}}
 {{#if (eq goWebFramework "stdlib")}}
@@ -22,7 +19,7 @@ import (
 	"syscall"
 	"time"
 {{/if}}
-{{#if (or (or (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (eq goApi "grpc-go")) (or (eq auth "go-better-auth") (ne goLogging "none")))}}
+{{#if (or (or (or (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (or (or (eq goWebFramework "go-zero") (eq goWebFramework "kratos")) (eq goWebFramework "httprouter"))) (eq goApi "grpc-go")) (or (eq auth "go-better-auth") (ne goLogging "none")))}}
 	"os"
 {{/if}}
 {{#if (eq goApi "grpc-go")}}
@@ -372,7 +369,7 @@ func main() {
 	defer database.Close()
 	_ = db
 {{/if}}
-{{#if (or (or (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (eq goApi "grpc-go")) (eq auth "go-better-auth"))}}
+{{#if (or (or (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (eq goApi "grpc-go")) (and (eq auth "go-better-auth") (eq goWebFramework "none")))}}
 
 	// Get host from environment
 	host := os.Getenv("HOST")
@@ -380,7 +377,7 @@ func main() {
 		host = "0.0.0.0"
 	}
 {{/if}}
-{{#if (or (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (eq auth "go-better-auth"))}}
+{{#if (or (or (or (or (eq goWebFramework "gin") (eq goWebFramework "echo")) (eq goWebFramework "fiber")) (or (eq goWebFramework "chi") (eq goWebFramework "stdlib"))) (and (eq auth "go-better-auth") (eq goWebFramework "none")))}}
 	// Get HTTP port from environment
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -982,18 +979,18 @@ func main() {
 {{/if}}
 {{#if (or (or (eq goWebFramework "go-zero") (eq goWebFramework "kratos")) (eq goWebFramework "httprouter"))}}
 
-	host := os.Getenv("HOST")
-	if host == "" {
-		host = "0.0.0.0"
+	httpHost := os.Getenv("HOST")
+	if httpHost == "" {
+		httpHost = "0.0.0.0"
 	}
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
+	httpPort := os.Getenv("PORT")
+	if httpPort == "" {
+		httpPort = "8080"
 	}
 {{#if (eq auth "go-better-auth")}}
-	appserver.Run(host+":"+port, authApp.Handler())
+	appserver.Run(httpHost+":"+httpPort, authApp.Handler())
 {{else}}
-	appserver.Run(host + ":" + port)
+	appserver.Run(httpHost + ":" + httpPort)
 {{/if}}
 {{/if}}
 {{#if (eq goApi "grpc-go")}}

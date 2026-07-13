@@ -325,6 +325,100 @@ describe("Go Language Support", () => {
         expect(hasFile(root, file)).toBe(true);
       }
     });
+
+    it("should keep new framework imports and addresses collision-free", async () => {
+      const result = await createVirtual({
+        projectName: "go-zero-auth-check",
+        ecosystem: "go",
+        auth: "go-better-auth",
+        goWebFramework: "go-zero",
+        goOrm: "ent",
+        goApi: "connect-go",
+        goAuth: "casbin",
+        goLogging: "logrus",
+      });
+
+      expect(result.success).toBe(true);
+      const mainContent = getFileContent(result.tree!.root, "cmd/server/main.go");
+      expect(mainContent.match(/\n\s*"os"\n/g)).toHaveLength(1);
+      expect(mainContent).not.toContain('"net/http"');
+      expect(mainContent).not.toContain("addr :=");
+      expect(mainContent).toContain('httpHost := os.Getenv("HOST")');
+      expect(mainContent).toContain('httpPort := os.Getenv("PORT")');
+    });
+
+    it("should emit a usable proto module when Buf is selected without gRPC", async () => {
+      const result = await createVirtual({
+        projectName: "go-buf-check",
+        ecosystem: "go",
+        goWebFramework: "none",
+        goOrm: "none",
+        goApi: "none",
+        goProtoTooling: "buf",
+      });
+
+      expect(result.success).toBe(true);
+      const root = result.tree!.root;
+      expect(hasFile(root, "buf.yaml")).toBe(true);
+      expect(hasFile(root, "buf.gen.yaml")).toBe(true);
+      expect(getFileContent(root, "proto/greeter.proto")).toContain("service Greeter");
+    });
+
+    it("should write oapi-codegen output relative to the API package", async () => {
+      const result = await createVirtual({
+        projectName: "go-oapi-check",
+        ecosystem: "go",
+        goWebFramework: "none",
+        goOrm: "none",
+        goApi: "oapi-codegen",
+      });
+
+      expect(result.success).toBe(true);
+      const config = getFileContent(result.tree!.root, "oapi-codegen.yaml");
+      expect(config).toContain("output: openapi.gen.go");
+      expect(config).not.toContain("output: internal/api/");
+    });
+
+    it("should render golang-migrate drivers and SQL for each relational database", async () => {
+      const cases = [
+        {
+          database: "sqlite" as const,
+          driver: "database/sqlite3",
+          sql: "AUTOINCREMENT",
+        },
+        {
+          database: "postgres" as const,
+          driver: "database/postgres",
+          sql: "BIGSERIAL",
+        },
+        {
+          database: "mysql" as const,
+          driver: "database/mysql",
+          sql: "AUTO_INCREMENT",
+        },
+      ];
+
+      for (const migrationCase of cases) {
+        const result = await createVirtual({
+          projectName: `go-migrate-${migrationCase.database}`,
+          ecosystem: "go",
+          database: migrationCase.database,
+          goWebFramework: "none",
+          goOrm: "none",
+          goApi: "none",
+          goMigrations: "golang-migrate",
+        });
+
+        expect(result.success).toBe(true);
+        const root = result.tree!.root;
+        expect(getFileContent(root, "internal/migrations/migrations.go")).toContain(
+          migrationCase.driver,
+        );
+        expect(getFileContent(root, "migrations/000001_create_users.up.sql")).toContain(
+          migrationCase.sql,
+        );
+      }
+    });
   });
 
   describe("Gin Web Framework Integration", () => {
