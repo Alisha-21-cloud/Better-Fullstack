@@ -417,6 +417,12 @@ const GRAPH_BACKEND_ADVANCED_CATEGORY_ORDER_BY_ECOSYSTEM = {
     "goCaching",
     "goConfig",
     "goObservability",
+    "goValidation",
+    "goQuality",
+    "goMigrations",
+    "goTemplating",
+    "goProtoTooling",
+    "goDI",
   ],
   java: ["javaBuildTool", "javaApi", "javaLogging", "javaLibraries", "javaTestingLibraries"],
   elixir: [

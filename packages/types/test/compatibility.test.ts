@@ -225,7 +225,11 @@ describe("compatibility issue helpers", () => {
     for (const frontend of ["vue", "vanilla-vite"] as const) {
       expect(
         getDisabledReason(
-          { ...DEFAULT_STACK_SELECTION, webFrontend: [frontend], nativeFrontend: [] },
+          {
+            ...DEFAULT_STACK_SELECTION,
+            webFrontend: [frontend],
+            nativeFrontend: [],
+          },
           "uiLibrary",
           "daisyui",
         ),
@@ -233,7 +237,11 @@ describe("compatibility issue helpers", () => {
       for (const platform of ["pwa", "tauri", "docker-compose"] as const) {
         expect(
           getDisabledReason(
-            { ...DEFAULT_STACK_SELECTION, webFrontend: [frontend], nativeFrontend: [] },
+            {
+              ...DEFAULT_STACK_SELECTION,
+              webFrontend: [frontend],
+              nativeFrontend: [],
+            },
             "appPlatforms",
             platform,
           ),
@@ -437,6 +445,30 @@ describe("compatibility issue helpers", () => {
     );
   });
 
+  it("limits Go migrations to relational database targets", () => {
+    const baseStack = {
+      ...DEFAULT_STACK_SELECTION,
+      ecosystem: "go" as const,
+      goMigrations: "golang-migrate" as const,
+    };
+
+    expect(
+      getDisabledReason({ ...baseStack, database: "sqlite" }, "goMigrations", "golang-migrate"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, database: "postgres" }, "goMigrations", "golang-migrate"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, database: "mysql" }, "goMigrations", "golang-migrate"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, database: "mongodb" }, "goMigrations", "golang-migrate"),
+    ).toBe("Go migrations require SQLite, PostgreSQL, or MySQL");
+    expect(getDisabledReason(baseStack, "database", "mongodb")).toBe(
+      "The selected Go migration tool requires SQLite, PostgreSQL, or MySQL",
+    );
+  });
+
   it("routes promoted frontend library disabled reasons through graph checks", () => {
     expect(
       getDisabledReason(
@@ -618,7 +650,11 @@ describe("compatibility issue helpers", () => {
     );
     for (const stack of [
       { ...DEFAULT_STACK_SELECTION, webFrontend: ["nuxt"] },
-      { ...DEFAULT_STACK_SELECTION, webFrontend: ["astro"], runtime: "workers" },
+      {
+        ...DEFAULT_STACK_SELECTION,
+        webFrontend: ["astro"],
+        runtime: "workers",
+      },
       { ...DEFAULT_STACK_SELECTION, webFrontend: ["astro"], runtime: "node" },
     ] as const) {
       expect(getDisabledReason(stack, "cms", "keystatic")).toBe(keystaticAstro7Reason);

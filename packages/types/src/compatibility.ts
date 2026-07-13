@@ -246,6 +246,12 @@ export type CompatibilityInput = {
   goCaching: string;
   goConfig: string;
   goObservability: string;
+  goValidation: string;
+  goQuality: string;
+  goMigrations: string;
+  goTemplating: string;
+  goProtoTooling: string;
+  goDI: string;
   javaLanguage: string;
   javaWebFramework: string;
   javaBuildTool: string;
@@ -508,7 +514,10 @@ export const analyzeStackCompatibility = (
       nextStack.webFrontend = nextStack.webFrontend.filter((f) => f !== "solid");
       if (nextStack.webFrontend.length === 0) nextStack.webFrontend = ["none"];
       changed = true;
-      changes.push({ category: "backend", message: "Removed Solid (incompatible with Convex)" });
+      changes.push({
+        category: "backend",
+        message: "Removed Solid (incompatible with Convex)",
+      });
     }
     if (nextStack.webFrontend.includes("solid-start")) {
       nextStack.webFrontend = nextStack.webFrontend.filter((f) => f !== "solid-start");
@@ -524,7 +533,10 @@ export const analyzeStackCompatibility = (
       if (nextStack.webFrontend.length === 0) nextStack.webFrontend = ["none"];
       nextStack.astroIntegration = "none";
       changed = true;
-      changes.push({ category: "backend", message: "Removed Astro (incompatible with Convex)" });
+      changes.push({
+        category: "backend",
+        message: "Removed Astro (incompatible with Convex)",
+      });
     }
 
     // Remove AI example if incompatible frontends are selected (Convex AI supports React-based frontends, including React + Vite)
@@ -596,7 +608,10 @@ export const analyzeStackCompatibility = (
     ) {
       nextStack.examples = ["none"];
       changed = true;
-      changes.push({ category: "backend", message: "Examples cleared (no backend)" });
+      changes.push({
+        category: "backend",
+        message: "Examples cleared (no backend)",
+      });
     }
   }
 
@@ -723,7 +738,10 @@ export const analyzeStackCompatibility = (
   if (nextStack.runtime === "workers" && nextStack.backend !== "hono") {
     nextStack.backend = "hono";
     changed = true;
-    changes.push({ category: "runtime", message: "Backend set to 'Hono' (required for Workers)" });
+    changes.push({
+      category: "runtime",
+      message: "Backend set to 'Hono' (required for Workers)",
+    });
   }
 
   // Workers runtime requires server deployment
@@ -781,7 +799,10 @@ export const analyzeStackCompatibility = (
       if (nextStack.orm !== "none") {
         nextStack.orm = "none";
         changed = true;
-        changes.push({ category: "database", message: "ORM set to 'None' (no database selected)" });
+        changes.push({
+          category: "database",
+          message: "ORM set to 'None' (no database selected)",
+        });
       }
       if (nextStack.dbSetup !== "none") {
         nextStack.dbSetup = "none";
@@ -850,7 +871,10 @@ export const analyzeStackCompatibility = (
       } else {
         nextStack.database = "sqlite";
         changed = true;
-        changes.push({ category: "orm", message: "Database set to 'SQLite' (required for ORM)" });
+        changes.push({
+          category: "orm",
+          message: "Database set to 'SQLite' (required for ORM)",
+        });
       }
     }
 
@@ -958,10 +982,7 @@ export const analyzeStackCompatibility = (
     const hasStandaloneViteFrontend = nextStack.webFrontend.some((frontend) =>
       ["vanilla-vite", "vue"].includes(frontend),
     );
-    if (
-      hasStandaloneViteFrontend &&
-      ["trpc", "orpc", "ts-rest", "garph"].includes(nextStack.api)
-    ) {
+    if (hasStandaloneViteFrontend && ["trpc", "orpc", "ts-rest", "garph"].includes(nextStack.api)) {
       nextStack.api = "graphql-yoga";
       changed = true;
       changes.push({
@@ -977,7 +998,10 @@ export const analyzeStackCompatibility = (
     if (needsOrpc && (nextStack.api === "trpc" || nextStack.api === "apollo-server")) {
       nextStack.api = "orpc";
       changed = true;
-      changes.push({ category: "api", message: "API set to 'oRPC' (required for this frontend)" });
+      changes.push({
+        category: "api",
+        message: "API set to 'oRPC' (required for this frontend)",
+      });
     }
 
     // Astro with non-React integration requires oRPC for React-only API clients.
@@ -1838,7 +1862,10 @@ export const analyzeStackCompatibility = (
   if (nextStack.webDeploy !== "none" && !nextStack.webFrontend.some((f) => f !== "none")) {
     nextStack.webDeploy = "none";
     changed = true;
-    changes.push({ category: "webDeploy", message: "Web deploy set to 'None' (no web frontend)" });
+    changes.push({
+      category: "webDeploy",
+      message: "Web deploy set to 'None' (no web frontend)",
+    });
   }
 
   // Server deploy constraints
@@ -3039,6 +3066,27 @@ export const getDisabledReason = (
   }
 
   // ============================================
+  // GO ECOSYSTEM RULES
+  // ============================================
+  if (
+    category === "goMigrations" &&
+    optionId !== "none" &&
+    currentStack.ecosystem === "go" &&
+    !["sqlite", "postgres", "mysql"].includes(currentStack.database)
+  ) {
+    return "Go migrations require SQLite, PostgreSQL, or MySQL";
+  }
+
+  if (
+    category === "database" &&
+    currentStack.ecosystem === "go" &&
+    currentStack.goMigrations !== "none" &&
+    !["sqlite", "postgres", "mysql"].includes(optionId)
+  ) {
+    return "The selected Go migration tool requires SQLite, PostgreSQL, or MySQL";
+  }
+
+  // ============================================
   // JAVA ECOSYSTEM RULES
   // ============================================
   if (category === "javaWebFramework") {
@@ -3727,6 +3775,54 @@ const GRAPH_DISABLED_REASON_BINDINGS: Partial<
     currentEcosystem: "go",
     authoritative: true,
     candidateIdPrefix: "candidate:native",
+  },
+  goValidation: {
+    role: "validation",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goQuality: {
+    role: "codeQuality",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goMigrations: {
+    role: "migrations",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goTemplating: {
+    role: "templating",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goProtoTooling: {
+    role: "buildTool",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
+  },
+  goDI: {
+    role: "libraries",
+    ecosystem: "go",
+    ownerRole: "backend",
+    ownerEcosystem: "go",
+    currentEcosystem: "go",
+    authoritative: true,
   },
   dotnetOrm: {
     role: "orm",
