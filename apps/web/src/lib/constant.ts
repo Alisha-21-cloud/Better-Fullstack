@@ -5101,7 +5101,7 @@ export const TECH_OPTIONS: Record<
       id: "buf",
       name: "Buf",
       description: "Protobuf linting, breaking-change detection, and generation",
-      icon: "https://cdn.simpleicons.org/buf/000000",
+      icon: "",
       color: "from-slate-500 to-indigo-600",
       default: false,
       isNew: true,

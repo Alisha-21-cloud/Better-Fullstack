@@ -16,9 +16,8 @@ import {
   TECH_OPTIONS,
   type StackState,
 } from "../src/lib/constant";
-import {
-  generateStackCommand,
-} from "../src/lib/stack-utils";
+import { ICON_REGISTRY } from "../src/lib/tech-icons";
+import { generateStackCommand } from "../src/lib/stack-utils";
 
 describe("Go Ecosystem Tab", () => {
   describe("Ecosystem Type", () => {
@@ -223,6 +222,15 @@ describe("Go Ecosystem Tab", () => {
         const actual = TECH_OPTIONS[category as TechCategory].map((option) => option.id);
         expect(actual).toEqual(expect.arrayContaining(ids));
       }
+    });
+
+    it("should keep shared and unsupported Go tool icons out of the global registry", () => {
+      expect(ICON_REGISTRY.oauth2).toBeUndefined();
+      expect(TECH_OPTIONS.goAuth.find((option) => option.id === "oauth2")?.icon).toBe(
+        "https://cdn.simpleicons.org/go/00ADD8",
+      );
+      expect(ICON_REGISTRY.buf).toBeUndefined();
+      expect(TECH_OPTIONS.goProtoTooling.find((option) => option.id === "buf")?.icon).toBe("");
     });
   });
 
