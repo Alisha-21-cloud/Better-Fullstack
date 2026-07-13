@@ -32,6 +32,11 @@ import {
   ELIXIR_OBSERVABILITY_VALUES,
   ELIXIR_ORM_VALUES,
   ELIXIR_QUALITY_VALUES,
+  ELIXIR_I18N_VALUES,
+  ELIXIR_HTTP_SERVER_VALUES,
+  ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  ELIXIR_DOCUMENTATION_VALUES,
+  ELIXIR_CLUSTERING_VALUES,
   ELIXIR_REALTIME_VALUES,
   ELIXIR_TESTING_VALUES,
   ELIXIR_VALIDATION_VALUES,
@@ -269,6 +274,11 @@ export type OptionCategory =
   | "elixirObservability"
   | "elixirTesting"
   | "elixirQuality"
+  | "elixirI18n"
+  | "elixirHttpServer"
+  | "elixirApplicationFramework"
+  | "elixirDocumentation"
+  | "elixirClustering"
   | "elixirDeploy"
   | "elixirLibraries";
 
@@ -480,6 +490,11 @@ export const ELIXIR_CATEGORY_ORDER = [
   "elixirObservability",
   "elixirTesting",
   "elixirQuality",
+  "elixirI18n",
+  "elixirHttpServer",
+  "elixirApplicationFramework",
+  "elixirDocumentation",
+  "elixirClustering",
   "elixirDeploy",
   "elixirLibraries",
   "aiDocs",
@@ -610,6 +625,11 @@ export function getCategoryDisplayName(categoryKey: string): string {
     elixirObservability: "Elixir Observability",
     elixirTesting: "Elixir Testing",
     elixirQuality: "Elixir Code Quality",
+    elixirI18n: "Elixir Localization",
+    elixirHttpServer: "Elixir HTTP Server",
+    elixirApplicationFramework: "Elixir Application Framework",
+    elixirDocumentation: "Elixir Documentation",
+    elixirClustering: "Elixir Clustering",
     elixirDeploy: "Elixir Deploy",
     elixirLibraries: "Elixir Libraries",
   };
@@ -884,6 +904,11 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   elixirObservability: ELIXIR_OBSERVABILITY_VALUES,
   elixirTesting: ELIXIR_TESTING_VALUES,
   elixirQuality: ELIXIR_QUALITY_VALUES,
+  elixirI18n: ELIXIR_I18N_VALUES,
+  elixirHttpServer: ELIXIR_HTTP_SERVER_VALUES,
+  elixirApplicationFramework: ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  elixirDocumentation: ELIXIR_DOCUMENTATION_VALUES,
+  elixirClustering: ELIXIR_CLUSTERING_VALUES,
   elixirDeploy: ELIXIR_DEPLOY_VALUES,
   elixirLibraries: ELIXIR_LIBRARIES_VALUES,
 };
@@ -1575,20 +1600,27 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   elixirOrm: {
     ecto: "Ecto",
     "ecto-sql": "Ecto SQL",
+    myxql: "MyXQL",
+    ecto_sqlite3: "ecto_sqlite3",
   },
   elixirAuth: {
     "phx-gen-auth": "phx.gen.auth",
     ueberauth: "Ueberauth",
     guardian: "Guardian",
+    pow: "Pow",
   },
   elixirApi: {
     rest: "Phoenix REST",
     absinthe: "Absinthe GraphQL",
     grpc: "gRPC (grpc-elixir)",
+    open_api_spex: "OpenApiSpex",
   },
   elixirLibraries: {
     broadway: "Broadway",
     nx: "Nx (Numerical Elixir)",
+    ex_aws: "ExAws",
+    floki: "Floki",
+    rustler: "Rustler",
   },
   elixirRealtime: {
     channels: "Phoenix Channels",
@@ -1607,32 +1639,56 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   elixirHttp: {
     req: "Req",
     finch: "Finch",
+    tesla: "Tesla",
   },
   elixirJson: {
     jason: "Jason",
   },
   elixirEmail: {
     swoosh: "Swoosh",
+    bamboo: "Bamboo",
   },
   elixirCaching: {
     cachex: "Cachex",
     nebulex: "Nebulex",
+    redix: "Redix",
   },
   elixirObservability: {
     telemetry: "Telemetry",
     opentelemetry: "OpenTelemetry",
     prom_ex: "PromEx",
+    sentry: "Sentry",
   },
   elixirTesting: {
     ex_unit: "ExUnit",
     mox: "Mox",
     bypass: "Bypass",
     wallaby: "Wallaby",
+    stream_data: "StreamData",
+    ex_machina: "ExMachina",
   },
   elixirQuality: {
     credo: "Credo",
     dialyxir: "Dialyxir",
     sobelow: "Sobelow",
+    excoveralls: "ExCoveralls",
+    mix_audit: "MixAudit",
+  },
+  elixirI18n: {
+    gettext: "Gettext",
+  },
+  elixirHttpServer: {
+    bandit: "Bandit",
+    cowboy: "Cowboy",
+  },
+  elixirApplicationFramework: {
+    ash: "Ash Framework",
+  },
+  elixirDocumentation: {
+    ex_doc: "ExDoc",
+  },
+  elixirClustering: {
+    libcluster: "libcluster",
   },
   elixirDeploy: {
     docker: "Docker",
@@ -1859,6 +1915,11 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   elixirObservability: buildCategoryMetadata("elixirObservability"),
   elixirTesting: buildCategoryMetadata("elixirTesting"),
   elixirQuality: buildCategoryMetadata("elixirQuality"),
+  elixirI18n: buildCategoryMetadata("elixirI18n"),
+  elixirHttpServer: buildCategoryMetadata("elixirHttpServer"),
+  elixirApplicationFramework: buildCategoryMetadata("elixirApplicationFramework"),
+  elixirDocumentation: buildCategoryMetadata("elixirDocumentation"),
+  elixirClustering: buildCategoryMetadata("elixirClustering"),
   elixirDeploy: buildCategoryMetadata("elixirDeploy"),
   elixirLibraries: buildCategoryMetadata("elixirLibraries"),
 };

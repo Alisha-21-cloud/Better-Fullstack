@@ -41,6 +41,11 @@ import {
   ElixirObservabilitySchema,
   ElixirOrmSchema,
   ElixirQualitySchema,
+  ElixirI18nSchema,
+  ElixirHttpServerSchema,
+  ElixirApplicationFrameworkSchema,
+  ElixirDocumentationSchema,
+  ElixirClusteringSchema,
   ElixirRealtimeSchema,
   ElixirTestingSchema,
   ElixirValidationSchema,
@@ -575,6 +580,11 @@ const MCP_COMPATIBILITY_DEFAULTS = {
   elixirObservability: "telemetry",
   elixirTesting: "ex_unit",
   elixirQuality: "credo",
+  elixirI18n: "none",
+  elixirHttpServer: "cowboy",
+  elixirApplicationFramework: "none",
+  elixirDocumentation: "none",
+  elixirClustering: "none",
   elixirDeploy: "none",
   elixirLibraries: [],
 } satisfies Partial<Record<keyof CompatibilityInput, string | string[]>>;
@@ -1386,6 +1396,15 @@ const crossEcosystemInputSchema = {
   elixirObservability: ElixirObservabilitySchema.optional().describe("Elixir observability"),
   elixirTesting: ElixirTestingSchema.optional().describe("Elixir testing library"),
   elixirQuality: ElixirQualitySchema.optional().describe("Elixir code quality/security"),
+  elixirI18n: ElixirI18nSchema.optional().describe("Elixir localization"),
+  elixirHttpServer: ElixirHttpServerSchema.optional().describe("Elixir HTTP server"),
+  elixirApplicationFramework: ElixirApplicationFrameworkSchema.optional().describe(
+    "Elixir application framework",
+  ),
+  elixirDocumentation: ElixirDocumentationSchema.optional().describe(
+    "Elixir documentation tooling",
+  ),
+  elixirClustering: ElixirClusteringSchema.optional().describe("Elixir clustering"),
   elixirDeploy: ElixirDeploySchema.optional().describe("Elixir deployment target"),
   elixirLibraries: z.array(ElixirLibrariesSchema).optional().describe("Elixir libraries"),
 };
@@ -1917,9 +1936,8 @@ export async function startMcpServer() {
           addonWarnings = await setupAddons(config);
         }
 
-        const { collectStructuredBaselines, recordScaffoldManifest } = await import(
-          "./utils/scaffold-manifest.js"
-        );
+        const { collectStructuredBaselines, recordScaffoldManifest } =
+          await import("./utils/scaffold-manifest.js");
         await recordScaffoldManifest(projectDir, {
           baselines: collectStructuredBaselines(result.tree),
         });

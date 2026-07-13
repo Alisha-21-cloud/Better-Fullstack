@@ -6,25 +6,79 @@ type TechResourceLinks = {
 type LinkMap = Record<string, TechResourceLinks>;
 
 const BASE_LINKS: LinkMap = {
-  eslint: { docsUrl: "https://eslint.org/docs/latest/", githubUrl: "https://github.com/eslint/eslint" },
-  prettier: { docsUrl: "https://prettier.io/docs/", githubUrl: "https://github.com/prettier/prettier" },
-  axios: { docsUrl: "https://axios-http.com/docs/intro", githubUrl: "https://github.com/axios/axios" },
-  ws: { docsUrl: "https://github.com/websockets/ws/blob/master/doc/ws.md", githubUrl: "https://github.com/websockets/ws" },
-  "vanilla-vite": { docsUrl: "https://vite.dev/guide/", githubUrl: "https://github.com/vitejs/vite" },
-  firebase: { docsUrl: "https://firebase.google.com/docs/web/setup", githubUrl: "https://github.com/firebase/firebase-js-sdk" },
-  "openai-sdk": { docsUrl: "https://platform.openai.com/docs/libraries/javascript", githubUrl: "https://github.com/openai/openai-node" },
-  "anthropic-sdk": { docsUrl: "https://docs.anthropic.com/en/api/client-sdks", githubUrl: "https://github.com/anthropics/anthropic-sdk-typescript" },
-  "graphql-codegen": { docsUrl: "https://the-guild.dev/graphql/codegen/docs/getting-started", githubUrl: "https://github.com/dotansimha/graphql-code-generator" },
-  "openapi-typescript": { docsUrl: "https://openapi-ts.dev/", githubUrl: "https://github.com/openapi-ts/openapi-typescript" },
-  "apollo-client": { docsUrl: "https://www.apollographql.com/docs/react/", githubUrl: "https://github.com/apollographql/apollo-client" },
-  ga4: { docsUrl: "https://developers.google.com/analytics/devguides/collection/ga4", githubUrl: "https://github.com/googleanalytics" },
-  paypal: { docsUrl: "https://developer.paypal.com/sdk/js/", githubUrl: "https://github.com/paypal/paypal-js" },
-  electron: { docsUrl: "https://www.electronjs.org/docs/latest/", githubUrl: "https://github.com/electron/electron" },
-  capacitor: { docsUrl: "https://capacitorjs.com/docs", githubUrl: "https://github.com/ionic-team/capacitor" },
-  "styled-components": { docsUrl: "https://styled-components.com/docs", githubUrl: "https://github.com/styled-components/styled-components" },
-  passport: { docsUrl: "https://www.passportjs.org/concepts/authentication/", githubUrl: "https://github.com/jaredhanson/passport" },
+  eslint: {
+    docsUrl: "https://eslint.org/docs/latest/",
+    githubUrl: "https://github.com/eslint/eslint",
+  },
+  prettier: {
+    docsUrl: "https://prettier.io/docs/",
+    githubUrl: "https://github.com/prettier/prettier",
+  },
+  axios: {
+    docsUrl: "https://axios-http.com/docs/intro",
+    githubUrl: "https://github.com/axios/axios",
+  },
+  ws: {
+    docsUrl: "https://github.com/websockets/ws/blob/master/doc/ws.md",
+    githubUrl: "https://github.com/websockets/ws",
+  },
+  "vanilla-vite": {
+    docsUrl: "https://vite.dev/guide/",
+    githubUrl: "https://github.com/vitejs/vite",
+  },
+  firebase: {
+    docsUrl: "https://firebase.google.com/docs/web/setup",
+    githubUrl: "https://github.com/firebase/firebase-js-sdk",
+  },
+  "openai-sdk": {
+    docsUrl: "https://platform.openai.com/docs/libraries/javascript",
+    githubUrl: "https://github.com/openai/openai-node",
+  },
+  "anthropic-sdk": {
+    docsUrl: "https://docs.anthropic.com/en/api/client-sdks",
+    githubUrl: "https://github.com/anthropics/anthropic-sdk-typescript",
+  },
+  "graphql-codegen": {
+    docsUrl: "https://the-guild.dev/graphql/codegen/docs/getting-started",
+    githubUrl: "https://github.com/dotansimha/graphql-code-generator",
+  },
+  "openapi-typescript": {
+    docsUrl: "https://openapi-ts.dev/",
+    githubUrl: "https://github.com/openapi-ts/openapi-typescript",
+  },
+  "apollo-client": {
+    docsUrl: "https://www.apollographql.com/docs/react/",
+    githubUrl: "https://github.com/apollographql/apollo-client",
+  },
+  ga4: {
+    docsUrl: "https://developers.google.com/analytics/devguides/collection/ga4",
+    githubUrl: "https://github.com/googleanalytics",
+  },
+  paypal: {
+    docsUrl: "https://developer.paypal.com/sdk/js/",
+    githubUrl: "https://github.com/paypal/paypal-js",
+  },
+  electron: {
+    docsUrl: "https://www.electronjs.org/docs/latest/",
+    githubUrl: "https://github.com/electron/electron",
+  },
+  capacitor: {
+    docsUrl: "https://capacitorjs.com/docs",
+    githubUrl: "https://github.com/ionic-team/capacitor",
+  },
+  "styled-components": {
+    docsUrl: "https://styled-components.com/docs",
+    githubUrl: "https://github.com/styled-components/styled-components",
+  },
+  passport: {
+    docsUrl: "https://www.passportjs.org/concepts/authentication/",
+    githubUrl: "https://github.com/jaredhanson/passport",
+  },
   mocha: { docsUrl: "https://mochajs.org/", githubUrl: "https://github.com/mochajs/mocha" },
-  contentful: { docsUrl: "https://www.contentful.com/developers/docs/javascript/tutorials/using-js-cda-sdk/", githubUrl: "https://github.com/contentful/contentful.js" },
+  contentful: {
+    docsUrl: "https://www.contentful.com/developers/docs/javascript/tutorials/using-js-cda-sdk/",
+    githubUrl: "https://github.com/contentful/contentful.js",
+  },
   trpc: { docsUrl: "https://trpc.io/docs", githubUrl: "https://github.com/trpc/trpc" },
   orpc: { docsUrl: "https://orpc.unnoq.com/", githubUrl: "https://github.com/unnoq/orpc" },
   "ts-rest": {
@@ -172,7 +226,10 @@ const BASE_LINKS: LinkMap = {
   },
   xunit: { docsUrl: "https://xunit.net/", githubUrl: "https://github.com/xunit/xunit" },
   nunit: { docsUrl: "https://docs.nunit.org/", githubUrl: "https://github.com/nunit/nunit" },
-  moq: { docsUrl: "https://github.com/devlooped/moq", githubUrl: "https://github.com/devlooped/moq" },
+  moq: {
+    docsUrl: "https://github.com/devlooped/moq",
+    githubUrl: "https://github.com/devlooped/moq",
+  },
   "testcontainers-dotnet": {
     docsUrl: "https://dotnet.testcontainers.org/",
     githubUrl: "https://github.com/testcontainers/testcontainers-dotnet",
@@ -647,7 +704,8 @@ const BASE_LINKS: LinkMap = {
     githubUrl: "https://github.com/grafana/grafana",
   },
   datadog: {
-    docsUrl: "https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/nodejs/",
+    docsUrl:
+      "https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/nodejs/",
     githubUrl: "https://github.com/DataDog/dd-trace-js",
   },
   axiom: {
@@ -1040,7 +1098,10 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://supabase.com/docs/guides/storage",
     githubUrl: "https://github.com/supabase/storage",
   },
-  intlayer: { docsUrl: "https://intlayer.org", githubUrl: "https://github.com/aymericzip/intlayer" },
+  intlayer: {
+    docsUrl: "https://intlayer.org",
+    githubUrl: "https://github.com/aymericzip/intlayer",
+  },
   "framer-motion": {
     docsUrl: "https://motion.dev/docs",
     githubUrl: "https://github.com/motiondivision/motion",
@@ -1104,7 +1165,10 @@ const BASE_LINKS: LinkMap = {
     docsUrl: "https://rocket.rs/guide/",
     githubUrl: "https://github.com/rwf2/Rocket",
   },
-  poem: { docsUrl: "https://docs.rs/poem/latest/poem/", githubUrl: "https://github.com/poem-web/poem" },
+  poem: {
+    docsUrl: "https://docs.rs/poem/latest/poem/",
+    githubUrl: "https://github.com/poem-web/poem",
+  },
   loco: { docsUrl: "https://loco.rs/docs/", githubUrl: "https://github.com/loco-rs/loco" },
   warp: { docsUrl: "https://docs.rs/warp/latest/warp/", githubUrl: "https://github.com/seanmonstar/warp" },
   salvo: { docsUrl: "https://salvo.rs/guide/", githubUrl: "https://github.com/salvo-rs/salvo" },
@@ -1423,8 +1487,7 @@ const BASE_LINKS: LinkMap = {
     githubUrl: "https://github.com/FluentValidation/FluentValidation",
   },
   "data-annotations": {
-    docsUrl:
-      "https://learn.microsoft.com/dotnet/api/system.componentmodel.dataannotations",
+    docsUrl: "https://learn.microsoft.com/dotnet/api/system.componentmodel.dataannotations",
   },
   jooq: {
     docsUrl: "https://www.jooq.org/doc/latest/manual/",
@@ -1661,6 +1724,14 @@ const CATEGORY_LINKS: LinkMap = {
     docsUrl: "https://hexdocs.pm/ecto/",
     githubUrl: "https://github.com/elixir-ecto/ecto",
   },
+  "elixirOrm:myxql": {
+    docsUrl: "https://hexdocs.pm/myxql/",
+    githubUrl: "https://github.com/elixir-ecto/myxql",
+  },
+  "elixirOrm:ecto_sqlite3": {
+    docsUrl: "https://hexdocs.pm/ecto_sqlite3/",
+    githubUrl: "https://github.com/elixir-sqlite/ecto_sqlite3",
+  },
   "elixirAuth:phx-gen-auth": { docsUrl: "https://hexdocs.pm/phoenix/mix_phx_gen_auth.html" },
   "elixirAuth:ueberauth": {
     docsUrl: "https://hexdocs.pm/ueberauth/",
@@ -1670,10 +1741,18 @@ const CATEGORY_LINKS: LinkMap = {
     docsUrl: "https://hexdocs.pm/guardian/",
     githubUrl: "https://github.com/ueberauth/guardian",
   },
+  "elixirAuth:pow": {
+    docsUrl: "https://hexdocs.pm/pow/",
+    githubUrl: "https://github.com/pow-auth/pow",
+  },
   "elixirApi:rest": { docsUrl: "https://hexdocs.pm/phoenix/controllers.html" },
   "elixirApi:absinthe": {
     docsUrl: "https://hexdocs.pm/absinthe/",
     githubUrl: "https://github.com/absinthe-graphql/absinthe",
+  },
+  "elixirApi:open_api_spex": {
+    docsUrl: "https://hexdocs.pm/open_api_spex/",
+    githubUrl: "https://github.com/open-api-spex/open_api_spex",
   },
   "elixirRealtime:channels": { docsUrl: "https://hexdocs.pm/phoenix/channels.html" },
   "elixirRealtime:presence": { docsUrl: "https://hexdocs.pm/phoenix/Phoenix.Presence.html" },
@@ -1709,6 +1788,10 @@ const CATEGORY_LINKS: LinkMap = {
     docsUrl: "https://hexdocs.pm/finch/",
     githubUrl: "https://github.com/sneako/finch",
   },
+  "elixirHttp:tesla": {
+    docsUrl: "https://hexdocs.pm/tesla/",
+    githubUrl: "https://github.com/elixir-tesla/tesla",
+  },
   "elixirJson:jason": {
     docsUrl: "https://hexdocs.pm/jason/",
     githubUrl: "https://github.com/michalmuskala/jason",
@@ -1716,6 +1799,10 @@ const CATEGORY_LINKS: LinkMap = {
   "elixirEmail:swoosh": {
     docsUrl: "https://hexdocs.pm/swoosh/",
     githubUrl: "https://github.com/swoosh/swoosh",
+  },
+  "elixirEmail:bamboo": {
+    docsUrl: "https://hexdocs.pm/bamboo/",
+    githubUrl: "https://github.com/thoughtbot/bamboo",
   },
   "elixirCaching:cachex": {
     docsUrl: "https://hexdocs.pm/cachex/",
@@ -1725,6 +1812,10 @@ const CATEGORY_LINKS: LinkMap = {
     docsUrl: "https://hexdocs.pm/nebulex/",
     githubUrl: "https://github.com/cabol/nebulex",
   },
+  "elixirCaching:redix": {
+    docsUrl: "https://hexdocs.pm/redix/",
+    githubUrl: "https://github.com/whatyouhide/redix",
+  },
   "elixirObservability:telemetry": {
     docsUrl: "https://hexdocs.pm/telemetry/",
     githubUrl: "https://github.com/beam-telemetry/telemetry",
@@ -1732,6 +1823,10 @@ const CATEGORY_LINKS: LinkMap = {
   "elixirObservability:prom_ex": {
     docsUrl: "https://hexdocs.pm/prom_ex/",
     githubUrl: "https://github.com/akoutmos/prom_ex",
+  },
+  "elixirObservability:sentry": {
+    docsUrl: "https://hexdocs.pm/sentry/",
+    githubUrl: "https://github.com/getsentry/sentry-elixir",
   },
   "elixirTesting:ex_unit": { docsUrl: "https://hexdocs.pm/ex_unit/" },
   "elixirTesting:mox": {
@@ -1746,6 +1841,14 @@ const CATEGORY_LINKS: LinkMap = {
     docsUrl: "https://hexdocs.pm/wallaby/",
     githubUrl: "https://github.com/elixir-wallaby/wallaby",
   },
+  "elixirTesting:stream_data": {
+    docsUrl: "https://hexdocs.pm/stream_data/",
+    githubUrl: "https://github.com/whatyouhide/stream_data",
+  },
+  "elixirTesting:ex_machina": {
+    docsUrl: "https://hexdocs.pm/ex_machina/",
+    githubUrl: "https://github.com/thoughtbot/ex_machina",
+  },
   "elixirQuality:credo": {
     docsUrl: "https://hexdocs.pm/credo/",
     githubUrl: "https://github.com/rrrene/credo",
@@ -1757,6 +1860,50 @@ const CATEGORY_LINKS: LinkMap = {
   "elixirQuality:sobelow": {
     docsUrl: "https://hexdocs.pm/sobelow/",
     githubUrl: "https://github.com/nccgroup/sobelow",
+  },
+  "elixirQuality:excoveralls": {
+    docsUrl: "https://hexdocs.pm/excoveralls/",
+    githubUrl: "https://github.com/parroty/excoveralls",
+  },
+  "elixirQuality:mix_audit": {
+    docsUrl: "https://hexdocs.pm/mix_audit/",
+    githubUrl: "https://github.com/mirego/mix_audit",
+  },
+  "elixirI18n:gettext": {
+    docsUrl: "https://hexdocs.pm/gettext/",
+    githubUrl: "https://github.com/elixir-gettext/gettext",
+  },
+  "elixirHttpServer:bandit": {
+    docsUrl: "https://hexdocs.pm/bandit/",
+    githubUrl: "https://github.com/mtrudel/bandit",
+  },
+  "elixirHttpServer:cowboy": {
+    docsUrl: "https://hexdocs.pm/plug_cowboy/",
+    githubUrl: "https://github.com/elixir-plug/plug_cowboy",
+  },
+  "elixirApplicationFramework:ash": {
+    docsUrl: "https://hexdocs.pm/ash/",
+    githubUrl: "https://github.com/ash-project/ash",
+  },
+  "elixirDocumentation:ex_doc": {
+    docsUrl: "https://hexdocs.pm/ex_doc/",
+    githubUrl: "https://github.com/elixir-lang/ex_doc",
+  },
+  "elixirClustering:libcluster": {
+    docsUrl: "https://hexdocs.pm/libcluster/",
+    githubUrl: "https://github.com/bitwalker/libcluster",
+  },
+  "elixirLibraries:ex_aws": {
+    docsUrl: "https://hexdocs.pm/ex_aws/",
+    githubUrl: "https://github.com/ex-aws/ex_aws",
+  },
+  "elixirLibraries:floki": {
+    docsUrl: "https://hexdocs.pm/floki/",
+    githubUrl: "https://github.com/philss/floki",
+  },
+  "elixirLibraries:rustler": {
+    docsUrl: "https://hexdocs.pm/rustler/",
+    githubUrl: "https://github.com/rusterlium/rustler",
   },
   "elixirDeploy:gigalixir": { docsUrl: "https://gigalixir.readthedocs.io/" },
   "elixirDeploy:mix-release": { docsUrl: "https://hexdocs.pm/mix/Mix.Tasks.Release.html" },

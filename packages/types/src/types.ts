@@ -135,6 +135,11 @@ import type {
   ElixirObservabilitySchema,
   ElixirTestingSchema,
   ElixirQualitySchema,
+  ElixirI18nSchema,
+  ElixirHttpServerSchema,
+  ElixirApplicationFrameworkSchema,
+  ElixirDocumentationSchema,
+  ElixirClusteringSchema,
   ElixirDeploySchema,
   AiDocsSchema,
   ShadcnBaseSchema,
@@ -278,6 +283,11 @@ export type ElixirCaching = z.infer<typeof ElixirCachingSchema>;
 export type ElixirObservability = z.infer<typeof ElixirObservabilitySchema>;
 export type ElixirTesting = z.infer<typeof ElixirTestingSchema>;
 export type ElixirQuality = z.infer<typeof ElixirQualitySchema>;
+export type ElixirI18n = z.infer<typeof ElixirI18nSchema>;
+export type ElixirHttpServer = z.infer<typeof ElixirHttpServerSchema>;
+export type ElixirApplicationFramework = z.infer<typeof ElixirApplicationFrameworkSchema>;
+export type ElixirDocumentation = z.infer<typeof ElixirDocumentationSchema>;
+export type ElixirClustering = z.infer<typeof ElixirClusteringSchema>;
 export type ElixirDeploy = z.infer<typeof ElixirDeploySchema>;
 export type AiDocs = z.infer<typeof AiDocsSchema>;
 export type ShadcnBase = z.infer<typeof ShadcnBaseSchema>;

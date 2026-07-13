@@ -129,6 +129,11 @@ export const TEMPLATE_FINGERPRINT_KEYS = [
   "elixirObservability",
   "elixirTesting",
   "elixirQuality",
+  "elixirI18n",
+  "elixirHttpServer",
+  "elixirApplicationFramework",
+  "elixirDocumentation",
+  "elixirClustering",
   "elixirDeploy",
 ] as const;
 

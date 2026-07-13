@@ -347,7 +347,9 @@ describe("compatibility issue helpers", () => {
     expect(
       getDisabledReason({ ...baseStack, webFrontend: ["tanstack-router"] }, "i18n", "intlayer"),
     ).toBeNull();
-    expect(getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "intlayer")).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "intlayer"),
+    ).toBeNull();
     expect(
       getDisabledReason({ ...baseStack, webFrontend: ["react-vite"] }, "i18n", "intlayer"),
     ).toBeNull();
@@ -1027,6 +1029,15 @@ describe("compatibility issue helpers", () => {
     expect(getDisabledReason(plainElixir, "elixirJobs", "oban")).toBe(
       "Oban requires Ecto SQL with PostgreSQL in the current Phoenix scaffold",
     );
+    expect(getDisabledReason(plainElixir, "elixirApi", "open_api_spex")).toBe(
+      "Elixir API scaffolds require Phoenix",
+    );
+    expect(getDisabledReason(plainElixir, "elixirI18n", "gettext")).toBe(
+      "Elixir Internationalization requires Phoenix",
+    );
+    expect(getDisabledReason(plainElixir, "elixirHttpServer", "bandit")).toBe(
+      "HTTP server adapters require Phoenix",
+    );
 
     expect(getDisabledReason(phoenixBase, "elixirAuth", "phx-gen-auth")).toBe(
       "phx.gen.auth requires Ecto SQL with PostgreSQL in the current Phoenix scaffold",
@@ -1036,6 +1047,15 @@ describe("compatibility issue helpers", () => {
     );
     expect(getDisabledReason(phoenixBase, "elixirJobs", "oban")).toBe(
       "Oban requires Ecto SQL with PostgreSQL in the current Phoenix scaffold",
+    );
+    expect(getDisabledReason(phoenixBase, "elixirAuth", "pow")).toBe(
+      "Pow requires Phoenix and an Ecto SQL repository",
+    );
+    expect(getDisabledReason(phoenixBase, "elixirTesting", "ex_machina")).toBe(
+      "ExMachina requires an Ecto SQL repository",
+    );
+    expect(getDisabledReason(phoenixBase, "elixirHttpServer", "none")).toBe(
+      "Phoenix requires Bandit or Cowboy",
     );
     expect(getDisabledReason(phoenixBase, "elixirRealtime", "live-view-streams")).toBe(
       "LiveView Streams require Phoenix LiveView",

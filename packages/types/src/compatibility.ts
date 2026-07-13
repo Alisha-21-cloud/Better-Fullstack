@@ -280,6 +280,11 @@ export type CompatibilityInput = {
   elixirObservability: string;
   elixirTesting: string;
   elixirQuality: string;
+  elixirI18n: string;
+  elixirHttpServer: string;
+  elixirApplicationFramework: string;
+  elixirDocumentation: string;
+  elixirClustering: string;
   elixirDeploy: string;
   elixirLibraries: string[];
 };
@@ -3095,6 +3100,11 @@ export const getDisabledReason = (
     "elixirObservability",
     "elixirTesting",
     "elixirQuality",
+    "elixirI18n",
+    "elixirHttpServer",
+    "elixirApplicationFramework",
+    "elixirDocumentation",
+    "elixirClustering",
     "elixirDeploy",
   ]);
 
@@ -3111,6 +3121,63 @@ export const getDisabledReason = (
     currentStack.elixirWebFramework === "none"
   ) {
     return "Wallaby browser tests require Phoenix";
+  }
+
+  if (
+    category === "elixirTesting" &&
+    optionId === "ex_machina" &&
+    currentStack.ecosystem === "elixir" &&
+    !["ecto-sql", "myxql", "ecto_sqlite3"].includes(currentStack.elixirOrm)
+  ) {
+    return "ExMachina requires an Ecto SQL repository";
+  }
+
+  if (
+    category === "elixirAuth" &&
+    optionId === "pow" &&
+    currentStack.ecosystem === "elixir" &&
+    (currentStack.elixirWebFramework === "none" ||
+      !["ecto-sql", "myxql", "ecto_sqlite3"].includes(currentStack.elixirOrm))
+  ) {
+    return "Pow requires Phoenix and an Ecto SQL repository";
+  }
+
+  if (
+    ((category === "elixirApi" && optionId === "open_api_spex") ||
+      (category === "elixirI18n" && optionId === "gettext")) &&
+    currentStack.ecosystem === "elixir" &&
+    currentStack.elixirWebFramework === "none"
+  ) {
+    return `${getCategoryDisplayName(category)} requires Phoenix`;
+  }
+
+  if (
+    category === "elixirHttpServer" &&
+    currentStack.ecosystem === "elixir" &&
+    ((optionId === "none" && currentStack.elixirWebFramework !== "none") ||
+      (optionId !== "none" && currentStack.elixirWebFramework === "none"))
+  ) {
+    return currentStack.elixirWebFramework === "none"
+      ? "HTTP server adapters require Phoenix"
+      : "Phoenix requires Bandit or Cowboy";
+  }
+
+  if (
+    category === "elixirJobs" &&
+    optionId === "oban" &&
+    currentStack.ecosystem === "elixir" &&
+    currentStack.elixirOrm !== "ecto-sql"
+  ) {
+    return "Oban requires the PostgreSQL Ecto SQL option";
+  }
+
+  if (
+    category === "elixirOrm" &&
+    ["myxql", "ecto_sqlite3"].includes(optionId) &&
+    currentStack.ecosystem === "elixir" &&
+    currentStack.elixirJobs === "oban"
+  ) {
+    return "Oban requires PostgreSQL-backed Ecto SQL";
   }
 
   if (
@@ -3209,6 +3276,11 @@ const ELIXIR_GRAPH_DISABLED_REASON_ROLES: Partial<Record<CompatibilityCategory, 
   elixirObservability: "observability",
   elixirTesting: "testing",
   elixirQuality: "codeQuality",
+  elixirI18n: "i18n",
+  elixirHttpServer: "runtime",
+  elixirApplicationFramework: "libraries",
+  elixirDocumentation: "documentation",
+  elixirClustering: "config",
   elixirDeploy: "deploy",
 };
 
@@ -4036,8 +4108,7 @@ export function allowedApisForFrontends(
   const includesAngular = frontends.includes("angular");
   const includesRedwood = frontends.includes("redwood");
   const includesFresh = frontends.includes("fresh");
-  const includesStandaloneVite =
-    frontends.includes("vanilla-vite") || frontends.includes("vue");
+  const includesStandaloneVite = frontends.includes("vanilla-vite") || frontends.includes("vue");
   const includesNative = frontends.some((frontend) =>
     ["native-bare", "native-uniwind", "native-unistyles"].includes(frontend),
   );
@@ -4100,8 +4171,7 @@ export function getApiFrontendCompatibilityIssue(
   const includesRedwood = frontends.includes("redwood");
   const includesFresh = frontends.includes("fresh");
   const includesSolidStart = frontends.includes("solid-start");
-  const includesStandaloneVite =
-    frontends.includes("vanilla-vite") || frontends.includes("vue");
+  const includesStandaloneVite = frontends.includes("vanilla-vite") || frontends.includes("vue");
   const isReactOnlyApi =
     api === "trpc" || api === "ts-rest" || api === "garph" || api === "apollo-server";
 
@@ -4357,7 +4427,14 @@ export function getCompatibleCSSFrameworks(
 ): CSSFramework[] {
   const frameworks =
     !uiLibrary || uiLibrary === "none"
-      ? (["tailwind", "scss", "less", "postcss-only", "styled-components", "none"] as CSSFramework[])
+      ? ([
+          "tailwind",
+          "scss",
+          "less",
+          "postcss-only",
+          "styled-components",
+          "none",
+        ] as CSSFramework[])
       : ([...UI_LIBRARY_COMPATIBILITY[uiLibrary].cssFrameworks] as CSSFramework[]);
 
   if (frontends.length === 0) return frameworks;
@@ -4454,6 +4531,11 @@ export function evaluateCompatibility(input: CompatibilityInput): CompatibilityE
     ["elixirObservability", input.elixirObservability],
     ["elixirTesting", input.elixirTesting],
     ["elixirQuality", input.elixirQuality],
+    ["elixirI18n", input.elixirI18n],
+    ["elixirHttpServer", input.elixirHttpServer],
+    ["elixirApplicationFramework", input.elixirApplicationFramework],
+    ["elixirDocumentation", input.elixirDocumentation],
+    ["elixirClustering", input.elixirClustering],
     ["elixirDeploy", input.elixirDeploy],
   ];
 

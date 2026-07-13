@@ -28,6 +28,30 @@ if config_env() == :prod do
       ssl: System.get_env("ECTO_SSL") == "true"
   end
 {{/if}}
+{{#if (eq elixirOrm "myxql")}}
+  database_url = System.get_env("DATABASE_URL")
+
+  if database_url do
+    config :{{elixirAppName}}, {{elixirModuleName}}.Repo,
+      url: database_url,
+      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+  end
+{{/if}}
+{{#if (eq elixirOrm "ecto_sqlite3")}}
+  database_path =
+    System.get_env("DATABASE_PATH") ||
+      Path.join(System.get_env("RELEASE_ROOT") || File.cwd!(), "data/{{elixirAppName}}.db")
+
+  File.mkdir_p!(Path.dirname(database_path))
+
+  config :{{elixirAppName}}, {{elixirModuleName}}.Repo,
+    database: database_path,
+    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "5")
+{{/if}}
+
+{{#if (eq elixirObservability "sentry")}}
+  config :sentry, dsn: System.get_env("SENTRY_DSN")
+{{/if}}
 
 {{#if (ne elixirWebFramework "none")}}
   secret_key_base =

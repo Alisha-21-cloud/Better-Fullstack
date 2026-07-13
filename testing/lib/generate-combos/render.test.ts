@@ -49,13 +49,18 @@ describe("smoke combo command rendering", () => {
       elixirObservability: "telemetry",
       elixirTesting: "ex_unit",
       elixirQuality: "credo",
+      elixirI18n: "gettext",
+      elixirHttpServer: "bandit",
+      elixirApplicationFramework: "ash",
+      elixirDocumentation: "ex_doc",
+      elixirClustering: "libcluster",
       elixirDeploy: "none",
       git: false,
       install: false,
     };
 
     expect(buildCommand("elixir-smoke", config)).toContain(
-      "--elixir-web-framework phoenix --elixir-orm ecto-sql --elixir-auth none --elixir-api rest --elixir-realtime channels --elixir-jobs none --elixir-validation ecto-changesets --elixir-http req --elixir-json jason --elixir-email none --elixir-caching none --elixir-observability telemetry --elixir-testing ex_unit --elixir-quality credo --elixir-deploy none",
+      "--elixir-web-framework phoenix --elixir-orm ecto-sql --elixir-auth none --elixir-api rest --elixir-realtime channels --elixir-jobs none --elixir-validation ecto-changesets --elixir-http req --elixir-json jason --elixir-email none --elixir-caching none --elixir-observability telemetry --elixir-testing ex_unit --elixir-quality credo --elixir-i18n gettext --elixir-http-server bandit --elixir-application-framework ash --elixir-documentation ex_doc --elixir-clustering libcluster --elixir-deploy none",
     );
   });
 });

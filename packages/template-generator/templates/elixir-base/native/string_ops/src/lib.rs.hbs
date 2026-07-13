@@ -1,0 +1,8 @@
+{{#if (includes elixirLibraries "rustler")}}
+#[rustler::nif]
+fn reverse(value: String) -> String {
+    value.chars().rev().collect()
+}
+
+rustler::init!("Elixir.{{elixirModuleName}}.Native.StringOps");
+{{/if}}

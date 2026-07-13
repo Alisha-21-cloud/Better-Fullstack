@@ -228,6 +228,11 @@ const ELIXIR_BASE_CONFIG: Partial<ProjectConfig> = {
   elixirObservability: "none",
   elixirTesting: "none",
   elixirQuality: "none",
+  elixirI18n: "none",
+  elixirHttpServer: "cowboy",
+  elixirApplicationFramework: "none",
+  elixirDocumentation: "none",
+  elixirClustering: "none",
   elixirDeploy: "none",
   elixirLibraries: [],
 };

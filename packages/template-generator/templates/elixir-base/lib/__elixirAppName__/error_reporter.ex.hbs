@@ -1,0 +1,9 @@
+{{#if (eq elixirObservability "sentry")}}
+defmodule {{elixirModuleName}}.ErrorReporter do
+  @moduledoc "Explicit Sentry reporting boundary for rescued exceptions."
+
+  def capture(exception, stacktrace \\ []) do
+    Sentry.capture_exception(exception, stacktrace: stacktrace)
+  end
+end
+{{/if}}

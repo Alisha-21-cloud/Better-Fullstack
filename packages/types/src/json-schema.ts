@@ -33,6 +33,11 @@ import {
   ElixirObservabilitySchema,
   ElixirOrmSchema,
   ElixirQualitySchema,
+  ElixirI18nSchema,
+  ElixirHttpServerSchema,
+  ElixirApplicationFrameworkSchema,
+  ElixirDocumentationSchema,
+  ElixirClusteringSchema,
   ElixirRealtimeSchema,
   ElixirTestingSchema,
   ElixirValidationSchema,
@@ -210,6 +215,26 @@ export function getElixirQualityJsonSchema() {
   return z.toJSONSchema(ElixirQualitySchema);
 }
 
+export function getElixirI18nJsonSchema() {
+  return z.toJSONSchema(ElixirI18nSchema);
+}
+
+export function getElixirHttpServerJsonSchema() {
+  return z.toJSONSchema(ElixirHttpServerSchema);
+}
+
+export function getElixirApplicationFrameworkJsonSchema() {
+  return z.toJSONSchema(ElixirApplicationFrameworkSchema);
+}
+
+export function getElixirDocumentationJsonSchema() {
+  return z.toJSONSchema(ElixirDocumentationSchema);
+}
+
+export function getElixirClusteringJsonSchema() {
+  return z.toJSONSchema(ElixirClusteringSchema);
+}
+
 export function getElixirDeployJsonSchema() {
   return z.toJSONSchema(ElixirDeploySchema);
 }
@@ -253,6 +278,11 @@ export function getAllJsonSchemas() {
     elixirObservability: getElixirObservabilityJsonSchema(),
     elixirTesting: getElixirTestingJsonSchema(),
     elixirQuality: getElixirQualityJsonSchema(),
+    elixirI18n: getElixirI18nJsonSchema(),
+    elixirHttpServer: getElixirHttpServerJsonSchema(),
+    elixirApplicationFramework: getElixirApplicationFrameworkJsonSchema(),
+    elixirDocumentation: getElixirDocumentationJsonSchema(),
+    elixirClustering: getElixirClusteringJsonSchema(),
     elixirDeploy: getElixirDeployJsonSchema(),
     createInput: getCreateInputJsonSchema(),
     projectConfig: getProjectConfigJsonSchema(),

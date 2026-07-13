@@ -760,19 +760,19 @@ export const ElixirWebFrameworkSchema = z
   .describe("Elixir web framework");
 
 export const ElixirOrmSchema = z
-  .enum(["ecto", "ecto-sql", "none"])
+  .enum(["ecto", "ecto-sql", "myxql", "ecto_sqlite3", "none"])
   .describe("Elixir database layer");
 
 export const ElixirAuthSchema = z
-  .enum(["phx-gen-auth", "ueberauth", "guardian", "none"])
+  .enum(["phx-gen-auth", "ueberauth", "guardian", "pow", "none"])
   .describe("Elixir authentication library");
 
 export const ElixirApiSchema = z
-  .enum(["rest", "absinthe", "grpc", "none"])
+  .enum(["rest", "absinthe", "grpc", "open_api_spex", "none"])
   .describe("Elixir API layer");
 
 export const ElixirLibrariesSchema = z
-  .enum(["broadway", "nx", "none"])
+  .enum(["broadway", "nx", "ex_aws", "floki", "rustler", "none"])
   .describe("Elixir application libraries");
 
 export const ElixirRealtimeSchema = z
@@ -787,27 +787,49 @@ export const ElixirValidationSchema = z
   .enum(["ecto-changesets", "nimble-options", "none"])
   .describe("Elixir validation and data contracts");
 
-export const ElixirHttpSchema = z.enum(["req", "finch", "none"]).describe("Elixir HTTP client");
+export const ElixirHttpSchema = z
+  .enum(["req", "finch", "tesla", "none"])
+  .describe("Elixir HTTP client");
 
 export const ElixirJsonSchema = z.enum(["jason", "none"]).describe("Elixir JSON library");
 
-export const ElixirEmailSchema = z.enum(["swoosh", "none"]).describe("Elixir email library");
+export const ElixirEmailSchema = z
+  .enum(["swoosh", "bamboo", "none"])
+  .describe("Elixir email library");
 
 export const ElixirCachingSchema = z
-  .enum(["cachex", "nebulex", "none"])
+  .enum(["cachex", "nebulex", "redix", "none"])
   .describe("Elixir caching library");
 
 export const ElixirObservabilitySchema = z
-  .enum(["telemetry", "opentelemetry", "prom_ex", "none"])
+  .enum(["telemetry", "opentelemetry", "prom_ex", "sentry", "none"])
   .describe("Elixir observability library");
 
 export const ElixirTestingSchema = z
-  .enum(["ex_unit", "mox", "bypass", "wallaby", "none"])
+  .enum(["ex_unit", "mox", "bypass", "wallaby", "stream_data", "ex_machina", "none"])
   .describe("Elixir testing library");
 
 export const ElixirQualitySchema = z
-  .enum(["credo", "dialyxir", "sobelow", "none"])
+  .enum(["credo", "dialyxir", "sobelow", "excoveralls", "mix_audit", "none"])
   .describe("Elixir code quality tool");
+
+export const ElixirI18nSchema = z.enum(["gettext", "none"]).describe("Elixir localization");
+
+export const ElixirHttpServerSchema = z
+  .enum(["bandit", "cowboy", "none"])
+  .describe("Elixir HTTP server");
+
+export const ElixirApplicationFrameworkSchema = z
+  .enum(["ash", "none"])
+  .describe("Elixir application framework");
+
+export const ElixirDocumentationSchema = z
+  .enum(["ex_doc", "none"])
+  .describe("Elixir documentation tooling");
+
+export const ElixirClusteringSchema = z
+  .enum(["libcluster", "none"])
+  .describe("Elixir clustering library");
 
 export const ElixirDeploySchema = z
   .enum(["docker", "fly", "gigalixir", "mix-release", "none"])
@@ -1072,6 +1094,11 @@ export const CreateInputSchema = z.object({
   elixirObservability: ElixirObservabilitySchema.optional(),
   elixirTesting: ElixirTestingSchema.optional(),
   elixirQuality: ElixirQualitySchema.optional(),
+  elixirI18n: ElixirI18nSchema.optional(),
+  elixirHttpServer: ElixirHttpServerSchema.optional(),
+  elixirApplicationFramework: ElixirApplicationFrameworkSchema.optional(),
+  elixirDocumentation: ElixirDocumentationSchema.optional(),
+  elixirClustering: ElixirClusteringSchema.optional(),
   elixirDeploy: ElixirDeploySchema.optional(),
   elixirLibraries: z.array(ElixirLibrariesSchema).optional(),
   // AI documentation files
@@ -1242,6 +1269,11 @@ export const ProjectConfigSchema = z.object({
   elixirObservability: ElixirObservabilitySchema,
   elixirTesting: ElixirTestingSchema,
   elixirQuality: ElixirQualitySchema,
+  elixirI18n: ElixirI18nSchema,
+  elixirHttpServer: ElixirHttpServerSchema,
+  elixirApplicationFramework: ElixirApplicationFrameworkSchema,
+  elixirDocumentation: ElixirDocumentationSchema,
+  elixirClustering: ElixirClusteringSchema,
   elixirDeploy: ElixirDeploySchema,
   elixirLibraries: z.array(ElixirLibrariesSchema),
   // AI documentation files
@@ -1399,6 +1431,11 @@ export const BetterTStackConfigSchema = z.object({
   elixirObservability: ElixirObservabilitySchema,
   elixirTesting: ElixirTestingSchema,
   elixirQuality: ElixirQualitySchema,
+  elixirI18n: ElixirI18nSchema,
+  elixirHttpServer: ElixirHttpServerSchema,
+  elixirApplicationFramework: ElixirApplicationFrameworkSchema,
+  elixirDocumentation: ElixirDocumentationSchema,
+  elixirClustering: ElixirClusteringSchema,
   elixirDeploy: ElixirDeploySchema,
   elixirLibraries: z.array(ElixirLibrariesSchema),
   // AI documentation files
@@ -1565,6 +1602,11 @@ export const ELIXIR_CACHING_VALUES = ElixirCachingSchema.options;
 export const ELIXIR_OBSERVABILITY_VALUES = ElixirObservabilitySchema.options;
 export const ELIXIR_TESTING_VALUES = ElixirTestingSchema.options;
 export const ELIXIR_QUALITY_VALUES = ElixirQualitySchema.options;
+export const ELIXIR_I18N_VALUES = ElixirI18nSchema.options;
+export const ELIXIR_HTTP_SERVER_VALUES = ElixirHttpServerSchema.options;
+export const ELIXIR_APPLICATION_FRAMEWORK_VALUES = ElixirApplicationFrameworkSchema.options;
+export const ELIXIR_DOCUMENTATION_VALUES = ElixirDocumentationSchema.options;
+export const ELIXIR_CLUSTERING_VALUES = ElixirClusteringSchema.options;
 export const ELIXIR_DEPLOY_VALUES = ElixirDeploySchema.options;
 export const AI_DOCS_VALUES = AiDocsSchema.options;
 export const SHADCN_BASE_VALUES = ShadcnBaseSchema.options;

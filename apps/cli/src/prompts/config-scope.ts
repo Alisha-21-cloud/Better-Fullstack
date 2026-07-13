@@ -8,22 +8,26 @@ import { isCancel, isGoBack, navigableMultiselect, navigableSelect } from "./nav
 
 export type ConfigScope = "core" | "full" | "custom";
 
-export type ConfigPromptKey = Exclude<
-  keyof ProjectConfig,
-  | "projectName"
-  | "projectDir"
-  | "relativePath"
-  | "versionChannel"
-  | "stackParts"
-  | "template"
-  | "shadcnBase"
-  | "shadcnStyle"
-  | "shadcnIconLibrary"
-  | "shadcnColorTheme"
-  | "shadcnBaseColor"
-  | "shadcnFont"
-  | "shadcnRadius"
-> | "astroIntegration" | "shadcnOptions" | "appPlatforms";
+export type ConfigPromptKey =
+  | Exclude<
+      keyof ProjectConfig,
+      | "projectName"
+      | "projectDir"
+      | "relativePath"
+      | "versionChannel"
+      | "stackParts"
+      | "template"
+      | "shadcnBase"
+      | "shadcnStyle"
+      | "shadcnIconLibrary"
+      | "shadcnColorTheme"
+      | "shadcnBaseColor"
+      | "shadcnFont"
+      | "shadcnRadius"
+    >
+  | "astroIntegration"
+  | "shadcnOptions"
+  | "appPlatforms";
 
 export type ConfigSection = {
   id: string;
@@ -129,7 +133,17 @@ export const CONFIG_SCOPE_REGISTRY = {
     sections: typescriptSections,
   },
   "react-native": {
-    core: ["frontend", "mobileNavigation", "backend", "runtime", "database", "orm", "api", "auth", "dbSetup"],
+    core: [
+      "frontend",
+      "mobileNavigation",
+      "backend",
+      "runtime",
+      "database",
+      "orm",
+      "api",
+      "auth",
+      "dbSetup",
+    ],
     sections: [
       {
         id: "mobile-experience",
@@ -154,7 +168,15 @@ export const CONFIG_SCOPE_REGISTRY = {
     ],
   },
   rust: {
-    core: ["rustWebFramework", "rustFrontend", "database", "dbSetup", "rustOrm", "rustApi", "rustAuth"],
+    core: [
+      "rustWebFramework",
+      "rustFrontend",
+      "database",
+      "dbSetup",
+      "rustOrm",
+      "rustApi",
+      "rustAuth",
+    ],
     sections: [
       sharedServiceSection,
       {
@@ -227,7 +249,16 @@ export const CONFIG_SCOPE_REGISTRY = {
     ],
   },
   java: {
-    core: ["javaWebFramework", "javaLanguage", "javaBuildTool", "database", "dbSetup", "javaOrm", "javaAuth", "javaApi"],
+    core: [
+      "javaWebFramework",
+      "javaLanguage",
+      "javaBuildTool",
+      "database",
+      "dbSetup",
+      "javaOrm",
+      "javaAuth",
+      "javaApi",
+    ],
     sections: [
       sharedServiceSection,
       {
@@ -284,12 +315,22 @@ export const CONFIG_SCOPE_REGISTRY = {
       {
         id: "quality",
         label: "Testing, Quality & Observability",
-        promptKeys: ["elixirTesting", "elixirQuality", "elixirObservability"],
+        promptKeys: [
+          "elixirTesting",
+          "elixirQuality",
+          "elixirObservability",
+          "elixirDocumentation",
+        ],
+      },
+      {
+        id: "runtime",
+        label: "Internationalization, Runtime & Clustering",
+        promptKeys: ["elixirI18n", "elixirHttpServer", "elixirClustering"],
       },
       {
         id: "deploy-libraries",
         label: "Deployment & Libraries",
-        promptKeys: ["elixirDeploy", "elixirLibraries"],
+        promptKeys: ["elixirDeploy", "elixirApplicationFramework", "elixirLibraries"],
       },
     ],
   },

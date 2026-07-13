@@ -1,3 +1,8 @@
 defmodule {{elixirModuleName}}.Mailer do
+{{#if (eq elixirEmail "swoosh")}}
   use Swoosh.Mailer, otp_app: :{{elixirAppName}}
+{{/if}}
+{{#if (eq elixirEmail "bamboo")}}
+  use Bamboo.Mailer, otp_app: :{{elixirAppName}}
+{{/if}}
 end

@@ -310,12 +310,7 @@ function appendGraphExtraFlags(flags: string[], config: ProjectConfig) {
         "neutral",
       );
       appendChangedStringFlag(flags, "shadcn-font", config.shadcnFont ?? "inter", "inter");
-      appendChangedStringFlag(
-        flags,
-        "shadcn-radius",
-        config.shadcnRadius ?? "default",
-        "default",
-      );
+      appendChangedStringFlag(flags, "shadcn-radius", config.shadcnRadius ?? "default", "default");
     }
     appendChangedGraphStringFlag(
       flags,
@@ -480,7 +475,15 @@ function appendGraphExtraFlags(flags: string[], config: ProjectConfig) {
       "none",
     );
     appendChangedGraphStringFlag(flags, config, "cms", "typescript", "cms", config.cms, "none");
-    appendChangedGraphStringFlag(flags, config, "search", "typescript", "search", config.search, "none");
+    appendChangedGraphStringFlag(
+      flags,
+      config,
+      "search",
+      "typescript",
+      "search",
+      config.search,
+      "none",
+    );
     appendChangedGraphStringFlag(
       flags,
       config,
@@ -823,6 +826,51 @@ function appendGraphExtraFlags(flags: string[], config: ProjectConfig) {
     appendChangedGraphStringFlag(
       flags,
       config,
+      "i18n",
+      "elixir",
+      "elixir-i18n",
+      config.elixirI18n,
+      "none",
+    );
+    appendChangedGraphStringFlag(
+      flags,
+      config,
+      "runtime",
+      "elixir",
+      "elixir-http-server",
+      config.elixirHttpServer,
+      "cowboy",
+    );
+    appendChangedGraphStringFlag(
+      flags,
+      config,
+      "libraries",
+      "elixir",
+      "elixir-application-framework",
+      config.elixirApplicationFramework,
+      "none",
+    );
+    appendChangedGraphStringFlag(
+      flags,
+      config,
+      "documentation",
+      "elixir",
+      "elixir-documentation",
+      config.elixirDocumentation,
+      "none",
+    );
+    appendChangedGraphStringFlag(
+      flags,
+      config,
+      "config",
+      "elixir",
+      "elixir-clustering",
+      config.elixirClustering,
+      "none",
+    );
+    appendChangedGraphStringFlag(
+      flags,
+      config,
       "deploy",
       "elixir",
       "elixir-deploy",
@@ -1076,6 +1124,11 @@ function getElixirFlags(config: ProjectConfig) {
   flags.push(`--elixir-observability ${config.elixirObservability}`);
   flags.push(`--elixir-testing ${config.elixirTesting}`);
   flags.push(`--elixir-quality ${config.elixirQuality}`);
+  flags.push(`--elixir-i18n ${config.elixirI18n}`);
+  flags.push(`--elixir-http-server ${config.elixirHttpServer}`);
+  flags.push(`--elixir-application-framework ${config.elixirApplicationFramework}`);
+  flags.push(`--elixir-documentation ${config.elixirDocumentation}`);
+  flags.push(`--elixir-clustering ${config.elixirClustering}`);
   flags.push(`--elixir-deploy ${config.elixirDeploy}`);
   flags.push(formatArrayFlag("elixir-libraries", config.elixirLibraries));
 

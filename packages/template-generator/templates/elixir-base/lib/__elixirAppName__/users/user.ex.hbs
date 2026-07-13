@@ -1,0 +1,11 @@
+{{#if (eq elixirAuth "pow")}}
+defmodule {{elixirModuleName}}.Users.User do
+  use Ecto.Schema
+  use Pow.Ecto.Schema
+
+  schema "users" do
+    pow_user_fields()
+    timestamps(type: :utc_datetime)
+  end
+end
+{{/if}}

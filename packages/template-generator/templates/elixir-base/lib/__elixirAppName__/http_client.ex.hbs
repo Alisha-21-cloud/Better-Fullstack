@@ -14,4 +14,11 @@ defmodule {{elixirModuleName}}.HttpClient do
     |> Finch.request!({{elixirModuleName}}.Finch)
   end
 {{/if}}
+{{#if (eq elixirHttp "tesla")}}
+  def get!(url, opts \\ []) do
+    Tesla.client([], Tesla.Adapter.Hackney)
+    |> Tesla.get(url, opts)
+    |> then(fn {:ok, response} -> response end)
+  end
+{{/if}}
 end

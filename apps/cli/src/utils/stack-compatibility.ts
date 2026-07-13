@@ -215,6 +215,11 @@ export function buildCompatibilityInputFromConfig(
     elixirObservability: asString(config.elixirObservability),
     elixirTesting: asString(config.elixirTesting),
     elixirQuality: asString(config.elixirQuality),
+    elixirI18n: asString(config.elixirI18n),
+    elixirHttpServer: asString(config.elixirHttpServer),
+    elixirApplicationFramework: asString(config.elixirApplicationFramework),
+    elixirDocumentation: asString(config.elixirDocumentation),
+    elixirClustering: asString(config.elixirClustering),
     elixirDeploy: asString(config.elixirDeploy),
     elixirLibraries: asStringArray(config.elixirLibraries),
   };
