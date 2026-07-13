@@ -290,6 +290,7 @@ describe("Go Language Support", () => {
       const result = await createVirtual({
         projectName: "go-expansion-check",
         ecosystem: "go",
+        database: "postgres",
         goWebFramework: "go-zero",
         goOrm: "sqlx",
         goApi: "grpc-gateway",
