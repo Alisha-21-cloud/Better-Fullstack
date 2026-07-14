@@ -79,6 +79,30 @@ export const DEPENDENCY_UPDATE_POLICIES: Readonly<Record<string, DependencyUpdat
     pinnedVersion: "^1.6.22",
     reason: "Keep the Better Auth family aligned with the reviewed Kysely and Yarn combination.",
   },
+  "@opentelemetry/sdk-node": {
+    pinnedVersion: "0.220.0",
+    reason: "Keep the coupled OpenTelemetry SDK and exporter release trains exact and aligned.",
+  },
+  "@opentelemetry/auto-instrumentations-node": {
+    pinnedVersion: "0.78.0",
+    reason: "Keep the coupled OpenTelemetry SDK and exporter release trains exact and aligned.",
+  },
+  "@opentelemetry/exporter-trace-otlp-http": {
+    pinnedVersion: "0.220.0",
+    reason: "Keep the coupled OpenTelemetry SDK and exporter release trains exact and aligned.",
+  },
+  "@opentelemetry/exporter-metrics-otlp-http": {
+    pinnedVersion: "0.220.0",
+    reason: "Keep the coupled OpenTelemetry SDK and exporter release trains exact and aligned.",
+  },
+  "@opentelemetry/resources": {
+    pinnedVersion: "2.9.0",
+    reason: "Keep the coupled OpenTelemetry SDK and exporter release trains exact and aligned.",
+  },
+  "@opentelemetry/sdk-metrics": {
+    pinnedVersion: "2.9.0",
+    reason: "Keep the coupled OpenTelemetry SDK and exporter release trains exact and aligned.",
+  },
   vitest: {
     pinnedVersion: "4.1.8",
     reason: "The Vitest family is exact-pinned to the latest reviewed Yarn-compatible patch.",

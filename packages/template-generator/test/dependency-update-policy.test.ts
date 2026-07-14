@@ -31,6 +31,17 @@ describe("dependency update policy", () => {
     }
   });
 
+  it("keeps the coupled OpenTelemetry packages on one exact release train", () => {
+    expect(dependencyVersionMap).toMatchObject({
+      "@opentelemetry/sdk-node": "0.220.0",
+      "@opentelemetry/auto-instrumentations-node": "0.78.0",
+      "@opentelemetry/exporter-trace-otlp-http": "0.220.0",
+      "@opentelemetry/exporter-metrics-otlp-http": "0.220.0",
+      "@opentelemetry/resources": "2.9.0",
+      "@opentelemetry/sdk-metrics": "2.9.0",
+    });
+  });
+
   it("never automates downgrades", () => {
     const downgrade = candidate("example", "downgrade");
 

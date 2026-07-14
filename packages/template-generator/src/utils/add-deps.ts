@@ -701,12 +701,12 @@ export const dependencyVersionMap = {
 
   // OpenTelemetry
   "@opentelemetry/api": "^1.9.1",
-  "@opentelemetry/sdk-node": "^0.219.0",
-  "@opentelemetry/auto-instrumentations-node": "^0.77.0",
-  "@opentelemetry/exporter-trace-otlp-http": "^0.219.0",
-  "@opentelemetry/exporter-metrics-otlp-http": "^0.219.0",
-  "@opentelemetry/resources": "^2.9.0",
-  "@opentelemetry/sdk-metrics": "^2.9.0",
+  "@opentelemetry/sdk-node": "0.220.0",
+  "@opentelemetry/auto-instrumentations-node": "0.78.0",
+  "@opentelemetry/exporter-trace-otlp-http": "0.220.0",
+  "@opentelemetry/exporter-metrics-otlp-http": "0.220.0",
+  "@opentelemetry/resources": "2.9.0",
+  "@opentelemetry/sdk-metrics": "2.9.0",
   "@opentelemetry/semantic-conventions": "^1.43.0",
 
   // Sentry
