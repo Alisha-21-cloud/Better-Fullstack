@@ -290,7 +290,7 @@ describe("Go Language Support", () => {
       const result = await createVirtual({
         projectName: "go-expansion-check",
         ecosystem: "go",
-        database: "postgres",
+        database: "mysql",
         goWebFramework: "go-zero",
         goOrm: "sqlx",
         goApi: "grpc-gateway",
@@ -325,6 +325,9 @@ describe("Go Language Support", () => {
       ]) {
         expect(hasFile(root, file)).toBe(true);
       }
+      expect(getFileContent(root, "proto/greeter.proto")).toContain("service Greeter");
+      expect(getFileContent(root, "go.mod")).toContain("github.com/go-sql-driver/mysql");
+      expect(getFileContent(root, "internal/database/database.go")).toContain('driver := "mysql"');
     });
 
     it("should keep new framework imports and addresses collision-free", async () => {
@@ -346,6 +349,10 @@ describe("Go Language Support", () => {
       expect(mainContent).not.toContain("addr :=");
       expect(mainContent).toContain('httpHost := os.Getenv("HOST")');
       expect(mainContent).toContain('httpPort := os.Getenv("PORT")');
+      const serverContent = getFileContent(result.tree!.root, "internal/server/server.go");
+      expect(serverContent).toContain("rest.WithNotFoundHandler");
+      expect(serverContent).toContain('strings.HasPrefix(r.URL.Path, "/api/auth/")');
+      expect(serverContent).not.toContain('Path: "/api/auth/:path"');
     });
 
     it("should emit a usable proto module when Buf is selected without gRPC", async () => {

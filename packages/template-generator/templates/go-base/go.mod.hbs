@@ -52,6 +52,9 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.24
 {{/if}}
 {{#if (eq goOrm "sqlx")}}
+{{#if (eq database "mysql")}}
+	github.com/go-sql-driver/mysql v1.9.3
+{{/if}}
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.24

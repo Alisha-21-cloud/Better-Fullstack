@@ -385,7 +385,7 @@ export async function gatherMultiEcosystemConfig(
             getGoQualityChoice(flags.goQuality),
           );
     const goMigrations =
-      goWebFramework === "none"
+      goWebFramework === "none" || !["sqlite", "postgres", "mysql"].includes(database)
         ? "none"
         : await scopedPromptValue("go", "goMigrations", configScope, backendSections, () =>
             getGoMigrationsChoice(flags.goMigrations),
@@ -446,7 +446,7 @@ export async function gatherMultiEcosystemConfig(
     }
     if (goValidation !== "none") stackPartSpecs.push(`backend.validation:go:${goValidation}`);
     if (goQuality !== "none") stackPartSpecs.push(`backend.codeQuality:go:${goQuality}`);
-    if (goMigrations !== "none") stackPartSpecs.push(`backend.dbSetup:go:${goMigrations}`);
+    if (goMigrations !== "none") stackPartSpecs.push(`backend.migrations:go:${goMigrations}`);
     if (goTemplating !== "none") stackPartSpecs.push(`backend.templating:go:${goTemplating}`);
     if (goProtoTooling !== "none") stackPartSpecs.push(`backend.buildTool:go:${goProtoTooling}`);
     if (goDI !== "none") stackPartSpecs.push(`backend.libraries:go:${goDI}`);

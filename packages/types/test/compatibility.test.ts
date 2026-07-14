@@ -52,21 +52,30 @@ describe("compatibility issue helpers", () => {
     });
   });
 
-  it("normalizes stale standalone Vite API and form selections", () => {
+  it("normalizes unsupported standalone Vite integrations", () => {
     for (const frontend of ["vanilla-vite", "vue"] as const) {
       const stack = {
         ...DEFAULT_STACK_SELECTION,
         backend: "hono" as const,
         webFrontend: [frontend],
         api: "orpc" as const,
+        auth: "better-auth" as const,
         forms: "tanstack-form" as const,
+        cms: "sanity" as const,
+        featureFlags: "growthbook" as const,
       };
       const result = analyzeStackCompatibility(stack);
 
       expect(result.adjustedStack?.api).toBe("graphql-yoga");
+      expect(result.adjustedStack?.auth).toBe("none");
       expect(result.adjustedStack?.forms).toBe("none");
+      expect(result.adjustedStack?.cms).toBe("none");
+      expect(result.adjustedStack?.featureFlags).toBe("none");
       expect(getDisabledReason(stack, "api", "orpc")).not.toBeNull();
       expect(getDisabledReason(stack, "forms", "tanstack-form")).not.toBeNull();
+      expect(getDisabledReason(stack, "cms", "sanity")).not.toBeNull();
+      expect(getDisabledReason(stack, "cms", "contentful")).toBeNull();
+      expect(getDisabledReason(stack, "featureFlags", "growthbook")).not.toBeNull();
       expect(getCompatibleFormLibraries([frontend])).toEqual(["none"]);
     }
   });
@@ -1130,6 +1139,7 @@ describe("compatibility issue helpers", () => {
       elixirJobs: "quantum",
       elixirHttp: "req",
       elixirObservability: "phoenix-telemetry",
+      elixirI18n: "gettext",
     });
 
     expect(result.adjustedStack).toMatchObject({
@@ -1140,7 +1150,20 @@ describe("compatibility issue helpers", () => {
       elixirJobs: "quantum",
       elixirHttp: "req",
       elixirObservability: "none",
+      elixirI18n: "none",
     });
+  });
+
+  it("clears Pow when the Elixir SQL repository is removed", () => {
+    const result = analyzeStackCompatibility({
+      ...DEFAULT_STACK_SELECTION,
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirOrm: "none",
+      elixirAuth: "pow",
+    });
+
+    expect(result.adjustedStack?.elixirAuth).toBe("none");
   });
 
   it("locks Effect backend services and validation without blocking compatible tools", () => {

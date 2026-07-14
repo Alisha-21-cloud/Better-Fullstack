@@ -9,6 +9,9 @@ import (
 {{#if (eq goWebFramework "go-zero")}}
 	"strconv"
 {{/if}}
+{{#if (and (eq goWebFramework "go-zero") (eq auth "go-better-auth"))}}
+	"strings"
+{{/if}}
 {{#if (eq goWebFramework "go-zero")}}
 
 	"github.com/zeromicro/go-zero/rest"
@@ -48,7 +51,20 @@ func Run(addr string{{#if (eq auth "go-better-auth")}}, authHandler http.Handler
 		panic(err)
 	}
 
+{{#if (eq auth "go-better-auth")}}
+	srv := rest.MustNewServer(
+		rest.RestConf{Host: host, Port: port},
+		rest.WithNotFoundHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, "/api/auth/") {
+				authHandler.ServeHTTP(w, r)
+				return
+			}
+			http.NotFound(w, r)
+		})),
+	)
+{{else}}
 	srv := rest.MustNewServer(rest.RestConf{Host: host, Port: port})
+{{/if}}
 	defer srv.Stop()
 	srv.AddRoutes([]rest.Route{
 		{Method: http.MethodGet, Path: "/", Handler: root},
@@ -57,7 +73,6 @@ func Run(addr string{{#if (eq auth "go-better-auth")}}, authHandler http.Handler
 {{#if (eq auth "go-better-auth")}}
 	for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodOptions} {
 		srv.AddRoute(rest.Route{Method: method, Path: "/api/auth", Handler: authHandler.ServeHTTP})
-		srv.AddRoute(rest.Route{Method: method, Path: "/api/auth/:path", Handler: authHandler.ServeHTTP})
 	}
 {{/if}}
 	srv.Start()

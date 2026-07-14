@@ -1300,7 +1300,13 @@ export async function gatherConfig(
       return getGoQualityChoice(flags.goQuality);
     },
     goMigrations: ({ results }) => {
-      if (results.ecosystem !== "go") return Promise.resolve("none" as GoMigrations);
+      if (
+        results.ecosystem !== "go" ||
+        !results.database ||
+        !["sqlite", "postgres", "mysql"].includes(results.database)
+      ) {
+        return Promise.resolve("none" as GoMigrations);
+      }
       return getGoMigrationsChoice(flags.goMigrations);
     },
     goTemplating: ({ results }) => {

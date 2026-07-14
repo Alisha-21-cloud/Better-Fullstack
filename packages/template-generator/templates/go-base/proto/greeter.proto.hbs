@@ -1,4 +1,4 @@
-{{#if (or (eq goApi "grpc-go") (eq goProtoTooling "buf"))}}
+{{#if (or (or (eq goApi "grpc-go") (eq goApi "grpc-gateway")) (eq goProtoTooling "buf"))}}
 syntax = "proto3";
 
 package proto;

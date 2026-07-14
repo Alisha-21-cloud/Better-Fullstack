@@ -1576,6 +1576,23 @@ export const analyzeStackCompatibility = (
       message: "Forms set to 'None' (standalone Vue and Vanilla integrations are not wired yet)",
     });
   }
+  if (hasStandaloneViteFrontend && nextStack.cms !== "none" && nextStack.cms !== "contentful") {
+    nextStack.cms = "none";
+    changed = true;
+    changes.push({
+      category: "cms",
+      message: "CMS set to 'None' (standalone Vue and Vanilla CMS templates are not wired yet)",
+    });
+  }
+  if (hasStandaloneViteFrontend && nextStack.featureFlags !== "none") {
+    nextStack.featureFlags = "none";
+    changed = true;
+    changes.push({
+      category: "featureFlags",
+      message:
+        "Feature flags set to 'None' (standalone Vue and Vanilla client integrations are not wired yet)",
+    });
+  }
 
   if (isFresh) {
     // TanStack Form has no Preact adapter
@@ -1781,6 +1798,7 @@ export const analyzeStackCompatibility = (
         "elixirApi",
         "elixirRealtime",
         "elixirObservability",
+        "elixirI18n",
       ];
 
       for (const key of dependentKeys) {
@@ -1850,6 +1868,16 @@ export const analyzeStackCompatibility = (
       changes.push({
         category: "elixirAuth",
         message: "Elixir auth set to 'None' (phx.gen.auth requires Ecto SQL with PostgreSQL)",
+      });
+    }
+
+    const sqlBackedElixirOrms = new Set(["ecto-sql", "myxql", "ecto_sqlite3"]);
+    if (nextStack.elixirAuth === "pow" && !sqlBackedElixirOrms.has(nextStack.elixirOrm)) {
+      nextStack.elixirAuth = "none";
+      changed = true;
+      changes.push({
+        category: "elixirAuth",
+        message: "Elixir auth set to 'None' (Pow requires an Ecto SQL repository)",
       });
     }
   }
@@ -1947,6 +1975,17 @@ export const getDisabledReason = (
   }
   if (category === "forms" && hasStandaloneViteFrontend && optionId !== "none") {
     return "Form library integrations are not yet wired for standalone Vue or Vanilla Vite";
+  }
+  if (
+    category === "cms" &&
+    hasStandaloneViteFrontend &&
+    optionId !== "none" &&
+    optionId !== "contentful"
+  ) {
+    return "CMS integrations other than Contentful are not yet wired for standalone Vue or Vanilla Vite";
+  }
+  if (category === "featureFlags" && hasStandaloneViteFrontend && optionId !== "none") {
+    return "Feature flag client integrations are not yet wired for standalone Vue or Vanilla Vite";
   }
 
   // ============================================
@@ -4645,6 +4684,8 @@ export function evaluateCompatibility(input: CompatibilityInput): CompatibilityE
     ["forms", input.forms],
     ["stateManagement", input.stateManagement],
     ["animation", input.animation],
+    ["cms", input.cms],
+    ["featureFlags", input.featureFlags],
     ["pythonApi", input.pythonApi],
     ["javaWebFramework", input.javaWebFramework],
     ["javaBuildTool", input.javaBuildTool],
