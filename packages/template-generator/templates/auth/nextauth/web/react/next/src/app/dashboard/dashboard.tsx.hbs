@@ -1,10 +1,10 @@
 "use client";
 
-import type { User } from "next-auth";
+import type { Session } from "next-auth";
 import UserMenu from "@/components/user-menu";
-import { AuthProvider } from "@/components/providers";
+import AuthProvider from "@/components/providers";
 
-export default function Dashboard({ user }: { user: User }) {
+export default function Dashboard({ user }: { user: NonNullable<Session["user"]> }) {
   return (
     <AuthProvider>
       <div className="min-h-screen bg-background">
@@ -34,10 +34,6 @@ export default function Dashboard({ user }: { user: User }) {
                 <div>
                   <dt className="text-sm text-muted-foreground">Email</dt>
                   <dd className="font-medium">{user.email}</dd>
-                </div>
-                <div>
-                  <dt className="text-sm text-muted-foreground">User ID</dt>
-                  <dd className="font-mono text-sm">{user.id}</dd>
                 </div>
               </dl>
             </div>

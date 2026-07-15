@@ -4,7 +4,7 @@ import { getDefaultConfig } from "../constants";
 import { parseStackPartSpecs, stackPartsToLegacyProjectConfigPartial } from "../types";
 import { hasWebStyling } from "../utils/compatibility-rules";
 import { exitCancelled } from "../utils/errors";
-import { getAddonsChoice } from "./addons";
+import { getAddonsChoice, getAppPlatformsChoice } from "./addons";
 import { getAiDocsChoice } from "./ai-docs";
 import { getAstroIntegrationChoice } from "./astro-integration";
 import {
@@ -44,12 +44,17 @@ import {
   getElixirObservabilityChoice,
   getElixirOrmChoice,
   getElixirQualityChoice,
+  getElixirI18nChoice,
+  getElixirHttpServerChoice,
+  getElixirApplicationFrameworkChoice,
+  getElixirDocumentationChoice,
+  getElixirClusteringChoice,
   getElixirRealtimeChoice,
   getElixirTestingChoice,
   getElixirValidationChoice,
   getElixirWebFrameworkChoice,
 } from "./elixir-ecosystem";
-import { WEB_FRONTEND_PROMPT_OPTIONS } from "./frontend";
+import { NATIVE_FRONTEND_PROMPT_OPTIONS, WEB_FRONTEND_PROMPT_OPTIONS } from "./frontend";
 import { getGitChoice } from "./git";
 import {
   getGoApiChoice,
@@ -57,12 +62,18 @@ import {
   getGoCachingChoice,
   getGoCliChoice,
   getGoConfigChoice,
+  getGoDIChoice,
   getGoLoggingChoice,
+  getGoMigrationsChoice,
   getGoMessageQueueChoice,
   getGoObservabilityChoice,
   getGoOrmChoice,
+  getGoProtoToolingChoice,
+  getGoQualityChoice,
   getGoRealtimeChoice,
+  getGoTemplatingChoice,
   getGoTestingChoice,
+  getGoValidationChoice,
   getGoWebFrameworkChoice,
 } from "./go-ecosystem";
 import { getinstallChoice } from "./install";
@@ -226,7 +237,7 @@ export async function gatherMultiEcosystemConfig(
           await getConfigSectionsChoice(
             "typescript",
             [],
-            ["ui-styling", "deploy", "addons-examples"],
+            ["app-platforms", "ui-styling", "deploy", "addons-examples"],
           ),
         )
       : [];
@@ -243,6 +254,16 @@ export async function gatherMultiEcosystemConfig(
     frontend === "astro"
       ? promptValue(await getAstroIntegrationChoice(flags.astroIntegration))
       : undefined;
+  const nativeFrontend = promptValue(
+    await navigableSelect<Frontend | "none">({
+      message: "Add a native mobile app? (React Native ecosystem)",
+      options: [
+        { value: "none", label: "None", hint: "web app only" },
+        ...NATIVE_FRONTEND_PROMPT_OPTIONS,
+      ],
+      initialValue: "none",
+    }),
+  );
   const uiLibrary = hasWebStyling(frontendList)
     ? await scopedPromptValue("typescript", "uiLibrary", configScope, typeScriptSections, () =>
         getUILibraryChoice(flags.uiLibrary, frontendList, astroIntegration),
@@ -266,7 +287,7 @@ export async function gatherMultiEcosystemConfig(
       : undefined;
   const cssFramework = hasWebStyling(frontendList)
     ? await scopedPromptValue("typescript", "cssFramework", configScope, typeScriptSections, () =>
-        getCSSFrameworkChoice(flags.cssFramework, uiLibrary),
+        getCSSFrameworkChoice(flags.cssFramework, uiLibrary, frontendList),
       )
     : "none";
 
@@ -274,6 +295,16 @@ export async function gatherMultiEcosystemConfig(
   const backendSections =
     configScope === "custom" ? promptValue(await getConfigSectionsChoice(backendEcosystem)) : [];
   const stackPartSpecs = [`frontend:typescript:${frontend}`];
+  if (nativeFrontend !== "none") {
+    stackPartSpecs.push(`mobile:react-native:${nativeFrontend}`);
+    stackPartSpecs.push("mobile.navigation:react-native:expo-router");
+    if (nativeFrontend === "native-uniwind") {
+      stackPartSpecs.push("mobile.ui:react-native:uniwind");
+    }
+    if (nativeFrontend === "native-unistyles") {
+      stackPartSpecs.push("mobile.ui:react-native:unistyles");
+    }
+  }
   const backendChoices: Partial<ProjectConfig> = {};
   let database: Database = "none";
   let dbSetup: ProjectConfig["dbSetup"] = "none";
@@ -341,6 +372,42 @@ export async function gatherMultiEcosystemConfig(
         : await scopedPromptValue("go", "goObservability", configScope, backendSections, () =>
             getGoObservabilityChoice(flags.goObservability),
           );
+    const goValidation =
+      goWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("go", "goValidation", configScope, backendSections, () =>
+            getGoValidationChoice(flags.goValidation),
+          );
+    const goQuality =
+      goWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("go", "goQuality", configScope, backendSections, () =>
+            getGoQualityChoice(flags.goQuality),
+          );
+    const goMigrations =
+      goWebFramework === "none" || !["sqlite", "postgres", "mysql"].includes(database)
+        ? "none"
+        : await scopedPromptValue("go", "goMigrations", configScope, backendSections, () =>
+            getGoMigrationsChoice(flags.goMigrations),
+          );
+    const goTemplating =
+      goWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("go", "goTemplating", configScope, backendSections, () =>
+            getGoTemplatingChoice(flags.goTemplating),
+          );
+    const goProtoTooling =
+      goWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("go", "goProtoTooling", configScope, backendSections, () =>
+            getGoProtoToolingChoice(flags.goProtoTooling),
+          );
+    const goDI =
+      goWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("go", "goDI", configScope, backendSections, () =>
+            getGoDIChoice(flags.goDI),
+          );
     Object.assign(backendChoices, {
       goWebFramework,
       goOrm,
@@ -354,6 +421,12 @@ export async function gatherMultiEcosystemConfig(
       goCaching,
       goConfig,
       goObservability,
+      goValidation,
+      goQuality,
+      goMigrations,
+      goTemplating,
+      goProtoTooling,
+      goDI,
     });
     if (goWebFramework !== "none") stackPartSpecs.push(`backend:go:${goWebFramework}`);
     if (goOrm !== "none") stackPartSpecs.push(`backend.orm:go:${goOrm}`);
@@ -371,6 +444,12 @@ export async function gatherMultiEcosystemConfig(
     if (goObservability !== "none") {
       stackPartSpecs.push(`backend.observability:go:${goObservability}`);
     }
+    if (goValidation !== "none") stackPartSpecs.push(`backend.validation:go:${goValidation}`);
+    if (goQuality !== "none") stackPartSpecs.push(`backend.codeQuality:go:${goQuality}`);
+    if (goMigrations !== "none") stackPartSpecs.push(`backend.migrations:go:${goMigrations}`);
+    if (goTemplating !== "none") stackPartSpecs.push(`backend.templating:go:${goTemplating}`);
+    if (goProtoTooling !== "none") stackPartSpecs.push(`backend.buildTool:go:${goProtoTooling}`);
+    if (goDI !== "none") stackPartSpecs.push(`backend.libraries:go:${goDI}`);
   }
 
   if (backendEcosystem === "rust") {
@@ -855,6 +934,38 @@ export async function gatherMultiEcosystemConfig(
         : await scopedPromptValue("elixir", "elixirQuality", configScope, backendSections, () =>
             getElixirQualityChoice(flags.elixirQuality),
           );
+    const elixirI18n =
+      elixirWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("elixir", "elixirI18n", configScope, backendSections, () =>
+            getElixirI18nChoice(flags.elixirI18n),
+          );
+    const elixirHttpServer =
+      elixirWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("elixir", "elixirHttpServer", configScope, backendSections, () =>
+            getElixirHttpServerChoice(flags.elixirHttpServer),
+          );
+    const elixirApplicationFramework = await scopedPromptValue(
+      "elixir",
+      "elixirApplicationFramework",
+      configScope,
+      backendSections,
+      () => getElixirApplicationFrameworkChoice(flags.elixirApplicationFramework),
+    );
+    const elixirDocumentation = await scopedPromptValue(
+      "elixir",
+      "elixirDocumentation",
+      configScope,
+      backendSections,
+      () => getElixirDocumentationChoice(flags.elixirDocumentation),
+    );
+    const elixirClustering =
+      elixirWebFramework === "none"
+        ? "none"
+        : await scopedPromptValue("elixir", "elixirClustering", configScope, backendSections, () =>
+            getElixirClusteringChoice(flags.elixirClustering),
+          );
     const elixirDeploy =
       elixirWebFramework === "none"
         ? "none"
@@ -882,6 +993,11 @@ export async function gatherMultiEcosystemConfig(
       elixirObservability,
       elixirTesting,
       elixirQuality,
+      elixirI18n,
+      elixirHttpServer,
+      elixirApplicationFramework,
+      elixirDocumentation,
+      elixirClustering,
       elixirDeploy,
       elixirLibraries,
     });
@@ -901,6 +1017,19 @@ export async function gatherMultiEcosystemConfig(
       stackPartSpecs.push(`backend.observability:elixir:${elixirObservability}`);
     }
     if (elixirTesting !== "none") stackPartSpecs.push(`backend.testing:elixir:${elixirTesting}`);
+    if (elixirI18n !== "none") stackPartSpecs.push(`backend.i18n:elixir:${elixirI18n}`);
+    if (elixirHttpServer !== "none") {
+      stackPartSpecs.push(`backend.runtime:elixir:${elixirHttpServer}`);
+    }
+    if (elixirApplicationFramework !== "none") {
+      stackPartSpecs.push(`backend.libraries:elixir:${elixirApplicationFramework}`);
+    }
+    if (elixirDocumentation !== "none") {
+      stackPartSpecs.push(`backend.documentation:elixir:${elixirDocumentation}`);
+    }
+    if (elixirClustering !== "none") {
+      stackPartSpecs.push(`backend.config:elixir:${elixirClustering}`);
+    }
     if (elixirDeploy !== "none") stackPartSpecs.push(`backend.deploy:elixir:${elixirDeploy}`);
     for (const library of elixirLibraries) {
       if (library !== "none") stackPartSpecs.push(`backend.libraries:elixir:${library}`);
@@ -911,12 +1040,19 @@ export async function gatherMultiEcosystemConfig(
 
   const stackParts = parseStackPartSpecs(stackPartSpecs, "selected");
   const graphPartial = stackPartsToLegacyProjectConfigPartial(stackParts);
+  const appPlatforms = await scopedPromptValue(
+    "typescript",
+    "appPlatforms",
+    configScope,
+    typeScriptSections,
+    () => getAppPlatformsChoice(flags.addons, frontendList),
+  );
   const addons = await scopedPromptValue(
     "typescript",
     "addons",
     configScope,
     typeScriptSections,
-    () => getAddonsChoice(flags.addons, frontendList, "none", "none", "bun"),
+    () => getAddonsChoice(flags.addons, frontendList, "none", "none", "bun", "none"),
   );
   const webDeploy = await scopedPromptValue(
     "typescript",
@@ -947,7 +1083,7 @@ export async function gatherMultiEcosystemConfig(
     projectDir,
     relativePath,
     ecosystem: "typescript",
-    frontend: frontendList,
+    frontend: nativeFrontend === "none" ? frontendList : [...frontendList, nativeFrontend],
     backend: "none",
     runtime: "none",
     database,
@@ -958,7 +1094,7 @@ export async function gatherMultiEcosystemConfig(
     uiLibrary,
     ...shadcnOptions,
     cssFramework,
-    addons,
+    addons: Array.from(new Set([...appPlatforms, ...addons])),
     examples: [],
     dbSetup,
     webDeploy,

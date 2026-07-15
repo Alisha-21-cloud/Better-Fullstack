@@ -31,6 +31,7 @@ import { handleDirectoryConflict, setupProjectDirectory } from "../../utils/proj
 import { addToHistory } from "../../utils/project-history";
 import { canPromptInteractively } from "../../utils/prompt-environment";
 import { renderTitle } from "../../utils/render-title";
+import { resolveCompatibilityAdjustments } from "../../utils/stack-compatibility";
 import { getTemplateConfig, getTemplateDescription } from "../../utils/templates";
 import {
   getProvidedFlags,
@@ -187,6 +188,8 @@ function getYesBaseConfig(flagConfig: Partial<ProjectConfig>): ProjectConfig {
     frontend: ["native-bare"],
     addons: [],
     examples: [],
+    database: "none",
+    orm: "none",
     auth: "none",
     payments: "none",
     email: "none",
@@ -223,6 +226,14 @@ function getYesBaseConfig(flagConfig: Partial<ProjectConfig>): ProjectConfig {
     mobileOTA: "none",
     mobileDeepLinking: "none",
   };
+}
+
+function reportCompatibilityAdjustments(adjustments: string[]) {
+  if (isSilent() || adjustments.length === 0) return;
+  log.warn(pc.yellow("Adjusted incompatible options (use --yolo to bypass):"));
+  for (const adjustment of adjustments) {
+    log.message(pc.yellow(`  ${adjustment}`));
+  }
 }
 
 function shouldPromptForVersionChannel(
@@ -478,6 +489,12 @@ export async function createProjectHandler(
               goCaching: "none",
               goConfig: "none",
               goObservability: "none",
+              goValidation: "none",
+              goQuality: "none",
+              goMigrations: "none",
+              goTemplating: "none",
+              goProtoTooling: "none",
+              goDI: "none",
               javaWebFramework: "none",
               javaBuildTool: "none",
               javaOrm: "none",
@@ -511,6 +528,11 @@ export async function createProjectHandler(
               elixirObservability: "none",
               elixirTesting: "none",
               elixirQuality: "none",
+              elixirI18n: "none",
+              elixirHttpServer: "none",
+              elixirApplicationFramework: "none",
+              elixirDocumentation: "none",
+              elixirClustering: "none",
               elixirDeploy: "none",
               elixirLibraries: [],
               aiDocs: [],
@@ -593,6 +615,19 @@ export async function createProjectHandler(
           versionChannel,
         };
 
+        // Auto-adjust incompatible combos with the same engine the web builder
+        // and MCP flows use, explaining every change instead of silently
+        // normalizing or scaffolding a broken project. Programmatic (silent)
+        // callers keep strict validation errors — nobody would see the summary.
+        if (!cliInput.yolo && !isSilent()) {
+          const { changes, adjustments } = resolveCompatibilityAdjustments(config);
+          if (adjustments.length > 0) {
+            config = { ...config, ...changes };
+            cliInput = { ...cliInput, ...changes };
+            reportCompatibilityAdjustments(adjustments);
+          }
+        }
+
         validateConfigCompatibility(config, providedFlags, cliInput);
 
         const yesPreflight = validatePreflightConfig(config);
@@ -621,6 +656,19 @@ export async function createProjectHandler(
           currentPathInput,
         );
         config = { ...gatheredConfig, versionChannel };
+
+        // Partial flags lack the prompt/default context needed for reliable
+        // compatibility decisions (for example, shadcn-ui needs the frontend
+        // and CSS selections). Normalize only after gathering the full config.
+        if (!cliInput.yolo && !isSilent()) {
+          const { changes, adjustments } = resolveCompatibilityAdjustments(config);
+          if (adjustments.length > 0) {
+            config = { ...config, ...changes };
+            cliInput = { ...cliInput, ...changes };
+            reportCompatibilityAdjustments(adjustments);
+          }
+        }
+
         validateConfigCompatibility(config, providedFlags, cliInput);
       }
 

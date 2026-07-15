@@ -23,6 +23,7 @@ export const StackPartRoleSchema = z
     "runtime",
     "deploy",
     "dbSetup",
+    "migrations",
     "realtime",
     "navigation",
     "caching",
@@ -121,6 +122,8 @@ export const FrontendSchema = z
     "tanstack-router",
     "react-router",
     "react-vite",
+    "vanilla-vite",
+    "vue",
     "tanstack-start",
     "next",
     "vinext",
@@ -174,9 +177,33 @@ export const AddonsSchema = z
     "devcontainer",
     "docker-compose",
     "github-actions",
+    "eslint",
+    "prettier",
+    "axios",
+    "firebase",
+    "graphql-codegen",
+    "openapi-typescript",
+    "apollo-client",
+    "electron",
+    "capacitor",
     "none",
   ])
   .describe("Additional addons");
+
+/**
+ * Addon values that are app platforms — shells/targets that package the web
+ * frontend (desktop, mobile hybrid, browser extension, terminal, installable
+ * PWA). Surfaced as a dedicated "App Platforms" section in the CLI and web
+ * builder; they still serialize into the `addons` config field.
+ */
+export const APP_PLATFORM_ADDON_VALUES = [
+  "pwa",
+  "tauri",
+  "electron",
+  "capacitor",
+  "wxt",
+  "opentui",
+] as const;
 
 export const ExamplesSchema = z
   .enum(["ai", "chat-sdk", "tanstack-showcase", "none"])
@@ -225,6 +252,7 @@ export const AuthSchema = z
     "auth0",
     "workos",
     "kinde",
+    "passport",
     "none",
   ])
   .describe("Authentication provider");
@@ -236,6 +264,7 @@ export const PaymentsSchema = z
     "stripe",
     "lemon-squeezy",
     "paddle",
+    "paypal",
     "dodo",
     "creem",
     "autumn",
@@ -259,6 +288,8 @@ export const AISchema = z
     "voltagent",
     "langgraph",
     "openai-agents",
+    "openai-sdk",
+    "anthropic-sdk",
     "google-adk",
     "modelfusion",
     "langchain",
@@ -307,7 +338,7 @@ export const ValidationSchema = z
   .describe("Schema validation library (none uses Zod as default for internal usage)");
 
 export const TestingSchema = z
-  .enum(["vitest", "playwright", "vitest-playwright", "jest", "cypress", "none"])
+  .enum(["vitest", "playwright", "vitest-playwright", "jest", "mocha", "cypress", "none"])
   .describe("Testing framework (vitest-playwright includes both unit and e2e testing)");
 
 export const EmailSchema = z
@@ -327,7 +358,7 @@ export const EmailSchema = z
   );
 
 export const RealtimeSchema = z
-  .enum(["socket-io", "partykit", "ably", "pusher", "liveblocks", "yjs", "none"])
+  .enum(["socket-io", "ws", "partykit", "ably", "pusher", "liveblocks", "yjs", "none"])
   .describe("Real-time/WebSocket solution");
 
 export const JobQueueSchema = z
@@ -335,7 +366,7 @@ export const JobQueueSchema = z
   .describe("Job queue/background worker solution");
 
 export const CMSSchema = z
-  .enum(["payload", "sanity", "strapi", "tinacms", "directus", "keystatic", "none"])
+  .enum(["payload", "sanity", "strapi", "tinacms", "directus", "keystatic", "contentful", "none"])
   .describe("Headless CMS solution");
 
 export const CachingSchema = z
@@ -387,7 +418,7 @@ export const FeatureFlagsSchema = z
   .describe("Feature flags provider for A/B testing and feature management");
 
 export const AnalyticsSchema = z
-  .enum(["plausible", "umami", "posthog", "none"])
+  .enum(["plausible", "umami", "posthog", "ga4", "none"])
   .describe("Product analytics provider");
 
 export const MobileNavigationSchema = z
@@ -420,19 +451,19 @@ export const MobileDeepLinkingSchema = z
 
 // Rust ecosystem schemas
 export const RustWebFrameworkSchema = z
-  .enum(["axum", "actix-web", "rocket", "poem", "loco", "none"])
+  .enum(["axum", "actix-web", "rocket", "poem", "loco", "warp", "salvo", "none"])
   .describe("Rust web framework");
 
 export const RustFrontendSchema = z
-  .enum(["leptos", "dioxus", "none"])
+  .enum(["leptos", "dioxus", "yew", "none"])
   .describe("Rust WASM frontend framework");
 
 export const RustOrmSchema = z
-  .enum(["sea-orm", "sqlx", "diesel", "none"])
+  .enum(["sea-orm", "sqlx", "diesel", "mongodb", "rusqlite", "tokio-postgres", "none"])
   .describe("Rust ORM/database layer");
 
 export const RustApiSchema = z
-  .enum(["tonic", "async-graphql", "none"])
+  .enum(["tonic", "async-graphql", "jsonrpsee", "none"])
   .describe("Rust API layer (gRPC/GraphQL)");
 
 export const RustCliSchema = z.enum(["clap", "ratatui", "none"]).describe("Rust CLI tools");
@@ -456,6 +487,13 @@ export const RustLibrariesSchema = z
     "mockall",
     "proptest",
     "insta",
+    "rand",
+    "regex",
+    "rayon",
+    "itertools",
+    "rstest",
+    "cargo-nextest",
+    "cargo-audit",
     "none",
   ])
   .describe("Rust core libraries");
@@ -471,7 +509,7 @@ export const RustErrorHandlingSchema = z
 export const RustCachingSchema = z.enum(["moka", "redis", "none"]).describe("Rust caching library");
 
 export const RustAuthSchema = z
-  .enum(["oauth2", "torii", "none"])
+  .enum(["oauth2", "torii", "openidconnect", "tower-sessions", "none"])
   .describe("Rust authentication library");
 
 export const RustRealtimeSchema = z
@@ -479,15 +517,15 @@ export const RustRealtimeSchema = z
   .describe("Rust realtime/WebSocket library");
 
 export const RustMessageQueueSchema = z
-  .enum(["lapin", "none"])
+  .enum(["lapin", "rdkafka", "async-nats", "none"])
   .describe("Rust message queue library");
 
 export const RustObservabilitySchema = z
-  .enum(["opentelemetry", "none"])
+  .enum(["opentelemetry", "metrics", "none"])
   .describe("Rust observability/tracing library");
 
 export const RustTemplatingSchema = z
-  .enum(["askama", "tera", "none"])
+  .enum(["askama", "tera", "minijinja", "none"])
   .describe("Rust template engine");
 
 // Python ecosystem schemas
@@ -561,15 +599,15 @@ export const PythonCliSchema = z
 
 // Go ecosystem schemas
 export const GoWebFrameworkSchema = z
-  .enum(["gin", "echo", "fiber", "chi", "stdlib", "none"])
+  .enum(["gin", "echo", "fiber", "chi", "stdlib", "go-zero", "kratos", "httprouter", "none"])
   .describe("Go web framework");
 
 export const GoOrmSchema = z
-  .enum(["gorm", "sqlc", "ent", "bun", "none"])
+  .enum(["gorm", "sqlc", "ent", "bun", "sqlx", "none"])
   .describe("Go ORM/database layer");
 
 export const GoApiSchema = z
-  .enum(["grpc-go", "gqlgen", "none"])
+  .enum(["grpc-go", "gqlgen", "grpc-gateway", "connect-go", "oapi-codegen", "none"])
   .describe("Go API layer (gRPC, GraphQL)");
 
 export const GoCliSchema = z
@@ -581,11 +619,11 @@ export const GoLoggingSchema = z
   .describe("Go logging library");
 
 export const GoAuthSchema = z
-  .enum(["casbin", "jwt", "goth", "none"])
+  .enum(["casbin", "jwt", "goth", "oauth2", "none"])
   .describe("Go authentication library");
 
 export const GoTestingSchema = z
-  .enum(["testify", "gomock", "none"])
+  .enum(["testify", "gomock", "testcontainers", "ginkgo-gomega", "mockery", "none"])
   .describe("Go testing libraries");
 
 export const GoRealtimeSchema = z
@@ -593,7 +631,7 @@ export const GoRealtimeSchema = z
   .describe("Go realtime/WebSocket library");
 
 export const GoMessageQueueSchema = z
-  .enum(["nats", "watermill", "none"])
+  .enum(["nats", "watermill", "kafka-go", "asynq", "none"])
   .describe("Go message queue/eventing library");
 
 export const GoCachingSchema = z
@@ -605,8 +643,24 @@ export const GoConfigSchema = z
   .describe("Go configuration management library");
 
 export const GoObservabilitySchema = z
-  .enum(["opentelemetry", "none"])
+  .enum(["opentelemetry", "prometheus", "none"])
   .describe("Go observability/tracing library");
+
+export const GoValidationSchema = z.enum(["validator", "none"]).describe("Go validation library");
+
+export const GoQualitySchema = z
+  .enum(["golangci-lint", "none"])
+  .describe("Go code quality tooling");
+
+export const GoMigrationsSchema = z
+  .enum(["golang-migrate", "none"])
+  .describe("Go database migration tooling");
+
+export const GoTemplatingSchema = z.enum(["templ", "none"]).describe("Go templating library");
+
+export const GoProtoToolingSchema = z.enum(["buf", "none"]).describe("Go Protocol Buffers tooling");
+
+export const GoDISchema = z.enum(["fx", "none"]).describe("Go dependency injection library");
 
 // Java ecosystem schemas
 export const JavaLanguageSchema = z
@@ -723,19 +777,19 @@ export const ElixirWebFrameworkSchema = z
   .describe("Elixir web framework");
 
 export const ElixirOrmSchema = z
-  .enum(["ecto", "ecto-sql", "none"])
+  .enum(["ecto", "ecto-sql", "myxql", "ecto_sqlite3", "none"])
   .describe("Elixir database layer");
 
 export const ElixirAuthSchema = z
-  .enum(["phx-gen-auth", "ueberauth", "guardian", "none"])
+  .enum(["phx-gen-auth", "ueberauth", "guardian", "pow", "none"])
   .describe("Elixir authentication library");
 
 export const ElixirApiSchema = z
-  .enum(["rest", "absinthe", "grpc", "none"])
+  .enum(["rest", "absinthe", "grpc", "open_api_spex", "none"])
   .describe("Elixir API layer");
 
 export const ElixirLibrariesSchema = z
-  .enum(["broadway", "nx", "none"])
+  .enum(["broadway", "nx", "ex_aws", "floki", "rustler", "none"])
   .describe("Elixir application libraries");
 
 export const ElixirRealtimeSchema = z
@@ -750,27 +804,49 @@ export const ElixirValidationSchema = z
   .enum(["ecto-changesets", "nimble-options", "none"])
   .describe("Elixir validation and data contracts");
 
-export const ElixirHttpSchema = z.enum(["req", "finch", "none"]).describe("Elixir HTTP client");
+export const ElixirHttpSchema = z
+  .enum(["req", "finch", "tesla", "none"])
+  .describe("Elixir HTTP client");
 
 export const ElixirJsonSchema = z.enum(["jason", "none"]).describe("Elixir JSON library");
 
-export const ElixirEmailSchema = z.enum(["swoosh", "none"]).describe("Elixir email library");
+export const ElixirEmailSchema = z
+  .enum(["swoosh", "bamboo", "none"])
+  .describe("Elixir email library");
 
 export const ElixirCachingSchema = z
-  .enum(["cachex", "nebulex", "none"])
+  .enum(["cachex", "nebulex", "redix", "none"])
   .describe("Elixir caching library");
 
 export const ElixirObservabilitySchema = z
-  .enum(["telemetry", "opentelemetry", "prom_ex", "none"])
+  .enum(["telemetry", "opentelemetry", "prom_ex", "sentry", "none"])
   .describe("Elixir observability library");
 
 export const ElixirTestingSchema = z
-  .enum(["ex_unit", "mox", "bypass", "wallaby", "none"])
+  .enum(["ex_unit", "mox", "bypass", "wallaby", "stream_data", "ex_machina", "none"])
   .describe("Elixir testing library");
 
 export const ElixirQualitySchema = z
-  .enum(["credo", "dialyxir", "sobelow", "none"])
+  .enum(["credo", "dialyxir", "sobelow", "excoveralls", "mix_audit", "none"])
   .describe("Elixir code quality tool");
+
+export const ElixirI18nSchema = z.enum(["gettext", "none"]).describe("Elixir localization");
+
+export const ElixirHttpServerSchema = z
+  .enum(["bandit", "cowboy", "none"])
+  .describe("Elixir HTTP server");
+
+export const ElixirApplicationFrameworkSchema = z
+  .enum(["ash", "none"])
+  .describe("Elixir application framework");
+
+export const ElixirDocumentationSchema = z
+  .enum(["ex_doc", "none"])
+  .describe("Elixir documentation tooling");
+
+export const ElixirClusteringSchema = z
+  .enum(["libcluster", "none"])
+  .describe("Elixir clustering library");
 
 export const ElixirDeploySchema = z
   .enum(["docker", "fly", "gigalixir", "mix-release", "none"])
@@ -781,7 +857,7 @@ export const AiDocsSchema = z
   .describe("AI documentation files (CLAUDE.md, AGENTS.md, .cursorrules)");
 
 export const CSSFrameworkSchema = z
-  .enum(["tailwind", "scss", "less", "postcss-only", "none"])
+  .enum(["tailwind", "scss", "less", "postcss-only", "styled-components", "none"])
   .describe("CSS framework/preprocessor");
 
 export const UILibrarySchema = z
@@ -998,6 +1074,12 @@ export const CreateInputSchema = z.object({
   goCaching: GoCachingSchema.optional(),
   goConfig: GoConfigSchema.optional(),
   goObservability: GoObservabilitySchema.optional(),
+  goValidation: GoValidationSchema.optional(),
+  goQuality: GoQualitySchema.optional(),
+  goMigrations: GoMigrationsSchema.optional(),
+  goTemplating: GoTemplatingSchema.optional(),
+  goProtoTooling: GoProtoToolingSchema.optional(),
+  goDI: GoDISchema.optional(),
   // Java ecosystem options
   javaLanguage: JavaLanguageSchema.optional(),
   javaWebFramework: JavaWebFrameworkSchema.optional(),
@@ -1035,6 +1117,11 @@ export const CreateInputSchema = z.object({
   elixirObservability: ElixirObservabilitySchema.optional(),
   elixirTesting: ElixirTestingSchema.optional(),
   elixirQuality: ElixirQualitySchema.optional(),
+  elixirI18n: ElixirI18nSchema.optional(),
+  elixirHttpServer: ElixirHttpServerSchema.optional(),
+  elixirApplicationFramework: ElixirApplicationFrameworkSchema.optional(),
+  elixirDocumentation: ElixirDocumentationSchema.optional(),
+  elixirClustering: ElixirClusteringSchema.optional(),
   elixirDeploy: ElixirDeploySchema.optional(),
   elixirLibraries: z.array(ElixirLibrariesSchema).optional(),
   // AI documentation files
@@ -1168,6 +1255,12 @@ export const ProjectConfigSchema = z.object({
   goCaching: GoCachingSchema,
   goConfig: GoConfigSchema,
   goObservability: GoObservabilitySchema,
+  goValidation: GoValidationSchema,
+  goQuality: GoQualitySchema,
+  goMigrations: GoMigrationsSchema,
+  goTemplating: GoTemplatingSchema,
+  goProtoTooling: GoProtoToolingSchema,
+  goDI: GoDISchema,
   // Java ecosystem options
   javaLanguage: JavaLanguageSchema.optional(),
   javaWebFramework: JavaWebFrameworkSchema,
@@ -1205,6 +1298,11 @@ export const ProjectConfigSchema = z.object({
   elixirObservability: ElixirObservabilitySchema,
   elixirTesting: ElixirTestingSchema,
   elixirQuality: ElixirQualitySchema,
+  elixirI18n: ElixirI18nSchema,
+  elixirHttpServer: ElixirHttpServerSchema,
+  elixirApplicationFramework: ElixirApplicationFrameworkSchema,
+  elixirDocumentation: ElixirDocumentationSchema,
+  elixirClustering: ElixirClusteringSchema,
   elixirDeploy: ElixirDeploySchema,
   elixirLibraries: z.array(ElixirLibrariesSchema),
   // AI documentation files
@@ -1325,6 +1423,12 @@ export const BetterTStackConfigSchema = z.object({
   goCaching: GoCachingSchema,
   goConfig: GoConfigSchema,
   goObservability: GoObservabilitySchema,
+  goValidation: GoValidationSchema,
+  goQuality: GoQualitySchema,
+  goMigrations: GoMigrationsSchema,
+  goTemplating: GoTemplatingSchema,
+  goProtoTooling: GoProtoToolingSchema,
+  goDI: GoDISchema,
   // Java ecosystem options
   javaLanguage: JavaLanguageSchema.optional(),
   javaWebFramework: JavaWebFrameworkSchema,
@@ -1362,6 +1466,11 @@ export const BetterTStackConfigSchema = z.object({
   elixirObservability: ElixirObservabilitySchema,
   elixirTesting: ElixirTestingSchema,
   elixirQuality: ElixirQualitySchema,
+  elixirI18n: ElixirI18nSchema,
+  elixirHttpServer: ElixirHttpServerSchema,
+  elixirApplicationFramework: ElixirApplicationFrameworkSchema,
+  elixirDocumentation: ElixirDocumentationSchema,
+  elixirClustering: ElixirClusteringSchema,
   elixirDeploy: ElixirDeploySchema,
   elixirLibraries: z.array(ElixirLibrariesSchema),
   // AI documentation files
@@ -1493,6 +1602,12 @@ export const GO_MESSAGE_QUEUE_VALUES = GoMessageQueueSchema.options;
 export const GO_CACHING_VALUES = GoCachingSchema.options;
 export const GO_CONFIG_VALUES = GoConfigSchema.options;
 export const GO_OBSERVABILITY_VALUES = GoObservabilitySchema.options;
+export const GO_VALIDATION_VALUES = GoValidationSchema.options;
+export const GO_QUALITY_VALUES = GoQualitySchema.options;
+export const GO_MIGRATIONS_VALUES = GoMigrationsSchema.options;
+export const GO_TEMPLATING_VALUES = GoTemplatingSchema.options;
+export const GO_PROTO_TOOLING_VALUES = GoProtoToolingSchema.options;
+export const GO_DI_VALUES = GoDISchema.options;
 export const JAVA_LANGUAGE_VALUES = JavaLanguageSchema.options;
 export const JAVA_WEB_FRAMEWORK_VALUES = JavaWebFrameworkSchema.options;
 export const JAVA_BUILD_TOOL_VALUES = JavaBuildToolSchema.options;
@@ -1528,6 +1643,11 @@ export const ELIXIR_CACHING_VALUES = ElixirCachingSchema.options;
 export const ELIXIR_OBSERVABILITY_VALUES = ElixirObservabilitySchema.options;
 export const ELIXIR_TESTING_VALUES = ElixirTestingSchema.options;
 export const ELIXIR_QUALITY_VALUES = ElixirQualitySchema.options;
+export const ELIXIR_I18N_VALUES = ElixirI18nSchema.options;
+export const ELIXIR_HTTP_SERVER_VALUES = ElixirHttpServerSchema.options;
+export const ELIXIR_APPLICATION_FRAMEWORK_VALUES = ElixirApplicationFrameworkSchema.options;
+export const ELIXIR_DOCUMENTATION_VALUES = ElixirDocumentationSchema.options;
+export const ELIXIR_CLUSTERING_VALUES = ElixirClusteringSchema.options;
 export const ELIXIR_DEPLOY_VALUES = ElixirDeploySchema.options;
 export const AI_DOCS_VALUES = AiDocsSchema.options;
 export const SHADCN_BASE_VALUES = ShadcnBaseSchema.options;

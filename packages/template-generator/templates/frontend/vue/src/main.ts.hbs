@@ -1,0 +1,11 @@
+import { createApp } from "vue";
+import App from "./App.vue";
+{{#if (eq cssFramework "scss")}}
+import "./style.scss";
+{{else if (eq cssFramework "less")}}
+import "./style.less";
+{{else}}
+import "./style.css";
+{{/if}}
+
+createApp(App).mount("#app");

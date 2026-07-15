@@ -41,6 +41,50 @@ pub fn authorize_url(client: &BasicClient) -> (url::Url, CsrfToken) {
     client.authorize_url(CsrfToken::new_random).url()
 }
 {{/if}}
+{{#if (eq rustAuth "openidconnect")}}
+//! OpenID Connect discovery and authorization helpers.
+
+#![allow(dead_code)]
+
+use openidconnect::core::{CoreClient, CoreProviderMetadata, CoreResponseType};
+use openidconnect::{
+    reqwest, ClientId, ClientSecret, CsrfToken, IssuerUrl, Nonce, RedirectUrl, Scope,
+};
+
+pub async fn discover_authorization_url(
+) -> Result<(url::Url, CsrfToken, Nonce), Box<dyn std::error::Error + Send + Sync>> {
+    let issuer = IssuerUrl::new(std::env::var("OIDC_ISSUER_URL")?)?;
+    let http_client = reqwest::ClientBuilder::new()
+        .redirect(reqwest::redirect::Policy::none())
+        .build()?;
+    let provider = CoreProviderMetadata::discover_async(issuer, &http_client).await?;
+    let client = CoreClient::from_provider_metadata(
+        provider,
+        ClientId::new(std::env::var("OIDC_CLIENT_ID")?),
+        Some(ClientSecret::new(std::env::var("OIDC_CLIENT_SECRET")?)),
+    )
+    .set_redirect_uri(RedirectUrl::new(std::env::var("OIDC_REDIRECT_URL")?)?);
+    Ok(client
+        .authorize_url(
+            openidconnect::AuthenticationFlow::<CoreResponseType>::AuthorizationCode,
+            CsrfToken::new_random,
+            Nonce::new_random,
+        )
+        .add_scope(Scope::new("openid profile email".to_string()))
+        .url())
+}
+{{/if}}
+{{#if (eq rustAuth "tower-sessions")}}
+//! In-memory session middleware for Tower/Axum applications.
+
+#![allow(dead_code)]
+
+use tower_sessions::{MemoryStore, SessionManagerLayer};
+
+pub fn session_layer() -> SessionManagerLayer<MemoryStore> {
+    SessionManagerLayer::new(MemoryStore::default()).with_secure(false)
+}
+{{/if}}
 {{#if (eq rustAuth "torii")}}
 //! Authentication via the Torii framework (SQLite storage + passwords).
 //!

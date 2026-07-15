@@ -450,6 +450,160 @@ exports[`Template Snapshots File Structure Snapshots file structure: hono-apollo
 ]
 `;
 
+exports[`Template Snapshots File Structure Snapshots file structure: typescript-library-expansion-react 1`] = `
+[
+  ".prettierignore",
+  ".prettierrc.json",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "README.md",
+  "apps/server/.env",
+  "apps/server/package.json",
+  "apps/server/src/index.ts",
+  "apps/server/src/lib/openai.ts",
+  "apps/server/src/lib/paypal-server.ts",
+  "apps/server/src/lib/websocket.ts",
+  "apps/server/test/smoke.test.ts",
+  "apps/server/tsconfig.json",
+  "apps/server/tsdown.config.ts",
+  "apps/web/.env",
+  "apps/web/codegen.ts",
+  "apps/web/electron-builder.yml",
+  "apps/web/electron/main.mjs",
+  "apps/web/electron/preload.mjs",
+  "apps/web/index.html",
+  "apps/web/package.json",
+  "apps/web/src/app-shell.tsx",
+  "apps/web/src/components/header.tsx",
+  "apps/web/src/components/loader.tsx",
+  "apps/web/src/components/mode-toggle.tsx",
+  "apps/web/src/components/theme-provider.tsx",
+  "apps/web/src/components/ui/button.tsx",
+  "apps/web/src/components/ui/card.tsx",
+  "apps/web/src/components/ui/checkbox.tsx",
+  "apps/web/src/components/ui/dropdown-menu.tsx",
+  "apps/web/src/components/ui/input.tsx",
+  "apps/web/src/components/ui/label.tsx",
+  "apps/web/src/components/ui/skeleton.tsx",
+  "apps/web/src/components/ui/sonner.tsx",
+  "apps/web/src/index.css",
+  "apps/web/src/lib/apollo-client.ts",
+  "apps/web/src/lib/contentful.ts",
+  "apps/web/src/lib/firebase.ts",
+  "apps/web/src/lib/google-analytics.ts",
+  "apps/web/src/lib/http-client.ts",
+  "apps/web/src/lib/paypal-client.ts",
+  "apps/web/src/lib/styled.tsx",
+  "apps/web/src/lib/utils.ts",
+  "apps/web/src/lib/websocket.ts",
+  "apps/web/src/main.tsx",
+  "apps/web/src/router.tsx",
+  "apps/web/src/routes/home.tsx",
+  "apps/web/src/utils/graphql.ts",
+  "apps/web/test/smoke.test.ts",
+  "apps/web/tsconfig.json",
+  "apps/web/vite.config.ts",
+  "bunfig.toml",
+  "eslint.config.mjs",
+  "package.json",
+  "packages/api/package.json",
+  "packages/api/src/index.ts",
+  "packages/api/test/smoke.test.ts",
+  "packages/api/tsconfig.json",
+  "packages/auth/package.json",
+  "packages/auth/src/index.ts",
+  "packages/auth/tsconfig.json",
+  "packages/config/package.json",
+  "packages/config/tsconfig.base.json",
+  "packages/db/drizzle.config.ts",
+  "packages/db/package.json",
+  "packages/db/src/index.ts",
+  "packages/db/src/schema/example.ts",
+  "packages/db/src/schema/index.ts",
+  "packages/db/tsconfig.json",
+  "packages/env/package.json",
+  "packages/env/src/native.ts",
+  "packages/env/src/server.ts",
+  "packages/env/src/web.ts",
+  "packages/env/tsconfig.json",
+  "tsconfig.json",
+]
+`;
+
+exports[`Template Snapshots File Structure Snapshots file structure: vanilla-vite-openapi-capacitor 1`] = `
+[
+  "AGENTS.md",
+  "CLAUDE.md",
+  "README.md",
+  "apps/server/.env",
+  "apps/server/package.json",
+  "apps/server/src/index.ts",
+  "apps/server/tsconfig.json",
+  "apps/server/tsdown.config.ts",
+  "apps/web/.env",
+  "apps/web/capacitor.config.ts",
+  "apps/web/index.html",
+  "apps/web/package.json",
+  "apps/web/src/main.ts",
+  "apps/web/src/style.css",
+  "apps/web/tsconfig.json",
+  "apps/web/vite.config.ts",
+  "bunfig.toml",
+  "package.json",
+  "packages/api/package.json",
+  "packages/api/src/index.ts",
+  "packages/api/src/openapi.json",
+  "packages/api/src/verify-openapi.ts",
+  "packages/api/tsconfig.json",
+  "packages/config/package.json",
+  "packages/config/tsconfig.base.json",
+  "packages/env/package.json",
+  "packages/env/src/native.ts",
+  "packages/env/src/server.ts",
+  "packages/env/src/web.ts",
+  "packages/env/tsconfig.json",
+  "tsconfig.json",
+]
+`;
+
+exports[`Template Snapshots File Structure Snapshots file structure: vue-anthropic-sdk 1`] = `
+[
+  "AGENTS.md",
+  "CLAUDE.md",
+  "README.md",
+  "apps/server/.env",
+  "apps/server/package.json",
+  "apps/server/src/index.ts",
+  "apps/server/src/lib/anthropic.ts",
+  "apps/server/tsconfig.json",
+  "apps/server/tsdown.config.ts",
+  "apps/web/.env",
+  "apps/web/index.html",
+  "apps/web/package.json",
+  "apps/web/src/App.vue",
+  "apps/web/src/env.d.ts",
+  "apps/web/src/main.ts",
+  "apps/web/src/style.css",
+  "apps/web/tsconfig.json",
+  "apps/web/vite.config.ts",
+  "bunfig.toml",
+  "package.json",
+  "packages/api/package.json",
+  "packages/api/src/index.ts",
+  "packages/api/src/openapi.json",
+  "packages/api/src/verify-openapi.ts",
+  "packages/api/tsconfig.json",
+  "packages/config/package.json",
+  "packages/config/tsconfig.base.json",
+  "packages/env/package.json",
+  "packages/env/src/native.ts",
+  "packages/env/src/server.ts",
+  "packages/env/src/web.ts",
+  "packages/env/tsconfig.json",
+  "tsconfig.json",
+]
+`;
+
 exports[`Template Snapshots File Structure Snapshots file structure: better-auth-full 1`] = `
 [
   "AGENTS.md",
@@ -1765,7 +1919,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -4061,6 +4215,7 @@ app.use(
 );
 
 
+
 app.use(
 	"/trpc",
 	createExpressMiddleware({
@@ -4411,7 +4566,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -5201,7 +5356,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -6037,7 +6192,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -7121,7 +7276,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -8254,7 +8409,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -9105,7 +9260,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -11088,7 +11243,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -11820,7 +11975,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -12579,7 +12734,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -13365,7 +13520,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -14795,7 +14950,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -15580,7 +15735,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -16367,7 +16522,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -16979,7 +17134,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3001,
+    port: 5173,
   },
 });
 "
@@ -18622,7 +18777,7 @@ SPRING_PROFILES_ACTIVE=dev
 # CORS_ORIGIN=http://localhost:3001
 APP_BASIC_USERNAME=admin
 APP_BASIC_PASSWORD=change-me
-CORS_ORIGIN=http://localhost:3001"
+CORS_ORIGIN=http://localhost:5173"
 ,
       "path": ".env.example",
     },
@@ -18727,14 +18882,9 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
   "crates/client/src/lib.rs",
   "crates/client/style/main.css",
   "crates/server/Cargo.toml",
-  "crates/server/src/auth.rs",
-  "crates/server/src/cache.rs",
-  "crates/server/src/email.rs",
+  "crates/server/src/database.rs",
   "crates/server/src/error.rs",
   "crates/server/src/main.rs",
-  "crates/server/src/meilisearch.rs",
-  "crates/server/src/observability.rs",
-  "crates/server/src/upstash_cache.rs",
   "rust-toolchain.toml",
 ]
 `;
@@ -18751,14 +18901,9 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
   "crates/dioxus-client/assets/main.css",
   "crates/dioxus-client/src/main.rs",
   "crates/server/Cargo.toml",
-  "crates/server/src/auth.rs",
-  "crates/server/src/cache.rs",
-  "crates/server/src/email.rs",
+  "crates/server/src/database.rs",
   "crates/server/src/error.rs",
   "crates/server/src/main.rs",
-  "crates/server/src/meilisearch.rs",
-  "crates/server/src/observability.rs",
-  "crates/server/src/upstash_cache.rs",
   "rust-toolchain.toml",
 ]
 `;
@@ -18773,14 +18918,8 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
   "crates/cli/Cargo.toml",
   "crates/cli/src/main.rs",
   "crates/server/Cargo.toml",
-  "crates/server/src/auth.rs",
-  "crates/server/src/cache.rs",
-  "crates/server/src/email.rs",
   "crates/server/src/error.rs",
   "crates/server/src/main.rs",
-  "crates/server/src/meilisearch.rs",
-  "crates/server/src/observability.rs",
-  "crates/server/src/upstash_cache.rs",
   "rust-toolchain.toml",
 ]
 `;
@@ -18793,14 +18932,9 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
   "Cargo.toml",
   "README.md",
   "crates/server/Cargo.toml",
-  "crates/server/src/auth.rs",
-  "crates/server/src/cache.rs",
-  "crates/server/src/email.rs",
+  "crates/server/src/database.rs",
   "crates/server/src/error.rs",
   "crates/server/src/main.rs",
-  "crates/server/src/meilisearch.rs",
-  "crates/server/src/observability.rs",
-  "crates/server/src/upstash_cache.rs",
   "rust-toolchain.toml",
 ]
 `;
@@ -18813,14 +18947,8 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
   "Cargo.toml",
   "README.md",
   "crates/server/Cargo.toml",
-  "crates/server/src/auth.rs",
-  "crates/server/src/cache.rs",
-  "crates/server/src/email.rs",
   "crates/server/src/error.rs",
   "crates/server/src/main.rs",
-  "crates/server/src/meilisearch.rs",
-  "crates/server/src/observability.rs",
-  "crates/server/src/upstash_cache.rs",
   "rust-toolchain.toml",
 ]
 `;
@@ -18833,21 +18961,44 @@ exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file 
   "Cargo.toml",
   "README.md",
   "crates/server/Cargo.toml",
-  "crates/server/src/auth.rs",
-  "crates/server/src/cache.rs",
-  "crates/server/src/email.rs",
+  "crates/server/src/database.rs",
   "crates/server/src/error.rs",
   "crates/server/src/main.rs",
-  "crates/server/src/meilisearch.rs",
-  "crates/server/src/observability.rs",
-  "crates/server/src/upstash_cache.rs",
+  "rust-toolchain.toml",
+]
+`;
+
+exports[`Template Snapshots - Rust Ecosystem Rust File Structure Snapshots file structure: axum-yew-library-expansion 1`] = `
+[
+  ".cargo/audit.toml",
+  ".config/nextest.toml",
+  ".env.example",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "Cargo.toml",
+  "README.md",
+  "crates/server/Cargo.toml",
+  "crates/server/src/auth.rs",
+  "crates/server/src/database.rs",
+  "crates/server/src/error.rs",
+  "crates/server/src/main.rs",
+  "crates/server/src/messaging.rs",
+  "crates/server/src/otel.rs",
+  "crates/server/src/rpc.rs",
+  "crates/server/src/templating.rs",
+  "crates/server/tests/rstest_examples.rs",
+  "crates/yew-client/Cargo.toml",
+  "crates/yew-client/Trunk.toml",
+  "crates/yew-client/index.html",
+  "crates/yew-client/src/main.rs",
+  "crates/yew-client/style/main.css",
   "rust-toolchain.toml",
 ]
 `;
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: axum-leptos-seaorm 1`] = `
 {
-  "fileCount": 21,
+  "fileCount": 16,
   "files": [
     {
       "content": 
@@ -18860,7 +19011,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -18868,6 +19019,26 @@ CORS_ORIGIN=http://localhost:3001
 # Database (if using)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
+
+# MongoDB (when rust-orm=mongodb)
+# MONGODB_URI=mongodb://localhost:27017
+# MONGODB_DATABASE=my_app
+
+# JSON-RPC (when rust-api=jsonrpsee)
+# JSONRPC_PORT=9944
+
+# Kafka / NATS (when selected)
+# KAFKA_BROKERS=localhost:9092
+# NATS_URL=nats://127.0.0.1:4222
+
+# OpenID Connect (when rust-auth=openidconnect)
+# OIDC_ISSUER_URL=https://accounts.example.com
+# OIDC_CLIENT_ID=your-client-id
+# OIDC_CLIENT_SECRET=your-client-secret
+# OIDC_REDIRECT_URL=http://localhost:3000/auth/callback
+
+# Prometheus metrics exporter (when rust-observability=metrics)
+# METRICS_LISTEN_ADDRESS=127.0.0.1:9000
 
 # JWT Secret (if using jsonwebtoken)
 # JWT_SECRET=your-secret-key-here"
@@ -18883,6 +19054,10 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 "[workspace]
 resolver = "2"
 members = [
+    "crates/server",
+    "crates/client",
+]
+default-members = [
     "crates/server",
     "crates/client",
 ]
@@ -19156,15 +19331,7 @@ path = "src/main.rs"
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/auth.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/cache.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/email.rs",
+      "path": "crates/server/src/database.rs",
     },
     {
       "content": "[exists]",
@@ -19172,7 +19339,8 @@ path = "src/main.rs"
     },
     {
       "content": 
-"use axum::{routing::get, Json, Router};
+"mod database;
+use axum::{routing::get, Json, Router};
 use serde::Serialize;
 use tower_http::cors::CorsLayer;
 mod error;
@@ -19249,6 +19417,7 @@ async fn main() -> anyhow::Result<()> {
         .layer(cors_layer())
         .with_state(state);
 
+
     // Get host and port from environment
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
     let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
@@ -19268,18 +19437,6 @@ async fn main() -> anyhow::Result<()> {
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/meilisearch.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/observability.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/upstash_cache.rs",
-    },
-    {
-      "content": "[exists]",
       "path": "README.md",
     },
     {
@@ -19292,7 +19449,7 @@ async fn main() -> anyhow::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: actix-dioxus-sqlx 1`] = `
 {
-  "fileCount": 20,
+  "fileCount": 15,
   "files": [
     {
       "content": 
@@ -19305,7 +19462,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -19313,6 +19470,26 @@ CORS_ORIGIN=http://localhost:3001
 # Database (if using)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
+
+# MongoDB (when rust-orm=mongodb)
+# MONGODB_URI=mongodb://localhost:27017
+# MONGODB_DATABASE=my_app
+
+# JSON-RPC (when rust-api=jsonrpsee)
+# JSONRPC_PORT=9944
+
+# Kafka / NATS (when selected)
+# KAFKA_BROKERS=localhost:9092
+# NATS_URL=nats://127.0.0.1:4222
+
+# OpenID Connect (when rust-auth=openidconnect)
+# OIDC_ISSUER_URL=https://accounts.example.com
+# OIDC_CLIENT_ID=your-client-id
+# OIDC_CLIENT_SECRET=your-client-secret
+# OIDC_REDIRECT_URL=http://localhost:3000/auth/callback
+
+# Prometheus metrics exporter (when rust-observability=metrics)
+# METRICS_LISTEN_ADDRESS=127.0.0.1:9000
 
 # JWT Secret (if using jsonwebtoken)
 # JWT_SECRET=your-secret-key-here"
@@ -19328,6 +19505,10 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 "[workspace]
 resolver = "2"
 members = [
+    "crates/server",
+    "crates/dioxus-client",
+]
+default-members = [
     "crates/server",
     "crates/dioxus-client",
 ]
@@ -19587,15 +19768,7 @@ path = "src/main.rs"
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/auth.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/cache.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/email.rs",
+      "path": "crates/server/src/database.rs",
     },
     {
       "content": "[exists]",
@@ -19603,7 +19776,8 @@ path = "src/main.rs"
     },
     {
       "content": 
-"use actix_cors::Cors;
+"mod database;
+use actix_cors::Cors;
 use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use serde::Serialize;
 mod error;
@@ -19704,18 +19878,6 @@ async fn main() -> anyhow::Result<()> {
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/meilisearch.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/observability.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/upstash_cache.rs",
-    },
-    {
-      "content": "[exists]",
       "path": "README.md",
     },
     {
@@ -19728,7 +19890,7 @@ async fn main() -> anyhow::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: cli-clap 1`] = `
 {
-  "fileCount": 18,
+  "fileCount": 12,
   "files": [
     {
       "content": 
@@ -19741,7 +19903,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -19749,6 +19911,26 @@ CORS_ORIGIN=http://localhost:3001
 # Database (if using)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
+
+# MongoDB (when rust-orm=mongodb)
+# MONGODB_URI=mongodb://localhost:27017
+# MONGODB_DATABASE=my_app
+
+# JSON-RPC (when rust-api=jsonrpsee)
+# JSONRPC_PORT=9944
+
+# Kafka / NATS (when selected)
+# KAFKA_BROKERS=localhost:9092
+# NATS_URL=nats://127.0.0.1:4222
+
+# OpenID Connect (when rust-auth=openidconnect)
+# OIDC_ISSUER_URL=https://accounts.example.com
+# OIDC_CLIENT_ID=your-client-id
+# OIDC_CLIENT_SECRET=your-client-secret
+# OIDC_REDIRECT_URL=http://localhost:3000/auth/callback
+
+# Prometheus metrics exporter (when rust-observability=metrics)
+# METRICS_LISTEN_ADDRESS=127.0.0.1:9000
 
 # JWT Secret (if using jsonwebtoken)
 # JWT_SECRET=your-secret-key-here"
@@ -19764,6 +19946,10 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 "[workspace]
 resolver = "2"
 members = [
+    "crates/server",
+    "crates/cli",
+]
+default-members = [
     "crates/server",
     "crates/cli",
 ]
@@ -20084,18 +20270,6 @@ path = "src/main.rs"
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/auth.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/cache.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/email.rs",
-    },
-    {
-      "content": "[exists]",
       "path": "crates/server/src/error.rs",
     },
     {
@@ -20130,18 +20304,6 @@ async fn main() -> anyhow::Result<()> {
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/meilisearch.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/observability.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/upstash_cache.rs",
-    },
-    {
-      "content": "[exists]",
       "path": "README.md",
     },
     {
@@ -20154,7 +20316,7 @@ async fn main() -> anyhow::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: axum-envlogger 1`] = `
 {
-  "fileCount": 16,
+  "fileCount": 11,
   "files": [
     {
       "content": 
@@ -20167,7 +20329,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -20175,6 +20337,26 @@ CORS_ORIGIN=http://localhost:3001
 # Database (if using)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
+
+# MongoDB (when rust-orm=mongodb)
+# MONGODB_URI=mongodb://localhost:27017
+# MONGODB_DATABASE=my_app
+
+# JSON-RPC (when rust-api=jsonrpsee)
+# JSONRPC_PORT=9944
+
+# Kafka / NATS (when selected)
+# KAFKA_BROKERS=localhost:9092
+# NATS_URL=nats://127.0.0.1:4222
+
+# OpenID Connect (when rust-auth=openidconnect)
+# OIDC_ISSUER_URL=https://accounts.example.com
+# OIDC_CLIENT_ID=your-client-id
+# OIDC_CLIENT_SECRET=your-client-secret
+# OIDC_REDIRECT_URL=http://localhost:3000/auth/callback
+
+# Prometheus metrics exporter (when rust-observability=metrics)
+# METRICS_LISTEN_ADDRESS=127.0.0.1:9000
 
 # JWT Secret (if using jsonwebtoken)
 # JWT_SECRET=your-secret-key-here"
@@ -20190,6 +20372,9 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 "[workspace]
 resolver = "2"
 members = [
+    "crates/server",
+]
+default-members = [
     "crates/server",
 ]
 
@@ -20298,15 +20483,7 @@ path = "src/main.rs"
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/auth.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/cache.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/email.rs",
+      "path": "crates/server/src/database.rs",
     },
     {
       "content": "[exists]",
@@ -20314,7 +20491,8 @@ path = "src/main.rs"
     },
     {
       "content": 
-"use axum::{routing::get, Json, Router};
+"mod database;
+use axum::{routing::get, Json, Router};
 use serde::Serialize;
 use tower_http::cors::CorsLayer;
 mod error;
@@ -20387,6 +20565,7 @@ async fn main() -> anyhow::Result<()> {
         .layer(cors_layer())
         .with_state(state);
 
+
     // Get host and port from environment
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
     let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
@@ -20406,18 +20585,6 @@ async fn main() -> anyhow::Result<()> {
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/meilisearch.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/observability.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/upstash_cache.rs",
-    },
-    {
-      "content": "[exists]",
       "path": "README.md",
     },
     {
@@ -20430,7 +20597,7 @@ async fn main() -> anyhow::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: axum-eyre 1`] = `
 {
-  "fileCount": 16,
+  "fileCount": 10,
   "files": [
     {
       "content": 
@@ -20443,7 +20610,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -20451,6 +20618,26 @@ CORS_ORIGIN=http://localhost:3001
 # Database (if using)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
+
+# MongoDB (when rust-orm=mongodb)
+# MONGODB_URI=mongodb://localhost:27017
+# MONGODB_DATABASE=my_app
+
+# JSON-RPC (when rust-api=jsonrpsee)
+# JSONRPC_PORT=9944
+
+# Kafka / NATS (when selected)
+# KAFKA_BROKERS=localhost:9092
+# NATS_URL=nats://127.0.0.1:4222
+
+# OpenID Connect (when rust-auth=openidconnect)
+# OIDC_ISSUER_URL=https://accounts.example.com
+# OIDC_CLIENT_ID=your-client-id
+# OIDC_CLIENT_SECRET=your-client-secret
+# OIDC_REDIRECT_URL=http://localhost:3000/auth/callback
+
+# Prometheus metrics exporter (when rust-observability=metrics)
+# METRICS_LISTEN_ADDRESS=127.0.0.1:9000
 
 # JWT Secret (if using jsonwebtoken)
 # JWT_SECRET=your-secret-key-here"
@@ -20466,6 +20653,9 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 "[workspace]
 resolver = "2"
 members = [
+    "crates/server",
+]
+default-members = [
     "crates/server",
 ]
 
@@ -20570,18 +20760,6 @@ path = "src/main.rs"
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/auth.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/cache.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/email.rs",
-    },
-    {
-      "content": "[exists]",
       "path": "crates/server/src/error.rs",
     },
     {
@@ -20640,6 +20818,7 @@ async fn main() -> eyre::Result<()> {
         .route("/health", get(health))
         .layer(cors_layer());
 
+
     // Get host and port from environment
     let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
     let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
@@ -20659,18 +20838,6 @@ async fn main() -> eyre::Result<()> {
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/meilisearch.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/observability.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/upstash_cache.rs",
-    },
-    {
-      "content": "[exists]",
       "path": "README.md",
     },
     {
@@ -20683,7 +20850,7 @@ async fn main() -> eyre::Result<()> {
 
 exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: rocket-seaorm 1`] = `
 {
-  "fileCount": 16,
+  "fileCount": 11,
   "files": [
     {
       "content": 
@@ -20696,7 +20863,7 @@ HOST=127.0.0.1
 PORT=3000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # gRPC (if using tonic)
 # GRPC_PORT=50051
@@ -20704,6 +20871,26 @@ CORS_ORIGIN=http://localhost:3001
 # Database (if using)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname
 # DATABASE_URL=sqlite:./data.db
+
+# MongoDB (when rust-orm=mongodb)
+# MONGODB_URI=mongodb://localhost:27017
+# MONGODB_DATABASE=my_app
+
+# JSON-RPC (when rust-api=jsonrpsee)
+# JSONRPC_PORT=9944
+
+# Kafka / NATS (when selected)
+# KAFKA_BROKERS=localhost:9092
+# NATS_URL=nats://127.0.0.1:4222
+
+# OpenID Connect (when rust-auth=openidconnect)
+# OIDC_ISSUER_URL=https://accounts.example.com
+# OIDC_CLIENT_ID=your-client-id
+# OIDC_CLIENT_SECRET=your-client-secret
+# OIDC_REDIRECT_URL=http://localhost:3000/auth/callback
+
+# Prometheus metrics exporter (when rust-observability=metrics)
+# METRICS_LISTEN_ADDRESS=127.0.0.1:9000
 
 # JWT Secret (if using jsonwebtoken)
 # JWT_SECRET=your-secret-key-here"
@@ -20719,6 +20906,9 @@ DATABASE_URL=postgres://user:password@localhost:5432/dbname
 "[workspace]
 resolver = "2"
 members = [
+    "crates/server",
+]
+default-members = [
     "crates/server",
 ]
 
@@ -20826,15 +21016,7 @@ path = "src/main.rs"
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/auth.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/cache.rs",
-    },
-    {
-      "content": "[exists]",
-      "path": "crates/server/src/email.rs",
+      "path": "crates/server/src/database.rs",
     },
     {
       "content": "[exists]",
@@ -20842,7 +21024,8 @@ path = "src/main.rs"
     },
     {
       "content": 
-"use rocket::{get, routes, serde::json::Json};
+"mod database;
+use rocket::{get, routes, serde::json::Json};
 use rocket_cors::CorsOptions;
 use serde::Serialize;
 mod error;
@@ -20920,15 +21103,458 @@ async fn rocket() -> _ {
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/meilisearch.rs",
+      "path": "README.md",
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/observability.rs",
+      "path": "rust-toolchain.toml",
+    },
+  ],
+}
+`;
+
+exports[`Template Snapshots - Rust Ecosystem Rust Key File Content Snapshots key files: axum-yew-library-expansion 1`] = `
+{
+  "fileCount": 24,
+  "files": [
+    {
+      "content": "[exists]",
+      "path": ".cargo/audit.toml",
     },
     {
       "content": "[exists]",
-      "path": "crates/server/src/upstash_cache.rs",
+      "path": ".config/nextest.toml",
+    },
+    {
+      "content": 
+"# Application
+RUST_LOG=debug
+APP_ENV=development
+
+# Server
+HOST=127.0.0.1
+PORT=3000
+
+# Allowed web origin for CORS (unset or empty = allow any origin)
+CORS_ORIGIN=http://localhost:5173
+
+# gRPC (if using tonic)
+# GRPC_PORT=50051
+
+# Database (if using)
+DATABASE_URL=postgres://user:password@localhost:5432/dbname
+# DATABASE_URL=sqlite:./data.db
+
+# MongoDB (when rust-orm=mongodb)
+# MONGODB_URI=mongodb://localhost:27017
+# MONGODB_DATABASE=my_app
+
+# JSON-RPC (when rust-api=jsonrpsee)
+# JSONRPC_PORT=9944
+
+# Kafka / NATS (when selected)
+# KAFKA_BROKERS=localhost:9092
+# NATS_URL=nats://127.0.0.1:4222
+
+# OpenID Connect (when rust-auth=openidconnect)
+# OIDC_ISSUER_URL=https://accounts.example.com
+# OIDC_CLIENT_ID=your-client-id
+# OIDC_CLIENT_SECRET=your-client-secret
+# OIDC_REDIRECT_URL=http://localhost:3000/auth/callback
+
+# Prometheus metrics exporter (when rust-observability=metrics)
+# METRICS_LISTEN_ADDRESS=127.0.0.1:9000
+
+# JWT Secret (if using jsonwebtoken)
+# JWT_SECRET=your-secret-key-here"
+,
+      "path": ".env.example",
+    },
+    {
+      "content": "[exists]",
+      "path": "AGENTS.md",
+    },
+    {
+      "content": 
+"[workspace]
+resolver = "2"
+members = [
+    "crates/server",
+    "crates/yew-client",
+]
+default-members = [
+    "crates/server",
+    "crates/yew-client",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+repository = ""
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.51", features = ["full"] }
+rdkafka = { version = "0.39", features = ["tokio"] }
+metrics = "0.24"
+metrics-exporter-prometheus = { version = "0.18", default-features = false, features = ["http-listener"] }
+minijinja = "2.21"
+tower-sessions = "0.15"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling (anyhow + thiserror)
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Tracing (used by server logging, CLI, TUI, and WASM frontends)
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Environment variables
+dotenvy = "0.15"
+
+
+# Web framework (Axum)
+axum = "0.8"
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+
+# Database (official MongoDB driver)
+mongodb = "3.8"
+
+# JSON-RPC
+jsonrpsee = { version = "0.26", features = ["server", "macros"] }
+
+# Frontend (Yew)
+yew = { version = "0.23", features = ["csr"] }
+gloo-net = { version = "0.7", default-features = false, features = ["http", "json"] }
+console_error_panic_hook = "0.1"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["HtmlElement"] }
+
+
+# Randomness and sampling
+rand = "0.10"
+# Regular expressions
+regex = "1.13"
+# Data parallelism
+rayon = "1.12"
+# Iterator utilities
+itertools = "0.15"
+# Fixture-based testing
+rstest = "0.26"
+
+
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+"
+,
+      "path": "Cargo.toml",
+    },
+    {
+      "content": "[exists]",
+      "path": "CLAUDE.md",
+    },
+    {
+      "content": 
+"[package]
+name = "snapshot-rust-axum-yew-library-expansion-server"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+# Async runtime
+tokio.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# Error handling
+thiserror.workspace = true
+anyhow.workspace = true
+
+# Logging
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# Environment
+dotenvy.workspace = true
+
+
+# Web framework
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+
+mongodb.workspace = true
+
+jsonrpsee.workspace = true
+
+
+rand.workspace = true
+regex.workspace = true
+rayon.workspace = true
+itertools.workspace = true
+tower-sessions.workspace = true
+rdkafka.workspace = true
+metrics.workspace = true
+metrics-exporter-prometheus.workspace = true
+minijinja.workspace = true
+
+[[bin]]
+name = "server"
+path = "src/main.rs"
+
+[dev-dependencies]
+rstest.workspace = true
+"
+,
+      "path": "crates/server/Cargo.toml",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/server/src/auth.rs",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/server/src/database.rs",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/server/src/error.rs",
+    },
+    {
+      "content": 
+"mod database;
+mod rpc;
+use axum::{routing::get, Json, Router};
+use serde::Serialize;
+use tower_http::cors::CorsLayer;
+mod auth;
+mod error;
+mod messaging;
+mod otel;
+mod templating;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+#[derive(Serialize)]
+struct HealthResponse {
+    status: &'static str,
+    message: &'static str,
+}
+
+async fn health() -> Json<HealthResponse> {
+    Json(HealthResponse {
+        status: "ok",
+        message: "Server is running",
+    })
+}
+
+/// CORS pinned to \`CORS_ORIGIN\` when set, permissive otherwise.
+fn cors_layer() -> CorsLayer {
+    match std::env::var("CORS_ORIGIN") {
+        Ok(origin) if !origin.is_empty() => CorsLayer::new()
+            .allow_origin(origin.parse::<axum::http::HeaderValue>().expect("invalid CORS_ORIGIN"))
+            .allow_methods(tower_http::cors::Any)
+            .allow_headers(tower_http::cors::Any),
+        _ => CorsLayer::permissive(),
+    }
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // Load environment variables
+    dotenvy::dotenv().ok();
+
+    // Start JSON-RPC on a dedicated port alongside the HTTP server
+    let rpc_host = std::env::var("JSONRPC_HOST")
+        .or_else(|_| std::env::var("HOST"))
+        .unwrap_or_else(|_| "127.0.0.1".to_string());
+    let rpc_port = std::env::var("JSONRPC_PORT").unwrap_or_else(|_| "9944".to_string());
+    let rpc_address = format!("{rpc_host}:{rpc_port}").parse()?;
+    let _rpc_server = rpc::start(rpc_address).await.map_err(|error| std::io::Error::other(error.to_string()))?;
+
+    // Install the Prometheus metrics recorder and HTTP exporter
+    otel::install_metrics().map_err(|error| std::io::Error::other(error.to_string()))?;
+
+    // Connect the selected database driver at startup
+    let _database = database::connect().await.map_err(|error| std::io::Error::other(error.to_string()))?;
+
+    // Initialize tracing
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "debug".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+
+
+    // Build router
+    let app = Router::new()
+        .route("/health", get(health))
+        .layer(cors_layer());
+
+    // Attach cookie-backed session management to every Axum route.
+    let app = app.layer(auth::session_layer());
+
+    // Get host and port from environment
+    let host = std::env::var("HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+    let addr = format!("{}:{}", host, port);
+
+    tracing::info!("Starting HTTP server at http://{}", addr);
+
+    // Start server
+    let listener = tokio::net::TcpListener::bind(&addr).await?;
+    axum::serve(listener, app).await?;
+
+    Ok(())
+}
+"
+,
+      "path": "crates/server/src/main.rs",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/server/src/messaging.rs",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/server/src/otel.rs",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/server/src/rpc.rs",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/server/src/templating.rs",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/server/tests/rstest_examples.rs",
+    },
+    {
+      "content": 
+"[package]
+name = "snapshot-rust-axum-yew-library-expansion-yew-client"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+yew.workspace = true
+gloo-net.workspace = true
+serde.workspace = true
+console_error_panic_hook.workspace = true
+wasm-bindgen-futures.workspace = true
+web-sys.workspace = true
+
+[[bin]]
+name = "yew-client"
+path = "src/main.rs"
+"
+,
+      "path": "crates/yew-client/Cargo.toml",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/yew-client/index.html",
+    },
+    {
+      "content": 
+"use gloo_net::http::Request;
+use serde::Deserialize;
+use wasm_bindgen_futures::spawn_local;
+use yew::prelude::*;
+
+#[derive(Clone, Debug, Deserialize, PartialEq)]
+struct HealthResponse {
+    status: String,
+    message: String,
+}
+
+#[function_component(App)]
+fn app() -> Html {
+    let health = use_state(|| None::<Result<HealthResponse, String>>);
+
+    {
+        let health = health.clone();
+        use_effect_with((), move |_| {
+            spawn_local(async move {
+                let result = Request::get("http://localhost:3000/health")
+                    .send()
+                    .await
+                    .map_err(|error| error.to_string())
+                    .and_then(|response| {
+                        if response.ok() {
+                            Ok(response)
+                        } else {
+                            Err(format!("server returned {}", response.status()))
+                        }
+                    });
+                let result = match result {
+                    Ok(response) => response
+                        .json::<HealthResponse>()
+                        .await
+                        .map_err(|error| error.to_string()),
+                    Err(error) => Err(error),
+                };
+                health.set(Some(result));
+            });
+            || ()
+        });
+    }
+
+    let status = match health.as_ref() {
+        None => html! { <p>{"Checking the Rust server…"}</p> },
+        Some(Ok(response)) => html! {
+            <p class="ok">{format!("{} — {}", response.status, response.message)}</p>
+        },
+        Some(Err(error)) => html! { <p class="error">{format!("Server unavailable: {error}")}</p> },
+    };
+
+    html! {
+        <main>
+            <span class="eyebrow">{"better/fullstack"}</span>
+            <h1>{"Yew + Rust"}</h1>
+            <p>{"A typed WebAssembly frontend connected to your generated Rust backend."}</p>
+            {status}
+        </main>
+    }
+}
+
+fn main() {
+    console_error_panic_hook::set_once();
+    yew::Renderer::<App>::new().render();
+}
+"
+,
+      "path": "crates/yew-client/src/main.rs",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/yew-client/style/main.css",
+    },
+    {
+      "content": "[exists]",
+      "path": "crates/yew-client/Trunk.toml",
     },
     {
       "content": "[exists]",
@@ -21089,9 +21715,9 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21149,9 +21775,9 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21241,9 +21867,9 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21301,9 +21927,9 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21361,9 +21987,9 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21413,9 +22039,9 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21473,9 +22099,9 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21549,9 +22175,9 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21617,9 +22243,9 @@ HOST=0.0.0.0
 PORT=8080
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
-# Database settings (if using GORM, sqlc, Ent, or Bun)
+# Database settings (if using GORM, sqlc, Ent, Bun, or sqlx)
 DATABASE_URL=postgres://user:password@localhost:5432/dbname?sslmode=disable
 
 # gRPC settings (if using gRPC)
@@ -21800,7 +22426,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -21916,7 +22542,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22024,7 +22650,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22116,7 +22742,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22192,7 +22818,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22268,7 +22894,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 
 # Database (if using SQLAlchemy/SQLModel)
 DATABASE_URL=sqlite:///./app.db
@@ -22435,7 +23061,7 @@ PORT=4000
 SECRET_KEY_BASE=replace-with-mix-phx-gen-secret
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 DATABASE_URL=ecto://postgres:postgres@localhost/snapshot_elixir_phoenix_ecto_rest_prod
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
@@ -22588,7 +23214,7 @@ PORT=4000
 SECRET_KEY_BASE=replace-with-mix-phx-gen-secret
 
 # Allowed web origin for CORS (unset or empty = allow any origin)
-CORS_ORIGIN=http://localhost:3001
+CORS_ORIGIN=http://localhost:5173
 DATABASE_URL=ecto://postgres:postgres@localhost/snapshot_elixir_phoenix_liveview_full_prod
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres

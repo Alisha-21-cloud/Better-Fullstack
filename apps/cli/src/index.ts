@@ -17,6 +17,7 @@ export {
 } from "./run";
 
 import type { ProjectConfig } from "./types";
+
 import { applyEffectBackendDefaults } from "./utils/config-processing";
 
 // Re-export virtual filesystem types for programmatic usage
@@ -174,6 +175,12 @@ export async function createVirtual(
       goCaching: options.goCaching || "none",
       goConfig: options.goConfig || "none",
       goObservability: options.goObservability || "none",
+      goValidation: options.goValidation || "none",
+      goQuality: options.goQuality || "none",
+      goMigrations: options.goMigrations || "none",
+      goTemplating: options.goTemplating || "none",
+      goProtoTooling: options.goProtoTooling || "none",
+      goDI: options.goDI || "none",
       javaWebFramework:
         options.javaWebFramework || (options.ecosystem === "java" ? "spring-boot" : "none"),
       javaLanguage: options.javaLanguage || "java",
@@ -186,8 +193,7 @@ export async function createVirtual(
       javaTestingLibraries:
         options.javaTestingLibraries || (options.ecosystem === "java" ? ["junit5"] : []),
       dotnetWebFramework:
-        options.dotnetWebFramework ||
-        (options.ecosystem === "dotnet" ? "aspnet-minimal" : "none"),
+        options.dotnetWebFramework || (options.ecosystem === "dotnet" ? "aspnet-minimal" : "none"),
       dotnetOrm: options.dotnetOrm || (options.ecosystem === "dotnet" ? "ef-core" : "none"),
       dotnetAuth:
         options.dotnetAuth || (options.ecosystem === "dotnet" ? "aspnet-identity" : "none"),
@@ -219,6 +225,12 @@ export async function createVirtual(
         options.elixirObservability || (options.ecosystem === "elixir" ? "telemetry" : "none"),
       elixirTesting: options.elixirTesting || (options.ecosystem === "elixir" ? "ex_unit" : "none"),
       elixirQuality: options.elixirQuality || (options.ecosystem === "elixir" ? "credo" : "none"),
+      elixirI18n: options.elixirI18n || "none",
+      elixirHttpServer:
+        options.elixirHttpServer || (options.ecosystem === "elixir" ? "cowboy" : "none"),
+      elixirApplicationFramework: options.elixirApplicationFramework || "none",
+      elixirDocumentation: options.elixirDocumentation || "none",
+      elixirClustering: options.elixirClustering || "none",
       elixirDeploy: options.elixirDeploy || "none",
       elixirLibraries: options.elixirLibraries || [],
       // AI documentation files (canonical default ships both CLAUDE.md + AGENTS.md)
@@ -229,9 +241,8 @@ export async function createVirtual(
     }
     applyEffectBackendDefaults(config, new Set(Object.keys(options)));
 
-    const { generateVirtualProject: generate, EMBEDDED_TEMPLATES } = await import(
-      "@better-fullstack/template-generator"
-    );
+    const { generateVirtualProject: generate, EMBEDDED_TEMPLATES } =
+      await import("@better-fullstack/template-generator");
 
     const result = await generate({
       config,
@@ -300,6 +311,12 @@ export type {
   GoCli,
   GoLogging,
   GoAuth,
+  GoValidation,
+  GoQuality,
+  GoMigrations,
+  GoTemplating,
+  GoProtoTooling,
+  GoDI,
   JavaWebFramework,
   JavaBuildTool,
   JavaLibraries,

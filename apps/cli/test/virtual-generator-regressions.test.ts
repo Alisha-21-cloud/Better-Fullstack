@@ -1,5 +1,9 @@
+import {
+  getLocalWebDevPort,
+  parseStackPartSpecs,
+  type ProjectConfig,
+} from "@better-fullstack/types";
 import { describe, expect, it } from "bun:test";
-import { parseStackPartSpecs } from "@better-fullstack/types";
 
 import { createVirtual } from "../src/index";
 import { validateConfigForProgrammaticUse } from "../src/utils/config-validation";
@@ -7,6 +11,18 @@ import { runWithContext } from "../src/utils/context";
 import { getVirtualTreeFileContent, hasVirtualFile } from "./virtual-tree-utils";
 
 const readTextFromTree = getVirtualTreeFileContent;
+
+function validateElixirProgrammatic(config: Partial<ProjectConfig>) {
+  return runWithContext({ silent: true }, () =>
+    validateConfigForProgrammaticUse({
+      projectName: "elixir-validation",
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirHttpServer: "bandit",
+      ...config,
+    }),
+  );
+}
 
 type PackageJsonShape = {
   packageManager?: string;
@@ -34,6 +50,103 @@ function packageHasDependency(packageJson: PackageJsonShape | undefined, name: s
 
 describe("Virtual Generator Regressions", () => {
   const packageManagers = ["npm", "pnpm", "bun", "yarn"] as const;
+
+  it("rejects unsupported Warp APIs through programmatic validation", () => {
+    expect(() =>
+      runWithContext({ silent: true }, () =>
+        validateConfigForProgrammaticUse({
+          ecosystem: "rust",
+          rustWebFramework: "warp",
+          rustApi: "tonic",
+        }),
+      ),
+    ).toThrow("Warp and Salvo currently support REST");
+  });
+
+  it("uses the canonical TanStack Router dev port in the generated Vite config", async () => {
+    const result = await createVirtual({
+      projectName: "tanstack-router-dev-port",
+      frontend: ["tanstack-router"],
+      backend: "hono",
+      runtime: "bun",
+      api: "orpc",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "none",
+    });
+
+    expect(result.success).toBe(true);
+    expect(readTextFromTree(result.tree!, "apps/web/vite.config.ts")).toContain(
+      `port: ${getLocalWebDevPort(["tanstack-router"])}`,
+    );
+  });
+
+  it("uses the canonical Solid dev port in the generated Vite config", async () => {
+    const result = await createVirtual({
+      projectName: "solid-dev-port",
+      frontend: ["solid"],
+      backend: "hono",
+      runtime: "bun",
+      api: "orpc",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "none",
+    });
+
+    expect(result.success).toBe(true);
+    expect(readTextFromTree(result.tree!, "apps/web/vite.config.ts")).toContain(
+      `port: ${getLocalWebDevPort(["solid"])}`,
+    );
+  });
+
+  it("does not leak Mocha smoke tests into Playwright projects", async () => {
+    const result = await createVirtual({
+      projectName: "playwright-only",
+      frontend: ["react-vite"],
+      backend: "hono",
+      runtime: "bun",
+      api: "orpc",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "none",
+      testing: "playwright",
+    });
+
+    expect(result.success).toBe(true);
+    expect(hasVirtualFile(result.tree!.root, "playwright.config.ts")).toBe(true);
+    expect(hasVirtualFile(result.tree!.root, "apps/web/test/smoke.test.ts")).toBe(false);
+    expect(hasVirtualFile(result.tree!.root, "apps/server/test/smoke.test.ts")).toBe(false);
+  });
+
+  for (const frontend of ["vanilla-vite", "vue"] as const) {
+    it(`wires daisyUI, PWA, and framework-agnostic state for ${frontend}`, async () => {
+      const result = await createVirtual({
+        projectName: `${frontend}-integrations`,
+        frontend: [frontend],
+        backend: "none",
+        runtime: "none",
+        api: "none",
+        database: "none",
+        orm: "none",
+        auth: "none",
+        forms: "none",
+        cssFramework: "tailwind",
+        uiLibrary: "daisyui",
+        stateManagement: "nanostores",
+        addons: ["pwa"],
+      });
+
+      expect(result.success).toBe(true);
+      const webPackageJson = readJsonFromTree(result.tree!, "apps/web/package.json");
+      expect(packageHasDependency(webPackageJson, "nanostores")).toBe(true);
+      expect(packageHasDependency(webPackageJson, "vite-plugin-pwa")).toBe(true);
+      expect(packageHasDependency(webPackageJson, "@vite-pwa/assets-generator")).toBe(true);
+      expect(readTextFromTree(result.tree!, "apps/web/src/style.css")).toContain(
+        '@plugin "daisyui";',
+      );
+      expect(hasVirtualFile(result.tree!.root, "apps/web/pwa-assets.config.ts")).toBe(true);
+    });
+  }
 
   for (const packageManager of packageManagers) {
     it(`writes a concrete ${packageManager} packageManager version`, async () => {
@@ -383,8 +496,9 @@ describe("Virtual Generator Regressions", () => {
     expect(workflow).toContain("run: bun run test");
     expect(rootPackageJson?.scripts?.test).toBe("bun run --filter native test");
     expect(nativePackageJson?.scripts?.test).toBe("jest");
-    expect(readTextFromTree(result.tree!, "apps/native/__tests__/mobile-ui-provider.test.tsx"))
-      .toContain("renders children inside the mobile provider");
+    expect(
+      readTextFromTree(result.tree!, "apps/native/__tests__/mobile-ui-provider.test.tsx"),
+    ).toContain("renders children inside the mobile provider");
   });
 
   const graphOnlyBackendCiCases = [
@@ -1532,6 +1646,21 @@ describe("Virtual Generator Regressions", () => {
     expect(dockerfile).not.toContain("mix.lock*");
   });
 
+  it("copies priv into Elixir Docker builds for every SQL repository adapter", async () => {
+    for (const orm of ["ecto-sql", "myxql", "ecto_sqlite3"] as const) {
+      const result = await createVirtual({
+        projectName: `elixir-docker-${orm}`,
+        ecosystem: "elixir",
+        elixirWebFramework: "none",
+        elixirOrm: orm,
+        elixirDeploy: "docker",
+      });
+
+      expect(result.success).toBe(true);
+      expect(readTextFromTree(result.tree!, "Dockerfile")).toContain("COPY priv priv");
+    }
+  });
+
   it("rolls initial Oban migrations all the way back down", async () => {
     const result = await createVirtual({
       projectName: "elixir-oban",
@@ -1633,6 +1762,24 @@ describe("Virtual Generator Regressions", () => {
         }),
       ),
     ).toThrow("Elixir auth scaffolds require Phoenix.");
+  });
+
+  it("keeps CLI validation aligned with expanded Elixir adapters", () => {
+    expect(() =>
+      validateElixirProgrammatic({ elixirOrm: "myxql", elixirAuth: "phx-gen-auth" }),
+    ).not.toThrow();
+    expect(() =>
+      validateElixirProgrammatic({ elixirOrm: "ecto_sqlite3", elixirAuth: "phx-gen-auth" }),
+    ).not.toThrow();
+    expect(() => validateElixirProgrammatic({ elixirHttpServer: "none" })).toThrow(
+      "Phoenix requires an HTTP server adapter.",
+    );
+    expect(() => validateElixirProgrammatic({ elixirOrm: "ecto", elixirAuth: "pow" })).toThrow(
+      "Pow requires Phoenix and an Ecto SQL repository.",
+    );
+    expect(() =>
+      validateElixirProgrammatic({ elixirOrm: "none", elixirTesting: "ex_machina" }),
+    ).toThrow("ExMachina requires an Ecto SQL repository.");
   });
 
   it("keeps Phoenix LiveView demos self-contained without Ecto", async () => {

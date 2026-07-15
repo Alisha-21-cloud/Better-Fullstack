@@ -1,0 +1,16 @@
+{{#if (eq elixirApi "open_api_spex")}}
+defmodule {{elixirModuleName}}Web.ApiSpec do
+  @moduledoc "OpenAPI document served by the generated Phoenix router."
+
+  alias OpenApiSpex.{Info, OpenApi, Server}
+
+  def spec do
+    %OpenApi{
+      info: %Info{title: "{{projectName}} API", version: "1.0.0"},
+      servers: [%Server{url: "/"}],
+      paths: %{}
+    }
+    |> OpenApiSpex.resolve_schema_modules()
+  end
+end
+{{/if}}

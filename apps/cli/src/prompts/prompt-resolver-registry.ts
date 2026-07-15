@@ -31,6 +31,11 @@ import {
   ELIXIR_OBSERVABILITY_VALUES,
   ELIXIR_ORM_VALUES,
   ELIXIR_QUALITY_VALUES,
+  ELIXIR_I18N_VALUES,
+  ELIXIR_HTTP_SERVER_VALUES,
+  ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  ELIXIR_DOCUMENTATION_VALUES,
+  ELIXIR_CLUSTERING_VALUES,
   ELIXIR_REALTIME_VALUES,
   ELIXIR_TESTING_VALUES,
   ELIXIR_VALIDATION_VALUES,
@@ -49,8 +54,14 @@ import {
   GO_API_VALUES,
   GO_AUTH_VALUES,
   GO_CLI_VALUES,
+  GO_DI_VALUES,
   GO_LOGGING_VALUES,
+  GO_MIGRATIONS_VALUES,
   GO_ORM_VALUES,
+  GO_PROTO_TOOLING_VALUES,
+  GO_QUALITY_VALUES,
+  GO_TEMPLATING_VALUES,
+  GO_VALIDATION_VALUES,
   GO_WEB_FRAMEWORK_VALUES,
   JAVA_AUTH_VALUES,
   JAVA_BUILD_TOOL_VALUES,
@@ -89,7 +100,6 @@ import {
   UI_LIBRARY_VALUES,
   VALIDATION_VALUES,
 } from "../types";
-
 import { resolveAIPrompt } from "./ai";
 import { resolveAnimationPrompt } from "./animation";
 import { resolveApiPrompt } from "./api";
@@ -125,6 +135,11 @@ import {
   resolveElixirObservabilityPrompt,
   resolveElixirOrmPrompt,
   resolveElixirQualityPrompt,
+  resolveElixirI18nPrompt,
+  resolveElixirHttpServerPrompt,
+  resolveElixirApplicationFrameworkPrompt,
+  resolveElixirDocumentationPrompt,
+  resolveElixirClusteringPrompt,
   resolveElixirRealtimePrompt,
   resolveElixirTestingPrompt,
   resolveElixirValidationPrompt,
@@ -132,14 +147,20 @@ import {
 } from "./elixir-ecosystem";
 import { resolveEmailPrompt } from "./email";
 import { resolveFileUploadPrompt } from "./file-upload";
-import { resolveFrontendPrompt } from "./frontend";
 import { resolveFormsPrompt } from "./forms";
+import { resolveFrontendPrompt } from "./frontend";
 import {
   resolveGoApiPrompt,
   resolveGoAuthPrompt,
   resolveGoCliPrompt,
+  resolveGoDIPrompt,
   resolveGoLoggingPrompt,
+  resolveGoMigrationsPrompt,
   resolveGoOrmPrompt,
+  resolveGoProtoToolingPrompt,
+  resolveGoQualityPrompt,
+  resolveGoTemplatingPrompt,
+  resolveGoValidationPrompt,
   resolveGoWebFrameworkPrompt,
 } from "./go-ecosystem";
 import {
@@ -164,7 +185,6 @@ import {
 import { resolveObservabilityPrompt } from "./observability";
 import { resolveORMPrompt } from "./orm";
 import { resolvePaymentsPrompt } from "./payments";
-import { resolveRateLimitPrompt } from "./rate-limit";
 import { type PromptResolution } from "./prompt-contract";
 import {
   resolvePythonAiPrompt,
@@ -177,6 +197,7 @@ import {
   resolvePythonValidationPrompt,
   resolvePythonWebFrameworkPrompt,
 } from "./python-ecosystem";
+import { resolveRateLimitPrompt } from "./rate-limit";
 import { resolveRealtimePrompt } from "./realtime";
 import { resolveRuntimePrompt } from "./runtime";
 import {
@@ -220,8 +241,9 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   },
   ai: {
     schemaValues: AI_VALUES,
-    resolve: ({ value }: { value?: string } = {}) => resolveAIPrompt(value as any),
-    coverageContexts: [{}],
+    resolve: ({ value, backend }: { value?: string; backend?: string } = {}) =>
+      resolveAIPrompt({ ai: value as any, backend: backend as any }),
+    coverageContexts: [{ backend: "hono" }, { backend: "none" }],
   },
   animation: {
     schemaValues: ANIMATION_VALUES,
@@ -231,16 +253,14 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   api: {
     schemaValues: API_VALUES,
     resolve: resolveApiPrompt,
-    coverageContexts: [
-      { frontend: ["next"], backend: "hono" },
-      { backend: "convex" },
-    ],
+    coverageContexts: [{ frontend: ["next"], backend: "hono" }, { backend: "convex" }],
   },
   auth: {
     schemaValues: AUTH_VALUES,
     resolve: resolveAuthPrompt,
     coverageContexts: [
       { ecosystem: "typescript", backend: "self", frontend: ["next"] },
+      { ecosystem: "typescript", backend: "express", frontend: ["react-vite"] },
       { ecosystem: "go", backend: "none", frontend: [] },
     ],
   },
@@ -257,12 +277,20 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   cms: {
     schemaValues: CMS_VALUES,
     resolve: resolveCMSPrompt,
-    coverageContexts: [{ backend: "hono" }, { backend: "none" }],
+    coverageContexts: [
+      { backend: "hono" },
+      { backend: "none", frontends: ["vue"] },
+      { backend: "none", frontends: [] },
+    ],
   },
   cssFramework: {
     schemaValues: CSS_FRAMEWORK_VALUES,
     resolve: resolveCSSFrameworkPrompt,
-    coverageContexts: [{}, { uiLibrary: "radix-ui" }],
+    coverageContexts: [
+      { frontends: ["react-vite"] },
+      { uiLibrary: "none", frontends: ["vue"] },
+      { uiLibrary: "radix-ui", frontends: ["react-vite"] },
+    ],
   },
   database: {
     schemaValues: DATABASE_VALUES,
@@ -329,7 +357,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   realtime: {
     schemaValues: REALTIME_VALUES,
     resolve: resolveRealtimePrompt,
-    coverageContexts: [{ backend: "hono" }, { backend: "none" }],
+    coverageContexts: [{ backend: "express" }, { backend: "hono" }, { backend: "none" }],
   },
   runtime: {
     schemaValues: RUNTIME_VALUES,
@@ -348,8 +376,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   },
   mobileNavigation: {
     schemaValues: MOBILE_NAVIGATION_VALUES,
-    resolve: ({ value }: { value?: string } = {}) =>
-      resolveMobileNavigationPrompt(value as any),
+    resolve: ({ value }: { value?: string } = {}) => resolveMobileNavigationPrompt(value as any),
     coverageContexts: [{}],
   },
   mobileUI: {
@@ -379,8 +406,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   },
   mobileDeepLinking: {
     schemaValues: MOBILE_DEEP_LINKING_VALUES,
-    resolve: ({ value }: { value?: string } = {}) =>
-      resolveMobileDeepLinkingPrompt(value as any),
+    resolve: ({ value }: { value?: string } = {}) => resolveMobileDeepLinkingPrompt(value as any),
     coverageContexts: [{}],
   },
   uiLibrary: {
@@ -400,8 +426,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   },
   astroIntegration: {
     schemaValues: ASTRO_INTEGRATION_VALUES,
-    resolve: ({ value }: { value?: string } = {}) =>
-      resolveAstroIntegrationPrompt(value as any),
+    resolve: ({ value }: { value?: string } = {}) => resolveAstroIntegrationPrompt(value as any),
     coverageContexts: [{}],
   },
   rustWebFramework: {
@@ -436,8 +461,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   },
   rustErrorHandling: {
     schemaValues: RUST_ERROR_HANDLING_VALUES,
-    resolve: ({ value }: { value?: string } = {}) =>
-      resolveRustErrorHandlingPrompt(value as any),
+    resolve: ({ value }: { value?: string } = {}) => resolveRustErrorHandlingPrompt(value as any),
     coverageContexts: [{}],
   },
   rustLibraries: {
@@ -452,8 +476,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   },
   pythonWebFramework: {
     schemaValues: PYTHON_WEB_FRAMEWORK_VALUES,
-    resolve: ({ value }: { value?: string } = {}) =>
-      resolvePythonWebFrameworkPrompt(value as any),
+    resolve: ({ value }: { value?: string } = {}) => resolvePythonWebFrameworkPrompt(value as any),
     coverageContexts: [{}],
   },
   pythonOrm: {
@@ -463,8 +486,7 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   },
   pythonValidation: {
     schemaValues: PYTHON_VALIDATION_VALUES,
-    resolve: ({ value }: { value?: string } = {}) =>
-      resolvePythonValidationPrompt(value as any),
+    resolve: ({ value }: { value?: string } = {}) => resolvePythonValidationPrompt(value as any),
     coverageContexts: [{}],
   },
   pythonAi: {
@@ -484,14 +506,12 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   },
   pythonTaskQueue: {
     schemaValues: PYTHON_TASK_QUEUE_VALUES,
-    resolve: ({ value }: { value?: string } = {}) =>
-      resolvePythonTaskQueuePrompt(value as any),
+    resolve: ({ value }: { value?: string } = {}) => resolvePythonTaskQueuePrompt(value as any),
     coverageContexts: [{}],
   },
   pythonGraphql: {
     schemaValues: PYTHON_GRAPHQL_VALUES,
-    resolve: ({ value }: { value?: string } = {}) =>
-      resolvePythonGraphqlPrompt(value as any),
+    resolve: ({ value }: { value?: string } = {}) => resolvePythonGraphqlPrompt(value as any),
     coverageContexts: [{}],
   },
   pythonQuality: {
@@ -527,6 +547,36 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   goAuth: {
     schemaValues: GO_AUTH_VALUES,
     resolve: ({ value }: { value?: string } = {}) => resolveGoAuthPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  goValidation: {
+    schemaValues: GO_VALIDATION_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveGoValidationPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  goQuality: {
+    schemaValues: GO_QUALITY_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveGoQualityPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  goMigrations: {
+    schemaValues: GO_MIGRATIONS_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveGoMigrationsPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  goTemplating: {
+    schemaValues: GO_TEMPLATING_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveGoTemplatingPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  goProtoTooling: {
+    schemaValues: GO_PROTO_TOOLING_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveGoProtoToolingPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  goDI: {
+    schemaValues: GO_DI_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveGoDIPrompt(value as any),
     coverageContexts: [{}],
   },
   javaWebFramework: {
@@ -679,6 +729,32 @@ export const PROMPT_RESOLVER_REGISTRY: ResolverRegistry = {
   elixirQuality: {
     schemaValues: ELIXIR_QUALITY_VALUES,
     resolve: ({ value }: { value?: string } = {}) => resolveElixirQualityPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  elixirI18n: {
+    schemaValues: ELIXIR_I18N_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveElixirI18nPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  elixirHttpServer: {
+    schemaValues: ELIXIR_HTTP_SERVER_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveElixirHttpServerPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  elixirApplicationFramework: {
+    schemaValues: ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+    resolve: ({ value }: { value?: string } = {}) =>
+      resolveElixirApplicationFrameworkPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  elixirDocumentation: {
+    schemaValues: ELIXIR_DOCUMENTATION_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveElixirDocumentationPrompt(value as any),
+    coverageContexts: [{}],
+  },
+  elixirClustering: {
+    schemaValues: ELIXIR_CLUSTERING_VALUES,
+    resolve: ({ value }: { value?: string } = {}) => resolveElixirClusteringPrompt(value as any),
     coverageContexts: [{}],
   },
   elixirDeploy: {

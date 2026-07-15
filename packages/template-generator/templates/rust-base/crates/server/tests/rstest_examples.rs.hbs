@@ -1,0 +1,10 @@
+{{#if (includes rustLibraries "rstest")}}
+use rstest::rstest;
+
+#[rstest]
+#[case("better", "fullstack", "better/fullstack")]
+#[case("rust", "starter", "rust/starter")]
+fn joins_project_parts(#[case] left: &str, #[case] right: &str, #[case] expected: &str) {
+    assert_eq!(format!("{left}/{right}"), expected);
+}
+{{/if}}

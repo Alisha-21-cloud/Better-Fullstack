@@ -16,8 +16,11 @@ function processCSSFrameworkDeps(vfs: VirtualFileSystem, config: ProjectConfig):
       "tanstack-router",
       "react-router",
       "react-vite",
+      "vanilla-vite",
+      "vue",
       "tanstack-start",
       "next",
+      "vinext",
       "nuxt",
       "svelte",
       "solid",
@@ -48,6 +51,12 @@ function processCSSFrameworkDeps(vfs: VirtualFileSystem, config: ProjectConfig):
       packagePath: webPath,
       devDependencies: ["less"],
     });
+  } else if (cssFramework === "styled-components") {
+    addPackageDependency({
+      vfs,
+      packagePath: webPath,
+      dependencies: ["styled-components"],
+    });
   } else if (cssFramework === "tailwind" && frontend.includes("astro")) {
     addPackageDependency({
       vfs,
@@ -65,7 +74,15 @@ function processUILibraryDeps(vfs: VirtualFileSystem, config: ProjectConfig): vo
   const { uiLibrary, frontend, backend } = config;
 
   const hasReactWeb = frontend.some((f) =>
-    ["tanstack-router", "react-router", "react-vite", "tanstack-start", "next", "vinext", "redwood"].includes(f),
+    [
+      "tanstack-router",
+      "react-router",
+      "react-vite",
+      "tanstack-start",
+      "next",
+      "vinext",
+      "redwood",
+    ].includes(f),
   );
   const hasNuxt = frontend.includes("nuxt");
   const hasSolid = frontend.includes("solid") || frontend.includes("solid-start");
@@ -140,7 +157,14 @@ function processUILibraryDeps(vfs: VirtualFileSystem, config: ProjectConfig): vo
 
     case "shadcn-svelte":
       if (hasSvelte || hasAstroSvelte) {
-        deps.push("shadcn-svelte", "bits-ui", "clsx", "tailwind-merge", "tw-animate-css", "lucide-svelte");
+        deps.push(
+          "shadcn-svelte",
+          "bits-ui",
+          "clsx",
+          "tailwind-merge",
+          "tw-animate-css",
+          "lucide-svelte",
+        );
       }
       break;
 

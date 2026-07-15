@@ -36,6 +36,11 @@ import {
   ELIXIR_OBSERVABILITY_VALUES,
   ELIXIR_ORM_VALUES,
   ELIXIR_QUALITY_VALUES,
+  ELIXIR_I18N_VALUES,
+  ELIXIR_HTTP_SERVER_VALUES,
+  ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  ELIXIR_DOCUMENTATION_VALUES,
+  ELIXIR_CLUSTERING_VALUES,
   ELIXIR_REALTIME_VALUES,
   ELIXIR_TESTING_VALUES,
   ELIXIR_VALIDATION_VALUES,
@@ -208,6 +213,21 @@ describe("stack graph", () => {
     expect(lowered.elixirEmail).toBe("swoosh");
     expect(lowered.elixirCaching).toBe("cachex");
     expect(lowered.elixirObservability).toBe("telemetry");
+  });
+
+  it("owns Go migrations on the Go backend instead of the database setup scope", () => {
+    const stackParts = parseStackPartSpecs([
+      "backend:go:gin",
+      "backend.migrations:go:golang-migrate",
+      "database:universal:postgres",
+    ]);
+    const result = validateStackParts(stackParts);
+    const lowered = stackPartsToLegacyProjectConfigPartial(stackParts);
+
+    expect(result.issues).toEqual([]);
+    expect(stackParts.find((part) => part.toolId === "golang-migrate")?.role).toBe("migrations");
+    expect(lowered.goMigrations).toBe("golang-migrate");
+    expect(lowered.dbSetup).toBeUndefined();
   });
 
   it("accepts native dotnet caching and observability tools as scoped capability parts", () => {
@@ -618,6 +638,14 @@ describe("stack graph", () => {
       "frontend:typescript:qwik",
       "frontend.i18n:typescript:paraglide",
     ]);
+    const paraglideVueParts = parseStackPartSpecs([
+      "frontend:typescript:vue",
+      "frontend.i18n:typescript:paraglide",
+    ]);
+    const paraglideVanillaViteParts = parseStackPartSpecs([
+      "frontend:typescript:vanilla-vite",
+      "frontend.i18n:typescript:paraglide",
+    ]);
     const freshParts = parseStackPartSpecs([
       "frontend:typescript:fresh",
       "frontend.animation:typescript:lottie",
@@ -636,6 +664,8 @@ describe("stack graph", () => {
     expect(validateStackParts(paraglideQwikParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_OWNER_TOOL",
     );
+    expect(validateStackParts(paraglideVueParts).issues).toEqual([]);
+    expect(validateStackParts(paraglideVanillaViteParts).issues).toEqual([]);
     expect(validateStackParts(freshParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_OWNER_TOOL",
     );
@@ -711,6 +741,12 @@ describe("stack graph", () => {
       "backend:go:gin",
       "workspaceTooling:universal:backend-utils",
     ]);
+    const selfOpenapiCodegenParts = parseStackPartSpecs([
+      "frontend:typescript:next",
+      "backend:typescript:self",
+      "backend.api:typescript:openapi",
+      "workspaceTooling:universal:openapi-typescript",
+    ]);
 
     expect(validateStackParts(dockerWorkersParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_GRAPH_SELECTION",
@@ -724,6 +760,18 @@ describe("stack graph", () => {
     expect(validateStackParts(backendUtilsGoParts).issues.map((issue) => issue.code)).toContain(
       "INCOMPATIBLE_GRAPH_SELECTION",
     );
+    expect(validateStackParts(selfOpenapiCodegenParts).issues.map((issue) => issue.code)).toContain(
+      "INCOMPATIBLE_GRAPH_SELECTION",
+    );
+  });
+
+  it("allows Redwood GraphQL Codegen without a separate API selection", () => {
+    const parts = parseStackPartSpecs([
+      "frontend:typescript:redwood",
+      "workspaceTooling:universal:graphql-codegen",
+    ]);
+
+    expect(validateStackParts(parts).issues).toEqual([]);
   });
 
   it("rejects shared non-TypeScript backend service candidates through graph checks", () => {
@@ -904,6 +952,27 @@ describe("stack graph", () => {
     ).toBe("Elixir auth scaffolds require Phoenix");
   });
 
+  it("allows ownerless plain Elixir application and documentation tools", () => {
+    const parts = parseStackPartSpecs([
+      "backend.libraries:elixir:ash",
+      "backend.documentation:elixir:ex_doc",
+    ]);
+
+    expect(validateStackParts(parts).issues).toEqual([]);
+  });
+
+  it("allows phx.gen.auth with every supported Ecto SQL repository", () => {
+    for (const orm of ["ecto-sql", "myxql", "ecto_sqlite3"]) {
+      const parts = parseStackPartSpecs([
+        "backend:elixir:phoenix",
+        `backend.orm:elixir:${orm}`,
+        "backend.auth:elixir:phx-gen-auth",
+      ]);
+
+      expect(validateStackParts(parts).issues).toEqual([]);
+    }
+  });
+
   it("materializes provided capabilities and rejects conflicts unless overrideable", () => {
     const stackParts = parseStackPartSpecs([
       "backend:typescript:convex",
@@ -933,7 +1002,10 @@ describe("stack graph", () => {
     );
 
     expect(diagnostics).toEqual([
-      expect.objectContaining({ code: "LEGACY_CONFIG_MISMATCH", path: "frontend" }),
+      expect.objectContaining({
+        code: "LEGACY_CONFIG_MISMATCH",
+        path: "frontend",
+      }),
     ]);
   });
 
@@ -947,7 +1019,10 @@ describe("stack graph", () => {
 
     expect(lowered.logging).toBe("none");
     expect(diagnostics).toEqual([
-      expect.objectContaining({ code: "LEGACY_CONFIG_MISMATCH", path: "logging" }),
+      expect.objectContaining({
+        code: "LEGACY_CONFIG_MISMATCH",
+        path: "logging",
+      }),
     ]);
   });
 });
@@ -1095,9 +1170,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
     const frontend = parts.find(
       (part) => part.role === "frontend" && part.ecosystem === "typescript",
     );
-    const frameworkPart = parts.find(
-      (part) => part.role === "testing" && part.toolId === "vitest",
-    );
+    const frameworkPart = parts.find((part) => part.role === "testing" && part.toolId === "vitest");
     const addonTestingParts = parts.filter(
       (part) => part.role === "testing" && part.toolId !== "vitest",
     );
@@ -1117,7 +1190,10 @@ describe("stack graph structural round-trip (phase 0)", () => {
       cssFramework: { role: "css", values: CSS_FRAMEWORK_VALUES },
       uiLibrary: { role: "ui", values: UI_LIBRARY_VALUES },
       forms: { role: "forms", values: FORMS_VALUES },
-      stateManagement: { role: "stateManagement", values: STATE_MANAGEMENT_VALUES },
+      stateManagement: {
+        role: "stateManagement",
+        values: STATE_MANAGEMENT_VALUES,
+      },
       animation: { role: "animation", values: ANIMATION_VALUES },
       fileUpload: { role: "fileUpload", values: FILE_UPLOAD_VALUES },
       i18n: { role: "i18n", values: I18N_VALUES },
@@ -1202,9 +1278,8 @@ describe("stack graph structural round-trip (phase 0)", () => {
       auth: "none",
     });
     expect(
-      noIntegrationParts.find(
-        (part) => part.role === "frontend" && part.ecosystem === "typescript",
-      )?.settings,
+      noIntegrationParts.find((part) => part.role === "frontend" && part.ecosystem === "typescript")
+        ?.settings,
     ).toBeUndefined();
     expect(
       stackPartsToLegacyProjectConfigPartial(noIntegrationParts).astroIntegration,
@@ -1320,13 +1395,22 @@ describe("stack graph structural round-trip (phase 0)", () => {
   });
 
   it("round-trips every addon and example value as multi-select graph parts", () => {
+    // API- and frontend-coupled addons need compatible selections to validate cleanly.
+    const CONFIG_BY_ADDON: Partial<Record<string, Partial<ProjectConfig>>> = {
+      "tanstack-query": { api: "none" },
+      "graphql-codegen": { api: "graphql-yoga" },
+      "apollo-client": { api: "graphql-yoga" },
+      "openapi-typescript": { api: "openapi" },
+      electron: { frontend: ["react-vite"] },
+      capacitor: { frontend: ["react-vite"] },
+    };
     for (const addon of ADDONS_VALUES) {
       const config = {
         ...TS_BASE,
         frontend: ["next"],
         runtime: "bun",
-        api: addon === "tanstack-query" ? "none" : TS_BASE.api,
         addons: [addon],
+        ...CONFIG_BY_ADDON[addon],
       };
       const parts = legacyProjectConfigToStackParts(config);
       const binding = getAddonStackPartBinding(addon);
@@ -1544,6 +1628,11 @@ describe("stack graph structural round-trip (phase 0)", () => {
           elixirObservability: ELIXIR_OBSERVABILITY_VALUES,
           elixirTesting: ELIXIR_TESTING_VALUES,
           elixirQuality: ELIXIR_QUALITY_VALUES,
+          elixirI18n: ELIXIR_I18N_VALUES,
+          elixirHttpServer: ELIXIR_HTTP_SERVER_VALUES,
+          elixirApplicationFramework: ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+          elixirDocumentation: ELIXIR_DOCUMENTATION_VALUES,
+          elixirClustering: ELIXIR_CLUSTERING_VALUES,
           elixirDeploy: ELIXIR_DEPLOY_VALUES,
         },
         arrays: {
@@ -1594,6 +1683,11 @@ describe("stack graph structural round-trip (phase 0)", () => {
       "elixirObservability",
       "elixirTesting",
       "elixirQuality",
+      "elixirI18n",
+      "elixirHttpServer",
+      "elixirApplicationFramework",
+      "elixirDocumentation",
+      "elixirClustering",
       "elixirDeploy",
     ]);
 
@@ -1652,6 +1746,11 @@ describe("stack graph structural round-trip (phase 0)", () => {
       elixirObservability: "telemetry",
       elixirTesting: "ex_unit",
       elixirQuality: "credo",
+      elixirI18n: "gettext",
+      elixirHttpServer: "bandit",
+      elixirApplicationFramework: "ash",
+      elixirDocumentation: "ex_doc",
+      elixirClustering: "libcluster",
       elixirDeploy: "docker",
       elixirValidation: "ecto-changesets",
     });
@@ -1667,11 +1766,16 @@ describe("stack graph structural round-trip (phase 0)", () => {
         "observability",
         "testing",
         "codeQuality",
+        "i18n",
+        "runtime",
+        "libraries",
+        "documentation",
+        "config",
         "deploy",
         "validation",
       ].includes(part.role),
     );
-    expect(extras).toHaveLength(10);
+    expect(extras).toHaveLength(15);
     for (const part of extras) {
       expect(part.ownerPartId).toBe(backend?.id);
     }
@@ -1683,6 +1787,11 @@ describe("stack graph structural round-trip (phase 0)", () => {
     expect(lowered.elixirEmail).toBe("swoosh");
     expect(lowered.elixirHttp).toBe("finch");
     expect(lowered.elixirQuality).toBe("credo");
+    expect(lowered.elixirI18n).toBe("gettext");
+    expect(lowered.elixirHttpServer).toBe("bandit");
+    expect(lowered.elixirApplicationFramework).toBe("ash");
+    expect(lowered.elixirDocumentation).toBe("ex_doc");
+    expect(lowered.elixirClustering).toBe("libcluster");
     expect(lowered.elixirDeploy).toBe("docker");
   });
 
@@ -1766,9 +1875,7 @@ describe("stack graph structural round-trip (phase 0)", () => {
     expect(lowered.pythonGraphql).toBe("strawberry");
 
     const reimported = legacyProjectConfigToStackParts(lowered);
-    expect(reimported.map(structuralTuple).sort()).toEqual(
-      pythonParts.map(structuralTuple).sort(),
-    );
+    expect(reimported.map(structuralTuple).sort()).toEqual(pythonParts.map(structuralTuple).sort());
   });
 
   it("imports Elixir realtime selections under the realtime role", () => {

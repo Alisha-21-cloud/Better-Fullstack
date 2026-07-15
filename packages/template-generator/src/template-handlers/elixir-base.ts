@@ -1,14 +1,13 @@
 import type { ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
-import type { TemplateData } from "./utils";
-
 import {
   isBinaryFile,
   normalizeElixirAppName,
   processTemplateString,
   transformFilename,
 } from "../core/template-processor";
+import { isEmptyTemplateOutput, type TemplateData } from "./utils";
 
 export async function processElixirBaseTemplate(
   vfs: VirtualFileSystem,
@@ -23,7 +22,7 @@ export async function processElixirBaseTemplate(
   const hasLiveView = config.elixirWebFramework === "phoenix-live-view";
   const hasLiveViewStreams = hasLiveView && config.elixirRealtime === "live-view-streams";
   const hasEcto = config.elixirOrm !== "none";
-  const hasEctoSql = config.elixirOrm === "ecto-sql";
+  const hasEctoSql = ["ecto-sql", "myxql", "ecto_sqlite3"].includes(config.elixirOrm);
   const hasAuth = hasPhoenix && config.elixirAuth === "phx-gen-auth" && hasEctoSql;
   const hasGuardian = hasPhoenix && config.elixirAuth === "guardian";
   const hasUeberauth = hasPhoenix && config.elixirAuth === "ueberauth";
@@ -33,11 +32,11 @@ export async function processElixirBaseTemplate(
   const hasOban = config.elixirJobs === "oban";
   const hasQuantum = config.elixirJobs === "quantum";
   const hasAbsinthe = hasPhoenix && config.elixirApi === "absinthe" && hasEcto;
-  const hasEmail = config.elixirEmail === "swoosh";
+  const hasEmail = config.elixirEmail !== "none";
   const hasDocker = ["docker", "fly", "gigalixir", "mix-release"].includes(config.elixirDeploy);
   const hasHttpClient = config.elixirHttp !== "none";
   const hasNimbleOptions = config.elixirValidation === "nimble-options";
-  const hasNebulex = config.elixirCaching === "nebulex";
+  const hasCacheModule = config.elixirCaching === "nebulex" || config.elixirCaching === "redix";
   const hasPromEx = hasPhoenix && config.elixirObservability === "prom_ex";
   const hasFlyDeploy = config.elixirDeploy === "fly";
   const hasGigalixirDeploy = config.elixirDeploy === "gigalixir";
@@ -50,16 +49,12 @@ export async function processElixirBaseTemplate(
     if (!hasPhoenix && templatePath.includes("___web")) continue;
     if (!hasPhoenix && templatePath.includes("test/support/conn_case")) continue;
     if (!hasLiveViewStreams && templatePath.includes("/live/")) continue;
-    if (
-      !hasEctoSql &&
-      (templatePath.includes("/repo.ex") || templatePath.includes("/migrations/"))
-    )
+    if (!hasEctoSql && (templatePath.includes("/repo.ex") || templatePath.includes("/migrations/")))
       continue;
     if (!hasEctoSql && templatePath.includes("priv/repo/seeds.exs")) continue;
-    if (
-      !hasEcto &&
-      (templatePath.includes("/catalog") || templatePath.includes("/item_controller"))
-    )
+    const isEctoCatalogTemplate =
+      templatePath.includes("/catalog.ex") || templatePath.includes("/catalog/");
+    if (!hasEcto && (isEctoCatalogTemplate || templatePath.includes("/item_controller")))
       continue;
     if (!hasAuth && templatePath.includes("/accounts")) continue;
     if (!hasAuth && templatePath.includes("create_users")) continue;
@@ -74,7 +69,7 @@ export async function processElixirBaseTemplate(
     if (!hasOban && templatePath.includes("add_oban_jobs")) continue;
     if (!hasQuantum && templatePath.includes("/scheduler.ex")) continue;
     if (!hasAbsinthe && templatePath.includes("/graphql/")) continue;
-    if (!hasNebulex && templatePath.includes("/cache.ex")) continue;
+    if (!hasCacheModule && templatePath.includes("/cache.ex")) continue;
     if (!hasPromEx && templatePath.includes("/prom_ex.ex")) continue;
     if (!hasNimbleOptions && templatePath.includes("/item_options.ex")) continue;
     if (!hasMox && templatePath.includes("/external_service.ex")) continue;
@@ -104,7 +99,7 @@ export async function processElixirBaseTemplate(
       processedContent = content;
     }
 
-    if (processedContent.trim() === "") continue;
+    if (isEmptyTemplateOutput(templatePath, processedContent)) continue;
 
     const sourcePath = isBinaryFile(templatePath) ? templatePath : undefined;
     vfs.writeFile(destPath, processedContent, sourcePath);

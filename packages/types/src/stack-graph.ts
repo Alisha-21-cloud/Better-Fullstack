@@ -9,6 +9,7 @@ import type {
 
 import {
   ADDONS_VALUES,
+  APP_PLATFORM_ADDON_VALUES,
   API_VALUES,
   AUTH_VALUES,
   AI_VALUES,
@@ -61,6 +62,12 @@ import {
   GO_MESSAGE_QUEUE_VALUES,
   GO_OBSERVABILITY_VALUES,
   GO_ORM_VALUES,
+  GO_VALIDATION_VALUES,
+  GO_QUALITY_VALUES,
+  GO_MIGRATIONS_VALUES,
+  GO_TEMPLATING_VALUES,
+  GO_PROTO_TOOLING_VALUES,
+  GO_DI_VALUES,
   GO_REALTIME_VALUES,
   GO_TESTING_VALUES,
   GO_WEB_FRAMEWORK_VALUES,
@@ -122,6 +129,11 @@ import {
   I18N_VALUES,
   ELIXIR_HTTP_VALUES,
   ELIXIR_QUALITY_VALUES,
+  ELIXIR_I18N_VALUES,
+  ELIXIR_HTTP_SERVER_VALUES,
+  ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  ELIXIR_DOCUMENTATION_VALUES,
+  ELIXIR_CLUSTERING_VALUES,
   StackPartRoleSchema,
   STATE_MANAGEMENT_VALUES,
   TESTING_VALUES,
@@ -219,27 +231,41 @@ const PARAGLIDE_COMPATIBLE_FRONTENDS = new Set([
   "tanstack-start",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "svelte",
   "solid",
   "solid-start",
   "astro",
 ]);
-const TYPESCRIPT_TRPC_INCOMPATIBLE_FRONTENDS = new Set(["nuxt", "svelte", "solid", "solid-start"]);
+const TYPESCRIPT_TRPC_INCOMPATIBLE_FRONTENDS = new Set([
+  "nuxt",
+  "svelte",
+  "solid",
+  "solid-start",
+  "vanilla-vite",
+  "vue",
+]);
 const TYPESCRIPT_APOLLO_SERVER_COMPATIBLE_FRONTENDS = new Set([
   "tanstack-router",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "tanstack-start",
   "next",
   "vinext",
 ]);
 const BETTER_AUTH_UNSUPPORTED_ORM_TOOLS = new Set(["typeorm", "mikroorm", "sequelize"]);
 const ELIXIR_ECTO_REQUIRED_TOOLS = new Set(["absinthe"]);
-const ELIXIR_ECTO_SQL_REQUIRED_TOOLS = new Set(["oban", "phx-gen-auth"]);
+const ELIXIR_ECTO_SQL_REQUIRED_TOOLS = new Set(["oban"]);
+const ELIXIR_SQL_REPO_REQUIRED_TOOLS = new Set(["pow", "ex_machina", "phx-gen-auth"]);
 const ELIXIR_PHOENIX_REQUIRED_ROLE_MESSAGES: Partial<Record<StackPartRole, string>> = {
   auth: "Elixir auth scaffolds require Phoenix",
   api: "Elixir API scaffolds require Phoenix",
   realtime: "Elixir realtime scaffolds require Phoenix",
+  i18n: "Elixir Internationalization requires Phoenix",
+  runtime: "HTTP server adapters require Phoenix",
 };
 const ELIXIR_UNSUPPORTED_GRAPH_TOOL_MESSAGES: Record<string, string> = {};
 export const ELIXIR_UNSUPPORTED_GRAPH_TOOLS = new Set(
@@ -366,17 +392,28 @@ const LEGACY_BACKEND_ARRAY_CATEGORIES_BY_ECOSYSTEM = {
   Partial<Record<StackPartRole, keyof ProjectConfig>>
 >;
 
-const CODE_QUALITY_ADDONS = new Set(["biome", "oxlint", "ultracite", "lefthook", "husky"]);
+const CODE_QUALITY_ADDONS = new Set([
+  "biome",
+  "eslint",
+  "prettier",
+  "oxlint",
+  "ultracite",
+  "lefthook",
+  "husky",
+]);
 const DOCUMENTATION_ADDONS = new Set(["starlight", "fumadocs"]);
-const FRONTEND_APP_PLATFORM_ADDONS = new Set(["pwa", "tauri", "wxt", "opentui"]);
+const FRONTEND_APP_PLATFORM_ADDONS = new Set<string>(APP_PLATFORM_ADDON_VALUES);
 const FRONTEND_DATA_FETCHING_ADDONS = new Set([
   "swr",
+  "apollo-client",
   "tanstack-query",
   "tanstack-table",
   "tanstack-virtual",
   "tanstack-db",
   "tanstack-pacer",
 ]);
+const FRONTEND_HTTP_CLIENT_ADDONS = new Set(["axios"]);
+const FRONTEND_LIBRARY_ADDONS = new Set(["firebase"]);
 const FRONTEND_TESTING_ADDONS = new Set(["msw", "storybook"]);
 const WORKSPACE_TOOLING_ADDONS = new Set([
   "turborepo",
@@ -388,6 +425,8 @@ const WORKSPACE_TOOLING_ADDONS = new Set([
   "mcp",
   "skills",
   "backend-utils",
+  "graphql-codegen",
+  "openapi-typescript",
 ]);
 const DOCKER_COMPOSE_COMPATIBLE_ECOSYSTEMS = new Set<StackPartEcosystem>([
   "typescript",
@@ -403,6 +442,8 @@ const LEGACY_ADDON_GRAPH_ROLES = new Set<StackPartRole>([
   "documentation",
   "testing",
   "workspaceTooling",
+  "httpClient",
+  "libraries",
 ]);
 const LEGACY_ARRAY_CATEGORIES = new Set<keyof ProjectConfig>([
   "addons",
@@ -433,10 +474,32 @@ export function getAddonStackPartBinding(toolId: string): AddonStackPartBinding 
     return { role: "documentation", ecosystem: "universal" };
   }
   if (FRONTEND_APP_PLATFORM_ADDONS.has(toolId)) {
-    return { role: "appPlatform", ecosystem: "typescript", ownerRole: "frontend" };
+    return {
+      role: "appPlatform",
+      ecosystem: "typescript",
+      ownerRole: "frontend",
+    };
   }
   if (FRONTEND_DATA_FETCHING_ADDONS.has(toolId)) {
-    return { role: "dataFetching", ecosystem: "typescript", ownerRole: "frontend" };
+    return {
+      role: "dataFetching",
+      ecosystem: "typescript",
+      ownerRole: "frontend",
+    };
+  }
+  if (FRONTEND_HTTP_CLIENT_ADDONS.has(toolId)) {
+    return {
+      role: "httpClient",
+      ecosystem: "typescript",
+      ownerRole: "frontend",
+    };
+  }
+  if (FRONTEND_LIBRARY_ADDONS.has(toolId)) {
+    return {
+      role: "libraries",
+      ecosystem: "typescript",
+      ownerRole: "frontend",
+    };
   }
   if (FRONTEND_TESTING_ADDONS.has(toolId)) {
     return { role: "testing", ecosystem: "typescript", ownerRole: "frontend" };
@@ -462,6 +525,7 @@ const OWNER_ROLES_BY_SCOPED_ROLE = {
   ),
   deploy: ["frontend", "backend"],
   dbSetup: ["database"],
+  migrations: ["backend"],
   ui: ["frontend", "mobile"],
   graphql: ["backend"],
   appPlatform: ["frontend"],
@@ -471,8 +535,8 @@ const OWNER_ROLES_BY_SCOPED_ROLE = {
   buildTool: ["backend"],
   cli: ["backend"],
   errorHandling: ["backend"],
-  httpClient: ["backend"],
-  libraries: ["backend"],
+  httpClient: ["frontend", "backend"],
+  libraries: ["frontend", "backend"],
 } as Partial<Record<StackPartRole, readonly StackPrimaryRole[]>>;
 
 const FRESH_UNSUPPORTED_STATE_MANAGEMENT_TOOLS = new Set([
@@ -616,6 +680,12 @@ const LEGACY_EXTRA_CATEGORIES_BY_ECOSYSTEM = {
     caching: "goCaching",
     config: "goConfig",
     observability: "goObservability",
+    validation: "goValidation",
+    codeQuality: "goQuality",
+    migrations: "goMigrations",
+    templating: "goTemplating",
+    buildTool: "goProtoTooling",
+    libraries: "goDI",
   },
   java: { buildTool: "javaBuildTool", logging: "javaLogging" },
   dotnet: {
@@ -635,6 +705,11 @@ const LEGACY_EXTRA_CATEGORIES_BY_ECOSYSTEM = {
     observability: "elixirObservability",
     testing: "elixirTesting",
     codeQuality: "elixirQuality",
+    i18n: "elixirI18n",
+    runtime: "elixirHttpServer",
+    libraries: "elixirApplicationFramework",
+    documentation: "elixirDocumentation",
+    config: "elixirClustering",
     deploy: "elixirDeploy",
   },
 } as const satisfies Record<
@@ -772,6 +847,20 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     { allowMultiple: true },
   ),
   ...defineTools(
+    ADDONS_VALUES.filter((value) => FRONTEND_HTTP_CLIENT_ADDONS.has(value)),
+    "httpClient",
+    "typescript",
+    undefined,
+    { allowMultiple: true },
+  ),
+  ...defineTools(
+    ADDONS_VALUES.filter((value) => FRONTEND_LIBRARY_ADDONS.has(value)),
+    "libraries",
+    "typescript",
+    undefined,
+    { allowMultiple: true },
+  ),
+  ...defineTools(
     ADDONS_VALUES.filter((value) => FRONTEND_TESTING_ADDONS.has(value)),
     "testing",
     "typescript",
@@ -839,7 +928,9 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(PYTHON_WEB_FRAMEWORK_VALUES, "backend", "python", "pythonWebFramework"),
   ...defineTools(PYTHON_ORM_VALUES, "orm", "python", "pythonOrm"),
   ...defineTools(PYTHON_VALIDATION_VALUES, "validation", "python", "pythonValidation"),
-  ...defineTools(PYTHON_AI_VALUES, "ai", "python", "pythonAi", { allowMultiple: true }),
+  ...defineTools(PYTHON_AI_VALUES, "ai", "python", "pythonAi", {
+    allowMultiple: true,
+  }),
   ...defineTools(PYTHON_API_VALUES, "api", "python", "pythonApi"),
   ...defineTools(PYTHON_AUTH_VALUES, "auth", "python", "pythonAuth"),
   ...defineTools(["resend"], "email", "python", "email"),
@@ -876,6 +967,12 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(["meilisearch", "bleve"], "search", "go", "search"),
   ...defineTools(GO_CONFIG_VALUES, "config", "go", "goConfig"),
   ...defineTools(GO_OBSERVABILITY_VALUES, "observability", "go", "goObservability"),
+  ...defineTools(GO_VALIDATION_VALUES, "validation", "go", "goValidation"),
+  ...defineTools(GO_QUALITY_VALUES, "codeQuality", "go", "goQuality"),
+  ...defineTools(GO_MIGRATIONS_VALUES, "migrations", "go", "goMigrations"),
+  ...defineTools(GO_TEMPLATING_VALUES, "templating", "go", "goTemplating"),
+  ...defineTools(GO_PROTO_TOOLING_VALUES, "buildTool", "go", "goProtoTooling"),
+  ...defineTools(GO_DI_VALUES, "libraries", "go", "goDI"),
   ...defineTools(JAVA_WEB_FRAMEWORK_VALUES, "backend", "java", "javaWebFramework"),
   ...defineTools(JAVA_LANGUAGE_VALUES, "language", "java", "javaLanguage"),
   ...defineTools(JAVA_BUILD_TOOL_VALUES, "buildTool", "java", "javaBuildTool"),
@@ -924,6 +1021,19 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
   ...defineTools(ELIXIR_OBSERVABILITY_VALUES, "observability", "elixir", "elixirObservability"),
   ...defineTools(ELIXIR_TESTING_VALUES, "testing", "elixir", "elixirTesting"),
   ...defineTools(ELIXIR_QUALITY_VALUES, "codeQuality", "elixir", "elixirQuality"),
+  ...defineTools(ELIXIR_I18N_VALUES, "i18n", "elixir", "elixirI18n"),
+  ...defineTools(ELIXIR_HTTP_SERVER_VALUES, "runtime", "elixir", "elixirHttpServer"),
+  ...defineTools(
+    ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+    "libraries",
+    "elixir",
+    "elixirApplicationFramework",
+    { allowMultiple: true, ownerless: true },
+  ),
+  ...defineTools(ELIXIR_DOCUMENTATION_VALUES, "documentation", "elixir", "elixirDocumentation", {
+    ownerless: true,
+  }),
+  ...defineTools(ELIXIR_CLUSTERING_VALUES, "config", "elixir", "elixirClustering"),
   ...defineTools(ELIXIR_DEPLOY_VALUES, "deploy", "elixir", "elixirDeploy"),
   {
     toolId: "convex",
@@ -931,8 +1041,18 @@ export const STACK_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     ecosystems: ["typescript"],
     legacyCategory: "backend",
     provides: [
-      { role: "database", toolId: "convex", ecosystem: "typescript", overrideable: false },
-      { role: "api", toolId: "convex", ecosystem: "typescript", overrideable: false },
+      {
+        role: "database",
+        toolId: "convex",
+        ecosystem: "typescript",
+        overrideable: false,
+      },
+      {
+        role: "api",
+        toolId: "convex",
+        ecosystem: "typescript",
+        overrideable: false,
+      },
     ],
   },
   {
@@ -1700,6 +1820,40 @@ function createAddonCompatibilityIssue(
   const runtimeTool = context.selectedToolIdsByRole?.runtime ?? "bun";
   const apiTool = context.selectedToolIdsByRole?.api;
 
+  if (
+    part.toolId === "graphql-codegen" &&
+    !apiTool?.match(/^(garph|graphql-yoga|apollo-server)$/) &&
+    frontendTool !== "redwood"
+  ) {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_GRAPH_SELECTION",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message: "GraphQL Code Generator requires a GraphQL API selection.",
+    });
+  }
+
+  if (part.toolId === "openapi-typescript" && apiTool !== "openapi") {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_GRAPH_SELECTION",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message: "openapi-typescript requires the OpenAPI API selection.",
+    });
+  }
+
+  if (part.toolId === "openapi-typescript" && backendTool === "self") {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_GRAPH_SELECTION",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message: "openapi-typescript requires a standalone backend that exposes an OpenAPI schema.",
+    });
+  }
+
   if (part.role === "appPlatform") {
     if (part.toolId === "pwa" && !hasPWACompatibleFrontend(frontendTools)) {
       return createStackGraphIssue({
@@ -1719,9 +1873,35 @@ function createAddonCompatibilityIssue(
         message: "Tauri requires a compatible web frontend.",
       });
     }
+    if (
+      ["electron", "capacitor"].includes(part.toolId) &&
+      !["tanstack-router", "react-vite", "vanilla-vite", "vue", "solid"].includes(
+        frontendTool ?? "",
+      )
+    ) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_OWNER_TOOL",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: `${part.toolId} requires a compatible Vite SPA frontend.`,
+      });
+    }
   }
 
   if (part.role === "dataFetching") {
+    if (
+      part.toolId === "apollo-client" &&
+      !apiTool?.match(/^(garph|graphql-yoga|apollo-server)$/)
+    ) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Apollo Client requires a GraphQL API selection.",
+      });
+    }
     if (part.toolId === "tanstack-query" && apiTool && apiTool !== "none") {
       return createStackGraphIssue({
         code: "INCOMPATIBLE_GRAPH_SELECTION",
@@ -2142,6 +2322,19 @@ function getStackPartCompatibilityIssue(
   const javaCompatibilityIssue = createJavaCompatibilityIssue(part, context);
   if (javaCompatibilityIssue) return javaCompatibilityIssue;
 
+  if (part.ecosystem === "go" && part.role === "migrations" && part.toolId === "golang-migrate") {
+    const databaseTool = context.primaryToolIdsByRole?.database ?? "none";
+    if (!["sqlite", "postgres", "mysql"].includes(databaseTool)) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message: "Go migrations require SQLite, PostgreSQL, or MySQL",
+      });
+    }
+  }
+
   if (part.ecosystem === "python" && part.role === "api" && DJANGO_API_TOOLS.has(part.toolId)) {
     if (context.ownerToolId !== "django") {
       return createStackGraphIssue({
@@ -2275,18 +2468,52 @@ function getStackPartCompatibilityIssue(
   ) {
     const ormTool = context.siblingToolIdsByRole?.orm ?? context.selectedToolIdsByRole?.orm;
     if (ormTool !== "ecto-sql") {
-      const message =
-        part.toolId === "phx-gen-auth"
-          ? "phx.gen.auth requires Ecto SQL with PostgreSQL in the current Phoenix scaffold"
-          : "Oban requires Ecto SQL with PostgreSQL in the current Phoenix scaffold";
       return createStackGraphIssue({
         code: "INCOMPATIBLE_GRAPH_SELECTION",
         partId: part.id,
         role: part.role,
         toolId: part.toolId,
-        message,
+        message: "Oban requires Ecto SQL with PostgreSQL in the current Phoenix scaffold",
       });
     }
+  }
+
+  if (
+    part.ecosystem === "elixir" &&
+    ELIXIR_SQL_REPO_REQUIRED_TOOLS.has(part.toolId) &&
+    context.ownerRole === "backend"
+  ) {
+    const ormTool = context.siblingToolIdsByRole?.orm ?? context.selectedToolIdsByRole?.orm;
+    if (!ormTool || !["ecto-sql", "myxql", "ecto_sqlite3"].includes(ormTool)) {
+      return createStackGraphIssue({
+        code: "INCOMPATIBLE_GRAPH_SELECTION",
+        partId: part.id,
+        role: part.role,
+        toolId: part.toolId,
+        message:
+          part.toolId === "pow"
+            ? "Pow requires Phoenix and an Ecto SQL repository"
+            : part.toolId === "phx-gen-auth"
+              ? "phx.gen.auth requires an Ecto SQL repository"
+              : "ExMachina requires an Ecto SQL repository",
+      });
+    }
+  }
+
+  if (
+    part.ecosystem === "elixir" &&
+    part.role === "runtime" &&
+    part.toolId === "none" &&
+    context.ownerRole === "backend" &&
+    context.ownerToolId !== "none"
+  ) {
+    return createStackGraphIssue({
+      code: "INCOMPATIBLE_GRAPH_SELECTION",
+      partId: part.id,
+      role: part.role,
+      toolId: part.toolId,
+      message: "Phoenix requires Bandit or Cowboy",
+    });
   }
 
   if (
@@ -2387,7 +2614,10 @@ function allowsMultipleSelectedParts(parts: readonly StackPart[]) {
   return selectedParts.every((part) => findDefinition(part)?.allowMultiple === true);
 }
 
-function parseRolePath(rolePath: string): { role: StackPartRole; ownerRole?: StackPrimaryRole } {
+function parseRolePath(rolePath: string): {
+  role: StackPartRole;
+  ownerRole?: StackPrimaryRole;
+} {
   const segments = rolePath.split(".");
   const rawRole = segments.length === 1 ? segments[0] : segments[segments.length - 1];
   const rawOwnerRole = segments.length > 1 ? segments[0] : undefined;
@@ -2585,7 +2815,14 @@ function addLegacyPart(
   settings?: Record<string, unknown>,
 ) {
   if (!toolId || toolId === "none") return undefined;
-  const part = createStackPart({ role, ecosystem, toolId, source, ownerPartId, settings });
+  const part = createStackPart({
+    role,
+    ecosystem,
+    toolId,
+    source,
+    ownerPartId,
+    settings,
+  });
   parts.push(part);
   return part;
 }
@@ -2618,8 +2855,11 @@ function appendUniqueLegacyArrayValue(
 
 function getLegacyArrayCategoryForPart(part: StackPart): keyof ProjectConfig | undefined {
   if (part.role === "examples") return "examples";
-  if (LEGACY_ADDON_GRAPH_ROLES.has(part.role) && getAddonStackPartBinding(part.toolId)) {
-    return "addons";
+  if (LEGACY_ADDON_GRAPH_ROLES.has(part.role)) {
+    const binding = getAddonStackPartBinding(part.toolId);
+    if (binding && binding.role === part.role && binding.ecosystem === part.ecosystem) {
+      return "addons";
+    }
   }
   const legacyCategory = findDefinition(part)?.legacyCategory;
   if (legacyCategory && LEGACY_ARRAY_CATEGORIES.has(legacyCategory)) return legacyCategory;

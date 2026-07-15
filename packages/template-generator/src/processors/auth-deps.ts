@@ -210,7 +210,7 @@ function processStandardAuthDeps(vfs: VirtualFileSystem, config: ProjectConfig):
       addPackageDependency({
         vfs,
         packagePath: webPath,
-        dependencies: ["next-auth", "@auth/core"],
+        dependencies: ["next-auth", "@auth/core", "@tanstack/react-form", "zod"],
       });
 
       // Add ORM-specific adapter
@@ -280,6 +280,25 @@ function processStandardAuthDeps(vfs: VirtualFileSystem, config: ProjectConfig):
         vfs,
         packagePath: webPath,
         dependencies: ["@kinde-oss/kinde-auth-nextjs"],
+      });
+    }
+  } else if (auth === "passport") {
+    if (authExists) {
+      addPackageDependency({
+        vfs,
+        packagePath: authPath,
+        dependencies: ["passport", "passport-github2"],
+        devDependencies: ["@types/passport", "@types/passport-github2"],
+      });
+    }
+
+    const serverPath = "apps/server/package.json";
+    if (vfs.exists(serverPath)) {
+      addPackageDependency({
+        vfs,
+        packagePath: serverPath,
+        dependencies: ["express-session"],
+        devDependencies: ["@types/express-session"],
       });
     }
   }

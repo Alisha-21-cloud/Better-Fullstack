@@ -123,6 +123,12 @@ function normalizeGraphConfigForPersistence(
     normalized.goCaching = "none";
     normalized.goConfig = "none";
     normalized.goObservability = "none";
+    normalized.goValidation = "none";
+    normalized.goQuality = "none";
+    normalized.goMigrations = "none";
+    normalized.goTemplating = "none";
+    normalized.goProtoTooling = "none";
+    normalized.goDI = "none";
   }
 
   if (
@@ -430,6 +436,12 @@ export function buildBtsConfigForPersistence(
     goCaching: persistedConfig.goCaching,
     goConfig: persistedConfig.goConfig,
     goObservability: persistedConfig.goObservability,
+    goValidation: persistedConfig.goValidation,
+    goQuality: persistedConfig.goQuality,
+    goMigrations: persistedConfig.goMigrations,
+    goTemplating: persistedConfig.goTemplating,
+    goProtoTooling: persistedConfig.goProtoTooling,
+    goDI: persistedConfig.goDI,
     javaLanguage: persistedConfig.javaLanguage,
     javaWebFramework: persistedConfig.javaWebFramework,
     javaBuildTool: persistedConfig.javaBuildTool,
@@ -464,6 +476,11 @@ export function buildBtsConfigForPersistence(
     elixirObservability: persistedConfig.elixirObservability,
     elixirTesting: persistedConfig.elixirTesting,
     elixirQuality: persistedConfig.elixirQuality,
+    elixirI18n: persistedConfig.elixirI18n,
+    elixirHttpServer: persistedConfig.elixirHttpServer,
+    elixirApplicationFramework: persistedConfig.elixirApplicationFramework,
+    elixirDocumentation: persistedConfig.elixirDocumentation,
+    elixirClustering: persistedConfig.elixirClustering,
     elixirDeploy: persistedConfig.elixirDeploy,
     elixirLibraries: persistedConfig.elixirLibraries,
     aiDocs: persistedConfig.aiDocs,
@@ -601,6 +618,12 @@ export async function writeBtsConfig(
     goCaching: btsConfig.goCaching,
     goConfig: btsConfig.goConfig,
     goObservability: btsConfig.goObservability,
+    goValidation: btsConfig.goValidation,
+    goQuality: btsConfig.goQuality,
+    goMigrations: btsConfig.goMigrations,
+    goTemplating: btsConfig.goTemplating,
+    goProtoTooling: btsConfig.goProtoTooling,
+    goDI: btsConfig.goDI,
     javaLanguage: btsConfig.javaLanguage,
     javaWebFramework: btsConfig.javaWebFramework,
     javaBuildTool: btsConfig.javaBuildTool,
@@ -635,6 +658,11 @@ export async function writeBtsConfig(
     elixirObservability: btsConfig.elixirObservability,
     elixirTesting: btsConfig.elixirTesting,
     elixirQuality: btsConfig.elixirQuality,
+    elixirI18n: btsConfig.elixirI18n,
+    elixirHttpServer: btsConfig.elixirHttpServer,
+    elixirApplicationFramework: btsConfig.elixirApplicationFramework,
+    elixirDocumentation: btsConfig.elixirDocumentation,
+    elixirClustering: btsConfig.elixirClustering,
     elixirDeploy: btsConfig.elixirDeploy,
     elixirLibraries: btsConfig.elixirLibraries,
     aiDocs: btsConfig.aiDocs,

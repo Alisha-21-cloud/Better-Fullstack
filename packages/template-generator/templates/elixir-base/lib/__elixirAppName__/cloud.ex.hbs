@@ -1,0 +1,10 @@
+{{#if (includes elixirLibraries "ex_aws")}}
+defmodule {{elixirModuleName}}.Cloud do
+  @moduledoc "Small ExAws boundary; credentials are read from the standard AWS environment."
+
+  def list_buckets do
+    ExAws.S3.list_buckets()
+    |> ExAws.request()
+  end
+end
+{{/if}}

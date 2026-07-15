@@ -19,6 +19,21 @@ pub fn render_hello(name: &str) -> Result<String, askama::Error> {
     HelloTemplate { name }.render()
 }
 {{/if}}
+{{#if (eq rustTemplating "minijinja")}}
+//! Lightweight runtime templates with MiniJinja.
+
+#![allow(dead_code)]
+
+use minijinja::{context, Environment, Error};
+
+pub fn render_hello(name: &str) -> Result<String, Error> {
+    let mut environment = Environment::new();
+    environment.add_template("hello.html", "<h1>Hello, \{{name}}!</h1>")?;
+    environment
+        .get_template("hello.html")?
+        .render(context! { name => name })
+}
+{{/if}}
 {{#if (eq rustTemplating "tera")}}
 //! Runtime HTML templates with Tera.
 

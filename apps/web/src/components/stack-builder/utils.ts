@@ -25,12 +25,17 @@ export const analyzeStackCompatibility = (stack: StackState): CompatibilityResul
   return analyzeStackCompatibilityShared(stack);
 };
 
+// appShells is a UI-only split of the appPlatforms category (both write into
+// config.addons); the compatibility engine only knows "appPlatforms".
+const toCompatibilityCategory = (category: keyof typeof TECH_OPTIONS): CompatibilityCategory =>
+  (category === "appShells" ? "appPlatforms" : category) as CompatibilityCategory;
+
 export const getDisabledReason = (
   currentStack: StackState,
   category: keyof typeof TECH_OPTIONS,
   optionId: string,
 ): string | null => {
-  return getDisabledReasonShared(currentStack, category as CompatibilityCategory, optionId);
+  return getDisabledReasonShared(currentStack, toCompatibilityCategory(category), optionId);
 };
 
 export const isOptionCompatible = (
@@ -38,7 +43,7 @@ export const isOptionCompatible = (
   category: keyof typeof TECH_OPTIONS,
   optionId: string,
 ): boolean => {
-  return isOptionCompatibleShared(currentStack, category as CompatibilityCategory, optionId);
+  return isOptionCompatibleShared(currentStack, toCompatibilityCategory(category), optionId);
 };
 
 export const getVisibleOptions = (

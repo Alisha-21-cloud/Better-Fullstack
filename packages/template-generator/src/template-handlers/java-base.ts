@@ -6,9 +6,9 @@ import {
 } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
-import type { TemplateData } from "./utils";
 
 import { isBinaryFile, processTemplateString, transformFilename } from "../core/template-processor";
+import { isEmptyTemplateOutput, type TemplateData } from "./utils";
 
 type JavaTemplateContext = ProjectConfig & {
   javaArtifactId: string;
@@ -604,7 +604,7 @@ export async function processJavaBaseTemplate(
       processedContent = content;
     }
 
-    if (!isBinaryFile(templatePath) && processedContent.trim() === "") continue;
+    if (isEmptyTemplateOutput(templatePath, processedContent)) continue;
 
     const sourcePath = isBinaryFile(templatePath) ? templatePath : undefined;
     vfs.writeFile(destPath, processedContent, sourcePath);

@@ -111,6 +111,62 @@ const SNAPSHOT_CONFIGS: Array<{
       auth: "better-auth",
     },
   },
+  {
+    name: "typescript-library-expansion-react",
+    config: {
+      frontend: ["react-vite"],
+      backend: "express",
+      runtime: "node",
+      api: "apollo-server",
+      database: "sqlite",
+      orm: "drizzle",
+      auth: "passport",
+      payments: "paypal",
+      addons: [
+        "eslint",
+        "prettier",
+        "axios",
+        "firebase",
+        "graphql-codegen",
+        "apollo-client",
+        "electron",
+      ],
+      cssFramework: "styled-components",
+      testing: "mocha",
+      realtime: "ws",
+      cms: "contentful",
+      analytics: "ga4",
+      ai: "openai-sdk",
+    },
+  },
+  {
+    name: "vanilla-vite-openapi-capacitor",
+    config: {
+      frontend: ["vanilla-vite"],
+      backend: "hono",
+      runtime: "node",
+      api: "openapi",
+      database: "none",
+      orm: "none",
+      auth: "none",
+      addons: ["openapi-typescript", "capacitor"],
+      cssFramework: "none",
+    },
+  },
+  {
+    name: "vue-anthropic-sdk",
+    config: {
+      frontend: ["vue"],
+      backend: "express",
+      runtime: "node",
+      api: "openapi",
+      database: "none",
+      orm: "none",
+      auth: "none",
+      ai: "anthropic-sdk",
+      cssFramework: "none",
+    },
+  },
 
   // === AUTH VARIATIONS ===
   {
@@ -338,7 +394,13 @@ const SNAPSHOT_CONFIGS: Array<{
 ];
 
 const KEY_FILE_SNAPSHOT_CONFIGS = SNAPSHOT_CONFIGS.filter(
-  ({ name }) => name !== "java-spring-boot-extended-libraries",
+  ({ name }) =>
+    name !== "java-spring-boot-extended-libraries" &&
+    ![
+      "typescript-library-expansion-react",
+      "vanilla-vite-openapi-capacitor",
+      "vue-anthropic-sdk",
+    ].includes(name),
 );
 
 // Default values to fill in missing config options
@@ -518,6 +580,30 @@ describe("Template Snapshots - Rust Ecosystem", () => {
         rustApi: "none" as const,
         rustCli: "none" as const,
         rustLibraries: ["serde"] as const,
+      },
+    },
+    {
+      name: "axum-yew-library-expansion",
+      config: {
+        ecosystem: "rust" as const,
+        rustWebFramework: "axum" as const,
+        rustFrontend: "yew" as const,
+        rustOrm: "mongodb" as const,
+        rustApi: "jsonrpsee" as const,
+        rustCli: "none" as const,
+        rustLibraries: [
+          "rand",
+          "regex",
+          "rayon",
+          "itertools",
+          "rstest",
+          "cargo-nextest",
+          "cargo-audit",
+        ] as const,
+        rustAuth: "tower-sessions" as const,
+        rustMessageQueue: "rdkafka" as const,
+        rustObservability: "metrics" as const,
+        rustTemplating: "minijinja" as const,
       },
     },
   ];

@@ -1,0 +1,9 @@
+{{#if (eq elixirApplicationFramework "ash")}}
+defmodule {{elixirModuleName}}.CatalogDomain do
+  use Ash.Domain
+
+  resources do
+    resource {{elixirModuleName}}.Resources.Item
+  end
+end
+{{/if}}

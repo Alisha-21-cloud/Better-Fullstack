@@ -1,0 +1,29 @@
+{{#if (eq rustApi "jsonrpsee")}}
+//! JSON-RPC server built with jsonrpsee.
+
+#![allow(dead_code)]
+
+use std::net::SocketAddr;
+
+use jsonrpsee::{core::RpcResult, proc_macros::rpc, server::{ServerBuilder, ServerHandle}};
+
+#[rpc(server)]
+pub trait HealthRpc {
+    #[method(name = "health")]
+    fn health(&self) -> RpcResult<String>;
+}
+
+pub struct HealthRpcService;
+
+impl HealthRpcServer for HealthRpcService {
+    fn health(&self) -> RpcResult<String> {
+        Ok("{{projectName}} is healthy".to_string())
+    }
+}
+
+pub async fn start(address: SocketAddr) -> Result<ServerHandle, Box<dyn std::error::Error + Send + Sync>> {
+    let server = ServerBuilder::default().build(address).await?;
+    let handle = server.start(HealthRpcService.into_rpc());
+    Ok(handle)
+}
+{{/if}}

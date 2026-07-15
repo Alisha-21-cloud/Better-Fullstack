@@ -72,7 +72,7 @@ function processDockerComposeTemplates(
     );
   } else if (
     config.frontend.some((f) =>
-      ["tanstack-router", "react-router", "react-vite", "solid", "astro"].includes(f),
+      ["tanstack-router", "react-router", "react-vite", "vanilla-vite", "vue", "solid", "astro"].includes(f),
     )
   ) {
     processSingleTemplate(
@@ -126,7 +126,7 @@ export async function processAddonTemplates(
         processTemplatesFromPrefix(vfs, templates, "addons/pwa/apps/web/next", "apps/web", config);
       } else if (
         config.frontend.some((f) =>
-          ["tanstack-router", "react-router", "react-vite", "solid"].includes(f),
+          ["tanstack-router", "react-router", "react-vite", "vanilla-vite", "vue", "solid"].includes(f),
         )
       ) {
         processTemplatesFromPrefix(vfs, templates, "addons/pwa/apps/web/vite", "apps/web", config);
@@ -138,6 +138,28 @@ export async function processAddonTemplates(
     if (addon === "tauri") {
       if (vfs.exists("apps/web/package.json")) {
         processTemplatesFromPrefix(vfs, templates, "addons/tauri/apps/web", "apps/web", config);
+      }
+      continue;
+    }
+
+    if (addon === "graphql-codegen" && vfs.exists("web/package.json")) {
+      processTemplatesFromPrefix(vfs, templates, "addons/graphql-codegen/apps/web", "web", config);
+      continue;
+    }
+
+    if (
+      [
+        "axios",
+        "firebase",
+        "graphql-codegen",
+        "openapi-typescript",
+        "apollo-client",
+        "electron",
+        "capacitor",
+      ].includes(addon)
+    ) {
+      if (vfs.exists("apps/web/package.json")) {
+        processTemplatesFromPrefix(vfs, templates, `addons/${addon}/apps/web`, "apps/web", config);
       }
       continue;
     }

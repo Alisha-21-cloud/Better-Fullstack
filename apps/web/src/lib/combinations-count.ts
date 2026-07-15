@@ -28,9 +28,7 @@ function optionCount(category: OptionCategory): number {
 }
 
 function mergedOptionIds(categories: readonly OptionCategory[]): string[] {
-  return [
-    ...new Set(categories.flatMap((category) => optionIds(category))),
-  ];
+  return [...new Set(categories.flatMap((category) => optionIds(category)))];
 }
 
 function formatScientificFromBigInt(value: bigint, precision = 3): ScientificNotation {
@@ -118,6 +116,12 @@ const goSingleSelectCategories = [
   "goApi",
   "goCli",
   "goLogging",
+  "goValidation",
+  "goQuality",
+  "goMigrations",
+  "goTemplating",
+  "goProtoTooling",
+  "goDI",
   "packageManager",
   "git",
   "install",
@@ -138,6 +142,11 @@ const elixirSingleSelectCategories = [
   "elixirObservability",
   "elixirTesting",
   "elixirQuality",
+  "elixirI18n",
+  "elixirHttpServer",
+  "elixirApplicationFramework",
+  "elixirDocumentation",
+  "elixirClustering",
   "elixirDeploy",
   "packageManager",
   "git",
@@ -175,7 +184,11 @@ const elixirCombinations =
   multiplyCounts(elixirSingleSelectCounts) * powerSetSize(optionIds("aiDocs"));
 
 const totalCombinations =
-  typescriptCombinations + rustCombinations + pythonCombinations + goCombinations + elixirCombinations;
+  typescriptCombinations +
+  rustCombinations +
+  pythonCombinations +
+  goCombinations +
+  elixirCombinations;
 const yoloCombinations = totalCombinations * 2n;
 
 const yearsAtOneMillisecondPerCombination = Number(totalCombinations) / MILLISECONDS_PER_YEAR;
@@ -187,9 +200,7 @@ export const combinationsMetrics = {
   totalCombinations,
   yoloCombinations,
   totalScientific: formatScientificFromBigInt(totalCombinations),
-  yearsAtOneMillisecondScientific: formatScientificFromNumber(
-    yearsAtOneMillisecondPerCombination,
-  ),
+  yearsAtOneMillisecondScientific: formatScientificFromNumber(yearsAtOneMillisecondPerCombination),
   universeLifetimesScientific: formatScientificFromNumber(
     universeLifetimesAtOneMillisecondPerCombination,
   ),

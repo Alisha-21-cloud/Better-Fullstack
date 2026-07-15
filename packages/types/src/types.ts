@@ -100,6 +100,12 @@ import type {
   GoCachingSchema,
   GoConfigSchema,
   GoObservabilitySchema,
+  GoValidationSchema,
+  GoQualitySchema,
+  GoMigrationsSchema,
+  GoTemplatingSchema,
+  GoProtoToolingSchema,
+  GoDISchema,
   JavaLanguageSchema,
   JavaWebFrameworkSchema,
   JavaBuildToolSchema,
@@ -135,6 +141,11 @@ import type {
   ElixirObservabilitySchema,
   ElixirTestingSchema,
   ElixirQualitySchema,
+  ElixirI18nSchema,
+  ElixirHttpServerSchema,
+  ElixirApplicationFrameworkSchema,
+  ElixirDocumentationSchema,
+  ElixirClusteringSchema,
   ElixirDeploySchema,
   AiDocsSchema,
   ShadcnBaseSchema,
@@ -243,6 +254,12 @@ export type GoMessageQueue = z.infer<typeof GoMessageQueueSchema>;
 export type GoCaching = z.infer<typeof GoCachingSchema>;
 export type GoConfig = z.infer<typeof GoConfigSchema>;
 export type GoObservability = z.infer<typeof GoObservabilitySchema>;
+export type GoValidation = z.infer<typeof GoValidationSchema>;
+export type GoQuality = z.infer<typeof GoQualitySchema>;
+export type GoMigrations = z.infer<typeof GoMigrationsSchema>;
+export type GoTemplating = z.infer<typeof GoTemplatingSchema>;
+export type GoProtoTooling = z.infer<typeof GoProtoToolingSchema>;
+export type GoDI = z.infer<typeof GoDISchema>;
 export type JavaLanguage = z.infer<typeof JavaLanguageSchema>;
 export type JavaWebFramework = z.infer<typeof JavaWebFrameworkSchema>;
 export type JavaBuildTool = z.infer<typeof JavaBuildToolSchema>;
@@ -278,6 +295,11 @@ export type ElixirCaching = z.infer<typeof ElixirCachingSchema>;
 export type ElixirObservability = z.infer<typeof ElixirObservabilitySchema>;
 export type ElixirTesting = z.infer<typeof ElixirTestingSchema>;
 export type ElixirQuality = z.infer<typeof ElixirQualitySchema>;
+export type ElixirI18n = z.infer<typeof ElixirI18nSchema>;
+export type ElixirHttpServer = z.infer<typeof ElixirHttpServerSchema>;
+export type ElixirApplicationFramework = z.infer<typeof ElixirApplicationFrameworkSchema>;
+export type ElixirDocumentation = z.infer<typeof ElixirDocumentationSchema>;
+export type ElixirClustering = z.infer<typeof ElixirClusteringSchema>;
 export type ElixirDeploy = z.infer<typeof ElixirDeploySchema>;
 export type AiDocs = z.infer<typeof AiDocsSchema>;
 export type ShadcnBase = z.infer<typeof ShadcnBaseSchema>;

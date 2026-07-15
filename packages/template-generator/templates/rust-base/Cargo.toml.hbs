@@ -11,6 +11,30 @@ members = [
 {{#if (eq rustFrontend "dioxus")}}
     "crates/dioxus-client",
 {{/if}}
+{{#if (eq rustFrontend "yew")}}
+    "crates/yew-client",
+{{/if}}
+{{#if (eq rustCli "clap")}}
+    "crates/cli",
+{{/if}}
+{{#if (eq rustCli "ratatui")}}
+    "crates/tui",
+{{/if}}
+]
+default-members = [
+    "crates/server",
+{{#if (eq rustApi "tonic")}}
+    "crates/proto",
+{{/if}}
+{{#if (eq rustFrontend "leptos")}}
+    "crates/client",
+{{/if}}
+{{#if (eq rustFrontend "dioxus")}}
+    "crates/dioxus-client",
+{{/if}}
+{{#if (eq rustFrontend "yew")}}
+    "crates/yew-client",
+{{/if}}
 {{#if (eq rustCli "clap")}}
     "crates/cli",
 {{/if}}
@@ -36,10 +60,20 @@ futures-util = "0.3"
 {{#if (eq rustMessageQueue "lapin")}}
 lapin = "4.10"
 {{/if}}
+{{#if (eq rustMessageQueue "rdkafka")}}
+rdkafka = { version = "0.39", features = ["tokio"] }
+{{/if}}
+{{#if (eq rustMessageQueue "async-nats")}}
+async-nats = "0.49"
+{{/if}}
 {{#if (eq rustObservability "opentelemetry")}}
 opentelemetry = "0.32"
 opentelemetry_sdk = "0.32"
 opentelemetry-otlp = { version = "0.32", features = ["http-proto", "reqwest-blocking-client"] }
+{{/if}}
+{{#if (eq rustObservability "metrics")}}
+metrics = "0.24"
+metrics-exporter-prometheus = { version = "0.18", default-features = false, features = ["http-listener"] }
 {{/if}}
 {{#if (eq rustTemplating "askama")}}
 askama = "0.16"
@@ -47,8 +81,18 @@ askama = "0.16"
 {{#if (eq rustTemplating "tera")}}
 tera = "1.20"
 {{/if}}
+{{#if (eq rustTemplating "minijinja")}}
+minijinja = "2.21"
+{{/if}}
 {{#if (eq rustAuth "torii")}}
 torii = { version = "0.5", features = ["sqlite", "password"] }
+{{/if}}
+{{#if (eq rustAuth "openidconnect")}}
+openidconnect = "4.0"
+url = "2"
+{{/if}}
+{{#if (eq rustAuth "tower-sessions")}}
+tower-sessions = "0.15"
 {{/if}}
 
 # Serialization
@@ -121,6 +165,14 @@ poem = "3.1"
 # Web framework (Loco) — DB-free: routes only, no ORM/migrations required
 loco-rs = { version = "0.16", default-features = false, features = ["cli"] }
 {{/if}}
+{{#if (eq rustWebFramework "warp")}}
+# Web framework (Warp)
+warp = { version = "0.4", features = ["server"] }
+{{/if}}
+{{#if (eq rustWebFramework "salvo")}}
+# Web framework (Salvo)
+salvo = { version = "=0.93.0", features = ["cors"] }
+{{/if}}
 
 {{#if (eq rustOrm "sqlx")}}
 # Database (SQLx)
@@ -135,6 +187,18 @@ sea-orm-migration = "1.1"
 # Database (Diesel + diesel-async)
 diesel = { version = "2.3", features = ["postgres"] }
 diesel-async = { version = "0.8", features = ["postgres", "deadpool"] }
+{{/if}}
+{{#if (eq rustOrm "mongodb")}}
+# Database (official MongoDB driver)
+mongodb = "3.8"
+{{/if}}
+{{#if (eq rustOrm "rusqlite")}}
+# Database (embedded SQLite)
+rusqlite = { version = "=0.38.0", features = ["bundled"] }
+{{/if}}
+{{#if (eq rustOrm "tokio-postgres")}}
+# Database (native async PostgreSQL)
+tokio-postgres = "0.7"
 {{/if}}
 
 {{#if (eq rustApi "tonic")}}
@@ -159,6 +223,10 @@ async-graphql-rocket = "7"
 async-graphql-poem = "7"
 {{/if}}
 {{/if}}
+{{#if (eq rustApi "jsonrpsee")}}
+# JSON-RPC
+jsonrpsee = { version = "0.26", features = ["server", "macros"] }
+{{/if}}
 
 {{#if (eq rustFrontend "leptos")}}
 # Frontend (Leptos)
@@ -181,6 +249,14 @@ dioxus-router = "0.6"
 dioxus-logger = "0.6"
 console_error_panic_hook = "0.1"
 wasm-bindgen = "0.2"
+{{/if}}
+{{#if (eq rustFrontend "yew")}}
+# Frontend (Yew)
+yew = { version = "0.23", features = ["csr"] }
+gloo-net = { version = "0.7", default-features = false, features = ["http", "json"] }
+console_error_panic_hook = "0.1"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = ["HtmlElement"] }
 {{/if}}
 
 {{#if (eq rustCli "clap")}}
@@ -257,6 +333,26 @@ proptest = "1"
 {{#if (includes rustLibraries "insta")}}
 # Snapshot testing
 insta = { version = "1", features = ["yaml"] }
+{{/if}}
+{{#if (includes rustLibraries "rand")}}
+# Randomness and sampling
+rand = "0.10"
+{{/if}}
+{{#if (includes rustLibraries "regex")}}
+# Regular expressions
+regex = "1.13"
+{{/if}}
+{{#if (includes rustLibraries "rayon")}}
+# Data parallelism
+rayon = "1.12"
+{{/if}}
+{{#if (includes rustLibraries "itertools")}}
+# Iterator utilities
+itertools = "0.15"
+{{/if}}
+{{#if (includes rustLibraries "rstest")}}
+# Fixture-based testing
+rstest = "0.26"
 {{/if}}
 
 {{#if (eq rustCaching "moka")}}

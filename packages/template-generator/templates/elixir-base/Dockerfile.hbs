@@ -1,6 +1,6 @@
 FROM hexpm/elixir:1.16.3-erlang-26.2.5-debian-bookworm-20240423-slim AS build
 
-RUN apt-get update -y && apt-get install -y build-essential git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && apt-get install -y build-essential git{{#if (includes elixirLibraries "rustler")}} cargo rustc{{/if}} && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV MIX_ENV=prod
 
@@ -9,7 +9,10 @@ COPY mix.exs ./
 RUN mix deps.get --only $MIX_ENV
 COPY config config
 COPY lib lib
-{{#if (or (ne elixirWebFramework "none") (eq elixirOrm "ecto-sql"))}}
+{{#if (includes elixirLibraries "rustler")}}
+COPY native native
+{{/if}}
+{{#if (or (ne elixirWebFramework "none") (or (eq elixirOrm "ecto-sql") (or (eq elixirOrm "myxql") (eq elixirOrm "ecto_sqlite3"))))}}
 COPY priv priv
 {{/if}}
 RUN mix release
@@ -18,5 +21,10 @@ FROM debian:bookworm-20240423-slim AS app
 RUN apt-get update -y && apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV MIX_ENV=prod
+{{#if (eq elixirOrm "ecto_sqlite3")}}
+ENV DATABASE_PATH=/data/{{elixirAppName}}.db
+RUN mkdir -p /data
+VOLUME ["/data"]
+{{/if}}
 COPY --from=build /app/_build/prod/rel/{{elixirAppName}} ./
 CMD ["/app/bin/{{elixirAppName}}", "start"]

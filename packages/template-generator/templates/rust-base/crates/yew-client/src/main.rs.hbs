@@ -1,0 +1,65 @@
+use gloo_net::http::Request;
+use serde::Deserialize;
+use wasm_bindgen_futures::spawn_local;
+use yew::prelude::*;
+
+#[derive(Clone, Debug, Deserialize, PartialEq)]
+struct HealthResponse {
+    status: String,
+    message: String,
+}
+
+#[function_component(App)]
+fn app() -> Html {
+    let health = use_state(|| None::<Result<HealthResponse, String>>);
+
+    {
+        let health = health.clone();
+        use_effect_with((), move |_| {
+            spawn_local(async move {
+                let result = Request::get("http://localhost:3000/health")
+                    .send()
+                    .await
+                    .map_err(|error| error.to_string())
+                    .and_then(|response| {
+                        if response.ok() {
+                            Ok(response)
+                        } else {
+                            Err(format!("server returned {}", response.status()))
+                        }
+                    });
+                let result = match result {
+                    Ok(response) => response
+                        .json::<HealthResponse>()
+                        .await
+                        .map_err(|error| error.to_string()),
+                    Err(error) => Err(error),
+                };
+                health.set(Some(result));
+            });
+            || ()
+        });
+    }
+
+    let status = match health.as_ref() {
+        None => html! { <p>{"Checking the Rust server…"}</p> },
+        Some(Ok(response)) => html! {
+            <p class="ok">{format!("{} — {}", response.status, response.message)}</p>
+        },
+        Some(Err(error)) => html! { <p class="error">{format!("Server unavailable: {error}")}</p> },
+    };
+
+    html! {
+        <main>
+            <span class="eyebrow">{"better/fullstack"}</span>
+            <h1>{"Yew + Rust"}</h1>
+            <p>{"A typed WebAssembly frontend connected to your generated Rust backend."}</p>
+            {status}
+        </main>
+    }
+}
+
+fn main() {
+    console_error_panic_hook::set_once();
+    yew::Renderer::<App>::new().render();
+}

@@ -351,6 +351,15 @@ describe("Authentication Configurations", () => {
       });
 
       expectSuccess(result);
+      const projectDir = result.projectDir!;
+      const authOptions = await readFile(join(projectDir, "apps/web/src/lib/auth.ts"), "utf-8");
+      const middleware = await readFile(
+        join(projectDir, "apps/web/src/middleware.ts"),
+        "utf-8",
+      );
+      expect(authOptions).toContain('strategy: "jwt"');
+      expect(middleware).toContain("api/auth");
+      expect(middleware).not.toContain('"/(api|trpc)(.*)"');
     });
 
     it("should work with nextauth + self backend + next + prisma", async () => {

@@ -26,6 +26,11 @@ import {
   ELIXIR_OBSERVABILITY_VALUES,
   ELIXIR_ORM_VALUES,
   ELIXIR_QUALITY_VALUES,
+  ELIXIR_I18N_VALUES,
+  ELIXIR_HTTP_SERVER_VALUES,
+  ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  ELIXIR_DOCUMENTATION_VALUES,
+  ELIXIR_CLUSTERING_VALUES,
   ELIXIR_REALTIME_VALUES,
   ELIXIR_TESTING_VALUES,
   ELIXIR_VALIDATION_VALUES,
@@ -39,10 +44,16 @@ import {
   GO_AUTH_VALUES,
   GO_CACHING_VALUES,
   GO_CONFIG_VALUES,
+  GO_DI_VALUES,
   GO_MESSAGE_QUEUE_VALUES,
+  GO_MIGRATIONS_VALUES,
   GO_OBSERVABILITY_VALUES,
+  GO_PROTO_TOOLING_VALUES,
+  GO_QUALITY_VALUES,
   GO_REALTIME_VALUES,
+  GO_TEMPLATING_VALUES,
   GO_TESTING_VALUES,
+  GO_VALIDATION_VALUES,
   GO_CLI_VALUES,
   GO_LOGGING_VALUES,
   GO_ORM_VALUES,
@@ -321,9 +332,7 @@ function makeTypeScriptDraft(args: GeneratorArgs): CandidateDraft {
       cms: sampleScalar(CMS_VALUES, 0.88),
       caching: sampleScalar(CACHING_VALUES, 0.88),
       rateLimit:
-        backend === "none" || backend === "convex"
-          ? "none"
-          : sampleScalar(RATE_LIMIT_VALUES, 0.9),
+        backend === "none" || backend === "convex" ? "none" : sampleScalar(RATE_LIMIT_VALUES, 0.9),
       i18n: sampleScalar(I18N_VALUES, 0.88),
       search: sampleScalar(SEARCH_VALUES, 0.9),
       fileStorage: sampleScalar(FILE_STORAGE_VALUES, 0.84),
@@ -463,6 +472,12 @@ function makeGoDraft(args: GeneratorArgs): CandidateDraft {
       goCaching: sampleScalar(GO_CACHING_VALUES, 0.5),
       goConfig: sampleScalar(GO_CONFIG_VALUES, 0.5),
       goObservability: sampleScalar(GO_OBSERVABILITY_VALUES, 0.5),
+      goValidation: sampleScalar(GO_VALIDATION_VALUES, 0.5),
+      goQuality: sampleScalar(GO_QUALITY_VALUES, 0.5),
+      goMigrations: sampleScalar(GO_MIGRATIONS_VALUES, 0.5),
+      goTemplating: sampleScalar(GO_TEMPLATING_VALUES, 0.5),
+      goProtoTooling: sampleScalar(GO_PROTO_TOOLING_VALUES, 0.5),
+      goDI: sampleScalar(GO_DI_VALUES, 0.5),
       email: sampleScalar(CROSS_ECOSYSTEM_EMAIL_VALUES, 0.75, "email"),
       observability: sampleScalar(CROSS_ECOSYSTEM_OBSERVABILITY_VALUES, 0.75, "observability"),
       caching: sampleScalar(CROSS_ECOSYSTEM_CACHING_VALUES, 0.75, "caching"),
@@ -534,9 +549,8 @@ function makeElixirDraft(args: GeneratorArgs): CandidateDraft {
       elixirRealtime: usesPhoenix
         ? sampleScalar(ELIXIR_REALTIME_VALUES, 0.25, "elixirRealtime")
         : "none",
-      elixirJobs: elixirOrm === "ecto-sql"
-        ? sampleScalar(ELIXIR_JOBS_VALUES, 0.55, "elixirJobs")
-        : "none",
+      elixirJobs:
+        elixirOrm === "ecto-sql" ? sampleScalar(ELIXIR_JOBS_VALUES, 0.55, "elixirJobs") : "none",
       elixirValidation: hasEcto
         ? sampleScalar(ELIXIR_VALIDATION_VALUES, 0.2, "elixirValidation")
         : "none",
@@ -555,9 +569,20 @@ function makeElixirDraft(args: GeneratorArgs): CandidateDraft {
       elixirQuality: usesPhoenix
         ? sampleScalar(ELIXIR_QUALITY_VALUES, 0.25, "elixirQuality")
         : "none",
-      elixirDeploy: usesPhoenix
-        ? sampleScalar(ELIXIR_DEPLOY_VALUES, 0.65, "elixirDeploy")
+      elixirI18n: usesPhoenix ? sampleScalar(ELIXIR_I18N_VALUES, 0.4, "elixirI18n") : "none",
+      elixirHttpServer: usesPhoenix
+        ? sampleScalar(ELIXIR_HTTP_SERVER_VALUES, 0.25, "elixirHttpServer")
         : "none",
+      elixirApplicationFramework: usesPhoenix
+        ? sampleScalar(ELIXIR_APPLICATION_FRAMEWORK_VALUES, 0.7, "elixirApplicationFramework")
+        : "none",
+      elixirDocumentation: usesPhoenix
+        ? sampleScalar(ELIXIR_DOCUMENTATION_VALUES, 0.5, "elixirDocumentation")
+        : "none",
+      elixirClustering: usesPhoenix
+        ? sampleScalar(ELIXIR_CLUSTERING_VALUES, 0.6, "elixirClustering")
+        : "none",
+      elixirDeploy: usesPhoenix ? sampleScalar(ELIXIR_DEPLOY_VALUES, 0.65, "elixirDeploy") : "none",
       elixirLibraries: usesPhoenix
         ? sampleArray(ELIXIR_LIBRARIES_VALUES, 0.5, 2, "elixirLibraries")
         : [],
@@ -709,6 +734,12 @@ function createValidationBase(projectName: string, draft: CandidateDraft): Proje
     goCli: "none",
     goLogging: "none",
     goAuth: "none",
+    goValidation: "none",
+    goQuality: "none",
+    goMigrations: "none",
+    goTemplating: "none",
+    goProtoTooling: "none",
+    goDI: "none",
     javaWebFramework: "none",
     javaBuildTool: "none",
     javaOrm: "none",
@@ -731,6 +762,11 @@ function createValidationBase(projectName: string, draft: CandidateDraft): Proje
     elixirObservability: "none",
     elixirTesting: "none",
     elixirQuality: "none",
+    elixirI18n: "none",
+    elixirHttpServer: "none",
+    elixirApplicationFramework: "none",
+    elixirDocumentation: "none",
+    elixirClustering: "none",
     elixirDeploy: "none",
     elixirLibraries: [],
     aiDocs: [],

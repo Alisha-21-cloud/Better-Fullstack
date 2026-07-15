@@ -818,6 +818,13 @@ describe("Payments Options", () => {
         "utf-8",
       );
       expect(lib).toContain('from "autumn-js"');
+      expect(lib).toContain("autumn.billing.attach");
+      expect(lib).toContain("autumn.customers.getOrCreate");
+      expect(lib).toContain("autumn.track");
+      expect(lib).toContain("customerId: params.customerId");
+      expect(lib).toContain("planId: params.planId");
+      expect(lib).not.toContain("autumn.checkout");
+      expect(lib).not.toContain("customer_id");
     });
 
     test("autumn with Svelte", async () => {

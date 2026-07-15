@@ -43,9 +43,7 @@ export function formatNameFromFingerprint(fingerprint: TemplateFingerprint): str
       typeof fingerprint.mobileTesting === "string" ? fingerprint.mobileTesting : undefined,
       typeof fingerprint.mobilePush === "string" ? fingerprint.mobilePush : undefined,
       typeof fingerprint.mobileOTA === "string" ? fingerprint.mobileOTA : undefined,
-      typeof fingerprint.mobileDeepLinking === "string"
-        ? fingerprint.mobileDeepLinking
-        : undefined,
+      typeof fingerprint.mobileDeepLinking === "string" ? fingerprint.mobileDeepLinking : undefined,
     ],
     rust: [
       typeof fingerprint.rustWebFramework === "string" ? fingerprint.rustWebFramework : undefined,
@@ -78,6 +76,12 @@ export function formatNameFromFingerprint(fingerprint: TemplateFingerprint): str
       typeof fingerprint.goCli === "string" ? fingerprint.goCli : undefined,
       typeof fingerprint.goLogging === "string" ? fingerprint.goLogging : undefined,
       typeof fingerprint.goAuth === "string" ? fingerprint.goAuth : undefined,
+      typeof fingerprint.goValidation === "string" ? fingerprint.goValidation : undefined,
+      typeof fingerprint.goQuality === "string" ? fingerprint.goQuality : undefined,
+      typeof fingerprint.goMigrations === "string" ? fingerprint.goMigrations : undefined,
+      typeof fingerprint.goTemplating === "string" ? fingerprint.goTemplating : undefined,
+      typeof fingerprint.goProtoTooling === "string" ? fingerprint.goProtoTooling : undefined,
+      typeof fingerprint.goDI === "string" ? fingerprint.goDI : undefined,
     ],
     java: [
       typeof fingerprint.javaWebFramework === "string" ? fingerprint.javaWebFramework : undefined,
@@ -243,6 +247,12 @@ export function buildCommand(name: string, config: ProjectConfig): string {
     ["go-caching", config.goCaching],
     ["go-config", config.goConfig],
     ["go-observability", config.goObservability],
+    ["go-validation", config.goValidation],
+    ["go-quality", config.goQuality],
+    ["go-migrations", config.goMigrations],
+    ["go-templating", config.goTemplating],
+    ["go-proto-tooling", config.goProtoTooling],
+    ["go-di", config.goDI],
   ];
 
   const javaFlags: Array<[string, string | readonly string[]]> = [
@@ -271,6 +281,11 @@ export function buildCommand(name: string, config: ProjectConfig): string {
     ["elixir-observability", config.elixirObservability],
     ["elixir-testing", config.elixirTesting],
     ["elixir-quality", config.elixirQuality],
+    ["elixir-i18n", config.elixirI18n],
+    ["elixir-http-server", config.elixirHttpServer],
+    ["elixir-application-framework", config.elixirApplicationFramework],
+    ["elixir-documentation", config.elixirDocumentation],
+    ["elixir-clustering", config.elixirClustering],
     ["elixir-deploy", config.elixirDeploy],
     ["elixir-libraries", withExplicitNone(config.elixirLibraries)],
   ];

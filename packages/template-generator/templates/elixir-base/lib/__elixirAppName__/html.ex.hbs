@@ -1,0 +1,11 @@
+{{#if (includes elixirLibraries "floki")}}
+defmodule {{elixirModuleName}}.HTML do
+  @moduledoc "HTML parsing helpers powered by Floki."
+
+  def links(document) do
+    with {:ok, tree} <- Floki.parse_document(document) do
+      {:ok, Floki.attribute(tree, "a", "href")}
+    end
+  end
+end
+{{/if}}

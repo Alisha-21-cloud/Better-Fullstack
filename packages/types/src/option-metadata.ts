@@ -5,6 +5,7 @@ import {
   ANALYTICS_VALUES,
   ANIMATION_VALUES,
   API_VALUES,
+  APP_PLATFORM_ADDON_VALUES,
   ASTRO_INTEGRATION_VALUES,
   AUTH_VALUES,
   CACHING_VALUES,
@@ -31,6 +32,11 @@ import {
   ELIXIR_OBSERVABILITY_VALUES,
   ELIXIR_ORM_VALUES,
   ELIXIR_QUALITY_VALUES,
+  ELIXIR_I18N_VALUES,
+  ELIXIR_HTTP_SERVER_VALUES,
+  ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  ELIXIR_DOCUMENTATION_VALUES,
+  ELIXIR_CLUSTERING_VALUES,
   ELIXIR_REALTIME_VALUES,
   ELIXIR_TESTING_VALUES,
   ELIXIR_VALIDATION_VALUES,
@@ -65,6 +71,12 @@ import {
   GO_CACHING_VALUES,
   GO_CONFIG_VALUES,
   GO_OBSERVABILITY_VALUES,
+  GO_VALIDATION_VALUES,
+  GO_QUALITY_VALUES,
+  GO_MIGRATIONS_VALUES,
+  GO_TEMPLATING_VALUES,
+  GO_PROTO_TOOLING_VALUES,
+  GO_DI_VALUES,
   JAVA_AUTH_VALUES,
   JAVA_API_VALUES,
   JAVA_LANGUAGE_VALUES,
@@ -176,6 +188,7 @@ export type OptionCategory =
   | "mobileDeepLinking"
   | "codeQuality"
   | "documentation"
+  | "appShells"
   | "appPlatforms"
   | "packageManager"
   | "workspaceShape"
@@ -233,6 +246,12 @@ export type OptionCategory =
   | "goCaching"
   | "goConfig"
   | "goObservability"
+  | "goValidation"
+  | "goQuality"
+  | "goMigrations"
+  | "goTemplating"
+  | "goProtoTooling"
+  | "goDI"
   | "javaLanguage"
   | "javaWebFramework"
   | "javaBuildTool"
@@ -267,6 +286,11 @@ export type OptionCategory =
   | "elixirObservability"
   | "elixirTesting"
   | "elixirQuality"
+  | "elixirI18n"
+  | "elixirHttpServer"
+  | "elixirApplicationFramework"
+  | "elixirDocumentation"
+  | "elixirClustering"
   | "elixirDeploy"
   | "elixirLibraries";
 
@@ -285,6 +309,7 @@ export type OptionCategoryEcosystem =
 export const TYPESCRIPT_CATEGORY_ORDER = [
   "webFrontend",
   "astroIntegration",
+  "appShells",
   "cssFramework",
   "uiLibrary",
   "shadcnBase",
@@ -416,6 +441,12 @@ export const GO_CATEGORY_ORDER = [
   "goCaching",
   "goConfig",
   "goObservability",
+  "goValidation",
+  "goQuality",
+  "goMigrations",
+  "goTemplating",
+  "goProtoTooling",
+  "goDI",
   "auth",
   "email",
   "observability",
@@ -477,6 +508,11 @@ export const ELIXIR_CATEGORY_ORDER = [
   "elixirObservability",
   "elixirTesting",
   "elixirQuality",
+  "elixirI18n",
+  "elixirHttpServer",
+  "elixirApplicationFramework",
+  "elixirDocumentation",
+  "elixirClustering",
   "elixirDeploy",
   "elixirLibraries",
   "aiDocs",
@@ -523,6 +559,8 @@ export function getCategoryOrderForEcosystem(
 export function getCategoryDisplayName(categoryKey: string): string {
   const categoryNames: Record<string, string> = {
     i18n: "Internationalization (i18n)",
+    appShells: "App Platforms",
+    appPlatforms: "Addons",
     mobileNavigation: "Mobile Navigation",
     mobileUI: "Mobile UI",
     mobileStorage: "Mobile Storage",
@@ -571,6 +609,12 @@ export function getCategoryDisplayName(categoryKey: string): string {
     goCaching: "Go Caching",
     goConfig: "Go Config",
     goObservability: "Go Observability",
+    goValidation: "Go Validation",
+    goQuality: "Go Code Quality",
+    goMigrations: "Go Database Migrations",
+    goTemplating: "Go Templating",
+    goProtoTooling: "Go Protobuf Tooling",
+    goDI: "Go Dependency Injection",
     javaLanguage: "Java Language",
     javaWebFramework: "Java Web Framework",
     javaBuildTool: "Java Build Tool",
@@ -605,6 +649,11 @@ export function getCategoryDisplayName(categoryKey: string): string {
     elixirObservability: "Elixir Observability",
     elixirTesting: "Elixir Testing",
     elixirQuality: "Elixir Code Quality",
+    elixirI18n: "Elixir Localization",
+    elixirHttpServer: "Elixir HTTP Server",
+    elixirApplicationFramework: "Elixir Application Framework",
+    elixirDocumentation: "Elixir Documentation",
+    elixirClustering: "Elixir Clustering",
     elixirDeploy: "Elixir Deploy",
     elixirLibraries: "Elixir Libraries",
   };
@@ -632,6 +681,8 @@ const WEB_FRONTEND_VALUES = [
   "tanstack-router",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "tanstack-start",
   "next",
   "vinext",
@@ -678,6 +729,8 @@ const BACKEND_BUILDER_VALUES = [
 
 const CODE_QUALITY_VALUES = [
   "biome",
+  "eslint",
+  "prettier",
   "oxlint",
   "ultracite",
   "lefthook",
@@ -687,13 +740,11 @@ const CODE_QUALITY_VALUES = [
 
 const DOCUMENTATION_VALUES = ["starlight", "fumadocs"] as const satisfies readonly string[];
 
+const APP_SHELL_VALUES = APP_PLATFORM_ADDON_VALUES;
+
 const APP_PLATFORM_VALUES = [
   "turborepo",
   "nx",
-  "pwa",
-  "tauri",
-  "wxt",
-  "opentui",
   "mcp",
   "skills",
   "msw",
@@ -708,6 +759,11 @@ const APP_PLATFORM_VALUES = [
   "devcontainer",
   "docker-compose",
   "github-actions",
+  "axios",
+  "firebase",
+  "graphql-codegen",
+  "openapi-typescript",
+  "apollo-client",
 ] as const satisfies readonly string[];
 
 const EXAMPLE_VALUES = ["ai", "chat-sdk"] as const satisfies readonly string[];
@@ -718,6 +774,7 @@ const MULTI_SELECT_CATEGORIES = new Set<OptionCategory>([
   "nativeFrontend",
   "codeQuality",
   "documentation",
+  "appShells",
   "appPlatforms",
   "examples",
   "aiDocs",
@@ -779,6 +836,7 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   mobileDeepLinking: MOBILE_DEEP_LINKING_VALUES,
   codeQuality: CODE_QUALITY_VALUES,
   documentation: DOCUMENTATION_VALUES,
+  appShells: APP_SHELL_VALUES,
   appPlatforms: APP_PLATFORM_VALUES,
   packageManager: PACKAGE_MANAGER_VALUES,
   workspaceShape: WORKSPACE_SHAPE_VALUES,
@@ -836,6 +894,12 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   goCaching: GO_CACHING_VALUES,
   goConfig: GO_CONFIG_VALUES,
   goObservability: GO_OBSERVABILITY_VALUES,
+  goValidation: GO_VALIDATION_VALUES,
+  goQuality: GO_QUALITY_VALUES,
+  goMigrations: GO_MIGRATIONS_VALUES,
+  goTemplating: GO_TEMPLATING_VALUES,
+  goProtoTooling: GO_PROTO_TOOLING_VALUES,
+  goDI: GO_DI_VALUES,
   javaLanguage: JAVA_LANGUAGE_VALUES,
   javaWebFramework: JAVA_WEB_FRAMEWORK_VALUES,
   javaBuildTool: JAVA_BUILD_TOOL_VALUES,
@@ -870,6 +934,11 @@ const CATEGORY_VALUE_IDS: Record<OptionCategory, readonly string[]> = {
   elixirObservability: ELIXIR_OBSERVABILITY_VALUES,
   elixirTesting: ELIXIR_TESTING_VALUES,
   elixirQuality: ELIXIR_QUALITY_VALUES,
+  elixirI18n: ELIXIR_I18N_VALUES,
+  elixirHttpServer: ELIXIR_HTTP_SERVER_VALUES,
+  elixirApplicationFramework: ELIXIR_APPLICATION_FRAMEWORK_VALUES,
+  elixirDocumentation: ELIXIR_DOCUMENTATION_VALUES,
+  elixirClustering: ELIXIR_CLUSTERING_VALUES,
   elixirDeploy: ELIXIR_DEPLOY_VALUES,
   elixirLibraries: ELIXIR_LIBRARIES_VALUES,
 };
@@ -886,6 +955,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     next: "Next.js",
     vinext: "Vinext",
     "react-vite": "React + Vite",
+    "vanilla-vite": "Vite (Vanilla TypeScript)",
+    vue: "Vue 3 + Vite",
     svelte: "SvelteKit",
     redwood: "RedwoodJS",
   },
@@ -940,16 +1011,23 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     sst: "SST",
     vercel: "Vercel",
   },
-  cms: { tinacms: "TinaCMS", directus: "Directus", keystatic: "Keystatic" },
+  cms: {
+    tinacms: "TinaCMS",
+    directus: "Directus",
+    keystatic: "Keystatic",
+    contentful: "Contentful",
+  },
   auth: {
     "better-auth-organizations": "Better Auth + Organizations",
     auth0: "Auth0",
     workos: "WorkOS AuthKit",
     kinde: "Kinde",
+    passport: "Passport.js",
   },
   payments: {
     "lemon-squeezy": "Lemon Squeezy",
     dodo: "Dodo Payments",
+    paypal: "PayPal",
   },
   email: {
     "react-email": "React Email",
@@ -993,9 +1071,11 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   },
   testing: {
     "vitest-playwright": "Vitest + Playwright",
+    mocha: "Mocha",
   },
   realtime: {
     "socket-io": "Socket.IO",
+    ws: "ws",
     yjs: "Y.js",
   },
   jobQueue: {
@@ -1029,7 +1109,12 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   logging: {
     evlog: "evlog",
   },
-  cssFramework: { tailwind: "Tailwind CSS", scss: "SCSS", "postcss-only": "PostCSS Only" },
+  cssFramework: {
+    tailwind: "Tailwind CSS",
+    scss: "SCSS",
+    "postcss-only": "PostCSS Only",
+    "styled-components": "styled-components",
+  },
   uiLibrary: {
     "shadcn-ui": "shadcn/ui",
     "shadcn-svelte": "shadcn-svelte",
@@ -1055,6 +1140,7 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   analytics: {
     plausible: "Plausible",
     umami: "Umami",
+    ga4: "Google Analytics 4",
   },
   mobileNavigation: {
     "expo-router": "Expo Router",
@@ -1085,6 +1171,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   },
   codeQuality: {
     biome: "Biome",
+    eslint: "ESLint",
+    prettier: "Prettier",
     oxlint: "Oxlint",
     ultracite: "Ultracite",
     lefthook: "Lefthook",
@@ -1095,10 +1183,15 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     starlight: "Starlight",
     fumadocs: "Fumadocs",
   },
-  appPlatforms: {
+  appShells: {
     pwa: "PWA",
+    tauri: "Tauri",
+    electron: "Electron",
+    capacitor: "Capacitor",
     wxt: "WXT",
     opentui: "OpenTUI",
+  },
+  appPlatforms: {
     mcp: "MCP",
     msw: "MSW",
     swr: "SWR",
@@ -1110,6 +1203,11 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     devcontainer: "DevContainer",
     "docker-compose": "Docker Compose",
     "github-actions": "GitHub Actions",
+    axios: "Axios",
+    firebase: "Firebase JS SDK",
+    "graphql-codegen": "GraphQL Code Generator",
+    "openapi-typescript": "openapi-typescript",
+    "apollo-client": "Apollo Client",
   },
   versionChannel: {
     stable: "Stable",
@@ -1125,6 +1223,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     voltagent: "VoltAgent",
     langgraph: "LangGraph.js",
     "openai-agents": "OpenAI Agents SDK",
+    "openai-sdk": "OpenAI SDK",
+    "anthropic-sdk": "Anthropic SDK",
     "google-adk": "Google ADK",
     modelfusion: "ModelFusion",
     langchain: "LangChain",
@@ -1194,19 +1294,26 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     rocket: "Rocket",
     poem: "Poem",
     loco: "Loco",
+    warp: "Warp",
+    salvo: "Salvo",
   },
   rustFrontend: {
     leptos: "Leptos",
     dioxus: "Dioxus",
+    yew: "Yew",
   },
   rustOrm: {
     "sea-orm": "SeaORM",
     sqlx: "SQLx",
     diesel: "Diesel",
+    mongodb: "MongoDB Rust Driver",
+    rusqlite: "rusqlite",
+    "tokio-postgres": "tokio-postgres",
   },
   rustApi: {
     "async-graphql": "async-graphql",
     tonic: "Tonic",
+    jsonrpsee: "jsonrpsee",
   },
   rustCli: {
     clap: "Clap",
@@ -1230,6 +1337,13 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     mockall: "Mockall",
     proptest: "Proptest",
     insta: "Insta",
+    rand: "rand",
+    regex: "regex",
+    rayon: "Rayon",
+    itertools: "Itertools",
+    rstest: "rstest",
+    "cargo-nextest": "cargo-nextest",
+    "cargo-audit": "cargo-audit",
   },
   rustLogging: {
     tracing: "Tracing",
@@ -1246,19 +1360,25 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   rustAuth: {
     oauth2: "OAuth2",
     torii: "Torii",
+    openidconnect: "OpenID Connect",
+    "tower-sessions": "tower-sessions",
   },
   rustRealtime: {
     "tokio-tungstenite": "tokio-tungstenite",
   },
   rustMessageQueue: {
     lapin: "Lapin (RabbitMQ)",
+    rdkafka: "rdkafka (Kafka)",
+    "async-nats": "async-nats",
   },
   rustObservability: {
     opentelemetry: "OpenTelemetry",
+    metrics: "metrics",
   },
   rustTemplating: {
     askama: "Askama",
     tera: "Tera",
+    minijinja: "MiniJinja",
   },
   pythonWebFramework: {
     fastapi: "FastAPI",
@@ -1339,16 +1459,23 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     fiber: "Fiber",
     chi: "Chi",
     stdlib: "net/http",
+    "go-zero": "go-zero",
+    kratos: "Kratos",
+    httprouter: "HttpRouter",
   },
   goOrm: {
     gorm: "GORM",
     sqlc: "sqlc",
     ent: "Ent",
     bun: "Bun",
+    sqlx: "sqlx",
   },
   goApi: {
     "grpc-go": "gRPC-Go",
     gqlgen: "gqlgen",
+    "grpc-gateway": "grpc-gateway",
+    "connect-go": "Connect-Go",
+    "oapi-codegen": "oapi-codegen",
   },
   goCli: {
     cobra: "Cobra",
@@ -1365,10 +1492,14 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
     casbin: "Casbin",
     jwt: "golang-jwt",
     goth: "Goth",
+    oauth2: "golang.org/x/oauth2",
   },
   goTesting: {
     testify: "Testify",
     gomock: "GoMock",
+    testcontainers: "Testcontainers for Go",
+    "ginkgo-gomega": "Ginkgo + Gomega",
+    mockery: "mockery",
   },
   goRealtime: {
     "gorilla-websocket": "Gorilla WebSocket",
@@ -1377,6 +1508,8 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   goMessageQueue: {
     nats: "NATS",
     watermill: "Watermill",
+    "kafka-go": "kafka-go",
+    asynq: "Asynq",
   },
   goCaching: {
     redis: "go-redis",
@@ -1388,6 +1521,25 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   },
   goObservability: {
     opentelemetry: "OpenTelemetry",
+    prometheus: "Prometheus",
+  },
+  goValidation: {
+    validator: "go-playground/validator",
+  },
+  goQuality: {
+    "golangci-lint": "golangci-lint",
+  },
+  goMigrations: {
+    "golang-migrate": "golang-migrate",
+  },
+  goTemplating: {
+    templ: "templ",
+  },
+  goProtoTooling: {
+    buf: "Buf",
+  },
+  goDI: {
+    fx: "Uber Fx",
   },
   javaLanguage: {
     java: "Java",
@@ -1510,20 +1662,27 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   elixirOrm: {
     ecto: "Ecto",
     "ecto-sql": "Ecto SQL",
+    myxql: "MyXQL",
+    ecto_sqlite3: "ecto_sqlite3",
   },
   elixirAuth: {
     "phx-gen-auth": "phx.gen.auth",
     ueberauth: "Ueberauth",
     guardian: "Guardian",
+    pow: "Pow",
   },
   elixirApi: {
     rest: "Phoenix REST",
     absinthe: "Absinthe GraphQL",
     grpc: "gRPC (grpc-elixir)",
+    open_api_spex: "OpenApiSpex",
   },
   elixirLibraries: {
     broadway: "Broadway",
     nx: "Nx (Numerical Elixir)",
+    ex_aws: "ExAws",
+    floki: "Floki",
+    rustler: "Rustler",
   },
   elixirRealtime: {
     channels: "Phoenix Channels",
@@ -1542,32 +1701,56 @@ const EXACT_LABEL_OVERRIDES: Partial<Record<OptionCategory, Partial<Record<strin
   elixirHttp: {
     req: "Req",
     finch: "Finch",
+    tesla: "Tesla",
   },
   elixirJson: {
     jason: "Jason",
   },
   elixirEmail: {
     swoosh: "Swoosh",
+    bamboo: "Bamboo",
   },
   elixirCaching: {
     cachex: "Cachex",
     nebulex: "Nebulex",
+    redix: "Redix",
   },
   elixirObservability: {
     telemetry: "Telemetry",
     opentelemetry: "OpenTelemetry",
     prom_ex: "PromEx",
+    sentry: "Sentry",
   },
   elixirTesting: {
     ex_unit: "ExUnit",
     mox: "Mox",
     bypass: "Bypass",
     wallaby: "Wallaby",
+    stream_data: "StreamData",
+    ex_machina: "ExMachina",
   },
   elixirQuality: {
     credo: "Credo",
     dialyxir: "Dialyxir",
     sobelow: "Sobelow",
+    excoveralls: "ExCoveralls",
+    mix_audit: "MixAudit",
+  },
+  elixirI18n: {
+    gettext: "Gettext",
+  },
+  elixirHttpServer: {
+    bandit: "Bandit",
+    cowboy: "Cowboy",
+  },
+  elixirApplicationFramework: {
+    ash: "Ash Framework",
+  },
+  elixirDocumentation: {
+    ex_doc: "ExDoc",
+  },
+  elixirClustering: {
+    libcluster: "libcluster",
   },
   elixirDeploy: {
     docker: "Docker",
@@ -1702,6 +1885,7 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   mobileDeepLinking: buildCategoryMetadata("mobileDeepLinking"),
   codeQuality: buildCategoryMetadata("codeQuality"),
   documentation: buildCategoryMetadata("documentation"),
+  appShells: buildCategoryMetadata("appShells"),
   appPlatforms: buildCategoryMetadata("appPlatforms"),
   packageManager: buildCategoryMetadata("packageManager"),
   workspaceShape: buildCategoryMetadata("workspaceShape"),
@@ -1759,6 +1943,12 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   goCaching: buildCategoryMetadata("goCaching"),
   goConfig: buildCategoryMetadata("goConfig"),
   goObservability: buildCategoryMetadata("goObservability"),
+  goValidation: buildCategoryMetadata("goValidation"),
+  goQuality: buildCategoryMetadata("goQuality"),
+  goMigrations: buildCategoryMetadata("goMigrations"),
+  goTemplating: buildCategoryMetadata("goTemplating"),
+  goProtoTooling: buildCategoryMetadata("goProtoTooling"),
+  goDI: buildCategoryMetadata("goDI"),
   javaLanguage: buildCategoryMetadata("javaLanguage"),
   javaWebFramework: buildCategoryMetadata("javaWebFramework"),
   javaBuildTool: buildCategoryMetadata("javaBuildTool"),
@@ -1793,6 +1983,11 @@ export const OPTION_CATEGORY_METADATA: Record<OptionCategory, OptionCategoryMeta
   elixirObservability: buildCategoryMetadata("elixirObservability"),
   elixirTesting: buildCategoryMetadata("elixirTesting"),
   elixirQuality: buildCategoryMetadata("elixirQuality"),
+  elixirI18n: buildCategoryMetadata("elixirI18n"),
+  elixirHttpServer: buildCategoryMetadata("elixirHttpServer"),
+  elixirApplicationFramework: buildCategoryMetadata("elixirApplicationFramework"),
+  elixirDocumentation: buildCategoryMetadata("elixirDocumentation"),
+  elixirClustering: buildCategoryMetadata("elixirClustering"),
   elixirDeploy: buildCategoryMetadata("elixirDeploy"),
   elixirLibraries: buildCategoryMetadata("elixirLibraries"),
 };

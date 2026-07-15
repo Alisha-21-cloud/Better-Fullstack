@@ -40,6 +40,11 @@ import {
   ElixirObservabilitySchema,
   ElixirOrmSchema,
   ElixirQualitySchema,
+  ElixirI18nSchema,
+  ElixirHttpServerSchema,
+  ElixirApplicationFrameworkSchema,
+  ElixirDocumentationSchema,
+  ElixirClusteringSchema,
   ElixirRealtimeSchema,
   ElixirTestingSchema,
   ElixirValidationSchema,
@@ -64,12 +69,18 @@ import {
   GoCachingSchema,
   GoCliSchema,
   GoConfigSchema,
+  GoDISchema,
   GoLoggingSchema,
+  GoMigrationsSchema,
   GoMessageQueueSchema,
   GoObservabilitySchema,
   GoOrmSchema,
+  GoProtoToolingSchema,
+  GoQualitySchema,
   GoRealtimeSchema,
+  GoTemplatingSchema,
   GoTestingSchema,
+  GoValidationSchema,
   GoWebFrameworkSchema,
   JavaAuthSchema,
   JavaApiSchema,
@@ -144,9 +155,7 @@ export const CreateCommandOptionsSchema = z.object({
   fromHistory: z
     .number()
     .optional()
-    .describe(
-      "Replay the stack of the Nth most-recent project from history (1 = most recent)",
-    ),
+    .describe("Replay the stack of the Nth most-recent project from history (1 = most recent)"),
   config: z
     .string()
     .optional()
@@ -318,25 +327,26 @@ export const CreateCommandOptionsSchema = z.object({
     .array(PythonCliSchema)
     .optional()
     .describe("Python CLI tooling (typer, click, rich)"),
-  goWebFramework: GoWebFrameworkSchema.optional().describe("Go web framework (gin, echo, fiber)"),
-  goOrm: GoOrmSchema.optional().describe("Go ORM/database (gorm, sqlc)"),
-  goApi: GoApiSchema.optional().describe("Go API layer (grpc-go)"),
+  goWebFramework: GoWebFrameworkSchema.optional().describe("Go web framework"),
+  goOrm: GoOrmSchema.optional().describe("Go ORM/database layer"),
+  goApi: GoApiSchema.optional().describe("Go API layer"),
   goCli: GoCliSchema.optional().describe("Go CLI tools (cobra, bubbletea, urfave-cli)"),
   goLogging: GoLoggingSchema.optional().describe("Go logging (zap, zerolog, slog)"),
-  goAuth: GoAuthSchema.optional().describe("Go auth (casbin, jwt, goth)"),
-  goTesting: z
-    .array(GoTestingSchema)
-    .optional()
-    .describe("Go testing libraries (testify, gomock)"),
+  goAuth: GoAuthSchema.optional().describe("Go authentication library"),
+  goTesting: z.array(GoTestingSchema).optional().describe("Go testing libraries"),
   goRealtime: GoRealtimeSchema.optional().describe(
     "Go realtime library (gorilla-websocket, centrifuge)",
   ),
-  goMessageQueue: GoMessageQueueSchema.optional().describe("Go message queue (nats, watermill)"),
+  goMessageQueue: GoMessageQueueSchema.optional().describe("Go message queue"),
   goCaching: GoCachingSchema.optional().describe("Go caching library (redis, ristretto)"),
   goConfig: GoConfigSchema.optional().describe("Go config management (viper, koanf)"),
-  goObservability: GoObservabilitySchema.optional().describe(
-    "Go observability (opentelemetry)",
-  ),
+  goObservability: GoObservabilitySchema.optional().describe("Go observability"),
+  goValidation: GoValidationSchema.optional().describe("Go validation"),
+  goQuality: GoQualitySchema.optional().describe("Go code quality"),
+  goMigrations: GoMigrationsSchema.optional().describe("Go database migrations"),
+  goTemplating: GoTemplatingSchema.optional().describe("Go templating"),
+  goProtoTooling: GoProtoToolingSchema.optional().describe("Go protobuf tooling"),
+  goDI: GoDISchema.optional().describe("Go dependency injection"),
   javaWebFramework: JavaWebFrameworkSchema.optional().describe(
     "Java web framework (spring-boot, quarkus, none)",
   ),
@@ -373,8 +383,12 @@ export const CreateCommandOptionsSchema = z.object({
   dotnetValidation: DotnetValidationSchema.optional().describe(
     ".NET validation (fluentvalidation, data-annotations)",
   ),
-  dotnetCaching: DotnetCachingSchema.optional().describe(".NET caching (redis, memory-cache, none)"),
-  dotnetDeploy: DotnetDeploySchema.optional().describe(".NET deploy target (docker, azure, aws, none)"),
+  dotnetCaching: DotnetCachingSchema.optional().describe(
+    ".NET caching (redis, memory-cache, none)",
+  ),
+  dotnetDeploy: DotnetDeploySchema.optional().describe(
+    ".NET deploy target (docker, azure, aws, none)",
+  ),
   elixirWebFramework: ElixirWebFrameworkSchema.optional().describe(
     "Elixir web framework (phoenix, phoenix-live-view, none)",
   ),
@@ -402,6 +416,19 @@ export const CreateCommandOptionsSchema = z.object({
   ),
   elixirQuality: ElixirQualitySchema.optional().describe(
     "Elixir code quality (credo, dialyxir, sobelow, none)",
+  ),
+  elixirI18n: ElixirI18nSchema.optional().describe("Elixir localization (gettext, none)"),
+  elixirHttpServer: ElixirHttpServerSchema.optional().describe(
+    "Elixir HTTP server (bandit, cowboy, none)",
+  ),
+  elixirApplicationFramework: ElixirApplicationFrameworkSchema.optional().describe(
+    "Elixir application framework (ash, none)",
+  ),
+  elixirDocumentation: ElixirDocumentationSchema.optional().describe(
+    "Elixir documentation tooling (ex_doc, none)",
+  ),
+  elixirClustering: ElixirClusteringSchema.optional().describe(
+    "Elixir clustering (libcluster, none)",
   ),
   elixirDeploy: ElixirDeploySchema.optional().describe(
     "Elixir deploy target (docker, fly, gigalixir, mix-release, none)",

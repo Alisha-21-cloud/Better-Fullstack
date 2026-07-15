@@ -1,6 +1,7 @@
 import { getLocalWebDevPort, type ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
+
 import { getGraphBackendConnection, hasWebFrontend } from "../utils/graph-backend";
 
 const JAVA_GROUP_ID = "com.example";
@@ -116,16 +117,19 @@ function generateGraphReadmeContent(config: ProjectConfig): string {
       ? "\nThe generated Spring Data JPA example uses an embedded H2 dev database. Update `apps/server/src/main/resources/application.yml` when switching to an external database.\n"
       : databasePart
         ? `\nDatabase-backed backend selections expect a local ${databasePart.toolId} database or a matching \`DATABASE_URL\` in the backend environment before you start the server. Copy the backend \`.env.example\` to \`.env\` and adjust it for your machine.\n`
-    : "";
+        : "";
   const hasJavaSpringSecurity = (config.stackParts ?? []).some(
-    (part) => part.role === "auth" && part.ecosystem === "java" && part.toolId === "spring-security",
+    (part) =>
+      part.role === "auth" && part.ecosystem === "java" && part.toolId === "spring-security",
   );
   const authNote = hasJavaSpringSecurity
     ? "\nSpring Security is enabled. HTTP Basic auth protects application endpoints except `/health`; set `APP_BASIC_USERNAME` and `APP_BASIC_PASSWORD` before running locally if you want credentials other than the dev defaults.\n"
     : "";
   const serverScripts = graphBackend
     ? [
-        graphBackend.setupCommand ? "- `setup:server` installs or prepares backend dependencies." : null,
+        graphBackend.setupCommand
+          ? "- `setup:server` installs or prepares backend dependencies."
+          : null,
         "- `dev:server` starts the generated backend.",
         graphBackend.checkCommand ? "- `check:server` runs the backend compile/check lane." : null,
         graphBackend.testCommand ? "- `test:server` runs backend tests." : null,
@@ -162,17 +166,29 @@ ${installCommand}
 ${graphBackend?.setupCommand ? `Prepare the backend dependencies and database state before starting the server:\n${setupLine}` : ""}${databaseNote}${authNote}
 Run the generated apps in separate terminals so each ecosystem keeps its native watcher and logs.
 
-${hasWeb ? `\`\`\`sh
+${
+  hasWeb
+    ? `\`\`\`sh
 ${packageManagerRunCommand} dev:web
 \`\`\`
-` : ""}${config.frontend.some((entry) => entry.startsWith("native-")) ? `\`\`\`sh
+`
+    : ""
+}${
+    config.frontend.some((entry) => entry.startsWith("native-"))
+      ? `\`\`\`sh
 ${packageManagerRunCommand} dev:native
 \`\`\`
-` : ""}
-${graphBackend ? `Start the backend:
+`
+      : ""
+  }
+${
+  graphBackend
+    ? `Start the backend:
 \`\`\`sh
 ${graphBackend.devCommand}
-\`\`\`` : ""}
+\`\`\``
+    : ""
+}
 ${graphBackend && hasWeb ? `The frontend is configured to call the backend at \`${graphBackend.serverUrl}\`. The generated health check reads the matching public server URL from the web environment file and targets \`${graphBackend.healthPath}\`.\n` : ""}
 ## Root Scripts
 
@@ -304,9 +320,9 @@ function generateJavaReadmeContent(config: ProjectConfig): string {
         ? config.javaBuildTool === "gradle"
           ? `${buildToolCommand} quarkusDev`
           : `${buildToolCommand} quarkus:dev`
-      : config.javaBuildTool === "gradle"
-        ? `${buildToolCommand} run`
-        : `${buildToolCommand} exec:java`
+        : config.javaBuildTool === "gradle"
+          ? `${buildToolCommand} run`
+          : `${buildToolCommand} exec:java`
     : null;
   const packageCommand = buildToolCommand
     ? config.javaBuildTool === "gradle"
@@ -560,11 +576,7 @@ ${packageManagerRunCmd} dev
 \`\`\`
 
 ${generateRunningInstructions(frontend, backend, webPort, hasWeb, hasNative, isConvex)}
-${
-  ai === "ai-cli"
-    ? `\n${generateAICLISection(packageManagerRunCmd, packageManager)}\n`
-    : ""
-}
+${ai === "ai-cli" ? `\n${generateAICLISection(packageManagerRunCmd, packageManager)}\n` : ""}
 ${
   examples.includes("chat-sdk")
     ? `\n${generateChatSdkExampleSection(options, packageManagerRunCmd, webPort, ai)}\n`
@@ -778,6 +790,8 @@ function generateStackDescription(
     "tanstack-router": "React, TanStack Router",
     "react-router": "React, React Router",
     "react-vite": "React, Vite SPA",
+    "vanilla-vite": "Vanilla TypeScript, Vite",
+    vue: "Vue 3, Vite",
     next: "Next.js",
     "tanstack-start": "React, TanStack Start",
     svelte: "SvelteKit",
@@ -855,6 +869,8 @@ function generateProjectStructure(
       "tanstack-router": "React + TanStack Router",
       "react-router": "React + React Router",
       "react-vite": "React + Vite SPA",
+      "vanilla-vite": "Vite + Vanilla TypeScript",
+      vue: "Vue 3 + Vite",
       next: "Next.js",
       "tanstack-start": "React + TanStack Start",
       svelte: "SvelteKit",
@@ -871,7 +887,9 @@ function generateProjectStructure(
   }
 
   if (hasNative) {
-    structure.push(`│   ${hasWeb ? "├──" : "└──"} native/      # Mobile application (React Native, Expo)`);
+    structure.push(
+      `│   ${hasWeb ? "├──" : "└──"} native/      # Mobile application (React Native, Expo)`,
+    );
   }
 
   if (addons.includes("starlight")) {
@@ -935,6 +953,8 @@ function generateFeaturesList(
     "tanstack-router": "- **TanStack Router** - File-based routing with full type safety",
     "react-router": "- **React Router** - Declarative routing for React",
     "react-vite": "- **React + Vite** - Client-routed React SPA powered by Vite",
+    "vanilla-vite": "- **Vite + TypeScript** - Framework-free TypeScript SPA powered by Vite",
+    vue: "- **Vue 3 + Vite** - Standalone Vue SPA with first-class TypeScript support",
     next: "- **Next.js** - Full-stack React framework",
     "tanstack-start": "- **TanStack Start** - SSR framework with TanStack Router",
     svelte: "- **SvelteKit** - Web framework for building Svelte apps",
@@ -1276,6 +1296,14 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push("- **Actix-web** - Powerful, pragmatic, and extremely fast web framework");
   } else if (rustWebFramework === "rocket") {
     features.push("- **Rocket** - Convention-over-configuration web framework for Rust");
+  } else if (rustWebFramework === "poem") {
+    features.push("- **Poem** - Full-featured async web framework built on Tokio and Hyper");
+  } else if (rustWebFramework === "loco") {
+    features.push("- **Loco** - Opinionated Rails-inspired application framework");
+  } else if (rustWebFramework === "warp") {
+    features.push("- **Warp** - Composable filter-based async web framework");
+  } else if (rustWebFramework === "salvo") {
+    features.push("- **Salvo** - Batteries-included async web framework");
   }
 
   // Frontend
@@ -1284,6 +1312,9 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push("- **WebAssembly** - High-performance frontend compiled from Rust");
   } else if (rustFrontend === "dioxus") {
     features.push("- **Dioxus** - React-like GUI library for web, desktop, and mobile");
+    features.push("- **WebAssembly** - High-performance frontend compiled from Rust");
+  } else if (rustFrontend === "yew") {
+    features.push("- **Yew** - Mature React-like framework for Rust and WebAssembly");
     features.push("- **WebAssembly** - High-performance frontend compiled from Rust");
   }
 
@@ -1294,6 +1325,12 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push("- **SQLx** - Async SQL toolkit with compile-time checked queries");
   } else if (rustOrm === "diesel") {
     features.push("- **Diesel** - Safe, extensible ORM with compile-time query validation");
+  } else if (rustOrm === "mongodb") {
+    features.push("- **MongoDB Rust Driver** - Official async BSON document database client");
+  } else if (rustOrm === "rusqlite") {
+    features.push("- **rusqlite** - Ergonomic embedded SQLite access");
+  } else if (rustOrm === "tokio-postgres") {
+    features.push("- **tokio-postgres** - Native asynchronous PostgreSQL client");
   }
 
   // API
@@ -1301,6 +1338,8 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push("- **Tonic** - Production-ready gRPC implementation");
   } else if (rustApi === "async-graphql") {
     features.push("- **async-graphql** - High-performance GraphQL server");
+  } else if (rustApi === "jsonrpsee") {
+    features.push("- **jsonrpsee** - Async JSON-RPC server on a dedicated port");
   }
 
   // CLI
@@ -1336,6 +1375,17 @@ function generateRustReadmeContent(config: ProjectConfig): string {
   if (libs.includes("tokio-test")) {
     features.push("- **Tokio Test** - Async testing utilities");
   }
+  if (libs.includes("rand")) features.push("- **rand** - Randomness and sampling");
+  if (libs.includes("regex")) features.push("- **regex** - Safe linear-time regular expressions");
+  if (libs.includes("rayon")) features.push("- **Rayon** - Data parallel iterators");
+  if (libs.includes("itertools")) features.push("- **Itertools** - Extended iterator utilities");
+  if (libs.includes("rstest")) features.push("- **rstest** - Fixture and parameterized tests");
+  if (libs.includes("cargo-nextest")) {
+    features.push("- **cargo-nextest** - Fast isolated test runner with CI profiles");
+  }
+  if (libs.includes("cargo-audit")) {
+    features.push("- **cargo-audit** - RustSec dependency vulnerability auditing");
+  }
 
   // Logging
   const { rustLogging } = config;
@@ -1369,6 +1419,10 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     features.push(
       "- **OAuth2** - OAuth2 client with authorization code, PKCE, and token exchange flows",
     );
+  } else if (rustAuth === "openidconnect") {
+    features.push("- **OpenID Connect** - Provider discovery and typed authorization flows");
+  } else if (rustAuth === "tower-sessions") {
+    features.push("- **tower-sessions** - Cookie-backed Axum session middleware");
   }
 
   // Project structure
@@ -1398,6 +1452,19 @@ function generateRustReadmeContent(config: ProjectConfig): string {
       "│       ├── Dioxus.toml   # Dioxus CLI config",
       "│       ├── src/main.rs",
       "│       └── assets/main.css",
+    );
+  } else if (rustFrontend === "yew") {
+    structure.push(
+      "├── crates/",
+      "│   ├── server/           # Backend API server",
+      "│   │   ├── Cargo.toml",
+      "│   │   └── src/main.rs",
+      "│   └── yew-client/       # Yew WASM frontend",
+      "│       ├── Cargo.toml",
+      "│       ├── Trunk.toml    # Trunk build config",
+      "│       ├── index.html",
+      "│       ├── src/main.rs",
+      "│       └── style/main.css",
     );
   } else {
     structure.push(
@@ -1429,7 +1496,13 @@ function generateRustReadmeContent(config: ProjectConfig): string {
     scripts += `
 - \`cd crates/dioxus-client && dx serve\`: Start Dioxus dev server
 - \`cd crates/dioxus-client && dx build --release\`: Build Dioxus for production`;
+  } else if (rustFrontend === "yew") {
+    scripts += `
+- \`cd crates/yew-client && trunk serve\`: Start Yew dev server
+- \`cd crates/yew-client && trunk build --release\`: Build Yew for production`;
   }
+  if (libs.includes("cargo-nextest")) scripts += "\n- `cargo nextest run`: Run tests with nextest";
+  if (libs.includes("cargo-audit")) scripts += "\n- `cargo audit`: Audit dependencies with RustSec";
 
   return `# ${projectName}
 
@@ -1442,7 +1515,7 @@ ${features.join("\n")}
 ## Prerequisites
 
 - [Rust](https://rustup.rs/) (stable toolchain)
-${rustFrontend === "leptos" ? "- [Trunk](https://trunkrs.dev/) (`cargo install trunk`)\n- [wasm32-unknown-unknown target](https://rustwasm.github.io/docs/book/) (`rustup target add wasm32-unknown-unknown`)" : ""}${rustFrontend === "dioxus" ? "- [Dioxus CLI](https://dioxuslabs.com/learn/0.6/getting_started) (`cargo install dioxus-cli`)\n- [wasm32-unknown-unknown target](https://rustwasm.github.io/docs/book/) (`rustup target add wasm32-unknown-unknown`)" : ""}
+${rustFrontend === "leptos" || rustFrontend === "yew" ? "- [Trunk](https://trunkrs.dev/) (`cargo install trunk`)\n- [wasm32-unknown-unknown target](https://rustwasm.github.io/docs/book/) (`rustup target add wasm32-unknown-unknown`)" : ""}${rustFrontend === "dioxus" ? "- [Dioxus CLI](https://dioxuslabs.com/learn/0.6/getting_started) (`cargo install dioxus-cli`)\n- [wasm32-unknown-unknown target](https://rustwasm.github.io/docs/book/) (`rustup target add wasm32-unknown-unknown`)" : ""}${libs.includes("cargo-nextest") ? "\n- [cargo-nextest](https://nexte.st/) (`cargo install cargo-nextest --locked`)" : ""}${libs.includes("cargo-audit") ? "\n- [cargo-audit](https://rustsec.org/) (`cargo install cargo-audit --locked`)" : ""}
 
 ## Getting Started
 
@@ -1483,6 +1556,20 @@ In a separate terminal, start the Dioxus frontend:
 \`\`\`bash
 cd crates/dioxus-client
 dx serve
+\`\`\`
+
+The frontend will be available at [http://localhost:8080](http://localhost:8080).
+`
+      : ""
+  }${
+    rustFrontend === "yew"
+      ? `### Running the Frontend
+
+In a separate terminal, start the Yew frontend:
+
+\`\`\`bash
+cd crates/yew-client
+trunk serve
 \`\`\`
 
 The frontend will be available at [http://localhost:8080](http://localhost:8080).
@@ -1568,7 +1655,9 @@ function generatePythonReadmeContent(config: ProjectConfig): string {
   if (pythonApi === "django-rest-framework") {
     features.push("- **Django REST Framework** - Mature toolkit for building Django REST APIs");
   } else if (pythonApi === "django-ninja") {
-    features.push("- **Django Ninja** - FastAPI-style Django APIs with type hints and OpenAPI docs");
+    features.push(
+      "- **Django Ninja** - FastAPI-style Django APIs with type hints and OpenAPI docs",
+    );
   }
 
   // Task queue
@@ -1813,7 +1902,25 @@ ${scripts}
 }
 
 function generateGoReadmeContent(config: ProjectConfig): string {
-  const { projectName, goWebFramework, goOrm, goApi, goCli, goLogging, goAuth, auth } = config;
+  const {
+    projectName,
+    goWebFramework,
+    goOrm,
+    goApi,
+    goCli,
+    goLogging,
+    goAuth,
+    goTesting,
+    goMessageQueue,
+    goObservability,
+    goValidation,
+    goQuality,
+    goMigrations,
+    goTemplating,
+    goProtoTooling,
+    goDI,
+    auth,
+  } = config;
 
   const features: string[] = ["- **Go** - Fast, reliable, and efficient programming language"];
 
@@ -1826,6 +1933,14 @@ function generateGoReadmeContent(config: ProjectConfig): string {
     features.push("- **Fiber** - Express-inspired web framework built on Fasthttp");
   } else if (goWebFramework === "chi") {
     features.push("- **Chi** - Lightweight, zero-dependency router built on net/http");
+  } else if (goWebFramework === "stdlib") {
+    features.push("- **net/http** - Standard-library HTTP routing");
+  } else if (goWebFramework === "go-zero") {
+    features.push("- **go-zero** - API-first resilient microservice framework");
+  } else if (goWebFramework === "kratos") {
+    features.push("- **Kratos** - Cloud-native HTTP and gRPC framework");
+  } else if (goWebFramework === "httprouter") {
+    features.push("- **HttpRouter** - High-performance radix-tree router");
   }
 
   // ORM/Database
@@ -1835,11 +1950,21 @@ function generateGoReadmeContent(config: ProjectConfig): string {
     features.push("- **SQLc** - Generate type-safe code from SQL");
   } else if (goOrm === "ent") {
     features.push("- **Ent** - Code-first ORM by Meta with graph traversal API");
+  } else if (goOrm === "bun") {
+    features.push("- **Bun** - SQL-first ORM and query builder");
+  } else if (goOrm === "sqlx") {
+    features.push("- **sqlx** - Lightweight database/sql extensions");
   }
 
   // API
   if (goApi === "grpc-go") {
     features.push("- **gRPC** - High-performance RPC framework");
+  } else if (goApi === "grpc-gateway") {
+    features.push("- **grpc-gateway** - REST/JSON gateway for protobuf services");
+  } else if (goApi === "connect-go") {
+    features.push("- **Connect-Go** - Multi-protocol RPC over HTTP");
+  } else if (goApi === "oapi-codegen") {
+    features.push("- **oapi-codegen** - Typed OpenAPI code generation");
   }
 
   // CLI
@@ -1865,7 +1990,19 @@ function generateGoReadmeContent(config: ProjectConfig): string {
     features.push("- **Casbin** - Model-based authorization (ACL, RBAC, ABAC)");
   } else if (goAuth === "jwt") {
     features.push("- **golang-jwt** - JWT token creation and validation");
+  } else if (goAuth === "oauth2") {
+    features.push("- **x/oauth2** - OAuth2 client configuration");
   }
+
+  if (goTesting.length > 0) features.push(`- **Testing** - ${goTesting.join(", ")}`);
+  if (goMessageQueue !== "none") features.push(`- **Messaging** - ${goMessageQueue}`);
+  if (goObservability !== "none") features.push(`- **Observability** - ${goObservability}`);
+  if (goValidation !== "none") features.push(`- **Validation** - ${goValidation}`);
+  if (goQuality !== "none") features.push(`- **Code Quality** - ${goQuality}`);
+  if (goMigrations !== "none") features.push(`- **Migrations** - ${goMigrations}`);
+  if (goTemplating !== "none") features.push(`- **Templating** - ${goTemplating}`);
+  if (goProtoTooling !== "none") features.push(`- **Protobuf Tooling** - ${goProtoTooling}`);
+  if (goDI !== "none") features.push(`- **Dependency Injection** - ${goDI}`);
 
   if (auth === "go-better-auth") {
     features.push(
@@ -1916,11 +2053,14 @@ function generateGoReadmeContent(config: ProjectConfig): string {
     structure.push("│       └── auth.go");
   }
 
-  if (goApi === "grpc-go") {
+  if (goApi === "grpc-go" || goApi === "grpc-gateway") {
     structure.push("├── proto/                # Protocol buffer definitions");
     structure.push("│   ├── greeter.proto");
     structure.push("│   ├── greeter.pb.go");
     structure.push("│   └── greeter_grpc.pb.go");
+  } else if (goProtoTooling === "buf") {
+    structure.push("├── proto/                # Protocol buffer definitions");
+    structure.push("│   └── greeter.proto");
   }
 
   structure.push("├── .env.example          # Environment variables template");
@@ -1948,6 +2088,18 @@ function generateGoReadmeContent(config: ProjectConfig): string {
     goScripts += `
 - \`protoc --go_out=. --go-grpc_out=. proto/*.proto\`: Regenerate protobuf code`;
   }
+  if (goApi === "grpc-gateway")
+    goScripts += `\n- \`go run cmd/gateway/main.go\`: Run the REST gateway`;
+  if (goApi === "connect-go")
+    goScripts += `\n- \`go run cmd/connect/main.go\`: Run the Connect RPC server`;
+  if (goApi === "oapi-codegen")
+    goScripts += `\n- \`go generate ./internal/api\`: Regenerate OpenAPI types`;
+  if (goTemplating === "templ")
+    goScripts += `\n- \`go run github.com/a-h/templ/cmd/templ generate\`: Generate templ components`;
+  if (goProtoTooling === "buf")
+    goScripts += `\n- \`go run github.com/bufbuild/buf/cmd/buf generate\`: Generate protobuf code`;
+  if (goMigrations === "golang-migrate")
+    goScripts += `\n- \`migrate -path migrations -database "$DATABASE_URL" up\`: Run migrations`;
 
   let authSetup = "";
   if (auth === "go-better-auth") {
@@ -2032,6 +2184,13 @@ Supported databases:
 - SQLite (default): leave \`DATABASE_URL\` empty
 - PostgreSQL: \`DATABASE_URL=postgres://user:pass@localhost:5432/dbname?sslmode=disable\`
 `;
+  } else if (goOrm === "sqlx") {
+    databaseSetup = `
+## Database Setup
+
+This project uses sqlx with SQLite by default and PostgreSQL when \`DATABASE_URL\` starts with \`postgres\`.
+Copy \`.env.example\` to \`.env\`, then set \`DATABASE_URL\` for your environment.
+`;
   }
 
   // gRPC setup section
@@ -2062,8 +2221,8 @@ ${features.join("\n")}
 
 ## Prerequisites
 
-- [Go](https://go.dev/) 1.22 or higher
-${goApi === "grpc-go" ? "- [Protocol Buffers](https://protobuf.dev/) compiler (`protoc`)\n- [Go gRPC plugins](https://grpc.io/docs/languages/go/quickstart/)" : ""}
+- [Go](https://go.dev/) 1.25 or higher
+${goApi === "grpc-go" || goApi === "grpc-gateway" ? "- [Protocol Buffers](https://protobuf.dev/) compiler (`protoc`)\n- [Go gRPC plugins](https://grpc.io/docs/languages/go/quickstart/)" : ""}
 
 ## Getting Started
 

@@ -22,6 +22,10 @@ import { executeApolloRequest } from "@{{projectName}}/api";
 {{/if}}
 import cors from "cors";
 import express{{#if (or (eq api "apollo-server") (and (eq api "openapi") (isBetterAuth auth)))}}, { type Request }{{/if}} from "express";
+{{#if (eq realtime "ws")}}
+import { createServer } from "node:http";
+import { attachWebSocketServer } from "./lib/websocket";
+{{/if}}
 {{#if (includes examples "ai")}}
 import { streamText, type UIMessage, convertToModelMessages } from "ai";
 import { google } from "@ai-sdk/google";
@@ -30,6 +34,10 @@ import { google } from "@ai-sdk/google";
 import { auth } from "@{{projectName}}/auth";
 import { toNodeHandler } from "better-auth/node";
 {{/if}}
+{{#if (eq auth "passport")}}
+import { passport } from "@{{projectName}}/auth";
+import session from "express-session";
+{{/if}}
 
 const app = express();
 
@@ -37,12 +45,39 @@ app.use(
 	cors({
 		origin: env.CORS_ORIGIN,
 		methods: ["GET", "POST", "OPTIONS"],
+{{#if (or (isBetterAuth auth) (eq auth "passport"))}}
+		credentials: true,
+{{/if}}
 {{#if (isBetterAuth auth)}}
 		allowedHeaders: ["Content-Type", "Authorization"],
-		credentials: true,
 {{/if}}
 	})
 );
+
+{{#if (eq auth "passport")}}
+app.use(
+  session({
+    secret: process.env.PASSPORT_SESSION_SECRET ?? "change-me-in-production",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production" },
+  }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
+app.get("/api/auth/github", passport.authenticate("github", { scope: ["user:email"] }));
+app.get(
+  "/api/auth/github/callback",
+  passport.authenticate("github", { failureRedirect: "/?auth=failed" }),
+  (_req, res) => res.redirect(process.env.CORS_ORIGIN ?? "http://localhost:3001"),
+);
+app.post("/api/auth/logout", (req, res, next) => {
+  req.logout((error) => {
+    if (error) return next(error);
+    res.status(204).end();
+  });
+});
+{{/if}}
 
 {{#if (isBetterAuth auth)}}
 app.all("/api/auth{/*path}", toNodeHandler(auth));
@@ -196,6 +231,14 @@ app.get("/", (_req, res) => {
 	res.status(200).send("OK");
 });
 
+{{#if (eq realtime "ws")}}
+const server = createServer(app);
+attachWebSocketServer(server);
+server.listen(3000, () => {
+	console.log("HTTP and WebSocket server is running on http://localhost:3000");
+});
+{{else}}
 app.listen(3000, () => {
 	console.log("Server is running on http://localhost:3000");
 });
+{{/if}}

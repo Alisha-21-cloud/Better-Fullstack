@@ -6,6 +6,7 @@ import {
   evaluateCompatibility,
   getAIFrontendCompatibilityIssue,
   getApiFrontendCompatibilityIssue,
+  getCompatibleFormLibraries,
   getDisabledReason,
 } from "../src/compatibility";
 import { DEFAULT_STACK_SELECTION } from "../src/stack-translation";
@@ -38,6 +39,45 @@ describe("compatibility issue helpers", () => {
 
   it("allows frontend-agnostic API options", () => {
     expect(getApiFrontendCompatibilityIssue("orpc", ["svelte"])).toBeUndefined();
+  });
+
+  it("rejects API options without a standalone Vite web integration", () => {
+    const issue = getApiFrontendCompatibilityIssue("orpc", ["vue"]);
+
+    expect(issue).toMatchObject({
+      code: "STANDALONE_VITE_API_UNSUPPORTED",
+      category: "api",
+      optionId: "orpc",
+      provided: { api: "orpc", frontend: "vue" },
+    });
+  });
+
+  it("normalizes unsupported standalone Vite integrations", () => {
+    for (const frontend of ["vanilla-vite", "vue"] as const) {
+      const stack = {
+        ...DEFAULT_STACK_SELECTION,
+        backend: "hono" as const,
+        webFrontend: [frontend],
+        api: "orpc" as const,
+        auth: "better-auth" as const,
+        forms: "tanstack-form" as const,
+        cms: "sanity" as const,
+        featureFlags: "growthbook" as const,
+      };
+      const result = analyzeStackCompatibility(stack);
+
+      expect(result.adjustedStack?.api).toBe("graphql-yoga");
+      expect(result.adjustedStack?.auth).toBe("none");
+      expect(result.adjustedStack?.forms).toBe("none");
+      expect(result.adjustedStack?.cms).toBe("none");
+      expect(result.adjustedStack?.featureFlags).toBe("none");
+      expect(getDisabledReason(stack, "api", "orpc")).not.toBeNull();
+      expect(getDisabledReason(stack, "forms", "tanstack-form")).not.toBeNull();
+      expect(getDisabledReason(stack, "cms", "sanity")).not.toBeNull();
+      expect(getDisabledReason(stack, "cms", "contentful")).toBeNull();
+      expect(getDisabledReason(stack, "featureFlags", "growthbook")).not.toBeNull();
+      expect(getCompatibleFormLibraries([frontend])).toEqual(["none"]);
+    }
   });
 
   it("treats Apollo Server as a React-only API option", () => {
@@ -173,6 +213,52 @@ describe("compatibility issue helpers", () => {
     });
   });
 
+  it("removes incompatible Electron and Capacitor selections after a frontend change", () => {
+    const result = analyzeStackCompatibility({
+      ...DEFAULT_STACK_SELECTION,
+      nativeFrontend: [],
+      webFrontend: ["next"],
+      appPlatforms: ["electron", "capacitor"],
+    });
+
+    expect(result.adjustedStack.appPlatforms).toEqual([]);
+    expect(result.changes.map((change) => change.message)).toEqual(
+      expect.arrayContaining([
+        "Electron removed (requires compatible frontend)",
+        "Capacitor removed (requires compatible frontend)",
+      ]),
+    );
+  });
+
+  it("allows daisyUI and platform tooling for Vue and vanilla Vite", () => {
+    for (const frontend of ["vue", "vanilla-vite"] as const) {
+      expect(
+        getDisabledReason(
+          {
+            ...DEFAULT_STACK_SELECTION,
+            webFrontend: [frontend],
+            nativeFrontend: [],
+          },
+          "uiLibrary",
+          "daisyui",
+        ),
+      ).toBeNull();
+      for (const platform of ["pwa", "tauri", "docker-compose"] as const) {
+        expect(
+          getDisabledReason(
+            {
+              ...DEFAULT_STACK_SELECTION,
+              webFrontend: [frontend],
+              nativeFrontend: [],
+            },
+            "appPlatforms",
+            platform,
+          ),
+        ).toBeNull();
+      }
+    }
+  });
+
   it("returns structured TanStack AI frontend issues", () => {
     const issue = getAIFrontendCompatibilityIssue("tanstack-ai", ["svelte"]);
 
@@ -250,6 +336,21 @@ describe("compatibility issue helpers", () => {
     );
     expect(getDisabledReason(supportedStack, "webDeploy", "render")).toBeNull();
     expect(getDisabledReason(supportedStack, "webDeploy", "netlify")).toBeNull();
+    expect(getDisabledReason(unsupportedStack, "webDeploy", "cloudflare")).toBeNull();
+    expect(
+      getDisabledReason(
+        { ...unsupportedStack, webFrontend: ["vanilla-vite"] },
+        "webDeploy",
+        "cloudflare",
+      ),
+    ).toBe("'cloudflare' web deployment is not wired for the 'vanilla-vite' frontend.");
+    expect(
+      getDisabledReason(
+        { ...unsupportedStack, webFrontend: ["vue"] },
+        "webDeploy",
+        "cloudflare",
+      ),
+    ).toBe("'cloudflare' web deployment is not wired for the 'vue' frontend.");
     for (const stack of supportedNetlifyStacks) {
       expect(getDisabledReason(stack, "webDeploy", "netlify")).toBeNull();
     }
@@ -267,6 +368,12 @@ describe("compatibility issue helpers", () => {
     ).toBeNull();
     expect(
       getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "paraglide"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["vue"] }, "i18n", "paraglide"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["vanilla-vite"] }, "i18n", "paraglide"),
     ).toBeNull();
     expect(getDisabledReason({ ...baseStack, webFrontend: ["angular"] }, "i18n", "paraglide")).toBe(
       "Paraglide is not yet wired for the 'angular' frontend",
@@ -292,7 +399,9 @@ describe("compatibility issue helpers", () => {
     expect(
       getDisabledReason({ ...baseStack, webFrontend: ["tanstack-router"] }, "i18n", "intlayer"),
     ).toBeNull();
-    expect(getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "intlayer")).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, webFrontend: ["next"] }, "i18n", "intlayer"),
+    ).toBeNull();
     expect(
       getDisabledReason({ ...baseStack, webFrontend: ["react-vite"] }, "i18n", "intlayer"),
     ).toBeNull();
@@ -357,6 +466,30 @@ describe("compatibility issue helpers", () => {
     );
     expect(getDisabledReason({ ...baseStack, database: "sqlite" }, "dbSetup", "docker")).toBe(
       "SQLite does not need Docker database setup.",
+    );
+  });
+
+  it("limits Go migrations to relational database targets", () => {
+    const baseStack = {
+      ...DEFAULT_STACK_SELECTION,
+      ecosystem: "go" as const,
+      goMigrations: "golang-migrate" as const,
+    };
+
+    expect(
+      getDisabledReason({ ...baseStack, database: "sqlite" }, "goMigrations", "golang-migrate"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, database: "postgres" }, "goMigrations", "golang-migrate"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, database: "mysql" }, "goMigrations", "golang-migrate"),
+    ).toBeNull();
+    expect(
+      getDisabledReason({ ...baseStack, database: "mongodb" }, "goMigrations", "golang-migrate"),
+    ).toBe("Go migrations require SQLite, PostgreSQL, or MySQL");
+    expect(getDisabledReason(baseStack, "database", "mongodb")).toBe(
+      "The selected Go migration tool requires SQLite, PostgreSQL, or MySQL",
     );
   });
 
@@ -541,7 +674,11 @@ describe("compatibility issue helpers", () => {
     );
     for (const stack of [
       { ...DEFAULT_STACK_SELECTION, webFrontend: ["nuxt"] },
-      { ...DEFAULT_STACK_SELECTION, webFrontend: ["astro"], runtime: "workers" },
+      {
+        ...DEFAULT_STACK_SELECTION,
+        webFrontend: ["astro"],
+        runtime: "workers",
+      },
       { ...DEFAULT_STACK_SELECTION, webFrontend: ["astro"], runtime: "node" },
     ] as const) {
       expect(getDisabledReason(stack, "cms", "keystatic")).toBe(keystaticAstro7Reason);
@@ -706,6 +843,18 @@ describe("compatibility issue helpers", () => {
         "tanstack-query",
       ),
     ).toBe("TanStack Query is already included via the selected API layer.");
+
+    expect(
+      getDisabledReason(
+        {
+          ...DEFAULT_STACK_SELECTION,
+          backend: "self",
+          api: "openapi",
+        },
+        "appPlatforms",
+        "openapi-typescript",
+      ),
+    ).toBe("openapi-typescript requires a standalone backend that exposes an OpenAPI schema.");
 
     expect(
       getDisabledReason(
@@ -960,15 +1109,33 @@ describe("compatibility issue helpers", () => {
     expect(getDisabledReason(plainElixir, "elixirJobs", "oban")).toBe(
       "Oban requires Ecto SQL with PostgreSQL in the current Phoenix scaffold",
     );
+    expect(getDisabledReason(plainElixir, "elixirApi", "open_api_spex")).toBe(
+      "Elixir API scaffolds require Phoenix",
+    );
+    expect(getDisabledReason(plainElixir, "elixirI18n", "gettext")).toBe(
+      "Elixir Internationalization requires Phoenix",
+    );
+    expect(getDisabledReason(plainElixir, "elixirHttpServer", "bandit")).toBe(
+      "HTTP server adapters require Phoenix",
+    );
 
     expect(getDisabledReason(phoenixBase, "elixirAuth", "phx-gen-auth")).toBe(
-      "phx.gen.auth requires Ecto SQL with PostgreSQL in the current Phoenix scaffold",
+      "phx.gen.auth requires an Ecto SQL repository",
     );
     expect(getDisabledReason(phoenixBase, "elixirApi", "absinthe")).toBe(
       "Absinthe GraphQL requires Ecto in the current Phoenix scaffold",
     );
     expect(getDisabledReason(phoenixBase, "elixirJobs", "oban")).toBe(
       "Oban requires Ecto SQL with PostgreSQL in the current Phoenix scaffold",
+    );
+    expect(getDisabledReason(phoenixBase, "elixirAuth", "pow")).toBe(
+      "Pow requires Phoenix and an Ecto SQL repository",
+    );
+    expect(getDisabledReason(phoenixBase, "elixirTesting", "ex_machina")).toBe(
+      "ExMachina requires an Ecto SQL repository",
+    );
+    expect(getDisabledReason(phoenixBase, "elixirHttpServer", "none")).toBe(
+      "Phoenix requires Bandit or Cowboy",
     );
     expect(getDisabledReason(phoenixBase, "elixirRealtime", "live-view-streams")).toBe(
       "LiveView Streams require Phoenix LiveView",
@@ -987,6 +1154,8 @@ describe("compatibility issue helpers", () => {
       elixirJobs: "quantum",
       elixirHttp: "req",
       elixirObservability: "phoenix-telemetry",
+      elixirI18n: "gettext",
+      elixirHttpServer: "cowboy",
     });
 
     expect(result.adjustedStack).toMatchObject({
@@ -997,7 +1166,62 @@ describe("compatibility issue helpers", () => {
       elixirJobs: "quantum",
       elixirHttp: "req",
       elixirObservability: "none",
+      elixirI18n: "none",
+      elixirHttpServer: "none",
     });
+  });
+
+  it("clears selections whose prerequisites are no longer present", () => {
+    const cases = [
+      {
+        stack: { backend: "hono", realtime: "ws" },
+        expected: { realtime: "none" },
+      },
+      {
+        stack: { backend: "convex", payments: "paypal" },
+        expected: { payments: "none" },
+      },
+      {
+        stack: { backend: "none", aiSdk: "openai-sdk" },
+        expected: { aiSdk: "none" },
+      },
+      {
+        stack: { backend: "convex", aiSdk: "anthropic-sdk" },
+        expected: { aiSdk: "none" },
+      },
+      {
+        stack: { api: "openapi", appPlatforms: ["turborepo", "graphql-codegen"] },
+        expected: { appPlatforms: ["turborepo"] },
+      },
+      {
+        stack: { webFrontend: ["svelte"], cssFramework: "styled-components", uiLibrary: "none" },
+        expected: { cssFramework: "none" },
+      },
+      {
+        stack: { webFrontend: ["vue"], webDeploy: "cloudflare" },
+        expected: { webDeploy: "none" },
+      },
+    ];
+
+    for (const { stack, expected } of cases) {
+      const result = analyzeStackCompatibility({
+        ...DEFAULT_STACK_SELECTION,
+        ...stack,
+      });
+      expect(result.adjustedStack).toMatchObject(expected);
+    }
+  });
+
+  it("clears Pow when the Elixir SQL repository is removed", () => {
+    const result = analyzeStackCompatibility({
+      ...DEFAULT_STACK_SELECTION,
+      ecosystem: "elixir",
+      elixirWebFramework: "phoenix",
+      elixirOrm: "none",
+      elixirAuth: "pow",
+    });
+
+    expect(result.adjustedStack?.elixirAuth).toBe("none");
   });
 
   it("locks Effect backend services and validation without blocking compatible tools", () => {
@@ -1039,5 +1263,30 @@ describe("compatibility issue helpers", () => {
         "tanstack-form",
       ),
     ).toBeNull();
+  });
+
+  it("enforces the generated Rust framework integration boundaries", () => {
+    const warpStack = {
+      ...DEFAULT_STACK_SELECTION,
+      ecosystem: "rust",
+      rustWebFramework: "warp",
+      rustApi: "jsonrpsee",
+      rustAuth: "none",
+    };
+
+    expect(getDisabledReason(warpStack, "rustApi", "tonic")).toBe(
+      "Warp and Salvo currently support REST or the standalone jsonrpsee server",
+    );
+    expect(getDisabledReason(warpStack, "rustApi", "jsonrpsee")).toBeNull();
+    expect(getDisabledReason(warpStack, "rustAuth", "tower-sessions")).toBe(
+      "The generated tower-sessions middleware is wired specifically for Axum",
+    );
+    expect(
+      getDisabledReason(
+        { ...warpStack, rustWebFramework: "axum", rustAuth: "tower-sessions" },
+        "rustWebFramework",
+        "salvo",
+      ),
+    ).toBe("tower-sessions requires the generated Axum middleware stack");
   });
 });

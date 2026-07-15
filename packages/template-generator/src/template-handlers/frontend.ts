@@ -14,6 +14,8 @@ export async function processFrontendTemplates(
       f,
     ),
   );
+  const hasVanillaViteWeb = config.frontend.includes("vanilla-vite");
+  const hasVueWeb = config.frontend.includes("vue");
   const hasNuxtWeb = config.frontend.includes("nuxt");
   const hasSvelteWeb = config.frontend.includes("svelte");
   const hasSolidWeb = config.frontend.includes("solid");
@@ -30,6 +32,8 @@ export async function processFrontendTemplates(
 
   if (
     hasReactWeb ||
+    hasVanillaViteWeb ||
+    hasVueWeb ||
     hasNuxtWeb ||
     hasSvelteWeb ||
     hasSolidWeb ||
@@ -62,6 +66,10 @@ export async function processFrontendTemplates(
           config,
         );
       }
+    } else if (hasVanillaViteWeb) {
+      processTemplatesFromPrefix(vfs, templates, "frontend/vanilla-vite", "apps/web", config);
+    } else if (hasVueWeb) {
+      processTemplatesFromPrefix(vfs, templates, "frontend/vue", "apps/web", config);
     } else if (hasNuxtWeb) {
       processTemplatesFromPrefix(vfs, templates, "frontend/nuxt", "apps/web", config);
     } else if (hasSvelteWeb) {

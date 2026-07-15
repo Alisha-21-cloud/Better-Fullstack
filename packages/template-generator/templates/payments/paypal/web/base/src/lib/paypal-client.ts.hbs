@@ -1,0 +1,10 @@
+import { loadScript } from "@paypal/paypal-js";
+
+export function loadPayPal(clientId: string, currency = "USD") {
+  return loadScript({
+    clientId,
+    components: "buttons",
+    currency,
+    intent: "capture",
+  });
+}

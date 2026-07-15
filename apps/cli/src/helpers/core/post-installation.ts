@@ -544,7 +544,12 @@ function getClerkInstructions(backend: Backend, frontend: Frontend[]) {
     return `${pc.bold("Clerk Authentication Setup:")}\n${pc.cyan("•")} Follow the guide: ${pc.underline("https://docs.convex.dev/auth/clerk")}\n${pc.cyan("•")} Set CLERK_JWT_ISSUER_DOMAIN in Convex Dashboard\n${pc.cyan("•")} Set CLERK_PUBLISHABLE_KEY in apps/*/.env`;
   }
 
-  if (backend === "self" && (frontend.includes("next") || frontend.includes("vinext") || frontend.includes("tanstack-start"))) {
+  if (
+    backend === "self" &&
+    (frontend.includes("next") ||
+      frontend.includes("vinext") ||
+      frontend.includes("tanstack-start"))
+  ) {
     const publishableKeyVar = frontend.includes("next")
       ? "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY"
       : "VITE_CLERK_PUBLISHABLE_KEY";
@@ -804,7 +809,9 @@ function getRenderDeployInstructions(webDeploy: WebDeploy, serverDeploy: ServerD
     instructions.push(
       `${pc.cyan("\u2022")} Set production env vars (database, auth, CORS) in the Render dashboard`,
     );
-    instructions.push(`${pc.cyan("\u2022")} Docs: ${pc.underline("https://render.com/docs/blueprint-spec")}`);
+    instructions.push(
+      `${pc.cyan("\u2022")} Docs: ${pc.underline("https://render.com/docs/blueprint-spec")}`,
+    );
   }
 
   return instructions.length ? `\n${instructions.join("\n")}` : "";
@@ -849,6 +856,10 @@ function displayRustInstructions(config: ProjectConfig & { depsInstalled: boolea
       actix: "Actix Web",
       axum: "Axum",
       rocket: "Rocket",
+      poem: "Poem",
+      loco: "Loco",
+      warp: "Warp",
+      salvo: "Salvo",
     };
     output += `${pc.cyan("•")} Web Framework: ${frameworkNames[rustWebFramework] || rustWebFramework}\n`;
   }
@@ -867,6 +878,9 @@ function displayRustInstructions(config: ProjectConfig & { depsInstalled: boolea
       diesel: "Diesel",
       sqlx: "SQLx",
       "sea-orm": "SeaORM",
+      mongodb: "MongoDB Rust Driver",
+      rusqlite: "rusqlite",
+      "tokio-postgres": "tokio-postgres",
     };
     output += `${pc.cyan("•")} Database: ${ormNames[rustOrm] || rustOrm}\n`;
   }
@@ -874,7 +888,8 @@ function displayRustInstructions(config: ProjectConfig & { depsInstalled: boolea
   if (rustApi && rustApi !== "none") {
     const apiNames: Record<string, string> = {
       "async-graphql": "async-graphql",
-      juniper: "Juniper",
+      tonic: "Tonic",
+      jsonrpsee: "jsonrpsee",
     };
     output += `${pc.cyan("•")} API: ${apiNames[rustApi] || rustApi}\n`;
   }
@@ -938,8 +953,25 @@ function displayRustInstructions(config: ProjectConfig & { depsInstalled: boolea
 }
 
 function displayGoInstructions(config: ProjectConfig & { depsInstalled: boolean }) {
-  const { relativePath, depsInstalled, goWebFramework, goOrm, goApi, goCli, goLogging, goAuth } =
-    config;
+  const {
+    relativePath,
+    depsInstalled,
+    goWebFramework,
+    goOrm,
+    goApi,
+    goCli,
+    goLogging,
+    goAuth,
+    goTesting,
+    goMessageQueue,
+    goObservability,
+    goValidation,
+    goQuality,
+    goMigrations,
+    goTemplating,
+    goProtoTooling,
+    goDI,
+  } = config;
 
   const cdCmd = `cd ${relativePath}`;
 
@@ -960,6 +992,10 @@ function displayGoInstructions(config: ProjectConfig & { depsInstalled: boolean 
       echo: "Echo",
       fiber: "Fiber",
       chi: "Chi",
+      stdlib: "net/http",
+      "go-zero": "go-zero",
+      kratos: "Kratos",
+      httprouter: "HttpRouter",
     };
     output += `${pc.cyan("•")} Web Framework: ${frameworkNames[goWebFramework] || goWebFramework}\n`;
   }
@@ -969,6 +1005,8 @@ function displayGoInstructions(config: ProjectConfig & { depsInstalled: boolean 
       gorm: "GORM",
       sqlc: "sqlc",
       ent: "Ent",
+      bun: "Bun",
+      sqlx: "sqlx",
     };
     output += `${pc.cyan("•")} Database: ${ormNames[goOrm] || goOrm}\n`;
   }
@@ -976,6 +1014,9 @@ function displayGoInstructions(config: ProjectConfig & { depsInstalled: boolean 
   if (goApi && goApi !== "none") {
     const apiNames: Record<string, string> = {
       "grpc-go": "gRPC-Go",
+      "grpc-gateway": "grpc-gateway",
+      "connect-go": "Connect-Go",
+      "oapi-codegen": "oapi-codegen",
     };
     output += `${pc.cyan("•")} API: ${apiNames[goApi] || goApi}\n`;
   }
@@ -1002,8 +1043,30 @@ function displayGoInstructions(config: ProjectConfig & { depsInstalled: boolean 
     const authNames: Record<string, string> = {
       casbin: "Casbin",
       jwt: "golang-jwt",
+      goth: "Goth",
+      oauth2: "x/oauth2",
     };
     output += `${pc.cyan("•")} Auth: ${authNames[goAuth] || goAuth}\n`;
+  }
+
+  const extras: Array<[string, string | string[]]> = [
+    ["Testing", goTesting],
+    ["Messaging", goMessageQueue],
+    ["Observability", goObservability],
+    ["Validation", goValidation],
+    ["Code Quality", goQuality],
+    ["Migrations", goMigrations],
+    ["Templating", goTemplating],
+    ["Protobuf Tooling", goProtoTooling],
+    ["Dependency Injection", goDI],
+  ];
+  for (const [label, value] of extras) {
+    const rendered = Array.isArray(value)
+      ? value.filter((item) => item !== "none").join(", ")
+      : value;
+    if (rendered && rendered !== "none") {
+      output += `${pc.cyan("•")} ${label}: ${rendered}\n`;
+    }
   }
 
   output += `\n${pc.bold("Common Go commands:")}\n`;
@@ -1164,9 +1227,9 @@ function displayJavaInstructions(config: ProjectConfig & { depsInstalled: boolea
         ? javaBuildTool === "gradle"
           ? `${buildToolCommand} quarkusDev`
           : `${buildToolCommand} quarkus:dev`
-      : javaBuildTool === "gradle"
-        ? `${buildToolCommand} run`
-        : `${buildToolCommand} exec:java`
+        : javaBuildTool === "gradle"
+          ? `${buildToolCommand} run`
+          : `${buildToolCommand} exec:java`
     : null;
   const packageCommand = buildToolCommand
     ? javaBuildTool === "gradle"

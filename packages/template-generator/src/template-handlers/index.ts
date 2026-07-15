@@ -23,6 +23,8 @@ export { processObservabilityTemplates } from "./observability";
 export { processRateLimitTemplates } from "./rate-limit";
 export { processFeatureFlagsTemplates } from "./feature-flags";
 export { processAnalyticsTemplates } from "./analytics";
+export { processAITemplates } from "./ai";
+export { processRealtimeTemplates } from "./realtime";
 export { processJobQueueTemplates } from "./job-queue";
 export { processCMSTemplates } from "./cms";
 export { processI18nTemplates } from "./i18n";

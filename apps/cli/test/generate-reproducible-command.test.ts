@@ -390,6 +390,12 @@ describe("generateReproducibleCommand", () => {
         "--go-caching none " +
         "--go-config none " +
         "--go-observability none " +
+        "--go-validation none " +
+        "--go-quality none " +
+        "--go-migrations none " +
+        "--go-templating none " +
+        "--go-proto-tooling none " +
+        "--go-di none " +
         "--auth go-better-auth " +
         "--email none " +
         "--observability none " +
@@ -854,10 +860,7 @@ describe("generateReproducibleCommand", () => {
   });
 
   it("preserves Astro integration when stackParts are present", () => {
-    const stackParts = parseStackPartSpecs([
-      "frontend:typescript:astro",
-      "backend:rust:axum",
-    ]);
+    const stackParts = parseStackPartSpecs(["frontend:typescript:astro", "backend:rust:axum"]);
     const command = generateReproducibleCommand(
       makeConfig({
         stackParts,
@@ -916,6 +919,41 @@ describe("generateReproducibleCommand", () => {
     expect(command).toContain("--elixir-json none");
     expect(command).not.toContain("--elixir-http finch");
     expect(command).not.toContain("--part backend.json:elixir:none");
+  });
+
+  it("reproduces the expanded Elixir ecosystem flags", () => {
+    const command = generateReproducibleCommand(
+      makeConfig({
+        ecosystem: "elixir",
+        elixirWebFramework: "phoenix",
+        elixirOrm: "myxql",
+        elixirAuth: "pow",
+        elixirApi: "open_api_spex",
+        elixirRealtime: "channels",
+        elixirJobs: "none",
+        elixirValidation: "ecto-changesets",
+        elixirHttp: "tesla",
+        elixirJson: "jason",
+        elixirEmail: "bamboo",
+        elixirCaching: "redix",
+        elixirObservability: "sentry",
+        elixirTesting: "ex_machina",
+        elixirQuality: "mix_audit",
+        elixirI18n: "gettext",
+        elixirHttpServer: "bandit",
+        elixirApplicationFramework: "ash",
+        elixirDocumentation: "ex_doc",
+        elixirClustering: "libcluster",
+        elixirDeploy: "none",
+        elixirLibraries: ["ex_aws", "floki", "rustler"],
+      }),
+    );
+
+    expect(command).toContain("--elixir-i18n gettext");
+    expect(command).toContain("--elixir-http-server bandit");
+    expect(command).toContain("--elixir-application-framework ash");
+    expect(command).toContain("--elixir-documentation ex_doc");
+    expect(command).toContain("--elixir-clustering libcluster");
   });
 
   it("reproduces graph-owned .NET fields as --part flags", () => {

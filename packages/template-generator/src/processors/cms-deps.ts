@@ -3,6 +3,7 @@ import type { ProjectConfig } from "@better-fullstack/types";
 import type { VirtualFileSystem } from "../core/virtual-fs";
 
 import { addPackageDependency, type AvailableDependencies } from "../utils/add-deps";
+import { getWebPackagePath } from "../utils/project-paths";
 
 const REACT_CMS_FRONTENDS = new Set([
   "tanstack-router",
@@ -14,10 +15,23 @@ const REACT_CMS_FRONTENDS = new Set([
 ]);
 
 export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): void {
-  const { cms, frontend, database } = config;
+  const { cms, frontend, backend, database } = config;
   if (!cms || cms === "none") return;
 
   const hasNext = frontend.includes("next");
+  const webPath = getWebPackagePath(frontend, backend);
+
+  if (cms === "contentful") {
+    if (vfs.exists(webPath)) {
+      addPackageDependency({
+        vfs,
+        packagePath: webPath,
+        dependencies: ["contentful"],
+      });
+    }
+    return;
+  }
+
   const hasWebFrontend =
     frontend.includes("next") ||
     frontend.includes("astro") ||
@@ -55,7 +69,6 @@ export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): v
 
   if (!hasWebFrontend) return;
 
-  const webPath = "apps/web/package.json";
   if (!vfs.exists(webPath)) return;
 
   if (cms === "sanity") {
@@ -110,7 +123,8 @@ export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): v
 
       const existingCheckTypes = pkgJson.scripts["check-types"];
       if (existingCheckTypes) {
-        pkgJson.scripts["check-types"] = `tinacms build --local --skip-cloud-checks && ${existingCheckTypes}`;
+        pkgJson.scripts["check-types"] =
+          `tinacms build --local --skip-cloud-checks && ${existingCheckTypes}`;
       }
 
       vfs.writeJson(webPath, pkgJson);
@@ -128,7 +142,11 @@ export function processCMSDeps(vfs: VirtualFileSystem, config: ProjectConfig): v
 }
 
 function getPayloadDeps(database: ProjectConfig["database"]): AvailableDependencies[] {
-  const deps: AvailableDependencies[] = ["payload", "@payloadcms/next", "@payloadcms/richtext-lexical"];
+  const deps: AvailableDependencies[] = [
+    "payload",
+    "@payloadcms/next",
+    "@payloadcms/richtext-lexical",
+  ];
 
   switch (database) {
     case "postgres":

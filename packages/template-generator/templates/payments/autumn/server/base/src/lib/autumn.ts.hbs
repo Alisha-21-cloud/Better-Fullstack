@@ -9,20 +9,26 @@ export const autumn = new Autumn({
   secretKey: env.AUTUMN_SECRET_KEY,
 });
 
-// Starts a checkout for a plan/product. For a new customer Autumn returns a
-// Stripe Checkout `url` to redirect to; for an existing customer it performs
-// the upgrade/downgrade inline. Redirect to `result.data?.url` when present.
+// Starts a checkout for a plan. For a new customer Autumn returns a hosted
+// payment URL; for an existing customer it may perform the change inline.
+// Redirect to `result.paymentUrl` when present.
 export async function createCheckout(params: {
   customerId: string;
-  productId: string;
+  planId: string;
   successUrl?: string;
   customerData?: { name?: string; email?: string };
 }) {
-  return autumn.checkout({
-    customer_id: params.customerId,
-    product_id: params.productId,
-    success_url: params.successUrl,
-    customer_data: params.customerData,
+  if (params.customerData) {
+    await autumn.customers.getOrCreate({
+      customerId: params.customerId,
+      ...params.customerData,
+    });
+  }
+
+  return autumn.billing.attach({
+    customerId: params.customerId,
+    planId: params.planId,
+    successUrl: params.successUrl,
   });
 }
 
@@ -34,8 +40,8 @@ export async function trackUsage(params: {
   value?: number;
 }) {
   return autumn.track({
-    customer_id: params.customerId,
-    feature_id: params.featureId,
+    customerId: params.customerId,
+    featureId: params.featureId,
     value: params.value,
   });
 }

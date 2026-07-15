@@ -1,6 +1,7 @@
 import type { ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
+import { getWebPackagePath } from "../utils/project-paths";
 
 import { type TemplateData, processTemplatesFromPrefix } from "./utils";
 
@@ -14,7 +15,7 @@ const REACT_FRONTENDS = new Set([
 ]);
 
 const SVELTE_FRONTENDS = new Set(["svelte"]);
-const VUE_FRONTENDS = new Set(["nuxt"]);
+const VUE_FRONTENDS = new Set(["nuxt", "vue"]);
 const SOLID_FRONTENDS = new Set(["solid", "solid-start"]);
 
 function getAnalyticsTemplateVariant(frontend: readonly string[]): string | null {
@@ -31,6 +32,20 @@ export async function processAnalyticsTemplates(
   config: ProjectConfig,
 ): Promise<void> {
   if (!config.analytics || config.analytics === "none") return;
+
+  if (config.analytics === "ga4") {
+    const webPackagePath = getWebPackagePath(config.frontend, config.backend);
+    if (vfs.exists(webPackagePath)) {
+      processTemplatesFromPrefix(
+        vfs,
+        templates,
+        "analytics/ga4/web/base",
+        webPackagePath.replace(/\/package\.json$/, ""),
+        config,
+      );
+    }
+    return;
+  }
 
   const variant = getAnalyticsTemplateVariant(config.frontend);
   if (!variant) return;

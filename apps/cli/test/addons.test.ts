@@ -3,10 +3,18 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import type { Addons, Frontend } from "../src";
+import { getAddonGroup } from "../src/prompts/addons";
+import { APP_PLATFORM_ADDON_VALUES } from "../src/types";
 
 import { expectError, expectSuccess, runTRPCTest, type TestConfig } from "./test-utils";
 
 describe("Addon Configurations", () => {
+  it("keeps app platforms grouped in the bts add prompt", () => {
+    for (const addon of APP_PLATFORM_ADDON_VALUES) {
+      expect(getAddonGroup(addon)).toBe("App Platforms");
+    }
+  });
+
   describe("Universal Addons (no frontend restrictions)", () => {
     const universalAddons = ["biome", "lefthook", "husky", "turborepo", "nx", "oxlint", "msw"];
     const universalAddonTimeoutMs = 60_000;
@@ -143,7 +151,16 @@ describe("Addon Configurations", () => {
     });
 
     describe("PWA Addon", () => {
-      const pwaCompatibleFrontends = ["tanstack-router", "react-router", "react-vite", "solid", "next", "vinext"];
+      const pwaCompatibleFrontends = [
+        "tanstack-router",
+        "react-router",
+        "react-vite",
+        "vanilla-vite",
+        "vue",
+        "solid",
+        "next",
+        "vinext",
+      ];
 
       for (const frontend of pwaCompatibleFrontends) {
         it(`should work with PWA + ${frontend}`, async () => {
@@ -164,7 +181,9 @@ describe("Addon Configurations", () => {
           };
 
           // Handle special frontend requirements
-          if (frontend === "solid") {
+          if (["vanilla-vite", "vue"].includes(frontend)) {
+            config.api = "openapi";
+          } else if (frontend === "solid") {
             config.api = "orpc"; // tRPC not supported with solid
           } else {
             config.api = "trpc";
@@ -217,6 +236,8 @@ describe("Addon Configurations", () => {
       const tauriCompatibleFrontends = [
         "tanstack-router",
         "react-router",
+        "vanilla-vite",
+        "vue",
         "nuxt",
         "svelte",
         "solid",
@@ -241,7 +262,9 @@ describe("Addon Configurations", () => {
             install: false,
           };
 
-          if (["nuxt", "svelte", "solid"].includes(frontend)) {
+          if (["vanilla-vite", "vue"].includes(frontend)) {
+            config.api = "openapi";
+          } else if (["nuxt", "svelte", "solid"].includes(frontend)) {
             config.api = "orpc";
           } else {
             config.api = "trpc";
@@ -625,6 +648,77 @@ describe("Addon Configurations", () => {
         const compose = readFileSync(join(result.projectDir!, "docker-compose.yml"), "utf8");
         expect(compose).toContain('      - "50051:50051"');
         expect(compose).toContain("GRPC_PORT=50051");
+      });
+
+      it("should generate MongoDB and SQLite services for the new Rust drivers", async () => {
+        for (const rustOrm of ["mongodb", "rusqlite"] as const) {
+          const projectName = `docker-compose-rust-${rustOrm}`;
+          const result = await runTRPCTest({
+            projectName,
+            ecosystem: "rust",
+            addons: ["docker-compose"],
+            rustWebFramework: "axum",
+            rustFrontend: "none",
+            rustOrm,
+            rustApi: "none",
+            rustCli: "none",
+            rustLibraries: [],
+            rustLogging: "tracing",
+            rustErrorHandling: "anyhow-thiserror",
+            rustCaching: "none",
+            rustAuth: "none",
+            rustRealtime: "none",
+            rustMessageQueue: "none",
+            rustObservability: "none",
+            rustTemplating: "none",
+            install: false,
+          });
+
+          expectSuccess(result);
+          const compose = readFileSync(join(result.projectDir!, "docker-compose.yml"), "utf8");
+          if (rustOrm === "mongodb") {
+            expect(compose).toContain("image: mongo:7");
+            expect(compose).toContain(
+              `MONGODB_URI=mongodb://root:password@db:27017/${projectName}?authSource=admin`,
+            );
+            expect(compose).not.toContain("DATABASE_URL=mongodb://");
+            expect(compose).toContain("mongodb_data:/data/db");
+            expect(compose).not.toContain("image: postgres:16-alpine");
+          } else {
+            expect(compose).toContain("DATABASE_URL=/app/data/data.db");
+            expect(compose).toContain("rust_sqlite_data:/app/data");
+            expect(compose).not.toContain("depends_on:");
+            expect(compose).not.toContain("image: postgres:16-alpine");
+          }
+        }
+      });
+
+      it("should expose the Rust metrics exporter to container scrapers", async () => {
+        const result = await runTRPCTest({
+          projectName: "docker-compose-rust-metrics",
+          ecosystem: "rust",
+          addons: ["docker-compose"],
+          rustWebFramework: "axum",
+          rustFrontend: "none",
+          rustOrm: "none",
+          rustApi: "none",
+          rustCli: "none",
+          rustLibraries: [],
+          rustLogging: "tracing",
+          rustErrorHandling: "anyhow-thiserror",
+          rustCaching: "none",
+          rustAuth: "none",
+          rustRealtime: "none",
+          rustMessageQueue: "none",
+          rustObservability: "metrics",
+          rustTemplating: "none",
+          install: false,
+        });
+
+        expectSuccess(result);
+        const compose = readFileSync(join(result.projectDir!, "docker-compose.yml"), "utf8");
+        expect(compose).toContain('      - "9000:9000"');
+        expect(compose).toContain("METRICS_LISTEN_ADDRESS=0.0.0.0:9000");
       });
 
       it("should fail with docker-compose + Rust frontend until frontend container support exists", async () => {

@@ -1,0 +1,13 @@
+import OpenAI from "openai";
+import { env } from "@{{projectName}}/env/server";
+
+export const openai = new OpenAI({
+  apiKey: env.OPENAI_API_KEY,
+});
+
+export async function createOpenAIResponse(input: string) {
+  return openai.responses.create({
+    model: env.OPENAI_MODEL,
+    input,
+  });
+}

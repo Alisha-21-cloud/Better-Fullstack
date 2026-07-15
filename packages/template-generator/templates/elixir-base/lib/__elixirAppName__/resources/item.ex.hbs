@@ -1,0 +1,16 @@
+{{#if (eq elixirApplicationFramework "ash")}}
+defmodule {{elixirModuleName}}.Resources.Item do
+  use Ash.Resource,
+    domain: {{elixirModuleName}}.CatalogDomain,
+    data_layer: Ash.DataLayer.Ets
+
+  attributes do
+    uuid_primary_key :id
+    attribute :name, :string, allow_nil?: false, public?: true
+  end
+
+  actions do
+    defaults [:read, :destroy, create: :*, update: :*]
+  end
+end
+{{/if}}

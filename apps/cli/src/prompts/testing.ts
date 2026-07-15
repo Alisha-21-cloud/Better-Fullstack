@@ -29,6 +29,11 @@ const TESTING_PROMPT_OPTIONS: PromptOption<Testing>[] = [
     hint: "Classic testing framework with wide ecosystem",
   },
   {
+    value: "mocha",
+    label: "Mocha",
+    hint: "Flexible Node.js test framework with TypeScript support via tsx",
+  },
+  {
     value: "cypress",
     label: "Cypress",
     hint: "E2E testing with time travel debugging",

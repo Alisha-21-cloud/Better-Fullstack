@@ -19,6 +19,10 @@ import {
   validateWebDeployFrontendTemplates,
   validateWebDeployRequiresWebFrontend,
   validateAIFrontendCompatibility,
+  validateAIBackendCompatibility,
+  validateCSSFrameworkFrontendCompatibility,
+  validateRealtimeCompatibility,
+  validateRustExpansionCompatibility,
   validateWorkersCompatibility,
 } from "./compatibility-rules";
 import { isSilent } from "./context";
@@ -783,7 +787,7 @@ function validateElixirConstraints(config: Partial<ProjectConfig>) {
 
   const hasPhoenix = config.elixirWebFramework !== "none";
   const hasEcto = config.elixirOrm !== "none";
-  const hasEctoSql = config.elixirOrm === "ecto-sql";
+  const hasEctoSql = ["ecto-sql", "myxql", "ecto_sqlite3"].includes(config.elixirOrm ?? "none");
 
   if (!hasPhoenix) {
     const phoenixOnlySelections = [
@@ -835,14 +839,61 @@ function validateElixirConstraints(config: Partial<ProjectConfig>) {
     });
   }
 
+  if (hasPhoenix && config.elixirHttpServer === "none") {
+    incompatibilityError({
+      message: "Phoenix requires an HTTP server adapter.",
+      provided: {
+        "elixir-web-framework": config.elixirWebFramework ?? "none",
+        "elixir-http-server": "none",
+      },
+      suggestions: [
+        "Use --elixir-http-server bandit",
+        "Use --elixir-http-server cowboy",
+        "Use --elixir-web-framework none",
+      ],
+    });
+  }
+
   if (config.elixirAuth === "phx-gen-auth" && !hasEctoSql) {
     incompatibilityError({
-      message: "phx.gen.auth requires Ecto SQL with PostgreSQL in the generated Phoenix scaffold.",
+      message: "phx.gen.auth requires an Ecto SQL repository in the generated Phoenix scaffold.",
       provided: {
         "elixir-auth": "phx-gen-auth",
         "elixir-orm": config.elixirOrm ?? "none",
       },
-      suggestions: ["Use --elixir-orm ecto-sql", "Use --elixir-auth none"],
+      suggestions: [
+        "Use --elixir-orm ecto-sql",
+        "Use --elixir-orm myxql",
+        "Use --elixir-orm ecto_sqlite3",
+        "Use --elixir-auth none",
+      ],
+    });
+  }
+
+  if (config.elixirAuth === "pow" && (!hasPhoenix || !hasEctoSql)) {
+    incompatibilityError({
+      message: "Pow requires Phoenix and an Ecto SQL repository.",
+      provided: {
+        "elixir-web-framework": config.elixirWebFramework ?? "none",
+        "elixir-auth": "pow",
+        "elixir-orm": config.elixirOrm ?? "none",
+      },
+      suggestions: [
+        "Use --elixir-web-framework phoenix",
+        "Use --elixir-orm ecto-sql",
+        "Use --elixir-auth none",
+      ],
+    });
+  }
+
+  if (config.elixirTesting === "ex_machina" && !hasEctoSql) {
+    incompatibilityError({
+      message: "ExMachina requires an Ecto SQL repository.",
+      provided: {
+        "elixir-testing": "ex_machina",
+        "elixir-orm": config.elixirOrm ?? "none",
+      },
+      suggestions: ["Use --elixir-orm ecto-sql", "Use --elixir-testing none"],
     });
   }
 
@@ -1073,9 +1124,7 @@ function validateI18nConstraints(config: Partial<ProjectConfig>) {
   if (config.i18n !== "intlayer") return;
 
   const { web } = splitFrontends(config.frontend ?? []);
-  const unsupportedFrontend = web.find(
-    (frontend) => !INTLAYER_COMPATIBLE_FRONTENDS.has(frontend),
-  );
+  const unsupportedFrontend = web.find((frontend) => !INTLAYER_COMPATIBLE_FRONTENDS.has(frontend));
 
   if (web.length === 0 || unsupportedFrontend) {
     incompatibilityError({
@@ -1121,6 +1170,7 @@ export function validateFullConfig(
 
   validateApiConstraints(config, options);
   validatePythonApiConstraints(config);
+  validateRustExpansionCompatibility(config);
   validateEmailConstraints(config);
   validateObservabilityConstraints(config);
   validateCachingConstraints(config);
@@ -1221,6 +1271,7 @@ export function validateFullConfig(
       config.rustFrontend,
       config.javaWebFramework,
       config.database,
+      config.api,
     );
     config.addons = [...new Set(config.addons)];
   }
@@ -1241,6 +1292,9 @@ export function validateFullConfig(
   );
 
   validateAIFrontendCompatibility(config.ai, config.frontend ?? []);
+  validateAIBackendCompatibility(config.ai, config.backend);
+  validateRealtimeCompatibility(config.realtime, config.backend);
+  validateCSSFrameworkFrontendCompatibility(config.cssFramework, config.frontend ?? []);
 
   validateUILibraryFrontendCompatibility(
     config.uiLibrary,
@@ -1280,6 +1334,7 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
     validateSearchConstraints(config);
     validateJavaConstraints(config);
     validateElixirConstraints(config);
+    validateRustExpansionCompatibility(config);
     validateI18nConstraints(config);
 
     validatePaymentsCompatibility(config.payments, config.auth, config.backend, config.frontend);
@@ -1295,6 +1350,7 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
         config.rustFrontend,
         config.javaWebFramework,
         config.database,
+        config.api,
       );
     }
 
@@ -1307,6 +1363,9 @@ export function validateConfigForProgrammaticUse(config: Partial<ProjectConfig>)
     );
 
     validateAIFrontendCompatibility(config.ai, config.frontend ?? []);
+    validateAIBackendCompatibility(config.ai, config.backend);
+    validateRealtimeCompatibility(config.realtime, config.backend);
+    validateCSSFrameworkFrontendCompatibility(config.cssFramework, config.frontend ?? []);
 
     validateUILibraryFrontendCompatibility(
       config.uiLibrary,

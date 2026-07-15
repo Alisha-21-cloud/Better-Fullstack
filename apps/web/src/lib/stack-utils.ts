@@ -12,6 +12,9 @@ import type { TechCategory } from "@/lib/types";
 
 export function getStackKeyForCategory(category: TechCategory): keyof StackState {
   if (category === "ai") return "aiSdk";
+  // appShells is a UI-only split of the addons grab-bag; both sections share
+  // the appPlatforms state key so old share links keep working.
+  if (category === "appShells") return "appPlatforms";
   return category as keyof StackState;
 }
 

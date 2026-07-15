@@ -1,4 +1,10 @@
-import type { CLIInput, ProjectConfig, StackPart, StackPartEcosystem, StackPartRole } from "./types";
+import type {
+  CLIInput,
+  ProjectConfig,
+  StackPart,
+  StackPartEcosystem,
+  StackPartRole,
+} from "./types";
 
 import { analyzeStackCompatibility, type CompatibilityInput } from "./compatibility";
 import { createCliDefaultProjectConfigBase, type CliDefaultProjectConfigBase } from "./defaults";
@@ -126,6 +132,12 @@ export const DEFAULT_STACK_SELECTION: StackSelectionState = {
   goCaching: "none",
   goConfig: "none",
   goObservability: "none",
+  goValidation: "none",
+  goQuality: "none",
+  goMigrations: "none",
+  goTemplating: "none",
+  goProtoTooling: "none",
+  goDI: "none",
   javaLanguage: "java",
   javaWebFramework: "spring-boot",
   javaBuildTool: "maven",
@@ -160,6 +172,11 @@ export const DEFAULT_STACK_SELECTION: StackSelectionState = {
   elixirObservability: "telemetry",
   elixirTesting: "ex_unit",
   elixirQuality: "credo",
+  elixirI18n: "none",
+  elixirHttpServer: "cowboy",
+  elixirApplicationFramework: "none",
+  elixirDocumentation: "none",
+  elixirClustering: "none",
   elixirDeploy: "none",
   elixirLibraries: [],
 };
@@ -282,6 +299,12 @@ export const STACK_SELECTION_OPTION_CATEGORY_BY_KEY: Record<
   goCaching: "goCaching",
   goConfig: "goConfig",
   goObservability: "goObservability",
+  goValidation: "goValidation",
+  goQuality: "goQuality",
+  goMigrations: "goMigrations",
+  goTemplating: "goTemplating",
+  goProtoTooling: "goProtoTooling",
+  goDI: "goDI",
   javaLanguage: "javaLanguage",
   javaWebFramework: "javaWebFramework",
   javaBuildTool: "javaBuildTool",
@@ -316,6 +339,11 @@ export const STACK_SELECTION_OPTION_CATEGORY_BY_KEY: Record<
   elixirObservability: "elixirObservability",
   elixirTesting: "elixirTesting",
   elixirQuality: "elixirQuality",
+  elixirI18n: "elixirI18n",
+  elixirHttpServer: "elixirHttpServer",
+  elixirApplicationFramework: "elixirApplicationFramework",
+  elixirDocumentation: "elixirDocumentation",
+  elixirClustering: "elixirClustering",
   elixirDeploy: "elixirDeploy",
   elixirLibraries: "elixirLibraries",
 };
@@ -447,6 +475,12 @@ export const STACK_SELECTION_URL_KEYS = {
   goCaching: "gcache",
   goConfig: "gcfg",
   goObservability: "gobs",
+  goValidation: "gval",
+  goQuality: "gqual",
+  goMigrations: "gmig",
+  goTemplating: "gtpl",
+  goProtoTooling: "gproto",
+  goDI: "gdi",
   javaLanguage: "jlang",
   javaWebFramework: "jwf",
   javaBuildTool: "jbt",
@@ -481,6 +515,11 @@ export const STACK_SELECTION_URL_KEYS = {
   elixirObservability: "eobs",
   elixirTesting: "etest",
   elixirQuality: "eq",
+  elixirI18n: "ei18n",
+  elixirHttpServer: "ehs",
+  elixirApplicationFramework: "eaf",
+  elixirDocumentation: "edoc",
+  elixirClustering: "ecluster",
   elixirDeploy: "edeploy",
   elixirLibraries: "elib",
 } as const satisfies Record<StackSelectionKey, string>;
@@ -767,6 +806,12 @@ const CLI_SCALAR_CONFIG_FIELDS = [
   ["goCaching", "goCaching"],
   ["goConfig", "goConfig"],
   ["goObservability", "goObservability"],
+  ["goValidation", "goValidation"],
+  ["goQuality", "goQuality"],
+  ["goMigrations", "goMigrations"],
+  ["goTemplating", "goTemplating"],
+  ["goProtoTooling", "goProtoTooling"],
+  ["goDI", "goDI"],
   ["javaLanguage", "javaLanguage"],
   ["javaWebFramework", "javaWebFramework"],
   ["javaBuildTool", "javaBuildTool"],
@@ -797,6 +842,11 @@ const CLI_SCALAR_CONFIG_FIELDS = [
   ["elixirObservability", "elixirObservability"],
   ["elixirTesting", "elixirTesting"],
   ["elixirQuality", "elixirQuality"],
+  ["elixirI18n", "elixirI18n"],
+  ["elixirHttpServer", "elixirHttpServer"],
+  ["elixirApplicationFramework", "elixirApplicationFramework"],
+  ["elixirDocumentation", "elixirDocumentation"],
+  ["elixirClustering", "elixirClustering"],
   ["elixirDeploy", "elixirDeploy"],
 ] as const satisfies readonly (readonly [keyof CLIInput, keyof ProjectConfig])[];
 
@@ -884,6 +934,12 @@ const GO_CONFIG_KEYS = [
   "goCaching",
   "goConfig",
   "goObservability",
+  "goValidation",
+  "goQuality",
+  "goMigrations",
+  "goTemplating",
+  "goProtoTooling",
+  "goDI",
 ] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
 
 const JAVA_CONFIG_KEYS = [
@@ -927,6 +983,11 @@ const ELIXIR_CONFIG_KEYS = [
   "elixirObservability",
   "elixirTesting",
   "elixirQuality",
+  "elixirI18n",
+  "elixirHttpServer",
+  "elixirApplicationFramework",
+  "elixirDocumentation",
+  "elixirClustering",
   "elixirDeploy",
   "elixirLibraries",
 ] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
@@ -940,36 +1001,6 @@ const REACT_NATIVE_CONFIG_KEYS = [
   "mobileOTA",
   "mobileDeepLinking",
 ] as const satisfies readonly (keyof CliDefaultProjectConfigBase)[];
-
-const COMMAND_ADDONS = new Set([
-  "pwa",
-  "tauri",
-  "starlight",
-  "biome",
-  "lefthook",
-  "husky",
-  "turborepo",
-  "nx",
-  "docker-compose",
-  "devcontainer",
-  "github-actions",
-  "ultracite",
-  "fumadocs",
-  "oxlint",
-  "ruler",
-  "opentui",
-  "mcp",
-  "skills",
-  "wxt",
-  "msw",
-  "storybook",
-  "swr",
-  "tanstack-query",
-  "tanstack-table",
-  "tanstack-virtual",
-  "tanstack-db",
-  "tanstack-pacer",
-]);
 
 function withoutNone(values: readonly string[]): string[] {
   return values.filter((value) => value !== "none");
@@ -995,7 +1026,7 @@ function formatTypeScriptAddonsFlag(selection: StackSelectionInput) {
 
   if (addons.length === 0) return "--addons none";
 
-  return `--addons ${addons.filter((addon) => COMMAND_ADDONS.has(addon)).join(" ") || "none"}`;
+  return `--addons ${toUniqueNonNoneArray(addons).join(" ") || "none"}`;
 }
 
 type StackSelectionStringKey = {
@@ -1031,16 +1062,19 @@ const GRAPH_SHARED_BACKEND_FLAG_KEYS = [
   ["search", "search"],
 ] as const satisfies readonly [StackSelectionStringKey, string][];
 
-const GRAPH_ELIXIR_BACKEND_FLAG_KEYS = [
-  ["elixirJson", "elixir-json"],
-] as const satisfies readonly [StackSelectionStringKey, string][];
+const GRAPH_ELIXIR_BACKEND_FLAG_KEYS = [["elixirJson", "elixir-json"]] as const satisfies readonly [
+  StackSelectionStringKey,
+  string,
+][];
 
 function formatChangedStringFlag(
   selection: StackSelectionInput,
   key: StackSelectionStringKey,
   flag: string,
 ) {
-  return selection[key] === DEFAULT_STACK_SELECTION[key] ? undefined : `--${flag} ${selection[key]}`;
+  return selection[key] === DEFAULT_STACK_SELECTION[key]
+    ? undefined
+    : `--${flag} ${selection[key]}`;
 }
 
 type StackSelectionArrayKey = {
@@ -1058,7 +1092,12 @@ function formatChangedStringFlags(
 }
 
 function hasGraphPrimaryPart(
-  parts: readonly { role: string; ecosystem: string; toolId?: string; ownerPartId?: string }[],
+  parts: readonly {
+    role: string;
+    ecosystem: string;
+    toolId?: string;
+    ownerPartId?: string;
+  }[],
   role: "frontend" | "backend" | "mobile" | "database",
   ecosystem?: string,
   toolId?: string,
@@ -1072,10 +1111,7 @@ function hasGraphPrimaryPart(
   );
 }
 
-type ScopedStackPartRole = Exclude<
-  StackPartRole,
-  "frontend" | "backend" | "mobile" | "database"
->;
+type ScopedStackPartRole = Exclude<StackPartRole, "frontend" | "backend" | "mobile" | "database">;
 type ScopedStackPartField = {
   ownerRole?: "frontend" | "backend" | "mobile" | "database";
   ecosystem: StackPartEcosystem;
@@ -1125,12 +1161,18 @@ const GRAPH_ELIXIR_BACKEND_PART_SELECTION_KEYS = [
   ["elixirObservability", "observability"],
   ["elixirTesting", "testing"],
   ["elixirQuality", "codeQuality"],
+  ["elixirI18n", "i18n"],
+  ["elixirHttpServer", "runtime"],
+  ["elixirApplicationFramework", "libraries"],
+  ["elixirDocumentation", "documentation"],
+  ["elixirClustering", "config"],
   ["elixirDeploy", "deploy"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
 
-const GRAPH_DATABASE_PART_SELECTION_KEYS = [
-  ["dbSetup", "dbSetup"],
-] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
+const GRAPH_DATABASE_PART_SELECTION_KEYS = [["dbSetup", "dbSetup"]] as const satisfies readonly [
+  StackSelectionStringKey,
+  ScopedStackPartRole,
+][];
 
 const GRAPH_MOBILE_PART_SELECTION_KEYS = [
   ["mobileNavigation", "navigation"],
@@ -1171,6 +1213,12 @@ const GRAPH_PYTHON_BACKEND_ARRAY_PART_SELECTION_KEYS = [
 const GRAPH_GO_BACKEND_PART_SELECTION_KEYS = [
   ["goCli", "cli"],
   ["goLogging", "logging"],
+  ["goValidation", "validation"],
+  ["goQuality", "codeQuality"],
+  ["goMigrations", "migrations"],
+  ["goTemplating", "templating"],
+  ["goProtoTooling", "buildTool"],
+  ["goDI", "libraries"],
   ["caching", "caching"],
   ["search", "search"],
 ] as const satisfies readonly [StackSelectionStringKey, ScopedStackPartRole][];
@@ -1243,12 +1291,18 @@ const GRAPH_ELIXIR_BACKEND_PART_CLI_KEYS = [
   ["elixirObservability", "observability"],
   ["elixirTesting", "testing"],
   ["elixirQuality", "codeQuality"],
+  ["elixirI18n", "i18n"],
+  ["elixirHttpServer", "runtime"],
+  ["elixirApplicationFramework", "libraries"],
+  ["elixirDocumentation", "documentation"],
+  ["elixirClustering", "config"],
   ["elixirDeploy", "deploy"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
-const GRAPH_DATABASE_PART_CLI_KEYS = [
-  ["dbSetup", "dbSetup"],
-] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
+const GRAPH_DATABASE_PART_CLI_KEYS = [["dbSetup", "dbSetup"]] as const satisfies readonly [
+  keyof CLIInput,
+  ScopedStackPartRole,
+][];
 
 const GRAPH_MOBILE_PART_CLI_KEYS = [
   ["mobileNavigation", "navigation"],
@@ -1282,13 +1336,20 @@ const GRAPH_PYTHON_BACKEND_PART_CLI_KEYS = [
   ["search", "search"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
 
-const GRAPH_PYTHON_BACKEND_ARRAY_PART_CLI_KEYS = [
-  ["pythonAi", "ai"],
-] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
+const GRAPH_PYTHON_BACKEND_ARRAY_PART_CLI_KEYS = [["pythonAi", "ai"]] as const satisfies readonly [
+  keyof CLIInput,
+  ScopedStackPartRole,
+][];
 
 const GRAPH_GO_BACKEND_PART_CLI_KEYS = [
   ["goCli", "cli"],
   ["goLogging", "logging"],
+  ["goValidation", "validation"],
+  ["goQuality", "codeQuality"],
+  ["goMigrations", "migrations"],
+  ["goTemplating", "templating"],
+  ["goProtoTooling", "buildTool"],
+  ["goDI", "libraries"],
   ["caching", "caching"],
   ["search", "search"],
 ] as const satisfies readonly [keyof CLIInput, ScopedStackPartRole][];
@@ -1335,7 +1396,9 @@ function getAddonScopedPartFields(addons: readonly string[] | undefined): Scoped
   });
 }
 
-function getExampleScopedPartFields(examples: readonly string[] | undefined): ScopedStackPartField[] {
+function getExampleScopedPartFields(
+  examples: readonly string[] | undefined,
+): ScopedStackPartField[] {
   return toUniqueNonNoneArray(examples ?? []).map((example) => ({
     ecosystem: "universal" as const,
     role: "examples" as const,
@@ -1408,9 +1471,7 @@ function expandScopedStackPartSpecs(
   return stackPartSpecs;
 }
 
-function getSelectionScopedPartFields(
-  selection: StackSelectionInput,
-): ScopedStackPartField[] {
+function getSelectionScopedPartFields(selection: StackSelectionInput): ScopedStackPartField[] {
   return [
     ...GRAPH_TYPESCRIPT_FRONTEND_PART_SELECTION_KEYS.map(([key, role]) => ({
       ownerRole: "frontend" as const,
@@ -1516,7 +1577,9 @@ function getCliScopedPartFields(input: CLIInput): ScopedStackPartField[] {
   };
   const getArrayValue = (key: keyof CLIInput) => {
     const value = input[key];
-    return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : undefined;
+    return Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === "string")
+      : undefined;
   };
 
   return [
@@ -1636,7 +1699,10 @@ function getGraphStackParts(selection: StackSelectionInput) {
     getSelectionScopedPartFields(selection),
   );
   const stackParts = parseStackPartSpecs(stackPartSpecs, "selected");
-  const selectableStackParts = parseStackPartSpecs(getSelectableStackPartSpecs(stackPartSpecs), "selected");
+  const selectableStackParts = parseStackPartSpecs(
+    getSelectableStackPartSpecs(stackPartSpecs),
+    "selected",
+  );
   const validation = validateStackParts(selectableStackParts);
   if (validation.issues.length > 0) {
     throw new Error(validation.issues.map((issue) => issue.message).join("\n"));
@@ -1725,7 +1791,9 @@ export function cliInputToProjectConfigPartial(
 
   if (Array.isArray(input.part) && input.part.length > 0) {
     const stackParts = getCliGraphStackParts(input);
-    Object.assign(config, stackPartsToLegacyProjectConfigPartial(stackParts), { stackParts });
+    Object.assign(config, stackPartsToLegacyProjectConfigPartial(stackParts), {
+      stackParts,
+    });
   }
 
   return config;
@@ -1754,7 +1822,12 @@ function getCliGraphStackParts(input: CLIInput): StackPart[] {
     role: Exclude<StackPartRole, "frontend" | "backend" | "mobile" | "database">,
     value: string | undefined,
   ) => {
-    if (!value || value === "none" || !hasPrimary("backend", ecosystem) || hasScoped(role, ecosystem)) {
+    if (
+      !value ||
+      value === "none" ||
+      !hasPrimary("backend", ecosystem) ||
+      hasScoped(role, ecosystem)
+    ) {
       return;
     }
     const spec = `backend.${role}:${ecosystem}:${value}`;
@@ -1920,6 +1993,12 @@ function buildProjectConfigBase(
     goCaching: stack.goCaching as ProjectConfig["goCaching"],
     goConfig: stack.goConfig as ProjectConfig["goConfig"],
     goObservability: stack.goObservability as ProjectConfig["goObservability"],
+    goValidation: stack.goValidation as ProjectConfig["goValidation"],
+    goQuality: stack.goQuality as ProjectConfig["goQuality"],
+    goMigrations: stack.goMigrations as ProjectConfig["goMigrations"],
+    goTemplating: stack.goTemplating as ProjectConfig["goTemplating"],
+    goProtoTooling: stack.goProtoTooling as ProjectConfig["goProtoTooling"],
+    goDI: stack.goDI as ProjectConfig["goDI"],
     javaLanguage: stack.javaLanguage as ProjectConfig["javaLanguage"],
     javaWebFramework: stack.javaWebFramework as ProjectConfig["javaWebFramework"],
     javaBuildTool: stack.javaBuildTool as ProjectConfig["javaBuildTool"],
@@ -1958,6 +2037,12 @@ function buildProjectConfigBase(
     elixirObservability: stack.elixirObservability as ProjectConfig["elixirObservability"],
     elixirTesting: stack.elixirTesting as ProjectConfig["elixirTesting"],
     elixirQuality: stack.elixirQuality as ProjectConfig["elixirQuality"],
+    elixirI18n: stack.elixirI18n as ProjectConfig["elixirI18n"],
+    elixirHttpServer: stack.elixirHttpServer as ProjectConfig["elixirHttpServer"],
+    elixirApplicationFramework:
+      stack.elixirApplicationFramework as ProjectConfig["elixirApplicationFramework"],
+    elixirDocumentation: stack.elixirDocumentation as ProjectConfig["elixirDocumentation"],
+    elixirClustering: stack.elixirClustering as ProjectConfig["elixirClustering"],
     elixirDeploy: stack.elixirDeploy as ProjectConfig["elixirDeploy"],
     elixirLibraries: toUniqueNonNoneArray(
       stack.elixirLibraries,
@@ -2104,9 +2189,7 @@ function generateGraphCommand(selection: StackSelectionInput, projectName: strin
     ...(hasElixirBackend
       ? formatChangedStringFlags(selection, GRAPH_ELIXIR_BACKEND_FLAG_KEYS)
       : []),
-    ...(hasMobile
-      ? formatChangedStringFlags(selection, GRAPH_MOBILE_FLAG_KEYS)
-      : []),
+    ...(hasMobile ? formatChangedStringFlags(selection, GRAPH_MOBILE_FLAG_KEYS) : []),
     `--package-manager ${selection.packageManager}`,
     ...(selection.versionChannel !== "stable"
       ? [`--version-channel ${selection.versionChannel}`]
@@ -2319,6 +2402,12 @@ function generateGoCommand(selection: StackSelectionInput, projectName: string) 
     `--go-caching ${selection.goCaching}`,
     `--go-config ${selection.goConfig}`,
     `--go-observability ${selection.goObservability}`,
+    `--go-validation ${selection.goValidation}`,
+    `--go-quality ${selection.goQuality}`,
+    `--go-migrations ${selection.goMigrations}`,
+    `--go-templating ${selection.goTemplating}`,
+    `--go-proto-tooling ${selection.goProtoTooling}`,
+    `--go-di ${selection.goDI}`,
     `--auth ${selection.auth}`,
     `--email ${selection.email}`,
     `--observability ${selection.observability}`,
@@ -2400,6 +2489,11 @@ function generateElixirCommand(selection: StackSelectionInput, projectName: stri
     `--elixir-observability ${selection.elixirObservability}`,
     `--elixir-testing ${selection.elixirTesting}`,
     `--elixir-quality ${selection.elixirQuality}`,
+    `--elixir-i18n ${selection.elixirI18n}`,
+    `--elixir-http-server ${selection.elixirHttpServer}`,
+    `--elixir-application-framework ${selection.elixirApplicationFramework}`,
+    `--elixir-documentation ${selection.elixirDocumentation}`,
+    `--elixir-clustering ${selection.elixirClustering}`,
     `--elixir-deploy ${selection.elixirDeploy}`,
     formatArrayFlag("elixir-libraries", selection.elixirLibraries),
     formatArrayFlag("ai-docs", selection.aiDocs),

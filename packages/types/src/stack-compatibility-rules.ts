@@ -4,6 +4,8 @@ const WEB_FRAMEWORKS: readonly Frontend[] = [
   "tanstack-router",
   "react-router",
   "react-vite",
+  "vanilla-vite",
+  "vue",
   "tanstack-start",
   "next",
   "vinext",
@@ -20,6 +22,16 @@ const WEB_FRAMEWORKS: readonly Frontend[] = [
 ] as const;
 
 const WEB_DEPLOY_COMPATIBLE_FRONTENDS = {
+  cloudflare: [
+    "tanstack-router",
+    "react-router",
+    "tanstack-start",
+    "next",
+    "nuxt",
+    "svelte",
+    "solid",
+    "astro",
+  ],
   render: [
     "tanstack-router",
     "react-router",
@@ -49,6 +61,8 @@ export const hasPWACompatibleFrontend = (webFrontend: string[]) =>
       "tanstack-router",
       "react-router",
       "react-vite",
+      "vanilla-vite",
+      "vue",
       "solid",
       "next",
       "vinext",
@@ -62,6 +76,8 @@ export const hasTauriCompatibleFrontend = (webFrontend: string[]) =>
       "tanstack-router",
       "react-router",
       "react-vite",
+      "vanilla-vite",
+      "vue",
       "nuxt",
       "svelte",
       "solid",
@@ -77,6 +93,8 @@ export const hasDockerComposeCompatibleFrontend = (webFrontend: string[]) =>
       "tanstack-router",
       "react-router",
       "react-vite",
+      "vanilla-vite",
+      "vue",
       "solid",
       "next",
       "vinext",
@@ -127,6 +145,8 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
       "tanstack-router",
       "react-router",
       "react-vite",
+      "vanilla-vite",
+      "vue",
       "tanstack-start",
       "next",
       "vinext",
@@ -152,7 +172,7 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
       "vinext",
       "astro",
     ],
-    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
+    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "styled-components", "none"],
   },
   "headless-ui": {
     frontends: [
@@ -267,7 +287,7 @@ export const UI_LIBRARY_COMPATIBILITY: Record<
   },
   none: {
     frontends: WEB_FRAMEWORKS,
-    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "none"],
+    cssFrameworks: ["tailwind", "scss", "less", "postcss-only", "styled-components", "none"],
   },
 };
 

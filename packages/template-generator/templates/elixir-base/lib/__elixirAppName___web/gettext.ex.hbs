@@ -1,0 +1,6 @@
+{{#if (eq elixirI18n "gettext")}}
+defmodule {{elixirModuleName}}Web.Gettext do
+  @moduledoc "Gettext backend for translated UI and validation messages."
+  use Gettext.Backend, otp_app: :{{elixirAppName}}
+end
+{{/if}}

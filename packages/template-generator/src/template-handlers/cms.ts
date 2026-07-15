@@ -1,6 +1,7 @@
 import type { ProjectConfig } from "@better-fullstack/types";
 
 import type { VirtualFileSystem } from "../core/virtual-fs";
+import { getWebPackagePath } from "../utils/project-paths";
 
 import { type TemplateData, processTemplatesFromPrefix } from "./utils";
 
@@ -40,6 +41,20 @@ export async function processCMSTemplates(
   if (config.cms === "keystatic") {
     if (config.frontend.includes("next")) {
       processTemplatesFromPrefix(vfs, templates, "cms/keystatic/web/next", "apps/web", config);
+    }
+    return;
+  }
+
+  if (config.cms === "contentful") {
+    const webPackagePath = getWebPackagePath(config.frontend, config.backend);
+    if (vfs.exists(webPackagePath)) {
+      processTemplatesFromPrefix(
+        vfs,
+        templates,
+        "cms/contentful/web/base",
+        webPackagePath.replace(/\/package\.json$/, ""),
+        config,
+      );
     }
     return;
   }

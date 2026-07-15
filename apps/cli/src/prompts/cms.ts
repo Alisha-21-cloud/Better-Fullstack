@@ -1,7 +1,8 @@
-import type { Backend, CMS } from "../types";
-
-import { exitCancelled } from "../utils/errors";
+import type { Backend, CMS, Frontend } from "../types";
 import type { PromptSingleResolution } from "./prompt-contract";
+
+import { isWebFrontend } from "../utils/compatibility-rules";
+import { exitCancelled } from "../utils/errors";
 import { isCancel, navigableSelect } from "./navigable";
 
 const CMS_PROMPT_OPTIONS = [
@@ -36,6 +37,11 @@ const CMS_PROMPT_OPTIONS = [
     hint: "Git-backed CMS for Markdown, JSON, and YAML content",
   },
   {
+    value: "contentful" as const,
+    label: "Contentful",
+    hint: "Hosted headless CMS with a typed JavaScript delivery client",
+  },
+  {
     value: "none" as const,
     label: "None",
     hint: "Skip headless CMS setup",
@@ -45,12 +51,41 @@ const CMS_PROMPT_OPTIONS = [
 type CmsPromptContext = {
   cms?: CMS;
   backend?: Backend;
+  frontends?: Frontend[];
 };
 
-export function resolveCMSPrompt(
-  context: CmsPromptContext = {},
-): PromptSingleResolution<CMS> {
+export function resolveCMSPrompt(context: CmsPromptContext = {}): PromptSingleResolution<CMS> {
+  const hasStandaloneViteFrontend = context.frontends?.some((frontend) =>
+    ["vanilla-vite", "vue"].includes(frontend),
+  );
+  const compatibleOptions = hasStandaloneViteFrontend
+    ? CMS_PROMPT_OPTIONS.filter((option) => ["contentful", "none"].includes(option.value))
+    : CMS_PROMPT_OPTIONS;
+
   if (context.backend === "none" || context.backend === "convex") {
+    const options = compatibleOptions.filter((option) =>
+      ["contentful", "none"].includes(option.value),
+    );
+    const hasWebFrontend =
+      context.frontends?.some((frontend) => frontend !== "none" && isWebFrontend(frontend)) ??
+      false;
+
+    if (hasWebFrontend && (context.cms === undefined || context.cms === "contentful")) {
+      return context.cms === "contentful"
+        ? {
+            shouldPrompt: false,
+            mode: "single",
+            options,
+            autoValue: "contentful",
+          }
+        : {
+            shouldPrompt: true,
+            mode: "single",
+            options,
+            initialValue: "none",
+          };
+    }
+
     return {
       shouldPrompt: false,
       mode: "single",
@@ -63,19 +98,21 @@ export function resolveCMSPrompt(
     ? {
         shouldPrompt: false,
         mode: "single",
-        options: CMS_PROMPT_OPTIONS,
-        autoValue: context.cms,
+        options: compatibleOptions,
+        autoValue: compatibleOptions.some((option) => option.value === context.cms)
+          ? context.cms
+          : "none",
       }
     : {
         shouldPrompt: true,
         mode: "single",
-        options: CMS_PROMPT_OPTIONS,
+        options: compatibleOptions,
         initialValue: "none",
       };
 }
 
-export async function getCMSChoice(cms?: CMS, backend?: Backend) {
-  const resolution = resolveCMSPrompt({ cms, backend });
+export async function getCMSChoice(cms?: CMS, backend?: Backend, frontends?: Frontend[]) {
+  const resolution = resolveCMSPrompt({ cms, backend, frontends });
   if (!resolution.shouldPrompt) {
     return resolution.autoValue ?? "none";
   }

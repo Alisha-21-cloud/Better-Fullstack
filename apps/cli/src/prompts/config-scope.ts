@@ -8,22 +8,26 @@ import { isCancel, isGoBack, navigableMultiselect, navigableSelect } from "./nav
 
 export type ConfigScope = "core" | "full" | "custom";
 
-export type ConfigPromptKey = Exclude<
-  keyof ProjectConfig,
-  | "projectName"
-  | "projectDir"
-  | "relativePath"
-  | "versionChannel"
-  | "stackParts"
-  | "template"
-  | "shadcnBase"
-  | "shadcnStyle"
-  | "shadcnIconLibrary"
-  | "shadcnColorTheme"
-  | "shadcnBaseColor"
-  | "shadcnFont"
-  | "shadcnRadius"
-> | "astroIntegration" | "shadcnOptions";
+export type ConfigPromptKey =
+  | Exclude<
+      keyof ProjectConfig,
+      | "projectName"
+      | "projectDir"
+      | "relativePath"
+      | "versionChannel"
+      | "stackParts"
+      | "template"
+      | "shadcnBase"
+      | "shadcnStyle"
+      | "shadcnIconLibrary"
+      | "shadcnColorTheme"
+      | "shadcnBaseColor"
+      | "shadcnFont"
+      | "shadcnRadius"
+    >
+  | "astroIntegration"
+  | "shadcnOptions"
+  | "appPlatforms";
 
 export type ConfigSection = {
   id: string;
@@ -51,6 +55,11 @@ const sharedServiceSection = {
 } as const satisfies ConfigSection;
 
 const typescriptSections = [
+  {
+    id: "app-platforms",
+    label: "App Platforms",
+    promptKeys: ["appPlatforms"],
+  },
   {
     id: "ui-styling",
     label: "UI & Styling",
@@ -124,7 +133,17 @@ export const CONFIG_SCOPE_REGISTRY = {
     sections: typescriptSections,
   },
   "react-native": {
-    core: ["frontend", "mobileNavigation", "backend", "runtime", "database", "orm", "api", "auth", "dbSetup"],
+    core: [
+      "frontend",
+      "mobileNavigation",
+      "backend",
+      "runtime",
+      "database",
+      "orm",
+      "api",
+      "auth",
+      "dbSetup",
+    ],
     sections: [
       {
         id: "mobile-experience",
@@ -149,7 +168,15 @@ export const CONFIG_SCOPE_REGISTRY = {
     ],
   },
   rust: {
-    core: ["rustWebFramework", "rustFrontend", "database", "dbSetup", "rustOrm", "rustApi", "rustAuth"],
+    core: [
+      "rustWebFramework",
+      "rustFrontend",
+      "database",
+      "dbSetup",
+      "rustOrm",
+      "rustApi",
+      "rustAuth",
+    ],
     sections: [
       sharedServiceSection,
       {
@@ -201,13 +228,23 @@ export const CONFIG_SCOPE_REGISTRY = {
     ],
   },
   go: {
-    core: ["goWebFramework", "database", "dbSetup", "goOrm", "goApi", "goAuth"],
+    core: [
+      "goWebFramework",
+      "database",
+      "dbSetup",
+      "goOrm",
+      "goApi",
+      "goAuth",
+      "goValidation",
+      "goMigrations",
+      "goDI",
+    ],
     sections: [
       sharedServiceSection,
       {
         id: "cli-config",
         label: "CLI, Config & Logging",
-        promptKeys: ["goCli", "goConfig", "goLogging"],
+        promptKeys: ["goCli", "goConfig", "goLogging", "goTemplating", "goProtoTooling"],
       },
       {
         id: "backend-extras",
@@ -216,13 +253,22 @@ export const CONFIG_SCOPE_REGISTRY = {
       },
       {
         id: "quality",
-        label: "Testing & Observability",
-        promptKeys: ["goTesting", "goObservability"],
+        label: "Quality, Testing & Observability",
+        promptKeys: ["goQuality", "goTesting", "goObservability"],
       },
     ],
   },
   java: {
-    core: ["javaWebFramework", "javaLanguage", "javaBuildTool", "database", "dbSetup", "javaOrm", "javaAuth", "javaApi"],
+    core: [
+      "javaWebFramework",
+      "javaLanguage",
+      "javaBuildTool",
+      "database",
+      "dbSetup",
+      "javaOrm",
+      "javaAuth",
+      "javaApi",
+    ],
     sections: [
       sharedServiceSection,
       {
@@ -279,12 +325,22 @@ export const CONFIG_SCOPE_REGISTRY = {
       {
         id: "quality",
         label: "Testing, Quality & Observability",
-        promptKeys: ["elixirTesting", "elixirQuality", "elixirObservability"],
+        promptKeys: [
+          "elixirTesting",
+          "elixirQuality",
+          "elixirObservability",
+          "elixirDocumentation",
+        ],
+      },
+      {
+        id: "runtime",
+        label: "Internationalization, Runtime & Clustering",
+        promptKeys: ["elixirI18n", "elixirHttpServer", "elixirClustering"],
       },
       {
         id: "deploy-libraries",
         label: "Deployment & Libraries",
-        promptKeys: ["elixirDeploy", "elixirLibraries"],
+        promptKeys: ["elixirDeploy", "elixirApplicationFramework", "elixirLibraries"],
       },
     ],
   },
@@ -348,6 +404,8 @@ export function shouldAskConfigPromptKey(
 
 export function getDefaultPromptValue(key: ConfigPromptKey): unknown {
   if (key === "astroIntegration") return undefined;
+  // appPlatforms merges into config.addons; a skipped prompt adds nothing.
+  if (key === "appPlatforms") return [];
   const defaults = getDefaultConfig();
   if (key === "shadcnOptions") {
     // uiLibrary defaults to shadcn-ui, so a skipped shadcn prompt must carry
