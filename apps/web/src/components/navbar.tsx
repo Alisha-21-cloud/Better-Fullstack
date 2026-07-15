@@ -22,6 +22,7 @@ import { motion, LayoutGroup, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 
 import { formatCompactStat, useProjectStats } from "@/components/home/hero-stats";
+import { LaunchRadarButton } from "@/components/launch-radar-button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   CREATION_MODE_INDICATOR_ID,
@@ -41,6 +42,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { type BuilderMode, useBuilderMode } from "@/lib/builder-mode-bridge";
 import { LOCALE_LABELS } from "@/lib/i18n/locales";
+import { requestLaunchRadarOpen } from "@/lib/launch-radar";
 import { isStackShareSlug } from "@/lib/stack-share-slugs";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -479,6 +481,16 @@ function MobileNavMenu({ onBuilder }: { onBuilder: boolean }) {
               <Newspaper className="size-4" />
               {m.navBlog()}
             </DropdownMenuItem>
+            <DropdownMenuItem
+              render={<Link to="/" hash="whats-new" onClick={requestLaunchRadarOpen} />}
+              className={MOBILE_MENU_ITEM_CLASS}
+            >
+              <Sparkles className="size-4 text-[#FF5C8A]" />
+              <span>{m.navUpdates()}</span>
+              <span className="ml-auto rounded-full bg-[#18D5FF]/10 px-2 py-0.5 font-mono text-[9px] text-[#087e97] dark:text-[#18D5FF]">
+                84 {m.builderNewBadge().toLowerCase()}
+              </span>
+            </DropdownMenuItem>
           </div>
         </DropdownMenuGroup>
 
@@ -608,6 +620,7 @@ export function Navbar() {
         )}
 
         <div className="hidden shrink-0 items-center gap-3 lg:flex">
+          <LaunchRadarButton />
           <GithubStarButton />
           <ThemeToggle />
           <LocaleMenu />
