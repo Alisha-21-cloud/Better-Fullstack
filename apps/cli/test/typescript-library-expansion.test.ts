@@ -335,6 +335,25 @@ describe("TypeScript library expansion", () => {
     await expectGeneratedFile(result.projectDir, "apps/web/src/lib/paypal-server.ts", "new Client");
   });
 
+  test("uses the Astro dev port for self-hosted GraphQL Codegen", async () => {
+    const result = await runTRPCTest(
+      createCustomConfig({
+        projectName: "typescript-library-expansion-self-astro-codegen",
+        frontend: ["astro"],
+        astroIntegration: "react",
+        backend: "self",
+        runtime: "none",
+        api: "graphql-yoga",
+        database: "sqlite",
+        orm: "drizzle",
+        addons: ["graphql-codegen"],
+      }),
+    );
+
+    expectSuccess(result);
+    await expectGeneratedFile(result.projectDir, "apps/web/codegen.ts", "localhost:4321/api/graphql");
+  });
+
   test("keeps prompt filtering and hard validation aligned for constrained libraries", () => {
     expect(
       resolveAIPrompt({ backend: "convex" }).options.map((option) => option.value),

@@ -1172,6 +1172,41 @@ export const analyzeStackCompatibility = (
     }
   }
 
+  if (nextStack.payments === "paypal") {
+    const hasWebFrontend = nextStack.webFrontend.some((f) => f !== "none");
+    if (!hasWebFrontend || ["none", "convex"].includes(nextStack.backend)) {
+      nextStack.payments = "none";
+      changed = true;
+      changes.push({
+        category: "payments",
+        message: hasWebFrontend
+          ? "Payments set to 'None' (PayPal requires a standalone or fullstack backend)"
+          : "Payments set to 'None' (PayPal requires a web frontend)",
+      });
+    }
+  }
+
+  if (
+    ["openai-sdk", "anthropic-sdk"].includes(nextStack.aiSdk) &&
+    ["none", "convex"].includes(nextStack.backend)
+  ) {
+    nextStack.aiSdk = "none";
+    changed = true;
+    changes.push({
+      category: "ai",
+      message: "AI SDK set to 'None' (direct provider SDKs require a backend)",
+    });
+  }
+
+  if (nextStack.realtime === "ws" && nextStack.backend !== "express") {
+    nextStack.realtime = "none";
+    changed = true;
+    changes.push({
+      category: "realtime",
+      message: "Realtime set to 'None' (the ws integration requires Express)",
+    });
+  }
+
   // ============================================
   // EMAIL CONSTRAINTS
   // ============================================
@@ -1352,6 +1387,27 @@ export const analyzeStackCompatibility = (
   }
 
   // UI libraries requiring Tailwind - auto-adjust CSS framework or clear UI library
+  const styledComponentsFrontends = new Set([
+    "tanstack-router",
+    "react-router",
+    "react-vite",
+    "tanstack-start",
+    "next",
+    "vinext",
+    "redwood",
+  ]);
+  if (
+    nextStack.cssFramework === "styled-components" &&
+    !nextStack.webFrontend.some((frontend) => styledComponentsFrontends.has(frontend))
+  ) {
+    nextStack.cssFramework = "none";
+    changed = true;
+    changes.push({
+      category: "cssFramework",
+      message: "CSS framework set to 'None' (styled-components requires a React frontend)",
+    });
+  }
+
   const requiresTailwind = ["shadcn-ui", "shadcn-svelte", "daisyui", "nextui"].includes(
     nextStack.uiLibrary,
   );
@@ -1484,6 +1540,21 @@ export const analyzeStackCompatibility = (
         message: `${platform === "electron" ? "Electron" : "Capacitor"} removed (requires compatible frontend)`,
       });
     }
+  }
+
+  if (
+    nextStack.appPlatforms.includes("graphql-codegen") &&
+    !["garph", "graphql-yoga", "apollo-server"].includes(nextStack.api) &&
+    !nextStack.webFrontend.includes("redwood")
+  ) {
+    nextStack.appPlatforms = nextStack.appPlatforms.filter(
+      (platform) => platform !== "graphql-codegen",
+    );
+    changed = true;
+    changes.push({
+      category: "appPlatforms",
+      message: "GraphQL Code Generator removed (requires a GraphQL API selection)",
+    });
   }
 
   // ============================================
@@ -1799,6 +1870,7 @@ export const analyzeStackCompatibility = (
         "elixirRealtime",
         "elixirObservability",
         "elixirI18n",
+        "elixirHttpServer",
       ];
 
       for (const key of dependentKeys) {
@@ -1893,6 +1965,20 @@ export const analyzeStackCompatibility = (
     changes.push({
       category: "webDeploy",
       message: "Web deploy set to 'None' (no web frontend)",
+    });
+  }
+
+  const unsupportedWebDeployFrontend = getUnsupportedWebDeployFrontend(
+    nextStack.webDeploy,
+    nextStack.webFrontend,
+  );
+  if (nextStack.webDeploy !== "none" && unsupportedWebDeployFrontend) {
+    const webDeploy = nextStack.webDeploy;
+    nextStack.webDeploy = "none";
+    changed = true;
+    changes.push({
+      category: "webDeploy",
+      message: `Web deploy set to 'None' ('${webDeploy}' is not wired for the '${unsupportedWebDeployFrontend}' frontend)`,
     });
   }
 

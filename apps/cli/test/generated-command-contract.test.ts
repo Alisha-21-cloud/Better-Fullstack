@@ -11,6 +11,8 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
+import { dependencyVersionMap } from "@better-fullstack/template-generator";
+
 import { CreateCommandOptionsSchema } from "../src/create-command-input";
 import { runTRPCTest, expectSuccess } from "./test-utils";
 
@@ -398,6 +400,9 @@ describe("generated beta dependency invariants", () => {
   it(
     "keeps Turborepo at the stable template floor for beta scaffolds",
     async () => {
+      const turboTemplateFloor = dependencyVersionMap.turbo;
+      const turboStableVersion = turboTemplateFloor.replace(/^[~^]/, "");
+
       global.fetch = mock(async (input: string | URL | Request) => {
         const url = String(input);
         const packageName = decodeURIComponent(url.split("/").pop() ?? "");
@@ -406,12 +411,12 @@ describe("generated beta dependency invariants", () => {
           return new Response(
             JSON.stringify({
               "dist-tags": {
-                latest: "2.10.0",
+                latest: turboStableVersion,
                 next: "0.9.0-next.22",
               },
               versions: {
                 "0.9.0-next.22": {},
-                "2.10.0": {},
+                [turboStableVersion]: {},
               },
             }),
             {
@@ -459,7 +464,7 @@ describe("generated beta dependency invariants", () => {
       expectSuccess(result);
 
       const packageJson = await fs.readJson(join(result.projectDir!, "package.json"));
-      expect(packageJson.devDependencies.turbo).toBe("^2.10.0");
+      expect(packageJson.devDependencies.turbo).toBe(turboTemplateFloor);
       expect(packageJson.scripts["db:generate"]).toContain("turbo");
     },
     { timeout: 60_000 },

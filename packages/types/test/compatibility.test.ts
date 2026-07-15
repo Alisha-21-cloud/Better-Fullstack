@@ -336,6 +336,21 @@ describe("compatibility issue helpers", () => {
     );
     expect(getDisabledReason(supportedStack, "webDeploy", "render")).toBeNull();
     expect(getDisabledReason(supportedStack, "webDeploy", "netlify")).toBeNull();
+    expect(getDisabledReason(unsupportedStack, "webDeploy", "cloudflare")).toBeNull();
+    expect(
+      getDisabledReason(
+        { ...unsupportedStack, webFrontend: ["vanilla-vite"] },
+        "webDeploy",
+        "cloudflare",
+      ),
+    ).toBe("'cloudflare' web deployment is not wired for the 'vanilla-vite' frontend.");
+    expect(
+      getDisabledReason(
+        { ...unsupportedStack, webFrontend: ["vue"] },
+        "webDeploy",
+        "cloudflare",
+      ),
+    ).toBe("'cloudflare' web deployment is not wired for the 'vue' frontend.");
     for (const stack of supportedNetlifyStacks) {
       expect(getDisabledReason(stack, "webDeploy", "netlify")).toBeNull();
     }
@@ -1140,6 +1155,7 @@ describe("compatibility issue helpers", () => {
       elixirHttp: "req",
       elixirObservability: "phoenix-telemetry",
       elixirI18n: "gettext",
+      elixirHttpServer: "cowboy",
     });
 
     expect(result.adjustedStack).toMatchObject({
@@ -1151,7 +1167,49 @@ describe("compatibility issue helpers", () => {
       elixirHttp: "req",
       elixirObservability: "none",
       elixirI18n: "none",
+      elixirHttpServer: "none",
     });
+  });
+
+  it("clears selections whose prerequisites are no longer present", () => {
+    const cases = [
+      {
+        stack: { backend: "hono", realtime: "ws" },
+        expected: { realtime: "none" },
+      },
+      {
+        stack: { backend: "convex", payments: "paypal" },
+        expected: { payments: "none" },
+      },
+      {
+        stack: { backend: "none", aiSdk: "openai-sdk" },
+        expected: { aiSdk: "none" },
+      },
+      {
+        stack: { backend: "convex", aiSdk: "anthropic-sdk" },
+        expected: { aiSdk: "none" },
+      },
+      {
+        stack: { api: "openapi", appPlatforms: ["turborepo", "graphql-codegen"] },
+        expected: { appPlatforms: ["turborepo"] },
+      },
+      {
+        stack: { webFrontend: ["svelte"], cssFramework: "styled-components", uiLibrary: "none" },
+        expected: { cssFramework: "none" },
+      },
+      {
+        stack: { webFrontend: ["vue"], webDeploy: "cloudflare" },
+        expected: { webDeploy: "none" },
+      },
+    ];
+
+    for (const { stack, expected } of cases) {
+      const result = analyzeStackCompatibility({
+        ...DEFAULT_STACK_SELECTION,
+        ...stack,
+      });
+      expect(result.adjustedStack).toMatchObject(expected);
+    }
   });
 
   it("clears Pow when the Elixir SQL repository is removed", () => {
