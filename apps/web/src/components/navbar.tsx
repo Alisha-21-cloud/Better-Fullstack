@@ -487,7 +487,7 @@ function MobileNavMenu({ onBuilder }: { onBuilder: boolean }) {
             >
               <Sparkles className="size-4 text-[#FF5C8A]" />
               <span>{m.navUpdates()}</span>
-              <span className="ml-auto rounded-full bg-[#18D5FF]/10 px-2 py-0.5 font-mono text-[9px] text-[#087e97] dark:text-[#18D5FF]">
+              <span className="ml-auto rounded-full bg-[#18D5FF]/10 px-2 py-0.5 font-mono text-[9px] text-[#06647A] dark:text-[#18D5FF]">
                 84 {m.builderNewBadge().toLowerCase()}
               </span>
             </DropdownMenuItem>

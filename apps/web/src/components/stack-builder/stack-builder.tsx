@@ -342,7 +342,7 @@ function BuilderSearchField({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-mono text-xs">{entry.name}</span>
                   {entry.isNew ? (
-                    <span className="mt-1 inline-flex rounded-full bg-[#18D5FF]/10 px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-[#087e97] dark:text-[#18D5FF]">
+                    <span className="mt-1 inline-flex rounded-full bg-[#18D5FF]/10 px-1.5 py-0.5 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] text-[#06647A] dark:text-[#18D5FF]">
                       {m.builderNewBadge()}
                     </span>
                   ) : null}
@@ -3161,7 +3161,7 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
 
                   {showNewOptionsOnly && builderSearchData.availableNewOptionCount === 0 ? (
                     <div className="flex min-h-64 flex-col items-center justify-center px-5 text-center">
-                      <span className="flex size-11 items-center justify-center rounded-full bg-[#18D5FF]/10 text-[#087e97] dark:text-[#18D5FF]">
+                      <span className="flex size-11 items-center justify-center rounded-full bg-[#18D5FF]/10 text-[#06647A] dark:text-[#18D5FF]">
                         <Sparkles className="size-5" aria-hidden />
                       </span>
                       <p className="mt-4 max-w-sm font-mono text-xs text-muted-foreground">
@@ -3303,7 +3303,7 @@ const StackBuilder = ({ initialStack }: { initialStack?: StackState }) => {
                                               >
                                                 <div className="absolute top-2 right-2 flex items-center gap-1">
                                                   {isNewOption && (
-                                                    <span className="rounded-full bg-[#18D5FF]/10 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-[#087e97] dark:text-[#18D5FF]">
+                                                    <span className="rounded-full bg-[#18D5FF]/10 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.1em] text-[#06647A] dark:text-[#18D5FF]">
                                                       {m.builderNewBadge()}
                                                     </span>
                                                   )}

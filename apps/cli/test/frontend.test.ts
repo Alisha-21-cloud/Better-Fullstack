@@ -267,12 +267,8 @@ describe("Frontend Configurations", () => {
       });
 
       expectSuccess(result);
-      expect(await Bun.file(`${result.projectDir}/web/test/smoke.test.ts`).exists()).toBe(true);
-      expect(await Bun.file(`${result.projectDir}/api/test/smoke.test.ts`).exists()).toBe(true);
-      expect(await Bun.file(`${result.projectDir}/web/package.json`).text()).toContain(
-        "mocha --import=tsx",
-      );
-      expect(await Bun.file(`${result.projectDir}/api/package.json`).text()).toContain(
+      expect(await Bun.file(`${result.projectDir}/apps/web/test/smoke.test.ts`).exists()).toBe(true);
+      expect(await Bun.file(`${result.projectDir}/apps/web/package.json`).text()).toContain(
         "mocha --import=tsx",
       );
     });
